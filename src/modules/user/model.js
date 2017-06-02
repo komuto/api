@@ -27,11 +27,11 @@ export const Status = UserStatus;
 class UserModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
-    return 'user';
+    return 'users';
   }
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
-    return 'user_id';
+    return 'id_users';
   }
   // eslint-disable-next-line class-methods-use-this
   get hasTimestamps() {
@@ -51,7 +51,7 @@ class UserModel extends bookshelf.Model {
    * @param {string} str
    */
   static hashPasswordSync(str) {
-    return bcrypt.hashSync(str, SALT_ROUND);
+    return bcrypt.hashSync(str, null);
   }
 
   /**
@@ -64,7 +64,7 @@ class UserModel extends bookshelf.Model {
   }
 
   static async getById(id) {
-    return await this.where({ user_id: id }).fetch();
+    return await this.where({ id_users: id }).fetch();
   }
 
   /**
@@ -73,7 +73,7 @@ class UserModel extends bookshelf.Model {
    * @return {bool}
    */
   checkPassword(plain) {
-    return bcrypt.compareSync(plain, this.get('password'));
+    return bcrypt.compareSync(plain, this.get('password_users'));
   }
 }
 

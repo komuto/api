@@ -36,6 +36,7 @@
     "passport": "^0.3.2",
     "passport-jwt": "^2.2.1",
     "passport-local": "^1.0.0",
+    "pg": "^6.2.3",
     "raven": "^1.1.1",
     "response-time": "^2.3.2",
     "sharp": "^0.17.2",

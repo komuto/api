@@ -7,7 +7,7 @@ export default new LocalStrategy({
   passwordField: 'password',
   passReqToCallback: false,
 }, (email, password, done) => {
-  new User({ email }).fetch().then((user) => {
+  new User({ email_users: email }).fetch().then((user) => {
     if (!user) return done(null, false);
     if (user.checkPassword(password)) {
       if (_.includes([Status.INACTIVE], user.get('status'))) {

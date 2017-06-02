@@ -22,12 +22,12 @@ def.cdnPath = 'http://cdn.localhost.com';
 
 // knexjs config
 def.knex = {};
-def.knex.client = 'mysql';
+def.knex.client = 'postgres';
 def.knex.connection = {};
 def.knex.connection.host = '127.0.0.1';
-def.knex.connection.user = 'root';
-def.knex.connection.password = '';
-def.knex.connection.database = 'project';
+def.knex.connection.user = 'postgres';
+def.knex.connection.password = '12345678';
+def.knex.connection.database = 'komuto_api';
 def.knex.connection.charset = 'utf8';
 
 // jwt config
