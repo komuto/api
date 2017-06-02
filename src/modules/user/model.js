@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import rp from 'request-promise';
 import config from '../../../config';
 import core from '../../modules/core';
 
@@ -29,10 +30,12 @@ class UserModel extends bookshelf.Model {
   get tableName() {
     return 'users';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_users';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get hasTimestamps() {
     return true;
@@ -74,6 +77,25 @@ class UserModel extends bookshelf.Model {
    */
   checkPassword(plain) {
     return bcrypt.compareSync(plain, this.get('password_users'));
+  }
+
+  /**
+   * Compare plain password with it's hashed password from komuto api
+   * @param {string} plain
+   * @return {bool}
+   */
+  async checkPasswordFromApi(plain) {
+    return await rp.post({
+      url: 'http://api.komuto.dev',
+      form: {
+        page: 'login',
+        function: 'validatepassword',
+        param: {
+          password: plain,
+          hash: this.get('password_users'),
+        },
+      },
+    });
   }
 }
 

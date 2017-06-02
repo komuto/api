@@ -31,9 +31,11 @@ export function requestUtilsMiddleware() {
 
 // eslint-disable-next-line no-unused-vars
 export function apiResponse() {
-  return (req, res, next) => {
+  return (req, res) => {
+    const code = res.statusCode;
     const { status, message, data } = req.resData;
     return res.json({
+      code,
       status,
       message,
       data,

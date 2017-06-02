@@ -9,12 +9,16 @@ export default new LocalStrategy({
 }, (email, password, done) => {
   new User({ email_users: email }).fetch().then((user) => {
     if (!user) return done(null, false);
-    if (user.checkPassword(password)) {
-      if (_.includes([Status.INACTIVE], user.get('status'))) {
+    return user.checkPasswordFromApi(password)
+      .then((body) => {
+        body = JSON.parse(body);
+        if (body.data) {
+          if (_.includes([Status.INACTIVE], user.get('status'))) {
+            return done(null, false);
+          }
+          return done(null, user.toJSON());
+        }
         return done(null, false);
-      }
-      return done(null, user.toJSON());
-    }
-    return done(null, false);
+      });
   });
 });
