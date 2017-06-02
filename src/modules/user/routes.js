@@ -1,12 +1,12 @@
 import express from 'express';
 import passport from 'passport';
-import {validateLogin} from './middleware';
-import {UserController} from './controller';
+import { validateLogin } from './middleware';
+import { UserController } from './controller';
 import core from '../core';
-import {apiResponse} from '../core/middleware';
+import { apiResponse } from '../core/middleware';
 
 const routes = express.Router();
-const {wrap} = core.utils;
+const { wrap } = core.utils;
 
 /**
  * POST /login
@@ -14,7 +14,7 @@ const {wrap} = core.utils;
  */
 routes.post('/user/login',
   validateLogin(),
-  passport.authenticate('local-login', {session: false}),
+  passport.authenticate('local-login', { session: false }),
   wrap(UserController.getUser),
   apiResponse());
 
