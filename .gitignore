@@ -26,3 +26,4 @@ __MACOSX
 /config/local.js
 /config/*.local.js
 
+yarn.lock
