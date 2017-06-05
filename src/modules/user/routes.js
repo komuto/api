@@ -12,17 +12,17 @@ const { wrap } = core.utils;
  * POST /login
  * Authenticate user
  */
-routes.post('/user/login',
+routes.post('/users/login',
   validateLogin(),
-  passport.authenticate('local-login', { session: false }),
+  passport.authenticate('local-login'),
   wrap(UserController.getUser),
   apiResponse());
 
 /**
- * GET /profile/:id*?
- * View user profile
+ * GET /:id*?
+ * View user
  */
-routes.get('/user/:id*?',
+routes.get('/users/:id*?',
   passport.authenticate('jwt', {}),
   wrap(UserController.getUser),
   apiResponse());

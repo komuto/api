@@ -1,14 +1,15 @@
 import jwt from 'jsonwebtoken';
-import {User} from './model';
-import {jwt as jwtOptions} from '../../../config';
+import moment from 'moment';
+import { User } from './model';
+import { jwt as jwtOptions } from '../../../config';
 
 export const UserController = {};
-export default {UserController};
+export default { UserController };
 
 /**
- * View user profile
+ * View user
  */
-UserController.getUser = async(req, res, next) => {
+UserController.getUser = async (req, res, next) => {
   let profile = req.user;
   if (req.params.id) {
     profile = await User.getById(req.params.id);
@@ -19,9 +20,10 @@ UserController.getUser = async(req, res, next) => {
     return next(err);
   }
   if (req.route.path === '/user/login') {
-    const payload = {user_id: profile.user_id};
+    const payload = { id_users: profile.id_users };
     profile.token = jwt.sign(payload, jwtOptions.secretOrKey);
   }
+  profile.date = moment(profile.tgl_create_users).format('YYYY');
   delete profile.password_users;
   req.resData = {
     status: true,

@@ -17,7 +17,6 @@ export const UserRoles = {
   ROLE_USER: 'user',
 };
 
-
 export const UserStatus = {
   INACTIVE: 'inactive',
   ACTIVE: 'active',
