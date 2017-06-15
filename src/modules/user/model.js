@@ -40,7 +40,7 @@ class UserModel extends bookshelf.Model {
 
   // eslint-disable-next-line class-methods-use-this
   get hasTimestamps() {
-    return true;
+    return false;
   }
 
   /**
@@ -64,21 +64,42 @@ class UserModel extends bookshelf.Model {
    * @param {Object} data
    */
   static async create(data) {
-    const user = this.forge(data);
-    return await user.save();
+    data.approval_koperasi_users = 0;
+    data.tgl_create_users = moment();
+    data.status_users = 0;
+    data.tglstatus_users = moment();
+    const user = await new this(data).save();
+    return user.serialize();
+  }
+
+  /**
+   * Update user
+   * @param {Object} data
+   * @param {Object} newData
+   * @return {Object} user updated field only
+   */
+  static async update(data, newData) {
+    const user = await this.where(data).save(newData, { patch: true });
+    console.log(user);
+    return user.serialize();
   }
 
   static async getById(id) {
-    const user = await this.forge({ id_users: id }).fetch();
-    return user.serialize();
+    const user = await new this({ id_users: id }).fetch();
+    return user ? user.serialize() : user;
+  }
+
+  static async getByEmail(email) {
+    const user = await new this({ email_users: email }).fetch();
+    return user ? user.serialize() : user;
   }
 
   static async getBySocial(name, uid) {
-    const user = await this.forge({
+    const user = await new this({
       hybridauth_provider_name: name,
       hybridauth_provider_uid: uid,
     }).fetch();
-    return user.serialize();
+    return user ? user.serialize() : user;
   }
 
   /**

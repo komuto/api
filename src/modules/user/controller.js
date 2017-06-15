@@ -1,4 +1,8 @@
+import { Facebook } from 'fb';
 import { User } from './model';
+import config from '../../../config';
+
+const fb = new Facebook(config.fb);
 
 export const UserController = {};
 export default { UserController };
@@ -12,7 +16,39 @@ UserController.getOneUser = async (req, res, next) => {
 };
 
 UserController.getUserSocial = async (req, res, next) => {
-  req.user = await User.getBySocial(req.body.provider_name, req.body.provider_uid);
+  // Case where provider name and uid found on db
+  const { provider_name: name, provider_uid: uid, access_token } = req.body;
+  req.user = await User.getBySocial(name, uid);
+  // Case where provider name and uid not found on db
+  if (!req.user) {
+    fb.setAccessToken(access_token);
+    let response = await fb.api(uid, { fields: 'id,name,email,gender,picture.type(large)' });
+    const user = await User.getByEmail(response.email);
+    // Case where user already created but provider name and uid do not match
+    if (user) {
+      const updatedUser = await User.update(
+        { email_users: user.email },
+        {
+          hybridauth_provider_name: name,
+          hybridauth_provider_uid: uid,
+        },
+      );
+      user.provider_name = updatedUser.provider_name;
+      user.provider_uid = updatedUser.provider_uid;
+      req.user = user;
+    } else { // Case where user has not been created
+      response = {
+        hybridauth_provider_name: name,
+        hybridauth_provider_uid: response.id,
+        email_users: response.email,
+        namalengkap_users: response.name,
+        jeniskelamin_users: (response.gender === 'male') ? 'L' : 'P',
+        password_users: User.hashPasswordSync('123456789'),
+        pathfoto_users: response.picture.data.url,
+      };
+      req.user = await User.create(response);
+    }
+  }
   req.user.is_required_password = true;
   return next();
 };
@@ -23,10 +59,8 @@ UserController.getUserSocial = async (req, res, next) => {
 UserController.createUser = async (req, res, next) => {
   const user = req.user;
 
-  const data = req.body;
-
-  console.log(data);
-
+  // const data = req.body;
+  //
   // let newUser = await User.create({
   //   user_id: user.user_id,
   // });

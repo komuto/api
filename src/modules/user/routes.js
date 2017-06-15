@@ -7,7 +7,7 @@ import { apiResponse } from '../core/middleware';
 
 const routes = express.Router();
 const { wrap } = core.utils;
-user
+
 /**
  * POST /login
  * Authenticate user
