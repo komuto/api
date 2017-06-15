@@ -64,7 +64,7 @@ class UserModel extends bookshelf.Model {
    * @param {Object} data
    */
   static async create(data) {
-    const user = this.forge(data);
+    const user = new this(data);
     return await user.save();
   }
 

@@ -44,8 +44,6 @@ routes.get('/users/:id*?',
  * Create user
  */
 routes.post('/users',
-  passport.authenticate('jwt', {}),
-
   wrap(UserController.createUser),
   apiResponse());
 

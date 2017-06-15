@@ -21,15 +21,16 @@ UserController.getUserSocial = async (req, res, next) => {
  * Create user
  */
 UserController.createUser = async (req, res, next) => {
-  const user = req.user;
+  const { name, email, phone_number, password, gender } = req.body;
+  const hash = User.hashPasswordSync(password);
+  const user = await User.create({
+    namalengkap_users: name,
+    email_users: email,
+    nohp_users: phone_number,
+    jeniskelamin_users: gender,
+    password_users: hash,
 
-  const data = req.body;
-
-  console.log(data);
-
-  // let newUser = await User.create({
-  //   user_id: user.user_id,
-  // });
+  });
   delete user.password_users;
   req.resData = {
     status: true,
