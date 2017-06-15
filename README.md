@@ -43,7 +43,6 @@ Base configuration file is located inside `/config` directory, the `index.js` wi
 #### CLI Commands
 Here's list of commands you can use:
 - `yarn run lint` run linter (eslint with airbnb config)
-- `yarn run check` run flow static typing check. https://github.com/facebook/flow
 - `yarn run test` run jest test
 - `yarn run test:coverage` run jest test with code coverage
 - `yarn run build` transpile all js files under `src` directory into `build` folder
