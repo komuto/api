@@ -7,7 +7,7 @@ import { apiResponse } from '../core/middleware';
 
 const routes = express.Router();
 const { wrap } = core.utils;
-
+user
 /**
  * POST /login
  * Authenticate user
@@ -25,6 +25,16 @@ routes.post('/users/login',
 routes.get('/users/:id*?',
   passport.authenticate('jwt', {}),
   wrap(UserController.getUser),
+  apiResponse());
+
+/**
+ * POST /
+ * Create user
+ */
+routes.post('/users',
+  passport.authenticate('jwt', {}),
+
+  wrap(UserController.createUser),
   apiResponse());
 
 export default routes;

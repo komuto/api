@@ -35,3 +35,25 @@ UserController.getUser = async (req, res, next) => {
   };
   return next();
 };
+
+/**
+ * Create user
+ */
+UserController.createUser = async (req, res, next) => {
+  const user = req.user;
+
+  const data = req.body;
+
+  console.log(data);
+
+  // let newUser = await User.create({
+  //   user_id: user.user_id,
+  // });
+  delete user.password_users;
+  req.resData = {
+    status: true,
+    message: 'User Data',
+    data: user,
+  };
+  return next();
+};
