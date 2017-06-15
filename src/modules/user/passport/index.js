@@ -5,10 +5,12 @@ import { User } from '../model';
 
 function configure(app) {
   // eslint-disable-next-line no-underscore-dangle
-  passport.serializeUser((user, done) => done(null, user.id_users));
+  passport.serializeUser((user, done) => {
+    done(null, user.id);
+  });
   passport.deserializeUser((id, done) => new User({ id_users: id })
     .fetch()
-    .then(user => done(null, user.toJSON())));
+    .then(user => done(null, user.serialize())));
   passport.use('local-login', local);
   passport.use('jwt', jwt);
 
