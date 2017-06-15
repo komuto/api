@@ -1,6 +1,6 @@
 import express from 'express';
 import passport from 'passport';
-import { validateLogin } from './middleware';
+import { validateLogin, addToken, userData } from './middleware';
 import { UserController } from './controller';
 import core from '../core';
 import { apiResponse } from '../core/middleware';
@@ -14,7 +14,19 @@ const { wrap } = core.utils;
 routes.post('/users/login',
   validateLogin(),
   passport.authenticate('local-login'),
-  wrap(UserController.getUser),
+  addToken,
+  userData,
+  apiResponse());
+
+/**
+ * POST /social-login
+ * Authenticate user using social media
+ */
+routes.post('/users/social-login',
+  validateLogin({ social: true }),
+  wrap(UserController.getUserSocial),
+  addToken,
+  userData,
   apiResponse());
 
 /**
@@ -23,7 +35,8 @@ routes.post('/users/login',
  */
 routes.get('/users/:id*?',
   passport.authenticate('jwt', {}),
-  wrap(UserController.getUser),
+  wrap(UserController.getOneUser),
+  userData,
   apiResponse());
 
 /**
