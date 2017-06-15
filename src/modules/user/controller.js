@@ -29,7 +29,6 @@ UserController.createUser = async (req, res, next) => {
     nohp_users: phone_number,
     jeniskelamin_users: gender,
     password_users: hash,
-
   });
   delete user.password_users;
   req.resData = {
