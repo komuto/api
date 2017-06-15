@@ -20,6 +20,7 @@
     "express": "^4.14.0",
     "express-session": "^1.15.1",
     "express-status-monitor": "^0.1.7",
+    "fb": "^2.0.0",
     "helmet": "^3.3.0",
     "http-status": "^0.2.3",
     "jsend": "^1.0.2",
