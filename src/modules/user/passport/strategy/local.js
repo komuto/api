@@ -13,10 +13,9 @@ export default new LocalStrategy({
       .then((body) => {
         body = JSON.parse(body);
         if (body.data) {
-          if (_.includes([Status.INACTIVE], user.get('status'))) {
-            return done(null, false);
+          if (_.includes([Status.ACTIVE], user.get('status_users'))) {
+            return done(null, user.toJSON());
           }
-          return done(null, user.toJSON());
         }
         return done(null, false);
       });

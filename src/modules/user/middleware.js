@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import validate from 'validate.js';
+import jwt from 'jsonwebtoken';
 import constraints from './validation';
 import utils from '../../../common/utils';
+import { jwt as jwtOptions } from '../../../config';
 
 export const ROLE_ALL = '*';
 
@@ -34,12 +36,38 @@ export function auth(roles, failedCb) {
 /**
  * Login form validation middleware
  */
-export function validateLogin() {
+export function validateLogin({ social = false } = {}) {
   return (req, res, next) => {
-    const hasError = validate(req.body, constraints.login);
+    const hasError = validate(req.body, !social ? constraints.login : constraints.socialLogin);
     if (hasError) {
-      next(hasError);
+      return next(hasError);
     }
     return next();
   };
+}
+
+/**
+ * Add token to user
+ */
+export function addToken(req, res, next) {
+  const payload = { id_users: req.user.id };
+  req.user.token = jwt.sign(payload, jwtOptions.secretOrKey);
+  return next();
+}
+
+/**
+ * Build user data response
+ */
+export function userData(req, res, next) {
+  if (!req.user) {
+    const err = new Error('Invalid user');
+    return next(err);
+  }
+
+  req.resData = {
+    status: true,
+    message: 'User Data',
+    data: req.user,
+  };
+  return next();
 }
