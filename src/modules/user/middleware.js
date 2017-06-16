@@ -60,8 +60,12 @@ export function addToken(req, res, next) {
  */
 export function userData(req, res, next) {
   if (!req.user) {
-    const err = new Error('Invalid user');
-    return next(err);
+    return res.json({
+      status: false,
+      code: 400,
+      message: 'Invalid user',
+      data: {},
+    });
   }
 
   req.resData = {

@@ -60,8 +60,12 @@ UserController.createUser = async (req, res, next) => {
   const { name, email, phone_number, password, gender } = req.body;
   let user = await User.getByEmail(email);
   if (user) {
-    const err = new Error('Email sudah terdaftar.');
-    return next(err);
+    return res.json({
+      status: false,
+      code: 400,
+      message: 'Email sudah terdaftar',
+      data: {},
+    });
   }
   const hash = User.hashPasswordSync(password);
   user = await User.create({
