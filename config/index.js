@@ -39,6 +39,11 @@ def.jwt.audience = 'pionize.com';
 // mailer config
 def.emailServiceAdapter = 'sendgrid';
 
+// fb api config
+def.fb = {};
+def.fb.appId = '123456789';
+def.fb.appSecret = '123456677889'
+
 // url builder
 def.url = (dir = '/') => {
   const port = ((def.https && def.port !== 443) || (!def.https && def.port !== 80)) ? `:${def.port}` : '';
