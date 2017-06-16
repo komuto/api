@@ -22,7 +22,7 @@ UserController.getUserSocial = async (req, res, next) => {
   // Case where provider name and uid not found on db
   if (!req.user) {
     fb.setAccessToken(access_token);
-    let response = await fb.api(uid, { fields: 'id,name,email,gender,picture.type(large)' });
+    const response = await fb.api(uid, { fields: 'id,name,email,gender,picture.type(large)' });
     const user = await User.getByEmail(response.email);
     // Case where user already created but provider name and uid do not match
     if (user) {
@@ -37,16 +37,16 @@ UserController.getUserSocial = async (req, res, next) => {
       user.provider_uid = updatedUser.provider_uid;
       req.user = user;
     } else { // Case where user has not been created
-      response = {
+      const data = {
         hybridauth_provider_name: name,
         hybridauth_provider_uid: response.id,
         email_users: response.email,
         namalengkap_users: response.name,
         jeniskelamin_users: (response.gender === 'male') ? 'L' : 'P',
-        password_users: User.hashPasswordSync('123456789'),
+        password_users: User.hashPasswordSync('komuto'),
         pathfoto_users: response.picture.data.url,
       };
-      req.user = await User.create(response);
+      req.user = await User.create(data);
     }
   }
   req.user.is_required_password = true;
