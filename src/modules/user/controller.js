@@ -17,8 +17,8 @@ UserController.getOneUser = async (req, res, next) => {
 
 UserController.getUserSocial = async (req, res, next) => {
   // Case where provider name and uid found on db
-  const { provider_name: name, provider_uid: uid, access_token } = req.body;
-  req.user = await User.getBySocial(name, uid);
+  const { provider_name: providerName, provider_uid: uid, access_token } = req.body;
+  req.user = await User.getBySocial(providerName, uid);
   // Case where provider name and uid not found on db
   if (!req.user) {
     fb.setAccessToken(access_token);
@@ -29,7 +29,7 @@ UserController.getUserSocial = async (req, res, next) => {
       const updatedUser = await User.update(
         { email_users: user.email },
         {
-          hybridauth_provider_name: name,
+          hybridauth_provider_name: providerName,
           hybridauth_provider_uid: uid,
         },
       );
@@ -37,16 +37,12 @@ UserController.getUserSocial = async (req, res, next) => {
       user.provider_uid = updatedUser.provider_uid;
       req.user = user;
     } else { // Case where user has not been created
-      const data = {
-        hybridauth_provider_name: name,
-        hybridauth_provider_uid: response.id,
-        email_users: response.email,
-        namalengkap_users: response.name,
-        jeniskelamin_users: (response.gender === 'male') ? 'L' : 'P',
-        password_users: User.hashPasswordSync('komuto'),
-        pathfoto_users: response.picture.data.url,
-      };
-      req.user = await User.create(data);
+      response.provider_name = providerName;
+      response.provider_uid = response.id;
+      response.gender = (response.gender === 'male') ? 'L' : 'P';
+      response.password = User.hashPasswordSync('komuto');
+      response.photo = response.picture.data.url;
+      req.user = await User.create(User.matchDBColumn(response));
     }
   }
   req.user.is_required_password = true;
@@ -63,21 +59,38 @@ UserController.getBalance = (req, res, next) => {
 };
 
 /**
+ * Update User
+ */
+UserController.updateUser = async (req, res, next) => {
+  req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
+  await User.update({ id_users: req.user.id }, User.matchDBColumn(req.body));
+  req.user = await User.getById(req.user.id);
+  next();
+};
+
+/**
  * Create user
  */
 UserController.createUser = async (req, res, next) => {
-  const user = req.user;
-
-  // const data = req.body;
-  //
-  // let newUser = await User.create({
-  //   user_id: user.user_id,
-  // });
+  const { name, email, phone_number, password, gender } = req.body;
+  const hash = User.hashPasswordSync(password);
+  const user = await User.create({
+    namalengkap_users: name,
+    email_users: email,
+    nohp_users: phone_number,
+    jeniskelamin_users: gender,
+    password_users: hash,
+  });
+  if (!user) {
+    const err = new Error('Email sudah terdaftar.');
+    next(err);
+  }
   delete user.password_users;
   req.resData = {
     status: true,
     message: 'User Data',
     data: user,
   };
+
   return next();
 };

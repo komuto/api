@@ -7,5 +7,10 @@ const jwtParams = {
   jwtFromRequest: ExtractJwt.fromAuthHeader(),
 };
 export default new JwtStrategy(jwtParams, (jwtPayload, done) => {
-  new User({ id_users: jwtPayload.id_users }).fetch().then(user => done(null, user.toJSON()));
+  new User({ id_users: jwtPayload.id_users }).fetch()
+    .then((user) => {
+      if (!user) return done(null, false);
+      return done(null, user.toJSON());
+    })
+    .catch(e => done(e, false));
 });

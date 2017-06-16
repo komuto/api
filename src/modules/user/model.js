@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import moment from 'moment';
 import rp from 'request-promise';
 import config from '../../../config';
-import core from '../../modules/core';
+import core from '../core';
 
 const bookshelf = core.mysql.connect(config.knex);
 
@@ -80,7 +80,6 @@ class UserModel extends bookshelf.Model {
    */
   static async update(data, newData) {
     const user = await this.where(data).save(newData, { patch: true });
-    console.log(user);
     return user.serialize();
   }
 
@@ -100,6 +99,36 @@ class UserModel extends bookshelf.Model {
       hybridauth_provider_uid: uid,
     }).fetch();
     return user ? user.serialize() : user;
+  }
+
+  /**
+   * Transform supplied data properties to match with db column
+   * @param {object} data
+   * @return {object} newData
+   */
+  static matchDBColumn(data) {
+    const column = {
+      name: 'namalengkap_users',
+      email: 'email_users',
+      password: 'password_users',
+      cooperative_member_number: 'no_anggotakoperasi_users',
+      approval_cooperative_status: 'approval_koperasi_users',
+      photo: 'pathfoto_users',
+      phone_number: 'nohp_users',
+      gender: 'jeniskelamin_users',
+      status: 'status_users',
+      mother_name: 'ibukandung_users',
+      saldo_wallet: 'saldo_wallet',
+      place_of_birth: 'kota_lahir',
+      date_of_birth: 'tgl_lahir',
+      provider_name: 'hybridauth_provider_name',
+      provider_uid: 'hybridauth_provider_uid',
+    };
+    const newData = {};
+    Object.keys(data).forEach((prop) => {
+      if (column[prop]) newData[column[prop]] = data[prop];
+    });
+    return newData;
   }
 
   /**

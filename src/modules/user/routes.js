@@ -53,9 +53,17 @@ routes.get('/users/:id*?',
  * Create user
  */
 routes.post('/users',
-  passport.authenticate('jwt', {}),
-
   wrap(UserController.createUser),
+  apiResponse());
+
+/**
+ * PUT /users
+ * Update user
+ */
+routes.put('/users',
+  passport.authenticate('jwt', {}),
+  wrap(UserController.updateUser),
+  userData,
   apiResponse());
 
 export default routes;
