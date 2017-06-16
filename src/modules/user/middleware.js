@@ -3,6 +3,7 @@ import validate from 'validate.js';
 import jwt from 'jsonwebtoken';
 import constraints from './validation';
 import utils from '../../../common/utils';
+import { BadRequestError } from '../../../common/errors';
 import { jwt as jwtOptions } from '../../../config';
 
 export const ROLE_ALL = '*';
@@ -60,12 +61,7 @@ export function addToken(req, res, next) {
  */
 export function userData(req, res, next) {
   if (!req.user) {
-    return res.json({
-      status: false,
-      code: 400,
-      message: 'Invalid user',
-      data: {},
-    });
+    return next(new BadRequestError('Invalid user'));
   }
 
   req.resData = {

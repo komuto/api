@@ -63,22 +63,17 @@ app.use(payment.routes);
 
 app.use((req, res, next) => {
   const err = new Error('Path Not Found');
-  err.code = 404;
+  err.httpStatus = 404;
   next(err);
 });
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  const statusCode = err.code || 406;
-  res.status(statusCode);
-
-  const message = err.message;
-  delete err.message;
-  delete err.code;
-  res.json({
+  const statusCode = err.httpStatus || 406;
+  res.status(statusCode).json({
     status: false,
-    message,
-    data: err,
+    code: err.httpStatus,
+    message: err.message,
   });
 });
 

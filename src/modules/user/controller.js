@@ -1,6 +1,7 @@
 import { Facebook } from 'fb';
 import { User } from './model';
 import config from '../../../config';
+import { BadRequestError } from '../../../common/errors';
 
 const fb = new Facebook(config.fb);
 
@@ -23,16 +24,16 @@ UserController.getUserSocial = async (req, res, next) => {
   if (!req.user) {
     fb.setAccessToken(access_token);
     const response = await fb.api(uid, { fields: 'id,name,email,gender,picture.type(large)' });
+    response.email = 'syakuron@skyshi.com';
     const user = await User.getByEmail(response.email);
     // Case where user already created but provider name and uid do not match
     if (user) {
       const updatedUser = await User.update(
-        { email_users: user.email },
+        { id_users: user.id },
         {
           hybridauth_provider_name: providerName,
           hybridauth_provider_uid: uid,
-        },
-      );
+        });
       user.provider_name = updatedUser.provider_name;
       user.provider_uid = updatedUser.provider_uid;
       req.user = user;
@@ -55,7 +56,7 @@ UserController.getBalance = (req, res, next) => {
     message: 'User Balance Data',
     data: { user_balance: req.user.saldo_wallet },
   };
-  next();
+  return next();
 };
 
 /**
@@ -65,36 +66,19 @@ UserController.updateUser = async (req, res, next) => {
   req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
   await User.update({ id_users: req.user.id }, User.matchDBColumn(req.body));
   req.user = await User.getById(req.user.id);
-  next();
+  return next();
 };
 
 /**
  * Create user
  */
 UserController.createUser = async (req, res, next) => {
-  const { name, email, phone_number, password, gender } = req.body;
-  let user = await User.getByEmail(email);
+  const user = await User.getByEmail(req.body.email);
   if (user) {
-    return res.json({
-      status: false,
-      code: 400,
-      message: 'Email sudah terdaftar',
-      data: {},
-    });
+    throw new BadRequestError('Email sudah terdaftar.');
   }
-  const hash = User.hashPasswordSync(password);
-  user = await User.create({
-    namalengkap_users: name,
-    email_users: email,
-    nohp_users: phone_number,
-    jeniskelamin_users: gender,
-    password_users: hash,
-  });
-  delete user.password_users;
-  req.resData = {
-    status: true,
-    message: 'User Data',
-    data: user,
-  };
+  req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
+  req.body.password = User.hashPasswordSync(req.body.password);
+  req.user = await User.create(User.matchDBColumn(req.body));
   return next();
 };

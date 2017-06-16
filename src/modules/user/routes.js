@@ -72,6 +72,7 @@ routes.get('/users/:id*?',
  */
 routes.post('/users',
   wrap(UserController.createUser),
+  userData,
   apiResponse());
 
 /**
