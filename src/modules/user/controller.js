@@ -53,6 +53,15 @@ UserController.getUserSocial = async (req, res, next) => {
   return next();
 };
 
+UserController.getBalance = (req, res, next) => {
+  req.resData = {
+    status: true,
+    message: 'User Balance Data',
+    data: { user_balance: req.user.saldo_wallet },
+  };
+  next();
+};
+
 /**
  * Create user
  */

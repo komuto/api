@@ -31,6 +31,14 @@ routes.post('/users/social-login',
   apiResponse());
 
 /**
+ * GET /users/balance
+ */
+routes.get('/users/balance',
+  passport.authenticate('jwt', {}),
+  UserController.getBalance,
+  apiResponse());
+
+/**
  * GET /:id*?
  * View user
  */
