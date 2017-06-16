@@ -64,11 +64,15 @@ class UserModel extends bookshelf.Model {
    * @param {Object} data
    */
   static async create(data) {
+    let user = await this.getByEmail(data.email_users);
+    if (user) {
+      return false;
+    }
     data.approval_koperasi_users = 0;
     data.tgl_create_users = moment();
     data.status_users = 0;
     data.tglstatus_users = moment();
-    const user = await new this(data).save();
+    user = await new this(data).save();
     return user.serialize();
   }
 

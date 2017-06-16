@@ -66,6 +66,10 @@ UserController.createUser = async (req, res, next) => {
     jeniskelamin_users: gender,
     password_users: hash,
   });
+  if (!user) {
+    const err = new Error('Email sudah terdaftar.');
+    next(err);
+  }
   delete user.password_users;
   req.resData = {
     status: true,
