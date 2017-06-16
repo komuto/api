@@ -14,10 +14,26 @@ const { wrap } = core.utils;
  */
 routes.post('/users/login',
   validateLogin(),
-  passport.authenticate('local-login'),
+  passport.authenticate('local-login', {
+    failureRedirect: '/unauthorized',
+  }),
   addToken,
   userData,
   apiResponse());
+
+/**
+ * POST /unauthorized
+ * Unauthorized user
+ */
+routes.get('/unauthorized',
+  (req, res) => {
+    res.json({
+      status: false,
+      code: 401,
+      message: 'unauthorized',
+      data: {},
+    });
+  });
 
 /**
  * POST /social-login
@@ -43,7 +59,9 @@ routes.get('/users/balance',
  * View user
  */
 routes.get('/users/:id*?',
-  passport.authenticate('jwt', {}),
+  passport.authenticate('jwt', {
+    failureRedirect: '/unauthorized',
+  }),
   wrap(UserController.getOneUser),
   userData,
   apiResponse());

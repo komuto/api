@@ -73,24 +73,28 @@ UserController.updateUser = async (req, res, next) => {
  */
 UserController.createUser = async (req, res, next) => {
   const { name, email, phone_number, password, gender } = req.body;
+  let user = await User.getByEmail(email);
+  if (user) {
+    return res.json({
+      status: false,
+      code: 400,
+      message: 'Email sudah terdaftar',
+      data: {},
+    });
+  }
   const hash = User.hashPasswordSync(password);
-  const user = await User.create({
+  user = await User.create({
     namalengkap_users: name,
     email_users: email,
     nohp_users: phone_number,
     jeniskelamin_users: gender,
     password_users: hash,
   });
-  if (!user) {
-    const err = new Error('Email sudah terdaftar.');
-    next(err);
-  }
   delete user.password_users;
   req.resData = {
     status: true,
     message: 'User Data',
     data: user,
   };
-
   return next();
 };

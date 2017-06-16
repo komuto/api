@@ -50,6 +50,9 @@ def.url = (dir = '/') => {
   return `http${def.https ? 's' : ''}://${def.host}${port}${dir}`;
 };
 
+// komuto url
+def.komuto_url = 'http://api.komutodev.aptmi.com/komuto-api/';
+
 cfg.resolveLocalConfig(__dirname, (err, file) => {
   // eslint-disable-next-line global-require, import/no-dynamic-require
   if (!err) cfg.merge(def, require(file));
