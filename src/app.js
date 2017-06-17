@@ -74,6 +74,7 @@ app.use((err, req, res, next) => {
     status: false,
     code: err.httpStatus,
     message: err.message,
+    data: {},
   });
 });
 

@@ -16,6 +16,9 @@ UserController.getOneUser = async (req, res, next) => {
   return next();
 };
 
+/**
+ * Get user via social media
+ */
 UserController.getUserSocial = async (req, res, next) => {
   // Case where provider name and uid found on db
   const { provider_name: providerName, provider_uid: uid, access_token } = req.body;
@@ -60,12 +63,28 @@ UserController.getBalance = (req, res, next) => {
 };
 
 /**
- * Update User
+ * Update user
  */
 UserController.updateUser = async (req, res, next) => {
   req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
   await User.update({ id_users: req.user.id }, User.matchDBColumn(req.body));
   req.user = await User.getById(req.user.id);
+  return next();
+};
+
+/**
+ * Update user password
+ */
+UserController.updatePassword = async (req, res, next) => {
+  const user = await new User({ email_users: req.body.email }).fetch();
+  if (!user) {
+    throw new BadRequestError('Invalid user.');
+  }
+  if (await user.checkPassword(req.body.old_password)) {
+    const password = User.hashPasswordSync(req.body.password);
+    await User.update({ id_users: user.get('id_users') }, { password_users: password });
+    req.user = user.serialize();
+  }
   return next();
 };
 

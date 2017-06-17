@@ -85,4 +85,13 @@ routes.put('/users',
   userData,
   apiResponse());
 
+/**
+ * PUT /users/password
+ * Change user password
+ */
+routes.put('/users/password',
+  wrap(UserController.updatePassword),
+  userData,
+  apiResponse());
+
 export default routes;
