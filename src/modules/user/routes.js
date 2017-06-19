@@ -15,9 +15,7 @@ const { wrap } = core.utils;
  */
 routes.post('/users/login',
   validateLogin(),
-  passport.authenticate('local-login', {
-    failureRedirect: '/unauthorized',
-  }),
+  UserController.login,
   addToken,
   userData,
   apiResponse());

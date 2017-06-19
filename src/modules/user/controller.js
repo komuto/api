@@ -17,6 +17,19 @@ UserController.getOneUser = async (req, res, next) => {
 };
 
 /**
+ * Login authentication
+ */
+UserController.login = (req, res, next) => {
+  passport.authenticate('local-login', (err, user) => {
+    if (err) {
+      return next(err);
+    }
+    req.user = user;
+    return next();
+  })(req, res, next);
+};
+
+/**
  * Get user via social media
  */
 UserController.getUserSocial = async (req, res, next) => {
@@ -27,7 +40,6 @@ UserController.getUserSocial = async (req, res, next) => {
   if (!req.user) {
     fb.setAccessToken(access_token);
     const response = await fb.api(uid, { fields: 'id,name,email,gender,picture.type(large)' });
-    response.email = 'syakuron@skyshi.com';
     const user = await User.getByEmail(response.email);
     // Case where user already created but provider name and uid do not match
     if (user) {
