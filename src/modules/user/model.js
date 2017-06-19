@@ -4,9 +4,7 @@ import rp from 'request-promise';
 import config from '../../../config';
 import core from '../core';
 
-const bookshelf = core.mysql.connect(config.knex);
-
-bookshelf.plugin('pagination');
+const bookshelf = core.mysql.db;
 
 // used by bcrypt to generate new salt
 // 8 rounds will produce about 40 hashes per second on a 2GHz core
@@ -36,11 +34,6 @@ class UserModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_users';
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  get hasTimestamps() {
-    return false;
   }
 
   /**
@@ -187,3 +180,4 @@ UserModel.prototype.serialize = function () {
 };
 
 export const User = UserModel;
+export default bookshelf.model('User', UserModel);

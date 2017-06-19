@@ -1,5 +1,6 @@
 import knex from 'knex';
 import bookshelf from 'bookshelf';
+import cfg from '../../../config';
 
 /**
  * Connect to mysql instance
@@ -11,4 +12,8 @@ function connect(config) {
   return bookshelf(knex(config));
 }
 
-export default { connect };
+const db = connect(cfg.knex);
+db.plugin('pagination');
+db.plugin('registry');
+
+export default { db };

@@ -4,6 +4,7 @@ import { validateLogin, addToken, userData } from './middleware';
 import { UserController } from './controller';
 import core from '../core';
 import { apiResponse } from '../core/middleware';
+import { AddressController } from '../address/controller';
 
 const routes = express.Router();
 const { wrap } = core.utils;
@@ -50,8 +51,17 @@ routes.post('/users/social-login',
  * GET /users/balance
  */
 routes.get('/users/balance',
-  passport.authenticate('jwt', {}),
+  passport.authenticate('jwt', {
+    failureRedirect: '/unauthorized',
+  }),
   UserController.getBalance,
+  apiResponse());
+
+routes.get('/users/address',
+  passport.authenticate('jwt', {
+    failureRedirect: '/unauthorized',
+  }),
+  wrap(AddressController.getAddress),
   apiResponse());
 
 /**
@@ -80,7 +90,9 @@ routes.post('/users',
  * Update user
  */
 routes.put('/users',
-  passport.authenticate('jwt', {}),
+  passport.authenticate('jwt', {
+    failureRedirect: '/unauthorized',
+  }),
   wrap(UserController.updateUser),
   userData,
   apiResponse());

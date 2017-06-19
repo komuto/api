@@ -1,6 +1,5 @@
 import Promise from 'bluebird';
 import _ from 'lodash';
-import config from '../../../config';
 import core from '../core';
 import productModule from '../product';
 import lineItemModule from '../line_item';
@@ -9,9 +8,7 @@ import couponModule from '../coupon';
 const { Product } = productModule.model;
 const { LineItem, LineItemType } = lineItemModule.model;
 const { Coupon } = couponModule.model;
-const bookshelf = core.mysql.connect(config.knex);
-
-bookshelf.plugin('pagination');
+const bookshelf = core.mysql.db;
 
 export const OrderStatus = {
   CART: 'cart',

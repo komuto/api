@@ -1,9 +1,6 @@
-import config from '../../../config';
 import core from '../core';
 
-const bookshelf = core.mysql.connect(config.knex);
-
-bookshelf.plugin('pagination');
+const bookshelf = core.mysql.db;
 
 class PaymentModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this

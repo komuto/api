@@ -1,22 +1,21 @@
-import config from '../../../config';
-import core from '../core';
+import core from '../../core';
+import './address';
 
-const bookshelf = core.mysql.connect(config.knex);
+const bookshelf = core.mysql.db;
 
-bookshelf.plugin('pagination');
 
-class AddressModel extends bookshelf.Model {
+class DistrictModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
-    return 'address';
+    return 'kota_kab';
   }
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
-    return 'address_id';
+    return 'id_kotakab';
   }
-  // eslint-disable-next-line class-methods-use-this
-  get hasTimestamps() {
-    return true;
+
+  address() {
+    return this.hasMany('Address');
   }
 
   /**
@@ -55,5 +54,13 @@ class AddressModel extends bookshelf.Model {
   }
 }
 
+DistrictModel.prototype.serialize = function () {
+  return {
+    id: this.attributes.id_kotakab,
+    ro_id: this.attributes.id_ro,
+    name: this.attributes.nama_kotakab,
+  };
+};
+
 // eslint-disable-next-line import/prefer-default-export
-export const Address = AddressModel;
+export default bookshelf.model('District', DistrictModel);

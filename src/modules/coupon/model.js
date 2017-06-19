@@ -1,9 +1,6 @@
-import config from '../../../config';
 import core from '../../modules/core';
 
-const bookshelf = core.mysql.connect(config.knex);
-
-bookshelf.plugin('pagination');
+const bookshelf = core.mysql.db;
 
 export const CouponStatus = {
   INACTIVE: 'inactive',
