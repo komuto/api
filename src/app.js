@@ -13,6 +13,7 @@ import core from './modules/core';
 import user from './modules/user';
 import category from './modules/category';
 import expedition from './modules/expedition';
+import address from './modules/address';
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use(core.routes);
 app.use(user.routes);
 app.use(category.routes);
 app.use(expedition.routes);
+app.use(address.routes);
 
 app.use((req, res, next) => {
   const err = new Error('Path Not Found');
