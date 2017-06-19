@@ -5,6 +5,7 @@
   "author": "Andrew Junior Ongi K",
   "license": "UNLICENSED",
   "dependencies": {
+    "apicache": "^0.8.7",
     "aws-sdk": "^2.20.0",
     "babel-polyfill": "^6.20.0",
     "bcrypt": "^1.0.2",
@@ -39,6 +40,7 @@
     "passport-local": "^1.0.0",
     "pg": "^6.2.3",
     "raven": "^1.1.1",
+    "redis": "^2.7.1",
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
     "response-time": "^2.3.2",

@@ -1,7 +1,14 @@
 import express from 'express';
+import apicache from 'apicache';
+import redis from 'redis';
 import { CategoryController } from './controller';
 import core from '../core';
 import { apiResponse } from '../core/middleware';
+import config from '../../../config';
+
+const cache = apicache
+  .options({ redisClient: redis.createClient() })
+  .middleware;
 
 const routes = express.Router();
 const { wrap } = core.utils;
@@ -11,6 +18,7 @@ const { wrap } = core.utils;
  * View list of categories
  */
 routes.get('/categories',
+  cache(config.cache_exp),
   wrap(CategoryController.getCategories),
   apiResponse());
 
@@ -19,6 +27,7 @@ routes.get('/categories',
  * View list of sub categories
  */
 routes.get('/categories/:id/sub-categories',
+  cache(config.cache_exp),
   wrap(CategoryController.getCategories),
   apiResponse());
 
