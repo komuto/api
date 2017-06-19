@@ -3,6 +3,7 @@ import moment from 'moment';
 import rp from 'request-promise';
 import config from '../../../config';
 import core from '../core';
+import '../store/model';
 
 const bookshelf = core.mysql.db;
 
@@ -34,6 +35,10 @@ class UserModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_users';
+  }
+
+  store() {
+    return this.hasOne('Store', 'id_users', 'id_users');
   }
 
   /**
@@ -77,8 +82,7 @@ class UserModel extends bookshelf.Model {
   }
 
   static async getById(id) {
-    const user = await new this({ id_users: id }).fetch();
-    return user ? user.serialize() : user;
+    return await new this({ id_users: id }).fetch();
   }
 
   static async getByEmail(email) {

@@ -65,7 +65,18 @@ routes.get('/users/address',
   apiResponse());
 
 /**
- * GET /:id*?
+ * GET /users/profile
+ * View user
+ */
+routes.get('/users/profile',
+  passport.authenticate('jwt', {
+    failureRedirect: '/unauthorized',
+  }),
+  wrap(UserController.getProfile),
+  apiResponse());
+
+/**
+ * GET /users/:id*?
  * View user
  */
 routes.get('/users/:id*?',
