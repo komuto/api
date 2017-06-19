@@ -62,6 +62,5 @@ ProvinceModel.prototype.serialize = function () {
   };
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export const Province = ProvinceModel;
 export default bookshelf.model('Province', ProvinceModel);

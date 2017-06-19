@@ -1,5 +1,6 @@
 import { Address } from './model/address';
 import { Province } from './model/province';
+import { District } from './model/district';
 // import { BadRequestError } from '../../../common/errors';
 
 export const AddressController = {};
@@ -21,6 +22,17 @@ AddressController.getProvinces = async (req, res, next) => {
     status: true,
     message: 'Provinces Data',
     data: provinces,
+  };
+  return next();
+};
+
+AddressController.getDistricts = async (req, res, next) => {
+  const condition = typeof req.param('province_id') === 'undefined' ? {} : { id_provinsi: req.param('province_id') };
+  const districts = await District.get(condition);
+  req.resData = {
+    status: true,
+    message: 'Districts Data',
+    data: districts,
   };
   return next();
 };

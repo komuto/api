@@ -17,5 +17,14 @@ routes.get('/locations/provinces',
   wrap(AddressController.getProvinces),
   apiResponse());
 
+/**
+ * GET /locations/districts
+ * View list of districts
+ */
+routes.get('/locations/districts',
+  cache(config.cacheExp),
+  wrap(AddressController.getDistricts),
+  apiResponse());
+
 export default routes;
 

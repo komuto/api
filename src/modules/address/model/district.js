@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import core from '../../core';
 import './address';
 
@@ -50,6 +51,7 @@ class DistrictModel extends bookshelf.Model {
    * @param {Object} condition
    */
   static async get(condition = null) {
+    condition = _.omitBy(condition, _.isNil);
     return await this.where(condition).fetchAll();
   }
 }
@@ -62,5 +64,5 @@ DistrictModel.prototype.serialize = function () {
   };
 };
 
-// eslint-disable-next-line import/prefer-default-export
+export const District = DistrictModel;
 export default bookshelf.model('District', DistrictModel);
