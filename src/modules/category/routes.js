@@ -1,17 +1,12 @@
 import express from 'express';
-import apicache from 'apicache';
-import redis from 'redis';
 import { CategoryController } from './controller';
 import core from '../core';
 import { apiResponse } from '../core/middleware';
 import config from '../../../config';
 
-const cache = apicache
-  .options({ redisClient: redis.createClient() })
-  .middleware;
-
 const routes = express.Router();
 const { wrap } = core.utils;
+const cache = core.cache;
 
 /**
  * GET /categories
