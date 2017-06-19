@@ -53,6 +53,9 @@ def.url = (dir = '/') => {
 // komuto url
 def.komuto_url = 'http://api.komutodev.aptmi.com/komuto-api/';
 
+// cache expired
+def.cache_exp = '30 minutes';
+
 cfg.resolveLocalConfig(__dirname, (err, file) => {
   // eslint-disable-next-line global-require, import/no-dynamic-require
   if (!err) cfg.merge(def, require(file));
