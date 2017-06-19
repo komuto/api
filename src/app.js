@@ -11,10 +11,6 @@ import config from '../config';
 import c from './constants';
 import core from './modules/core';
 import user from './modules/user';
-import product from './modules/product';
-import coupon from './modules/coupon';
-import order from './modules/order';
-import payment from './modules/payment';
 import category from './modules/category';
 
 const app = express();
@@ -57,10 +53,6 @@ app.use(core.middleware.requestUtilsMiddleware());
 
 app.use(core.routes);
 app.use(user.routes);
-app.use(product.routes);
-app.use(coupon.routes);
-app.use(order.routes);
-app.use(payment.routes);
 app.use(category.routes);
 
 app.use((req, res, next) => {
