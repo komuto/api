@@ -144,7 +144,7 @@ class UserModel extends bookshelf.Model {
    */
   async checkPasswordFromApi(plain) {
     return await rp.post({
-      url: config.komuto_url,
+      url: config.komutoUrl,
       form: {
         page: 'login',
         function: 'validatepassword',

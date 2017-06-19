@@ -51,10 +51,10 @@ def.url = (dir = '/') => {
 };
 
 // komuto url
-def.komuto_url = 'http://api.komutodev.aptmi.com/komuto-api/';
+def.komutoUrl = 'http://api.komutodev.aptmi.com/komuto-api/';
 
 // cache expired
-def.cache_exp = '30 minutes';
+def.cacheExp = '30 minutes';
 
 cfg.resolveLocalConfig(__dirname, (err, file) => {
   // eslint-disable-next-line global-require, import/no-dynamic-require

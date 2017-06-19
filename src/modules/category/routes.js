@@ -18,7 +18,7 @@ const { wrap } = core.utils;
  * View list of categories
  */
 routes.get('/categories',
-  cache(config.cache_exp),
+  cache(config.cacheExp),
   wrap(CategoryController.getCategories),
   apiResponse());
 
@@ -27,7 +27,7 @@ routes.get('/categories',
  * View list of sub categories
  */
 routes.get('/categories/:id/sub-categories',
-  cache(config.cache_exp),
+  cache(config.cacheExp),
   wrap(CategoryController.getCategories),
   apiResponse());
 
