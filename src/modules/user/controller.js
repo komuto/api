@@ -27,7 +27,6 @@ UserController.getUserSocial = async (req, res, next) => {
   if (!req.user) {
     fb.setAccessToken(access_token);
     const response = await fb.api(uid, { fields: 'id,name,email,gender,picture.type(large)' });
-    response.email = 'syakuron@skyshi.com';
     const user = await User.getByEmail(response.email);
     // Case where user already created but provider name and uid do not match
     if (user) {
