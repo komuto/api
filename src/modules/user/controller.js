@@ -113,6 +113,8 @@ UserController.createUser = async (req, res, next) => {
   req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
   req.body.password = User.hashPasswordSync(req.body.password);
   req.user = await User.create(User.matchDBColumn(req.body));
+  const token = await UserToken.generateToken(req.user.id, TokenType.EMAIL_ACTIVATION);
+  UserEmail.send(UserEmail.buildActivation(req.user.email, token));
   return next();
 };
 
@@ -162,3 +164,16 @@ UserController.checkEmail = async (req, res, next) => {
   };
   return next();
 };
+
+UserController.activateUser = async (req, res, next) => {
+  const id = await UserToken.getId(req.query.token);
+  await User.activate(id);
+  await UserToken.expire(req.query.token);
+  req.resData = {
+    status: true,
+    message: 'Success',
+    data: {},
+  };
+  return next();
+};
+

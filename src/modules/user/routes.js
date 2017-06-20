@@ -131,5 +131,12 @@ routes.post('/accounts/email/check',
   wrap(UserController.checkEmail),
   apiResponse());
 
+/**
+ * GET /signup-verification?token
+ * Activate user account
+ */
+routes.get('/signup-verification',
+  wrap(UserController.activateUser),
+  apiResponse());
 
 export default routes;
