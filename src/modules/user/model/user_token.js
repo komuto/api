@@ -1,5 +1,7 @@
 import moment from 'moment';
+import md5 from 'md5';
 import core from '../../core';
+import { BadRequestError } from '../../../../common/errors';
 
 const bookshelf = core.postgres.db;
 
@@ -39,7 +41,7 @@ class UserTokenModel extends bookshelf.Model {
     if (token) {
       return token.get('value_tokenuser');
     }
-    token = 's24ffdsf7fs3829gdadfs489253hj'; //jwt.sign({ id_users: id }, config.jwt.secretOrKey).slice(0, 49);
+    token = md5(id);
     await new this({
       id_users: id,
       type_tokenuser: type,
@@ -48,6 +50,26 @@ class UserTokenModel extends bookshelf.Model {
       tglstatus_tokenuser: moment(),
     }).save();
     return token;
+  }
+
+  /**
+   * @param {string} token
+   */
+  static async getId(tokenValue) {
+    const token = await this.where({ value_tokenuser: tokenValue }).fetch();
+    if (!token) {
+      throw new BadRequestError('Token not found');
+    }
+    return token.get('id_users');
+  }
+
+  /**
+   * Expire the token by changing its status
+   * @param {string }token
+   */
+  static async expire(token) {
+    await this.where({ value_tokenuser: token })
+      .save({ status_tokenuser: TokenStatus.INACTIVE }, { patch: true });
   }
 }
 
