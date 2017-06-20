@@ -34,9 +34,9 @@ class ProductModel extends bookshelf.Model {
   /**
    * Get products by condition
    */
-  static async get(page, pageSize, condition = null) {
+  static async get(page, limit, condition = null) {
     condition = _.omitBy(condition, _.isNil);
-    return await this.where(condition).fetchPage({ page, pageSize, withRelated: ['store', 'imageProducts'] });
+    return await this.where(condition).fetchPage({ page, limit, withRelated: ['store', 'imageProducts'] });
   }
 
   /**
