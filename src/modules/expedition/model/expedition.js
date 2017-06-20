@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import moment from 'moment';
 import core from '../../core';
 
 const bookshelf = core.mysql.db;
@@ -27,11 +28,11 @@ ExpeditionModel.prototype.serialize = function () {
   return {
     id: this.attributes.id_ekspedisi,
     name: this.attributes.nama_ekspedisi,
-    status: this.attributes.status_ekspedisi,
+    status: parseInt(this.attributes.status_ekspedisi, 10),
     method: this.attributes.method_ekspedisi,
-    status_at: this.attributes.tglstatus_ekspedisi,
+    status_at: moment(this.attributes.tglstatus_ekspedisi).unix(),
     logo: this.attributes.logo_path,
-    insurance_fee: this.attributes.asurasi_fee,
+    insurance_fee: parseFloat(this.attributes.asurasi_fee),
   };
 };
 

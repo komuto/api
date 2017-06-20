@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import moment from 'moment';
 import core from '../../core';
 
 const bookshelf = core.mysql.db;
@@ -29,8 +30,8 @@ ServiceModel.prototype.serialize = function () {
     expedition_id: this.attributes.id_ekspedisi,
     name: this.attributes.nama_ekspedisiservice,
     description: this.attributes.deskripsi_ekspedisiservice,
-    status: this.attributes.status_ekspedisiservice,
-    status_at: this.attributes.tglstatus_ekspedisiservice,
+    status: parseInt(this.attributes.status_ekspedisiservice, 10),
+    status_at: moment(this.attributes.tglstatus_ekspedisiservice).unix(),
     logo: this.attributes.logo_path,
   };
 };
