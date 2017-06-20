@@ -62,5 +62,6 @@ ProvinceModel.prototype.serialize = function () {
   };
 };
 
-export const Province = ProvinceModel;
-export default bookshelf.model('Province', ProvinceModel);
+export const Province = bookshelf.model('Province', ProvinceModel);
+export default { Province };
+

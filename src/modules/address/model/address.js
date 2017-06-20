@@ -57,8 +57,7 @@ class AddressModel extends bookshelf.Model {
    * @param {Object} data
    */
   static async create(data) {
-    const address = new this(data);
-    return await address.save();
+    await new this(data).save();
   }
 
   /**
@@ -86,6 +85,44 @@ class AddressModel extends bookshelf.Model {
   static async get(condition = null) {
     return await this.where(condition).fetchAll();
   }
+
+  /**
+   * Check if primary address already in db
+   * @param {number} id
+   */
+  static async checkPrimary(id) {
+    const address = await this.where({ id_users: id, alamat_primary: '1' }).fetch();
+    return address;
+  }
+
+  /**
+   * Transform supplied data properties to match with db column
+   * @param {object} data
+   * @return {object} newData
+   */
+  static matchDBColumn(data) {
+    const column = {
+      user_id: 'id_users',
+      province_id: 'id_provinsi',
+      district_id: 'id_kotakab',
+      sub_district_id: 'id_kecamatan',
+      village_id: 'id_kelurahan',
+      name: 'nama_penerima',
+      email: 'email_penerima',
+      phone_number: 'tlp_penerima',
+      postal_code: 'kodepos_user',
+      address: 'alamat_user',
+      alias_address: 'alamat_alias',
+      is_primary: 'alamat_primary',
+      is_sale_address: 'alamat_originjual',
+      is_tender_address: 'alamat_originlelang',
+    };
+    const newData = {};
+    Object.keys(data).forEach((prop) => {
+      if (column[prop]) newData[column[prop]] = data[prop];
+    });
+    return newData;
+  }
 }
 
 AddressModel.prototype.serialize = function () {
@@ -104,5 +141,5 @@ AddressModel.prototype.serialize = function () {
 };
 
 // eslint-disable-next-line import/prefer-default-export
-export const Address = AddressModel;
-export default bookshelf.model('Address', AddressModel);
+export const Address = bookshelf.model('Address', AddressModel);
+export default { Address };

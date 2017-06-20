@@ -1,4 +1,5 @@
 import express from 'express';
+import passport from 'passport';
 import { AddressController } from './controller';
 import core from '../core';
 import { apiResponse } from '../core/middleware';
@@ -42,6 +43,13 @@ routes.get('/locations/sub-districts',
 routes.get('/locations/villages',
   cache(config.cacheExp),
   wrap(AddressController.getVillages),
+  apiResponse());
+
+routes.post('/users/addresses',
+  passport.authenticate('jwt', {
+    failureRedirect: '/unauthorized',
+  }),
+  wrap(AddressController.createAddress),
   apiResponse());
 
 export default routes;

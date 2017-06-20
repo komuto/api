@@ -4,7 +4,6 @@ import './address';
 
 const bookshelf = core.postgres.db;
 
-
 class VillageModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -63,5 +62,5 @@ VillageModel.prototype.serialize = function () {
   };
 };
 
-export const Village = VillageModel;
-export default bookshelf.model('Village', VillageModel);
+export const Village = bookshelf.model('Village', VillageModel);
+export default { Village };
