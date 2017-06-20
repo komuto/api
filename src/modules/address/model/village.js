@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import core from '../../core';
 import './address';
 
@@ -50,16 +51,17 @@ class VillageModel extends bookshelf.Model {
    * @param {Object} condition
    */
   static async get(condition = null) {
+    condition = _.omitBy(condition, _.isNil);
     return await this.where(condition).fetchAll();
   }
 }
 
 VillageModel.prototype.serialize = function () {
   return {
-    id: this.attributes.id_kelurahan,
+    id: parseInt(this.attributes.id_kelurahan, 10),
     name: this.attributes.nama_kelurahan,
   };
 };
 
-// eslint-disable-next-line import/prefer-default-export
+export const Village = VillageModel;
 export default bookshelf.model('Village', VillageModel);

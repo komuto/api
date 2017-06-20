@@ -2,6 +2,7 @@ import { Address } from './model/address';
 import { Province } from './model/province';
 import { District } from './model/district';
 import { SubDistrict } from './model/sub_district';
+import { Village } from './model/village';
 // import { BadRequestError } from '../../../common/errors';
 
 export const AddressController = {};
@@ -45,6 +46,17 @@ AddressController.getSubDistricts = async (req, res, next) => {
     status: true,
     message: 'Sub Districts Data',
     data: subDistricts,
+  };
+  return next();
+};
+
+AddressController.getVillages = async (req, res, next) => {
+  const condition = typeof req.param('sub_district_id') === 'undefined' ? {} : { id_kecamatan: req.param('sub_district_id') };
+  const villages = await Village.get(condition);
+  req.resData = {
+    status: true,
+    message: 'Villages Data',
+    data: villages,
   };
   return next();
 };

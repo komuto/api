@@ -28,11 +28,20 @@ routes.get('/locations/districts',
 
 /**
  * GET /locations/sub-districts
- * View list of Sub districts
+ * View list of sub districts
  */
 routes.get('/locations/sub-districts',
   cache(config.cacheExp),
   wrap(AddressController.getSubDistricts),
+  apiResponse());
+
+/**
+ * GET /locations/villages
+ * View list of villages
+ */
+routes.get('/locations/villages',
+  cache(config.cacheExp),
+  wrap(AddressController.getVillages),
   apiResponse());
 
 export default routes;
