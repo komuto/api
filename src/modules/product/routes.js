@@ -16,4 +16,12 @@ routes.get('/products',
   wrap(ProductController.index),
   apiResponse());
 
+/**
+ * GET /products/search
+ * View list of search result
+ */
+routes.get('/products/search',
+  wrap(ProductController.search),
+  apiResponse());
+
 export default routes;

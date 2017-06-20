@@ -28,3 +28,16 @@ ProductController.index = async (req, res, next) => {
   };
   return next();
 };
+
+/**
+ * Get search result
+ */
+ProductController.search = async (req, res, next) => {
+  const results = await Product.search(req.param('q'));
+  req.resData = {
+    status: true,
+    message: 'Products Search Result',
+    data: results,
+  };
+  return next();
+};

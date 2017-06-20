@@ -38,6 +38,17 @@ class ProductModel extends bookshelf.Model {
     condition = _.omitBy(condition, _.isNil);
     return await this.where(condition).fetchPage({ page, pageSize, withRelated: ['store', 'imageProducts'] });
   }
+
+  /**
+   * Get search result
+   */
+  static async search(query = null) {
+    return await this.query((qb) => {
+      qb.select('nama_produk');
+      qb.groupBy('nama_produk');
+      qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
+    }).fetchAll();
+  }
 }
 
 ProductModel.prototype.serialize = function () {
@@ -50,10 +61,11 @@ ProductModel.prototype.serialize = function () {
     weight: this.attributes.berat_produk,
     type: this.attributes.jenis_produk,
     description: this.attributes.deskripsi_produk,
-    price: parseFloat(this.attributes.harga_produk),
+    price: this.attributes.harga_produk ? parseFloat(this.attributes.harga_produk) : undefined,
     attrval: this.attributes.attrval_produk,
-    status: parseInt(this.attributes.status_produk, 10),
-    insurance: parseInt(this.attributes.asuransi_produk, 10),
+    status: this.attributes.status_produk ? parseInt(this.attributes.status_produk, 10) : undefined,
+    // eslint-disable-next-line max-len
+    insurance: this.attributes.asuransi_produk ? parseInt(this.attributes.asuransi_produk, 10) : undefined,
     discount: this.attributes.disc_produk,
     margin_dropshipper: this.attributes.margin_dropshiper,
     is_dropshipper: this.attributes.is_dropshiper,
@@ -62,8 +74,10 @@ ProductModel.prototype.serialize = function () {
     count_popular: this.attributes.count_populer,
     identifier_brand: this.attributes.identifier_brand,
     identifier_catalog: this.attributes.identifier_katalog,
-    status_at: moment(this.attributes.tglstatus_produk).unix(),
-    created_at: moment(this.attributes.date_created_produk).unix(),
+    // eslint-disable-next-line max-len
+    status_at: this.attributes.tglstatus_produk ? moment(this.attributes.tglstatus_produk).unix() : undefined,
+    // eslint-disable-next-line max-len
+    created_at: this.attributes.date_created_produk ? moment(this.attributes.date_created_produk).unix() : undefined,
   };
 };
 
