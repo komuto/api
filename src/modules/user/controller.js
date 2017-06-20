@@ -1,4 +1,5 @@
 import { Facebook } from 'fb';
+import passport from 'passport';
 import { User } from './model';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';

@@ -12,7 +12,7 @@ const cache = core.cache;
  * View list of products
  */
 routes.get('/products',
-  // cache('5 minutes'),
+  cache('5 minutes'),
   wrap(ProductController.index),
   apiResponse());
 
