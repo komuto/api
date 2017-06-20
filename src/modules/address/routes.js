@@ -45,11 +45,37 @@ routes.get('/locations/villages',
   wrap(AddressController.getVillages),
   apiResponse());
 
+/**
+ * POST /users/addresses
+ * Create address
+ */
 routes.post('/users/addresses',
   passport.authenticate('jwt', {
     failureRedirect: '/unauthorized',
   }),
   wrap(AddressController.createAddress),
+  apiResponse());
+
+/**
+ * PUT /users/addresses/id
+ * Change address
+ */
+routes.put('/users/addresses/:id',
+  passport.authenticate('jwt', {
+    failureRedirect: '/unauthorized',
+  }),
+  wrap(AddressController.updateAddress),
+  apiResponse());
+
+/**
+ * DELETE /users/addresses/id
+ * Delete address
+ */
+routes.delete('/users/addresses/:id',
+  passport.authenticate('jwt', {
+    failureRedirect: '/unauthorized',
+  }),
+  wrap(AddressController.deleteAddress),
   apiResponse());
 
 export default routes;

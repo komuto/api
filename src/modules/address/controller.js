@@ -64,3 +64,22 @@ AddressController.createAddress = async (req, res, next) => {
   await Address.create(Address.matchDBColumn(req.body));
   return next();
 };
+
+AddressController.updateAddress = async (req, res, next) => {
+  const data = { id_alamatuser: req.params.id, alamat_primary: '1' };
+  await Address.update(data, Address.matchDBColumn(req.body));
+  return next();
+};
+
+AddressController.deleteAddress = async (req, res, next) => {
+  if (req.body.is_primary) {
+    if (await Address.checkPrimary(req.user.id)) {
+      throw new BadRequestError('Email primary sudah terdaftar');
+    }
+  }
+  req.body.user_id = req.user.id;
+  req.body.is_primary = req.body.primary ? '1' : '0';
+  req.body.is_sale_address = '0';
+  await Address.create(Address.matchDBColumn(req.body));
+  return next();
+};
