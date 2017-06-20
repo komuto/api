@@ -79,6 +79,14 @@ class UserModel extends bookshelf.Model {
     return user.serialize();
   }
 
+  /**
+   * Activate user by changing its status
+   * @param {number} id
+   */
+  static async activate(id) {
+    await this.where({ id_users: id }).save({ status_users: '1' }, { patch: true });
+  }
+
   static async getById(id) {
     return await new this({ id_users: id }).fetch();
   }
