@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import moment from 'moment';
 import core from '../core';
 
@@ -33,8 +34,9 @@ class ProductModel extends bookshelf.Model {
   /**
    * Get products by condition
    */
-  static async get(page, pageSize) {
-    return await this.fetchPage({ page, pageSize, withRelated: ['store', 'imageProducts'] });
+  static async get(page, pageSize, condition = null) {
+    condition = _.omitBy(condition, _.isNil);
+    return await this.where(condition).fetchPage({ page, pageSize, withRelated: ['store', 'imageProducts'] });
   }
 }
 
