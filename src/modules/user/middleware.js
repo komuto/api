@@ -65,7 +65,6 @@ export function userData(req, res, next) {
   }
 
   req.resData = {
-    status: true,
     message: 'User Data',
     data: req.user,
   };

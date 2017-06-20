@@ -69,7 +69,6 @@ UserController.getUserSocial = async (req, res, next) => {
 
 UserController.getBalance = (req, res, next) => {
   req.resData = {
-    status: true,
     message: 'User Balance Data',
     data: { user_balance: req.user.saldo_wallet },
   };
@@ -82,7 +81,6 @@ UserController.getBalance = (req, res, next) => {
 UserController.updateUser = async (req, res, next) => {
   req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
   await User.update({ id_users: req.user.id }, User.matchDBColumn(req.body));
-  req.user = await User.getById(req.user.id);
   return next();
 };
 
@@ -97,7 +95,6 @@ UserController.updatePassword = async (req, res, next) => {
   if (await user.checkPassword(req.body.old_password)) {
     const password = User.hashPasswordSync(req.body.password);
     await User.update({ id_users: user.get('id_users') }, { password_users: password });
-    req.user = user.serialize();
   }
   return next();
 };
@@ -112,7 +109,7 @@ UserController.createUser = async (req, res, next) => {
   }
   req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
   req.body.password = User.hashPasswordSync(req.body.password);
-  req.user = await User.create(User.matchDBColumn(req.body));
+  await User.create(User.matchDBColumn(req.body));
   const token = await UserToken.generateToken(req.user.id, TokenType.EMAIL_ACTIVATION);
   UserEmail.send(UserEmail.buildActivation(req.user.email, token));
   return next();
@@ -126,7 +123,6 @@ UserController.getProfile = async (req, res, next) => {
   user = await user.load(['store']);
   const store = user.related('store');
   req.resData = {
-    status: true,
     message: 'User Profile',
     data: {
       user,
@@ -143,12 +139,6 @@ UserController.forgotPassword = async (req, res, next) => {
   }
   const token = await UserToken.generateToken(user.id, TokenType.FORGOT_PASSWORD);
   UserEmail.send(UserEmail.buildForgotPassword(req.body.email, token));
-
-  req.resData = {
-    status: true,
-    message: 'Success',
-    data: {},
-  };
   return next();
 };
 
@@ -157,11 +147,7 @@ UserController.checkEmail = async (req, res, next) => {
   if (user) {
     throw new BadRequestError('Email sudah terdaftar');
   }
-  req.resData = {
-    status: true,
-    message: 'Email Available',
-    data: {},
-  };
+  req.resData = { message: 'Email Available' };
   return next();
 };
 
@@ -169,11 +155,6 @@ UserController.activateUser = async (req, res, next) => {
   const id = await UserToken.getId(req.query.token);
   await User.activate(id);
   await UserToken.expire(req.query.token);
-  req.resData = {
-    status: true,
-    message: 'Success',
-    data: {},
-  };
   return next();
 };
 

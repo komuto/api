@@ -91,7 +91,6 @@ routes.get('/users/:id*?',
  */
 routes.post('/users',
   wrap(UserController.createUser),
-  userData,
   apiResponse());
 
 /**
@@ -103,7 +102,6 @@ routes.put('/users',
     failureRedirect: '/unauthorized',
   }),
   wrap(UserController.updateUser),
-  userData,
   apiResponse());
 
 /**
@@ -112,7 +110,6 @@ routes.put('/users',
  */
 routes.put('/users/password',
   wrap(UserController.updatePassword),
-  userData,
   apiResponse());
 
 /**
