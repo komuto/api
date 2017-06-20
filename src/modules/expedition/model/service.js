@@ -2,7 +2,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import core from '../../core';
 
-const bookshelf = core.mysql.db;
+const bookshelf = core.postgres.db;
 
 class ServiceModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this

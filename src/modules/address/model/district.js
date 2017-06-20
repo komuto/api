@@ -2,7 +2,7 @@ import _ from 'lodash';
 import core from '../../core';
 import './address';
 
-const bookshelf = core.mysql.db;
+const bookshelf = core.postgres.db;
 
 
 class DistrictModel extends bookshelf.Model {

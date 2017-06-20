@@ -5,7 +5,7 @@ import './district';
 import './sub_district';
 import './village';
 
-const bookshelf = core.mysql.db;
+const bookshelf = core.postgres.db;
 
 class AddressModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this

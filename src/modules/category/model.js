@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import core from '../core';
 
-const bookshelf = core.mysql.db;
+const bookshelf = core.postgres.db;
 
 class CategoryModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this

@@ -5,7 +5,7 @@ import config from '../../../config';
 import core from '../core';
 import '../store/model';
 
-const bookshelf = core.mysql.db;
+const bookshelf = core.postgres.db;
 
 // used by bcrypt to generate new salt
 // 8 rounds will produce about 40 hashes per second on a 2GHz core

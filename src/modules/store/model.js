@@ -1,6 +1,6 @@
 import core from '../core';
 
-const bookshelf = core.mysql.db;
+const bookshelf = core.postgres.db;
 
 export const StoreStatus = {};
 
