@@ -75,8 +75,7 @@ class UserModel extends bookshelf.Model {
    * @return {Object} user updated field only
    */
   static async update(data, newData) {
-    const user = await this.where(data).save(newData, { patch: true });
-    return user.serialize();
+    await this.where(data).save(newData, { patch: true });
   }
 
   /**

@@ -53,7 +53,7 @@ class AddressModel extends bookshelf.Model {
   }
 
   /**
-   * Create a new line item
+   * Create address
    * @param {Object} data
    */
   static async create(data) {
@@ -61,13 +61,12 @@ class AddressModel extends bookshelf.Model {
   }
 
   /**
-   * Update line item
-   * @param {Integer} id
+   * Update address
    * @param {Object} data
+   * @param {Object} newData
    */
-  static async update(id, data) {
-    const address = new this({ address_id: id });
-    return await address.save(data);
+  static async update(data, newData) {
+    await new this(data).save(newData, { patch: true });
   }
 
   /**
@@ -90,8 +89,12 @@ class AddressModel extends bookshelf.Model {
    * Check if primary address already in db
    * @param {number} id
    */
-  static async checkPrimary(id) {
-    const address = await this.where({ id_users: id, alamat_primary: '1' }).fetch();
+  static async checkPrimary(idUsers, idAddress) {
+    const query = { id_users: idUsers, alamat_primary: '1' };
+    if (idAddress) {
+      query.id_alamatuser = idAddress;
+    }
+    const address = await this.where(query).fetch();
     return address;
   }
 

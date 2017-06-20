@@ -45,14 +45,14 @@ UserController.getUserSocial = async (req, res, next) => {
     const user = await User.getByEmail(response.email);
     // Case where user already created but provider name and uid do not match
     if (user) {
-      const updatedUser = await User.update(
+      await User.update(
         { id_users: user.id },
         {
           hybridauth_provider_name: providerName,
           hybridauth_provider_uid: uid,
         });
-      user.provider_name = updatedUser.provider_name;
-      user.provider_uid = updatedUser.provider_uid;
+      user.provider_name = providerName;
+      user.provider_uid = uid;
       req.user = user;
     } else { // Case where user has not been created
       response.provider_name = providerName;
