@@ -59,15 +59,16 @@ AddressController.createAddress = async (req, res, next) => {
     }
   }
   req.body.user_id = req.user.id;
-  req.body.is_primary = req.body.primary ? '1' : '0';
+  req.body.is_primary = req.body.is_primary ? '1' : '0';
   req.body.is_sale_address = '0';
   await Address.create(Address.matchDBColumn(req.body));
   return next();
 };
 
-AddressController.updateAddress = async (req, res, next) => {
-  const data = { id_alamatuser: req.params.id, alamat_primary: '1' };
-  await Address.update(data, Address.matchDBColumn(req.body));
+AddressController.updatePrimaryAddress = async (req, res, next) => {
+  await Address.update(
+    { id_users: req.user.id, alamat_primary: '1' },
+    Address.matchDBColumn(req.body));
   return next();
 };
 

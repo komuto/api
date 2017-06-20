@@ -66,7 +66,7 @@ class AddressModel extends bookshelf.Model {
    * @param {Object} newData
    */
   static async update(data, newData) {
-    await new this(data).save(newData, { patch: true });
+    await this.where(data).save(newData, { patch: true });
   }
 
   /**
