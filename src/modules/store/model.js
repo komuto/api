@@ -1,8 +1,7 @@
+import moment from 'moment';
 import core from '../core';
 
 const bookshelf = core.postgres.db;
-
-export const StoreStatus = {};
 
 class StoreModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -13,16 +12,19 @@ class StoreModel extends bookshelf.Model {
   get idAttribute() {
     return 'id_toko';
   }
-  // eslint-disable-next-line class-methods-use-this
-  get hasTimestamps() {
-    return false;
-  }
 
   /**
    * Add relation to user
    */
   user() {
     return this.belongsTo('User');
+  }
+
+  /**
+   * Add relation to product
+   */
+  products() {
+    return this.hasMany('Product');
   }
 }
 
@@ -34,19 +36,19 @@ StoreModel.prototype.serialize = function () {
     description: this.attributes.deskripsi_toko,
     logo: this.attributes.logo_toko,
     custom_domain: this.attributes.custom_domain,
-    created_at: this.attributes.tgl_create_toko,
-    status: this.attributes.status_toko,
+    status: parseInt(this.attributes.status_toko, 10),
     remarks_status: this.attributes.remarks_status_toko,
-    status_at: this.attributes.tglstatus_toko,
     cover_image: this.attributes.pathcoverimage_toko,
     seller_theme_id: this.attributes.identifier_themesseller,
     reputation: this.attributes.reputasi_toko,
     store_id_number: this.attributes.no_ktp_toko,
     total_favorite: this.attributes.jumlahfavorit_toko,
-    verification_at: this.attributes.tanggal_verifikasi,
     note: this.attributes.note,
-    start_at: this.attributes.mulai_tanggal,
-    end_at: this.attributes.sampai_tanggal,
+    created_at: moment(this.attributes.tgl_create_toko).unix(),
+    status_at: moment(this.attributes.tglstatus_toko).unix(),
+    verification_at: moment(this.attributes.tanggal_verifikasi).unix(),
+    start_at: this.attributes.mulai_tanggal ? moment(this.attributes.mulai_tanggal).unix() : null,
+    end_at: this.attributes.sampai_tanggal ? moment(this.attributes.sampai_tanggal).unix() : null,
   };
 };
 

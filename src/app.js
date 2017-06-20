@@ -15,6 +15,8 @@ import category from './modules/category';
 import expedition from './modules/expedition';
 import address from './modules/address';
 import brand from './modules/brand';
+import product from './modules/product';
+import image from './modules/image';
 
 const app = express();
 
@@ -60,6 +62,7 @@ app.use(category.routes);
 app.use(expedition.routes);
 app.use(address.routes);
 app.use(brand.routes);
+app.use(product.routes);
 
 app.use((req, res, next) => {
   const err = new Error('Path Not Found');
