@@ -115,4 +115,21 @@ routes.put('/users/password',
   userData,
   apiResponse());
 
+/**
+ * POST /passwords/forgot
+ * Generate OTP sent through email
+ */
+routes.post('/passwords/forgot',
+  wrap(UserController.forgotPassword),
+  apiResponse());
+
+/**
+ * POST /accounts/email/check
+ * Check whether email already used or not
+ */
+routes.post('/accounts/email/check',
+  wrap(UserController.checkEmail),
+  apiResponse());
+
+
 export default routes;

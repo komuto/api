@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Strategy as LocalStrategy } from 'passport-local';
-import { User, Status } from '../../model';
+import { User, UserStatus } from '../../model';
 import { BadRequestError } from '../../../../../common/errors';
 
 export default new LocalStrategy({
@@ -14,7 +14,7 @@ export default new LocalStrategy({
       .then((body) => {
         body = JSON.parse(body);
         if (body.data) {
-          if (_.includes([Status.ACTIVE], user.get('status_users'))) {
+          if (_.includes([UserStatus.ACTIVE], user.get('status_users'))) {
             return done(null, user.toJSON());
           }
         }

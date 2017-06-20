@@ -38,11 +38,13 @@ def.jwt.audience = 'pionize.com';
 
 // mailer config
 def.emailServiceAdapter = 'sendgrid';
+def.emailKey = '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';
+def.emailFrom = 'no-reply@skyshi.com';
 
 // fb api config
 def.fb = {};
 def.fb.appId = '123456789';
-def.fb.appSecret = '123456677889'
+def.fb.appSecret = '123456677889';
 
 // url builder
 def.url = (dir = '/') => {
@@ -52,6 +54,7 @@ def.url = (dir = '/') => {
 
 // komuto url
 def.komutoUrl = 'http://api.komutodev.aptmi.com/komuto-api/';
+def.frontendKomuto = 'https://komuto.skyshi.com/';
 
 // cache expired
 def.cacheExp = '30 minutes';

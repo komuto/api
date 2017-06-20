@@ -1,9 +1,9 @@
 import bcrypt from 'bcrypt';
 import moment from 'moment';
 import rp from 'request-promise';
-import config from '../../../config';
-import core from '../core';
-import '../store/model';
+import config from '../../../../config';
+import core from '../../core';
+import '../../store/model';
 
 const bookshelf = core.postgres.db;
 
@@ -23,8 +23,6 @@ export const UserStatus = {
   TEMPBANNED: '2',
   PERMABANNED: '3',
 };
-
-export const Status = UserStatus;
 
 class UserModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -165,16 +163,16 @@ UserModel.prototype.serialize = function () {
     email: this.attributes.email_users,
     cooperative_member_number: this.attributes.no_anggotakoperasi_users ?
       this.attributes.no_anggotakoperasi_users : null,
-    approval_cooperative_status: parseInt(this.attributes.approval_koperasi_users, 10),
+    approval_cooperative_status: this.attributes.approval_koperasi_users,
     photo: this.attributes.pathfoto_users ? this.attributes.pathfoto_users : null,
     phone_number: this.attributes.nohp_users ? this.attributes.nohp_users : null,
     gender: this.attributes.jeniskelamin_users === 'L' ? 'male' : 'female',
-    status: parseInt(this.attributes.status_users, 10),
+    status: this.attributes.status_users,
     mother_name: this.attributes.ibukandung_users ? this.attributes.ibukandung_users : null,
     auth_key: this.attributes.auth_key ? this.attributes.auth_key : null,
     saldo_wallet: this.attributes.saldo_wallet ? this.attributes.saldo_wallet : 0,
     place_of_birth: this.attributes.kota_lahir ? this.attributes.kota_lahir : null,
-    date_of_birth: this.attributes.tgl_lahir ? moment(this.attributes.tgl_lahir).unix() : null,
+    date_of_birth: this.attributes.tgl_lahir ? this.attributes.tgl_lahir : null,
     created_at: moment(this.attributes.tgl_create_users).unix(),
     join_at: this.attributes.tgl_join_koperasi ? this.attributes.tgl_join_koperasi : null,
     status_at: moment(this.attributes.tglstatus_users).unix(),
@@ -183,5 +181,5 @@ UserModel.prototype.serialize = function () {
   };
 };
 
-export const User = UserModel;
-export default bookshelf.model('User', UserModel);
+export const User = bookshelf.model('User', UserModel);
+export default { User, UserStatus, UserRoles };

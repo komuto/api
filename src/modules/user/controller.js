@@ -1,5 +1,7 @@
 import { Facebook } from 'fb';
-import { User } from './model';
+import passport from 'passport';
+import { User, UserToken, TokenType } from './model';
+import { UserEmail } from './email';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
 
@@ -128,6 +130,35 @@ UserController.getProfile = async (req, res, next) => {
       user,
       store,
     },
+  };
+  return next();
+};
+
+UserController.forgotPassword = async (req, res, next) => {
+  const user = await User.getByEmail(req.body.email);
+  if (!user) {
+    throw new BadRequestError('Email belum terdaftar');
+  }
+  const token = await UserToken.generateToken(user.id, TokenType.FORGOT_PASSWORD);
+  UserEmail.send(UserEmail.buildForgotPassword(req.body.email, token));
+
+  req.resData = {
+    status: true,
+    message: 'Success',
+    data: {},
+  };
+  return next();
+};
+
+UserController.checkEmail = async (req, res, next) => {
+  const user = await User.getByEmail(req.body.email);
+  if (user) {
+    throw new BadRequestError('Email sudah terdaftar');
+  }
+  req.resData = {
+    status: true,
+    message: 'Email Available',
+    data: {},
   };
   return next();
 };
