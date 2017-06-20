@@ -60,11 +60,11 @@ routes.post('/users/addresses',
  * PUT /users/addresses/id
  * Change address
  */
-routes.put('/users/addresses/:id',
+routes.put('/users/addresses',
   passport.authenticate('jwt', {
     failureRedirect: '/unauthorized',
   }),
-  wrap(AddressController.updateAddress),
+  wrap(AddressController.updatePrimaryAddress),
   apiResponse());
 
 /**
