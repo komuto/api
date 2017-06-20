@@ -1,6 +1,7 @@
 import { Address } from './model/address';
 import { Province } from './model/province';
 import { District } from './model/district';
+import { SubDistrict } from './model/sub_district';
 // import { BadRequestError } from '../../../common/errors';
 
 export const AddressController = {};
@@ -33,6 +34,17 @@ AddressController.getDistricts = async (req, res, next) => {
     status: true,
     message: 'Districts Data',
     data: districts,
+  };
+  return next();
+};
+
+AddressController.getSubDistricts = async (req, res, next) => {
+  const condition = typeof req.param('district_id') === 'undefined' ? {} : { id_kotakab: req.param('district_id') };
+  const subDistricts = await SubDistrict.get(condition);
+  req.resData = {
+    status: true,
+    message: 'Sub Districts Data',
+    data: subDistricts,
   };
   return next();
 };

@@ -26,5 +26,14 @@ routes.get('/locations/districts',
   wrap(AddressController.getDistricts),
   apiResponse());
 
+/**
+ * GET /locations/sub-districts
+ * View list of Sub districts
+ */
+routes.get('/locations/sub-districts',
+  cache(config.cacheExp),
+  wrap(AddressController.getSubDistricts),
+  apiResponse());
+
 export default routes;
 

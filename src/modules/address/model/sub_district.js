@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import core from '../../core';
 import './address';
 
@@ -50,16 +51,17 @@ class SubdistrictModel extends bookshelf.Model {
    * @param {Object} condition
    */
   static async get(condition = null) {
+    condition = _.omitBy(condition, _.isNil);
     return await this.where(condition).fetchAll();
   }
 }
 
 SubdistrictModel.prototype.serialize = function () {
   return {
-    id: this.attributes.id_kecamatan,
+    id: parseInt(this.attributes.id_kecamatan, 10),
     name: this.attributes.nama_kecamatan,
   };
 };
 
-// eslint-disable-next-line import/prefer-default-export
+export const SubDistrict = SubdistrictModel;
 export default bookshelf.model('Subdistrict', SubdistrictModel);
