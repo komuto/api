@@ -33,11 +33,13 @@ export function requestUtilsMiddleware() {
 export function apiResponse() {
   return (req, res) => {
     const code = res.statusCode;
-    const { status = true, message = 'Success', data = {} } = req.resData || {};
+    const { status, message, data } = req.resData;
+    const { status, message, data, meta } = req.resData;
     return res.json({
       code,
       status,
       message,
+      meta,
       data,
     });
   };
