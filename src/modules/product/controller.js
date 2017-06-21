@@ -17,14 +17,15 @@ const getPrice = (price) => {
 ProductController.index = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const price = getPrice(req.query.price);
+  const price = req.query.price ? getPrice(req.query.price) : null;
   const params = {
     page,
     limit,
     price,
-    condition: { id_kategoriproduk: req.query.category_id },
+    where: { id_kategoriproduk: req.query.category_id },
     query: req.query.q,
     sort: req.query.sort,
+    condition: req.query.condition,
   };
   const products = await Product.get(params);
 

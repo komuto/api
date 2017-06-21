@@ -5,6 +5,10 @@ constraints.list = {
     presence: false,
     inclusion: ['newest', 'cheapest', 'expensive', 'best-selling'],
   },
+  condition: {
+    presence: false,
+    inclusion: ['new', 'used'],
+  },
 };
 
 constraints.search = {

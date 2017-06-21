@@ -32,11 +32,11 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
-   * Get products by condition
+   * Get products
    */
   static async get(params) {
-    const { page, limit, query, price } = params;
-    let { condition, sort } = params;
+    const { page, limit, query, price, condition } = params;
+    let { where, sort } = params;
 
     switch (sort) {
       case 'newest':
@@ -56,13 +56,18 @@ class ProductModel extends bookshelf.Model {
         break;
     }
 
-    condition = _.omitBy(condition, _.isNil);
-    const products = await this.where(condition)
+    where = _.omitBy(where, _.isNil);
+    if (condition) {
+      where.jenis_produk = condition === 'new' ? 1 : 0;
+    }
+    const products = await this.where(where)
       .query((qb) => {
         if (query) {
           qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
         }
-        qb.whereBetween('harga_produk', [price.min, price.max]);
+        if (price) {
+          qb.whereBetween('harga_produk', [price.min, price.max]);
+        }
       })
       .orderBy(sort)
       .fetchPage({ page, limit, withRelated: ['store', 'imageProducts'] });
@@ -98,10 +103,11 @@ ProductModel.prototype.serialize = function () {
     name: this.attributes.nama_produk,
     stock: this.attributes.stock_produk,
     weight: this.attributes.berat_produk,
-    type: this.attributes.jenis_produk,
+    type: this.attributes.jenis_produk ? parseInt(this.attributes.jenis_produk, 10) : undefined,
     description: this.attributes.deskripsi_produk,
     price: this.attributes.harga_produk ? parseFloat(this.attributes.harga_produk) : undefined,
-    attrval: this.attributes.attrval_produk,
+    // eslint-disable-next-line max-len
+    attrval: this.attributes.attrval_produk ? parseInt(this.attributes.attrval_produk, 10): undefined,
     status: this.attributes.status_produk ? parseInt(this.attributes.status_produk, 10) : undefined,
     // eslint-disable-next-line max-len
     insurance: this.attributes.asuransi_produk ? parseInt(this.attributes.asuransi_produk, 10) : undefined,
