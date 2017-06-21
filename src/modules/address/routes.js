@@ -1,8 +1,7 @@
 import express from 'express';
-import passport from 'passport';
 import { AddressController } from './controller';
 import core from '../core';
-import { apiResponse } from '../core/middleware';
+import { apiResponse, auth } from '../core/middleware';
 import config from '../../../config';
 
 const routes = express.Router();
@@ -50,9 +49,7 @@ routes.get('/locations/villages',
  * Create address
  */
 routes.post('/users/addresses',
-  passport.authenticate('jwt', {
-    failureRedirect: '/unauthorized',
-  }),
+  auth(),
   wrap(AddressController.createAddress),
   apiResponse());
 
@@ -61,9 +58,7 @@ routes.post('/users/addresses',
  * Change address
  */
 routes.put('/users/addresses',
-  passport.authenticate('jwt', {
-    failureRedirect: '/unauthorized',
-  }),
+  auth(),
   wrap(AddressController.updatePrimaryAddress),
   apiResponse());
 
@@ -72,9 +67,7 @@ routes.put('/users/addresses',
  * Delete address
  */
 routes.delete('/users/addresses/:id',
-  passport.authenticate('jwt', {
-    failureRedirect: '/unauthorized',
-  }),
+  auth(),
   wrap(AddressController.deleteAddress),
   apiResponse());
 
