@@ -26,10 +26,12 @@ class CategoryModel extends bookshelf.Model {
 CategoryModel.prototype.serialize = function () {
   return {
     id: this.attributes.id_kategoriproduk,
+    parent_id: this.attributes.parentid_kategoriproduk,
     icon: this.attributes.iconpath_kategoriproduk,
     name: this.attributes.nama_kategoriproduk,
   };
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export const Category = CategoryModel;
+export default bookshelf.model('Category', CategoryModel);
+
