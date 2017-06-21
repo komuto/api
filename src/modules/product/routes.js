@@ -2,6 +2,7 @@ import express from 'express';
 import { ProductController } from './controller';
 import core from '../core';
 import { apiResponse } from '../core/middleware';
+import { validateSearch } from './middleware';
 
 const routes = express.Router();
 const { wrap } = core.utils;
@@ -12,7 +13,8 @@ const cache = core.cache;
  * View list of products
  */
 routes.get('/products',
-  cache('5 minutes'),
+  // cache('5 minutes'),
+  validateSearch(),
   wrap(ProductController.index),
   apiResponse());
 
