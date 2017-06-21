@@ -1,10 +1,9 @@
 import validate from 'validate.js';
-import constraints from './validation';
 import { BadRequestError } from '../../../common/errors';
 
-export function validateSearch() {
+export function validateParam(constraints) {
   return (req, res, next) => {
-    const hasError = validate(req.query, constraints.search);
+    const hasError = validate(req.query, constraints);
     if (hasError) {
       const err = new BadRequestError('Invalid parameter');
       err.data = hasError;

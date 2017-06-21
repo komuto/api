@@ -1,12 +1,15 @@
 const constraints = {};
 
-/**
- * Login
- */
-constraints.search = {
+constraints.list = {
   sort: {
     presence: false,
     inclusion: ['newest', 'cheapest', 'expensive', 'best-selling'],
+  },
+};
+
+constraints.search = {
+  q: {
+    presence: true,
   },
 };
 

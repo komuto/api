@@ -2,7 +2,8 @@ import express from 'express';
 import { ProductController } from './controller';
 import core from '../core';
 import { apiResponse } from '../core/middleware';
-import { validateSearch } from './middleware';
+import { validateParam } from './middleware';
+import constraints from './validation';
 
 const routes = express.Router();
 const { wrap } = core.utils;
@@ -14,7 +15,7 @@ const cache = core.cache;
  */
 routes.get('/products',
   cache('5 minutes'),
-  validateSearch(),
+  validateParam(constraints.list),
   wrap(ProductController.index),
   apiResponse());
 
@@ -23,6 +24,7 @@ routes.get('/products',
  * View list of search result
  */
 routes.get('/products/search',
+  validateParam(constraints.search),
   wrap(ProductController.search),
   apiResponse());
 
