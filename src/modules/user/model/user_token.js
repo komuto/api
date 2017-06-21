@@ -54,9 +54,15 @@ class UserTokenModel extends bookshelf.Model {
 
   /**
    * @param {string} token
+   * @param {string} token type
+   * @return {number} user id
    */
-  static async getId(tokenValue) {
-    const token = await this.where({ value_tokenuser: tokenValue }).fetch();
+  static async getId(tokenValue, type) {
+    const token = await this.where({
+      value_tokenuser: tokenValue,
+      type_tokenuser: type,
+      status_tokenuser: TokenStatus.ACTIVE,
+    }).fetch();
     if (!token) {
       throw new BadRequestError('Token not found');
     }

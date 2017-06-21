@@ -11,12 +11,12 @@ export default { UserEmail };
  * @param {string} email
  * @return {json} mail
  */
-UserEmail.buildForgotPassword = (email) => {
+UserEmail.buildForgotPassword = (email, token) => {
   const fromEmail = new helper.Email(config.emailFrom);
   const toEmail = new helper.Email(email);
   const subject = 'Reset Password Link';
   const content = new helper.Content('text/html', 'Click the link below to reset your password:<br />' +
-  `${config.frontendKomuto}forgot_password`);
+  `${config.frontendKomuto}/password-new?token=${token}`);
   const mail = new helper.Mail(fromEmail, subject, toEmail, content);
   return mail.toJSON();
 };
