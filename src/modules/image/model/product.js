@@ -27,7 +27,7 @@ ProductModel.prototype.serialize = function () {
     product_id: this.attributes.id_produk,
     file: this.attributes.file_gambarproduk,
     created_at: moment(this.attributes.created_gambarproduk).unix(),
-    updated_at: moment(this.attributes.updated_gambarproduk).unix()
+    updated_at: moment(this.attributes.updated_gambarproduk).unix(),
   };
 };
 
