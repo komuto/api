@@ -5,7 +5,7 @@ const constraints = {};
  */
 constraints.search = {
   sort: {
-    presence: true,
+    presence: false,
     inclusion: ['newest', 'cheapest', 'expensive', 'best-selling'],
   },
 };
