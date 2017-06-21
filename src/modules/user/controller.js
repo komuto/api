@@ -107,11 +107,13 @@ UserController.createUser = async (req, res, next) => {
   if (user) {
     throw new BadRequestError('Email sudah terdaftar.');
   }
+  const password = req.body.password;
   req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
   req.body.password = User.hashPasswordSync(req.body.password);
   user = await User.create(User.matchDBColumn(req.body));
   const token = await UserToken.generateToken(user.id, TokenType.EMAIL_ACTIVATION);
   UserEmail.send(UserEmail.buildActivation(user.email, token));
+  req.body.password = password;
   return next();
 };
 
