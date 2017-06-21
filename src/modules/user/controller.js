@@ -119,15 +119,10 @@ UserController.createUser = async (req, res, next) => {
  * Get profile
  */
 UserController.getProfile = async (req, res, next) => {
-  let user = await User.getById(req.user.id);
-  user = await user.load(['store']);
-  const store = user.related('store');
+  const user = await User.getProfile(req.user.id);
   req.resData = {
     message: 'User Profile',
-    data: {
-      user,
-      store,
-    },
+    data: user,
   };
   return next();
 };

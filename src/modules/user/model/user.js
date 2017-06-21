@@ -103,6 +103,12 @@ class UserModel extends bookshelf.Model {
     return user ? user.serialize() : user;
   }
 
+  static async getProfile(id) {
+    const user = await this.where('id_users', id).fetch({ withRelated: ['store'] });
+    const store = user.related('store');
+    return { user, store };
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data

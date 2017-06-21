@@ -4,7 +4,7 @@ import './address';
 
 const bookshelf = core.postgres.db;
 
-class SubdistrictModel extends bookshelf.Model {
+class SubDistrictModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
     return 'kecamatan';
@@ -55,12 +55,12 @@ class SubdistrictModel extends bookshelf.Model {
   }
 }
 
-SubdistrictModel.prototype.serialize = function () {
+SubDistrictModel.prototype.serialize = function () {
   return {
     id: parseInt(this.attributes.id_kecamatan, 10),
     name: this.attributes.nama_kecamatan,
   };
 };
 
-export const SubDistrict = bookshelf.model('Subdistrict', SubdistrictModel);
+export const SubDistrict = bookshelf.model('SubDistrict', SubDistrictModel);
 export default { SubDistrict };
