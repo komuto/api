@@ -103,15 +103,15 @@ UserController.updatePassword = async (req, res, next) => {
  * Create user
  */
 UserController.createUser = async (req, res, next) => {
-  const user = await User.getByEmail(req.body.email);
+  let user = await User.getByEmail(req.body.email);
   if (user) {
     throw new BadRequestError('Email sudah terdaftar.');
   }
   req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
   req.body.password = User.hashPasswordSync(req.body.password);
-  await User.create(User.matchDBColumn(req.body));
-  const token = await UserToken.generateToken(req.user.id, TokenType.EMAIL_ACTIVATION);
-  UserEmail.send(UserEmail.buildActivation(req.user.email, token));
+  user = await User.create(User.matchDBColumn(req.body));
+  const token = await UserToken.generateToken(user.id, TokenType.EMAIL_ACTIVATION);
+  UserEmail.send(UserEmail.buildActivation(user.email, token));
   return next();
 };
 
@@ -152,8 +152,17 @@ UserController.checkEmail = async (req, res, next) => {
 };
 
 UserController.activateUser = async (req, res, next) => {
-  const id = await UserToken.getId(req.query.token);
+  const id = await UserToken.getId(req.query.token, TokenType.EMAIL_ACTIVATION);
   await User.activate(id);
+  await UserToken.expire(req.query.token);
+  return next();
+};
+
+/**
+ * Check whether active forgot password token exists
+ */
+UserController.checkToken = async (req, res, next) => {
+  await UserToken.getId(req.query.token, TokenType.FORGOT_PASSWORD);
   await UserToken.expire(req.query.token);
   return next();
 };

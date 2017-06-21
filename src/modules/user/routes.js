@@ -121,6 +121,14 @@ routes.post('/passwords/forgot',
   apiResponse());
 
 /**
+ * GET /password-new?token
+ * Check forgot password token
+ */
+routes.get('/password-new',
+  wrap(UserController.checkToken),
+  apiResponse());
+
+/**
  * POST /accounts/email/check
  * Check whether email already used or not
  */
