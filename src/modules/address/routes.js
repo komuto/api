@@ -1,12 +1,12 @@
 import express from 'express';
 import { AddressController } from './controller';
 import core from '../core';
-import { apiResponse, auth } from '../core/middleware';
 import config from '../../../config';
 
 const routes = express.Router();
 const { wrap } = core.utils;
 const cache = core.cache;
+const { apiResponse, auth } = core.middleware;
 
 /**
  * GET /locations/provinces
@@ -57,9 +57,9 @@ routes.post('/users/addresses',
  * PUT /users/addresses/id
  * Change address
  */
-routes.put('/users/addresses',
+routes.put('/users/addresses/:id',
   auth(),
-  wrap(AddressController.updatePrimaryAddress),
+  wrap(AddressController.updateAddress),
   apiResponse());
 
 /**

@@ -4,8 +4,8 @@ import { BadRequestError } from '../../../common/errors';
 export const AddressController = {};
 export default { AddressController };
 
-AddressController.getAddress = async (req, res, next) => {
-  const address = await Address.getFullAddress(req.user.id);
+AddressController.getPrimaryAddress = async (req, res, next) => {
+  const address = await Address.getFullAddress(req.user.id, true);
   req.resData = {
     message: 'Address Information',
     data: address,
@@ -65,22 +65,32 @@ AddressController.createAddress = async (req, res, next) => {
   return next();
 };
 
-AddressController.updatePrimaryAddress = async (req, res, next) => {
-  await Address.update(
-    { id_users: req.user.id, alamat_primary: '1' },
-    Address.matchDBColumn(req.body));
+AddressController.updateAddress = async (req, res, next) => {
+  if (req.body.is_primary !== undefined) {
+    // Switch status when there are other primary address
+    if (req.body.is_primary) {
+      const address = await Address.checkOtherPrimary(req.user.id, req.params.id);
+      if (address) {
+        await Address.update({ id_alamatuser: address.id }, { alamat_primary: '0' });
+      }
+    } else {
+      // Case when changing primary address to non primary
+      // without changing other address to primary
+      const address = Address.checkPrimary(req.user.id, req.params.id);
+      if (address) {
+        throw new BadRequestError('Harus mempunyai alamat primary');
+      }
+    }
+    req.body.is_primary = req.body.is_primary ? '1' : '0';
+  }
+  await Address.update({ id_alamatuser: req.params.id }, Address.matchDBColumn(req.body));
   return next();
 };
 
 AddressController.deleteAddress = async (req, res, next) => {
-  if (req.body.is_primary) {
-    if (await Address.checkPrimary(req.user.id)) {
-      throw new BadRequestError('Email primary sudah terdaftar');
-    }
+  if (await Address.checkPrimary(req.user.id, req.params.id)) {
+    throw new BadRequestError('Harus mempunyai alamat primary');
   }
-  req.body.user_id = req.user.id;
-  req.body.is_primary = req.body.primary ? '1' : '0';
-  req.body.is_sale_address = '0';
-  await Address.create(Address.matchDBColumn(req.body));
+  await Address.delete(req.params.id);
   return next();
 };

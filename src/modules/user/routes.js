@@ -40,7 +40,7 @@ routes.get('/users/balance',
 
 routes.get('/users/address',
   auth(),
-  wrap(AddressController.getAddress),
+  wrap(AddressController.getPrimaryAddress),
   apiResponse());
 
 /**

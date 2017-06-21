@@ -33,8 +33,15 @@ class AddressModel extends bookshelf.Model {
     return this.belongsTo('Village', 'id_kelurahan', 'id_kelurahan');
   }
 
-  static async getFullAddress(id) {
-    const address = await this.where({ id_users: id, alamat_primary: '1' }).fetch({
+  /**
+   * Get Full Address
+   * @param {number} user id
+   * @param {boolean} fetch primary address
+   */
+  static async getFullAddress(id, isPrimary = false) {
+    const query = { id_users: id };
+    if (isPrimary === true) query.alamat_primary = '1';
+    const address = await this.where(query).fetch({
       withRelated: ['province', 'district', 'subdistrict', 'village'],
     });
     if (!address) {
@@ -70,6 +77,14 @@ class AddressModel extends bookshelf.Model {
   }
 
   /**
+   * Delete address
+   * @param {number} address id
+   */
+  static async delete(id) {
+    await this.where('id_alamatuser', id).destroy();
+  }
+
+  /**
    * Get a line item by id
    * @param {Integer} id
    */
@@ -87,15 +102,29 @@ class AddressModel extends bookshelf.Model {
 
   /**
    * Check if primary address already in db
-   * @param {number} id
+   * @param {number} user id
+   * @param {number} OPTIONAL address id
    */
-  static async checkPrimary(idUsers, idAddress) {
-    const query = { id_users: idUsers, alamat_primary: '1' };
+  static async checkPrimary(idUser, idAddress) {
+    const query = { id_users: idUser, alamat_primary: '1' };
     if (idAddress) {
       query.id_alamatuser = idAddress;
     }
     const address = await this.where(query).fetch();
     return address;
+  }
+
+  /**
+   * Check if there are other primary address beside the supplied idAddress
+   * @param {number} user id
+   * @param {number} OPTIONAL address id
+   */
+  static async checkOtherPrimary(idUser, idAddress) {
+    const address = await this.query({
+      whereNot: { id_alamatuser: idAddress },
+      andWhere: { id_users: idUser, alamat_primary: '1' },
+    }).fetch();
+    return address ? address.serialize() : address;
   }
 
   /**
