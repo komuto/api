@@ -1,7 +1,9 @@
 import _ from 'lodash';
 import logger from 'morgan';
+import passport from 'passport';
 import c from '../../constants';
 import config from '../../../config';
+import { AuthorizationError } from '../../../common/errors';
 
 /**
  * Request logger middleware
@@ -41,6 +43,19 @@ export function apiResponse() {
       meta,
       data,
     });
+  };
+}
+
+export function auth() {
+  return (req, res, next) => {
+    passport.authenticate('jwt', (err, user) => {
+      if (!user) {
+        err = new AuthorizationError('unauthorized');
+        return next(err);
+      }
+      req.user = user;
+      return next();
+    })(req, res, next);
   };
 }
 

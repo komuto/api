@@ -1,9 +1,8 @@
 import express from 'express';
-import passport from 'passport';
 import { validateLogin, addToken, userData } from './middleware';
 import { UserController } from './controller';
 import core from '../core';
-import { apiResponse } from '../core/middleware';
+import { apiResponse, auth } from '../core/middleware';
 import { AddressController } from '../address/controller';
 
 const routes = express.Router();
@@ -21,20 +20,6 @@ routes.post('/users/login',
   apiResponse());
 
 /**
- * POST /unauthorized
- * Unauthorized user
- */
-routes.get('/unauthorized',
-  (req, res) => {
-    res.json({
-      status: false,
-      code: 401,
-      message: 'unauthorized',
-      data: {},
-    });
-  });
-
-/**
  * POST /social-login
  * Authenticate user using social media
  */
@@ -49,16 +34,12 @@ routes.post('/users/social-login',
  * GET /users/balance
  */
 routes.get('/users/balance',
-  passport.authenticate('jwt', {
-    failureRedirect: '/unauthorized',
-  }),
+  auth(),
   UserController.getBalance,
   apiResponse());
 
 routes.get('/users/address',
-  passport.authenticate('jwt', {
-    failureRedirect: '/unauthorized',
-  }),
+  auth(),
   wrap(AddressController.getAddress),
   apiResponse());
 
@@ -67,22 +48,8 @@ routes.get('/users/address',
  * View user
  */
 routes.get('/users/profile',
-  passport.authenticate('jwt', {
-    failureRedirect: '/unauthorized',
-  }),
+  auth(),
   wrap(UserController.getProfile),
-  apiResponse());
-
-/**
- * GET /users/:id*?
- * View user
- */
-routes.get('/users/:id*?',
-  passport.authenticate('jwt', {
-    failureRedirect: '/unauthorized',
-  }),
-  wrap(UserController.getOneUser),
-  userData,
   apiResponse());
 
 /**
@@ -98,9 +65,7 @@ routes.post('/users',
  * Update user
  */
 routes.put('/users',
-  passport.authenticate('jwt', {
-    failureRedirect: '/unauthorized',
-  }),
+  auth(),
   wrap(UserController.updateUser),
   apiResponse());
 
