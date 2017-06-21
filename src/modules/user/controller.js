@@ -60,6 +60,7 @@ UserController.getUserSocial = async (req, res, next) => {
       response.gender = (response.gender === 'male') ? 'L' : 'P';
       response.password = User.hashPasswordSync('komuto');
       response.photo = response.picture.data.url;
+      response.status = '1';
       req.user = await User.create(User.matchDBColumn(response));
     }
   }
