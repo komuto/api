@@ -11,7 +11,9 @@ ProductController.index = async (req, res, next) => {
   const page = req.param('page') ? parseInt(req.param('page'), 10) : 1;
   const limit = req.param('limit') ? parseInt(req.param('limit'), 10) : 10;
   const condition = { id_kategoriproduk: req.param('category_id') };
-  const products = await Product.get(page, limit, condition);
+  const query = req.param('q');
+  const sort = req.param('sort');
+  const products = await Product.get(page, limit, condition, query, sort);
   const data = [];
 
   _.forEach(products.models, (product) => {
