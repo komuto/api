@@ -13,6 +13,24 @@ AddressController.getPrimaryAddress = async (req, res, next) => {
   return next();
 };
 
+AddressController.getAddress = async (req, res, next) => {
+  const address = await Address.getFullAddress(req.user.id, false, req.params.id);
+  req.resData = {
+    message: 'Address Information',
+    data: address,
+  };
+  return next();
+};
+
+AddressController.getListAddress = async (req, res, next) => {
+  const addresses = await Address.getFullAddressAll(req.user.id);
+  req.resData = {
+    message: 'Address Information',
+    data: addresses,
+  };
+  return next();
+};
+
 AddressController.getProvinces = async (req, res, next) => {
   const provinces = await Province.get();
   req.resData = {

@@ -36,11 +36,13 @@ class AddressModel extends bookshelf.Model {
   /**
    * Get Full Address
    * @param {number} user id
-   * @param {boolean} fetch primary address
+   * @param {boolean} fetch only primary address
+   * @param {number} address id
    */
-  static async getFullAddress(id, isPrimary = false) {
-    const query = { id_users: id };
+  static async getFullAddress(idUser, isPrimary = false, idAddress) {
+    const query = { id_users: idUser };
     if (isPrimary === true) query.alamat_primary = '1';
+    if (idAddress) query.id_alamatuser = idAddress;
     const address = await this.where(query).fetch({
       withRelated: ['province', 'district', 'subdistrict', 'village'],
     });
@@ -57,6 +59,31 @@ class AddressModel extends bookshelf.Model {
       district,
       subdistrict,
       village };
+  }
+
+  /**
+   * Get All Address
+   * @param {number} user id
+   */
+  static async getFullAddressAll(idUser) {
+    const addresses = await this.where({ id_users: idUser }).fetchAll({
+      withRelated: ['province', 'district', 'subdistrict', 'village'],
+    });
+    if (!addresses) {
+      throw new BadRequestError('No address found');
+    }
+    return addresses.map((address) => {
+      const province = address.related('province');
+      const district = address.related('district');
+      const subdistrict = address.related('subdistrict');
+      const village = address.related('village');
+      return {
+        ...address.serialize(),
+        province,
+        district,
+        subdistrict,
+        village };
+    });
   }
 
   /**
