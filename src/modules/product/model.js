@@ -34,7 +34,10 @@ class ProductModel extends bookshelf.Model {
   /**
    * Get products by condition
    */
-  static async get(page, limit, condition = null, query = null, sort = null) {
+  static async get(params) {
+    const { page, limit, query, price } = params;
+    let { condition, sort } = params;
+
     switch (sort) {
       case 'newest':
         sort = 'date_created_produk';
@@ -59,6 +62,7 @@ class ProductModel extends bookshelf.Model {
         if (query) {
           qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
         }
+        qb.whereBetween('harga_produk', [price.min, price.max]);
       })
       .orderBy(sort)
       .fetchPage({ page, limit, withRelated: ['store', 'imageProducts'] });

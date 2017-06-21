@@ -1,19 +1,32 @@
-import _ from 'lodash';
 import { Product } from './model';
 
 export const ProductController = {};
 export default { ProductController };
 
+const getPrice = (price) => {
+  price = price.split('-');
+  return {
+    min: parseInt(price[0], 10),
+    max: parseInt(price[1], 10),
+  };
+};
+
 /**
  * Get products
  */
 ProductController.index = async (req, res, next) => {
-  const page = req.param('page') ? parseInt(req.param('page'), 10) : 1;
-  const limit = req.param('limit') ? parseInt(req.param('limit'), 10) : 10;
-  const condition = { id_kategoriproduk: req.param('category_id') };
-  const query = req.param('q');
-  const sort = req.param('sort');
-  const products = await Product.get(page, limit, condition, query, sort);
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const price = getPrice(req.query.price);
+  const params = {
+    page,
+    limit,
+    price,
+    condition: { id_kategoriproduk: req.query.category_id },
+    query: req.query.q,
+    sort: req.query.sort,
+  };
+  const products = await Product.get(params);
 
   req.resData = {
     status: true,
@@ -28,7 +41,7 @@ ProductController.index = async (req, res, next) => {
  * Get search result
  */
 ProductController.search = async (req, res, next) => {
-  const results = await Product.search(req.param('q'));
+  const results = await Product.search(req.query.q);
   req.resData = {
     status: true,
     message: 'Products Search Result',
