@@ -56,7 +56,9 @@ class ProductModel extends bookshelf.Model {
     condition = _.omitBy(condition, _.isNil);
     return await this.where(condition)
       .query((qb) => {
-        qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
+        if (query) {
+          qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
+        }
       })
       .orderBy(sort)
       .fetchPage({ page, limit, withRelated: ['store', 'imageProducts'] });
