@@ -14,19 +14,12 @@ ProductController.index = async (req, res, next) => {
   const query = req.param('q');
   const sort = req.param('sort');
   const products = await Product.get(page, limit, condition, query, sort);
-  const data = [];
-
-  _.forEach(products.models, (product) => {
-    const store = product.related('store');
-    const images = product.related('imageProducts');
-    data.push({ product, store, images });
-  });
 
   req.resData = {
     status: true,
     message: 'Products Data',
     meta: { page, limit },
-    data,
+    data: products,
   };
   return next();
 };
