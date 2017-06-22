@@ -37,11 +37,18 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to Category
+   */
+  category() {
+    return this.belongsTo('Category', 'id_kategoriproduk', 'id_kategoriproduk');
+  }
+
+  /**
    * Get products
    */
   static async get(params) {
     const { page, limit, query, price, condition } = params;
-    let { where, sort, other } = params;
+    let { where, sort, other, brands } = params;
 
     switch (sort) {
       case 'newest':
@@ -86,6 +93,10 @@ class ProductModel extends bookshelf.Model {
         if (other && other.discount) {
           qb.where('disc_produk', '>', 0);
         }
+        if (brands) {
+          brands = brands.split(',');
+          qb.whereIn('identifier_brand', brands);
+        }
       })
       .orderBy(sort)
       .fetchPage({
@@ -94,9 +105,13 @@ class ProductModel extends bookshelf.Model {
         withRelated: [
           {
             store: (qb) => {
-              qb.whereRaw('mulai_tanggal IS NOT NULL');
+              if (other && other.verified) {
+                qb.whereRaw('mulai_tanggal IS NOT NULL');
+              }
             },
-          }, 'imageProducts'],
+          },
+          'imageProducts',
+        ],
       });
 
     return products.map((product) => {

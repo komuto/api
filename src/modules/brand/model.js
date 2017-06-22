@@ -14,6 +14,13 @@ class BrandModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to Category
+   */
+  category() {
+    return this.belongsTo('Category', 'id_kategoriproduk', 'id_kategoriproduk');
+  }
+
+  /**
    * Get brands by condition
    * @param {Object} condition
    */
@@ -31,5 +38,5 @@ BrandModel.prototype.serialize = function () {
   };
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export const Brand = BrandModel;
+export default bookshelf.model('Brand', BrandModel);

@@ -14,6 +14,20 @@ class CategoryModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to Product
+   */
+  product() {
+    return this.belongsTo('Product', 'id_kategoriproduk', 'id_kategoriproduk');
+  }
+
+  /**
+   * Add relation to Brand
+   */
+  brands() {
+    return this.hasMany('Brand', 'id_kategoriproduk', 'id_kategoriproduk');
+  }
+
+  /**
    * Get categories by condition
    * @param {Object} condition
    */

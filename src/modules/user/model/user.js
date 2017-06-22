@@ -180,7 +180,7 @@ UserModel.prototype.serialize = function () {
     photo: this.attributes.pathfoto_users ? this.attributes.pathfoto_users : null,
     phone_number: this.attributes.nohp_users ? this.attributes.nohp_users : null,
     gender: this.attributes.jeniskelamin_users === 'L' ? 'male' : 'female',
-    status: this.attributes.status_users,
+    status: parseInt(this.attributes.status_users, 10),
     mother_name: this.attributes.ibukandung_users ? this.attributes.ibukandung_users : null,
     auth_key: this.attributes.auth_key ? this.attributes.auth_key : null,
     saldo_wallet: this.attributes.saldo_wallet ? this.attributes.saldo_wallet : 0,
