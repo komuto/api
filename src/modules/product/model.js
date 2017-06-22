@@ -48,7 +48,7 @@ class ProductModel extends bookshelf.Model {
    */
   static async get(params) {
     const { page, limit, query, price, condition } = params;
-    let { where, sort, other } = params;
+    let { where, sort, other, brands } = params;
 
     switch (sort) {
       case 'newest':
@@ -93,6 +93,10 @@ class ProductModel extends bookshelf.Model {
         if (other && other.discount) {
           qb.where('disc_produk', '>', 0);
         }
+        if (brands) {
+          brands = brands.split(',');
+          qb.whereIn('identifier_brand', brands);
+        }
       })
       .orderBy(sort)
       .fetchPage({
@@ -107,8 +111,6 @@ class ProductModel extends bookshelf.Model {
             },
           },
           'imageProducts',
-          'category',
-          'category.brands',
         ],
       });
 
