@@ -37,6 +37,13 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to Category
+   */
+  category() {
+    return this.belongsTo('Category', 'id_kategoriproduk', 'id_kategoriproduk');
+  }
+
+  /**
    * Get products
    */
   static async get(params) {
@@ -94,9 +101,15 @@ class ProductModel extends bookshelf.Model {
         withRelated: [
           {
             store: (qb) => {
-              qb.whereRaw('mulai_tanggal IS NOT NULL');
+              if (other && other.verified) {
+                qb.whereRaw('mulai_tanggal IS NOT NULL');
+              }
             },
-          }, 'imageProducts'],
+          },
+          'imageProducts',
+          'category',
+          'category.brands',
+        ],
       });
 
     return products.map((product) => {
