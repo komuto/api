@@ -7,6 +7,12 @@ import helmet from 'helmet';
 import jsend from 'jsend';
 import statusMonitor from 'express-status-monitor';
 import responseTime from 'response-time';
+import moment from 'moment';
+import ch from 'chalk';
+import morgan from 'morgan';
+import winston from 'winston';
+// eslint-disable-next-line no-unused-vars
+import winstonDaily from 'winston-daily-rotate-file';
 import config from '../config';
 import c from './constants';
 import core from './modules/core';
@@ -16,9 +22,33 @@ import expedition from './modules/expedition';
 import address from './modules/address';
 import brand from './modules/brand';
 import product from './modules/product';
+// eslint-disable-next-line no-unused-vars
 import image from './modules/image';
 
 const app = express();
+
+const logger = new (winston.Logger)({
+  transports: [
+    new winston.transports.DailyRotateFile({
+      filename: './../logs/log',
+      datePattern: 'yyyy-MM-dd.',
+      prepend: true,
+      level: 'debug',
+      timestamp: () => moment().format('YYYY-MM-DD HH:mm:ss'),
+      json: false,
+    }),
+  ],
+});
+
+logger.stream = {
+  write: (message) => {
+    logger.info(message);
+  },
+};
+
+morgan.token('body', req => `\n${JSON.stringify(req.body, null, 2)}`);
+
+app.use(morgan(`${ch.red(':method')} ${ch.green(':url')} ${ch.yellow(':response-time ms')} :body`, { stream: logger.stream }));
 
 process.on('unhandledRejection', (err) => {
   // eslint-disable-next-line no-console
