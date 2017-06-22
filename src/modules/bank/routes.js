@@ -1,29 +1,25 @@
 import express from 'express';
-import { CategoryController } from './controller';
+import { BankController } from './controller';
 import core from '../core';
-import { apiResponse } from '../core/middleware';
-import config from '../../../config';
 
 const routes = express.Router();
 const { wrap } = core.utils;
-const cache = core.cache;
+const { apiResponse } = core.middleware;
 
 /**
- * GET /categories
- * View list of categories
+ * GET /banks
+ * View list of banks
  */
-routes.get('/categories',
-  cache(config.cacheExp),
-  wrap(CategoryController.getCategories),
+routes.get('/banks',
+  wrap(BankController.getAll),
   apiResponse());
 
 /**
- * GET /categories/:id/sub-categories
- * View list of sub categories
+ * GET /banks/:id
+ * View bank detail
  */
-routes.get('/categories/:id/sub-categories',
-  cache(config.cacheExp),
-  wrap(CategoryController.getCategories),
+routes.get('/banks/:id',
+  wrap(BankController.getBank),
   apiResponse());
 
 export default routes;
