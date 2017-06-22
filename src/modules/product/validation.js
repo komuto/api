@@ -5,6 +5,9 @@ constraints.list = {
     presence: false,
     inclusion: ['newest', 'cheapest', 'expensive', 'best-selling'],
   },
+  price: {
+    presence: false,
+  },
   condition: {
     presence: false,
     inclusion: ['new', 'used'],
