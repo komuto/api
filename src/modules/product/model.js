@@ -6,6 +6,11 @@ const bookshelf = core.postgres.db;
 
 bookshelf.plugin('pagination');
 
+export const ProductType = {
+  USED: 0,
+  NEW: 1,
+};
+
 class ProductModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -58,7 +63,7 @@ class ProductModel extends bookshelf.Model {
 
     where = _.omitBy(where, _.isNil);
     if (condition) {
-      where.jenis_produk = condition === 'new' ? 1 : 0;
+      _.assign(where, { jenis_produk: condition === 'new' ? ProductType.NEW : ProductType.USED });
     }
     const products = await this.where(where)
       .query((qb) => {
