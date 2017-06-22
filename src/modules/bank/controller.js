@@ -1,18 +1,27 @@
-import { Category } from './model';
+import Bank from './model';
 
-export const CategoryController = {};
-export default { CategoryController };
+export const BankController = {};
+export default { BankController };
 
 /**
- * Get categories
+ * Get all banks
  */
-CategoryController.getCategories = async (req, res, next) => {
-  const id = typeof req.params.id !== 'undefined' ? req.params.id : 0;
-  const categories = await Category.get({ parentid_kategoriproduk: id });
+BankController.getAll = async (req, res, next) => {
+  const banks = await Bank.getAll();
   req.resData = {
     status: true,
-    message: 'Categories Data',
-    data: categories,
+    message: 'Master Bank Data',
+    data: banks,
   };
   return next();
 };
+
+BankController.getBank = async (req, res, next) => {
+  const bank = await Bank.getById(req.params.id);
+  req.resData = {
+    status: true,
+    message: 'Master Bank Data',
+    data: bank,
+  };
+  return next();
+}

@@ -1,37 +1,46 @@
+import moment from 'moment';
 import _ from 'lodash';
 import core from '../core';
+import { BadRequestError } from '../../../common/errors';
 
 const bookshelf = core.postgres.db;
 
-class CategoryModel extends bookshelf.Model {
+class BankModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
-    return 'kategori_produk';
+    return 'master_bank';
   }
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
-    return 'id_kategoriproduk';
+    return 'id_masterbank';
   }
 
   /**
-   * Get categories by condition
-   * @param {Object} condition
+   * Get all banks
    */
-  static async get(condition = null) {
-    condition = _.omitBy(condition, _.isNil);
-    return await this.where(condition).fetchAll();
+  static async getAll() {
+    const banks = await this.where({}).fetchAll();
+    if (!banks) throw new BadRequestError('No banks found');
+    return _.sortBy(banks.serialize(), ['id']);
+  }
+
+  static async getById(id) {
+    const bank = await this.where({ id_masterbank: id }).fetch();
+    if (!bank) throw new BadRequestError('No bank found');
+    return bank;
   }
 }
 
-CategoryModel.prototype.serialize = function () {
+BankModel.prototype.serialize = function () {
   return {
-    id: this.attributes.id_kategoriproduk,
-    parent_id: this.attributes.parentid_kategoriproduk,
-    icon: this.attributes.iconpath_kategoriproduk,
-    name: this.attributes.nama_kategoriproduk,
+    id: this.attributes.id_masterbank,
+    name: this.attributes.nama_masterbank,
+    code: this.attributes.kode_masterbank,
+    status: this.attributes.status_masterbank,
+    status_at: moment(this.attributes.tglstatus_masterbank).unix(),
+    logo: this.attributes.logo_masterbank,
   };
 };
 
-export const Category = CategoryModel;
-export default bookshelf.model('Category', CategoryModel);
+export default bookshelf.model('Bank', BankModel);
 

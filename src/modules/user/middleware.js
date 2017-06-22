@@ -49,7 +49,8 @@ export function validateLogin({ social = false } = {}) {
 
 export function validateRegistration() {
   return (req, res, next) => {
-    const hasError = validate(req.boyd, constraints.registration, { format: 'flat' });
+    console.log(req.body);
+    const hasError = validate(req.body, constraints.registration, { format: 'flat' });
     if (hasError) {
       return next(new BadRequestError(hasError));
     }
@@ -59,7 +60,7 @@ export function validateRegistration() {
 
 export function validateUpdate() {
   return (req, res, next) => {
-    const hasError = validate(req.boyd, constraints.update, { format: 'flat' });
+    const hasError = validate(req.body, constraints.update, { format: 'flat' });
     if (hasError) {
       return next(new BadRequestError(hasError));
     }

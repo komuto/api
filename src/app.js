@@ -22,6 +22,7 @@ import expedition from './modules/expedition';
 import address from './modules/address';
 import brand from './modules/brand';
 import product from './modules/product';
+import bank from './modules/bank';
 // eslint-disable-next-line no-unused-vars
 import image from './modules/image';
 
@@ -93,6 +94,7 @@ app.use(expedition.routes);
 app.use(address.routes);
 app.use(brand.routes);
 app.use(product.routes);
+app.use(bank.routes);
 
 app.use((req, res, next) => {
   const err = new Error('Path Not Found');
