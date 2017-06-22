@@ -18,6 +18,9 @@ constraints.list = {
   brands: {
     presence: false,
   },
+  services: {
+    presence: false,
+  },
 };
 
 constraints.search = {

@@ -44,11 +44,19 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to ExpeditionService
+   */
+  expeditionServices() {
+    return this.belongsToMany('ExpeditionService', 'detil_ekspedisiproduk', 'id_produk', 'id_ekspedisiservice');
+  }
+
+  /**
    * Get products
    */
   static async get(params) {
     const { page, limit, query, price, condition } = params;
-    let { where, sort, other, brands } = params;
+    let { where, sort, other, brands, services } = params;
+    let relatedServices = null;
 
     switch (sort) {
       case 'newest':
@@ -82,6 +90,14 @@ class ProductModel extends bookshelf.Model {
         other[val] = true;
       });
     }
+    if (services) {
+      services = services.split(',');
+      relatedServices = {
+        expeditionServices: (qb) => {
+          qb.whereIn('detil_ekspedisiproduk.id_ekspedisiservice', services);
+        },
+      };
+    }
     const products = await this.where(where)
       .query((qb) => {
         if (query) {
@@ -103,6 +119,7 @@ class ProductModel extends bookshelf.Model {
         page,
         limit,
         withRelated: [
+          'imageProducts',
           {
             store: (qb) => {
               if (other && other.verified) {
@@ -110,7 +127,7 @@ class ProductModel extends bookshelf.Model {
               }
             },
           },
-          'imageProducts',
+          relatedServices,
         ],
       });
 

@@ -15,6 +15,13 @@ class ServiceModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to Products
+   */
+  products() {
+    return this.belongsToMany('Product', 'detil_ekspedisiproduk', 'id_ekspedisiservice', 'id_produk');
+  }
+
+  /**
    * Get expeditions by condition
    * @param {Object} condition
    */
@@ -36,5 +43,5 @@ ServiceModel.prototype.serialize = function () {
   };
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export const ExpeditionService = ServiceModel;
+export default bookshelf.model('ExpeditionService', ServiceModel);

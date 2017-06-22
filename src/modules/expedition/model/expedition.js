@@ -28,13 +28,13 @@ ExpeditionModel.prototype.serialize = function () {
   return {
     id: this.attributes.id_ekspedisi,
     name: this.attributes.nama_ekspedisi,
-    status: parseInt(this.attributes.status_ekspedisi, 10),
     method: this.attributes.method_ekspedisi,
-    status_at: moment(this.attributes.tglstatus_ekspedisi).unix(),
     logo: this.attributes.logo_path,
     insurance_fee: parseFloat(this.attributes.asurasi_fee),
+    status: parseInt(this.attributes.status_ekspedisi, 10),
+    status_at: moment(this.attributes.tglstatus_ekspedisi).unix(),
   };
 };
 
-// eslint-disable-next-line import/prefer-default-export
 export const Expedition = ExpeditionModel;
+export default bookshelf.model('Expedition', ExpeditionModel);
