@@ -3,23 +3,52 @@ const constraints = {};
 constraints.list = {
   sort: {
     presence: false,
-    inclusion: ['newest', 'cheapest', 'expensive', 'best-selling'],
+    inclusion: {
+      within: ['newest', 'cheapest', 'expensive', 'best-selling'],
+      message: 'accept only `newest`, `cheapest`, `expensive`, or `best-selling` value',
+    },
   },
   price: {
     presence: false,
+    format: {
+      pattern: /^[1-9][\d]+-[1-9][\d]+/,
+      message: 'only number with one `-` symbol between number. First char can\'t be 0. e.g. `500-1000`',
+    },
   },
   condition: {
     presence: false,
-    inclusion: ['new', 'used'],
+    inclusion: {
+      within: ['new', 'used'],
+      message: 'accept only `new` or `used` value',
+    },
   },
   other: {
     presence: false,
+    format: {
+      pattern: /^((discount|verified|wholesaler)+,)*(discount|verified|wholesaler)+$/,
+      message: 'accept only `discount`, `verified`, and `wholesaler` value. Separated by comma',
+    },
   },
   brands: {
     presence: false,
+    format: {
+      pattern: /^([\d]+,)*[\d]+$/,
+      message: 'accept only number separated by comma',
+    },
   },
   services: {
     presence: false,
+    format: {
+      pattern: /^([\d]+,)*[\d]+$/,
+      message: 'accept only number separated by comma',
+    },
+  },
+  address: {
+    presence: false,
+    format: {
+      pattern: /^[\d]+.[\d]+/,
+      message: 'accept only two number separated by period. e.g `1.2` (province_id.district_id)',
+    },
   },
 };
 
