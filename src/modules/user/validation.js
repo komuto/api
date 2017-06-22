@@ -6,6 +6,7 @@ const constraints = {};
 constraints.login = {
   email: {
     presence: true,
+    email: { message: 'is not a valid email' },
   },
   password: {
     presence: true,

@@ -39,9 +39,9 @@ export function auth(roles, failedCb) {
  */
 export function validateLogin({ social = false } = {}) {
   return (req, res, next) => {
-    const hasError = validate(req.body, !social ? constraints.login : constraints.socialLogin);
+    const hasError = validate(req.body, !social ? constraints.login : constraints.socialLogin, { format: 'flat' });
     if (hasError) {
-      return next(hasError);
+      return next(new BadRequestError(hasError));
     }
     return next();
   };

@@ -2,6 +2,7 @@ import express from 'express';
 import { AddressController } from './controller';
 import core from '../core';
 import config from '../../../config';
+import { validateCreate, validateUpdate } from './middleware';
 
 const routes = express.Router();
 const { wrap } = core.utils;
@@ -50,6 +51,7 @@ routes.get('/locations/villages',
  */
 routes.post('/users/addresses',
   auth(),
+  validateCreate(),
   wrap(AddressController.createAddress),
   apiResponse());
 
@@ -59,6 +61,7 @@ routes.post('/users/addresses',
  */
 routes.put('/users/addresses/:id',
   auth(),
+  validateUpdate(),
   wrap(AddressController.updateAddress),
   apiResponse());
 

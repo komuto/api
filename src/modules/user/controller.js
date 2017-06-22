@@ -160,8 +160,19 @@ UserController.activateUser = async (req, res, next) => {
  * Check whether active forgot password token exists
  */
 UserController.checkToken = async (req, res, next) => {
-  await UserToken.getId(req.query.token, TokenType.FORGOT_PASSWORD);
-  await UserToken.expire(req.query.token);
+  const token = req.query.token || req.body.token;
+  req.id = await UserToken.getId(token, TokenType.FORGOT_PASSWORD);
+  req.token = token;
+  return next();
+};
+
+/**
+ * Reset password
+ */
+UserController.resetPassword = async (req, res, next) => {
+  const password = User.hashPasswordSync(req.body.password)
+  await User.update({ id_users: req.id }, { password_users: password });
+  await UserToken.expire(req.token);
   return next();
 };
 

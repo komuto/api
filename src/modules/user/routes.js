@@ -2,10 +2,10 @@ import express from 'express';
 import { validateLogin, addToken, userData } from './middleware';
 import { UserController } from './controller';
 import core from '../core';
-import { apiResponse, auth } from '../core/middleware';
 import { AddressController } from '../address/controller';
 
 const routes = express.Router();
+const { apiResponse, auth, checkContentType } = core.middleware;
 const { wrap } = core.utils;
 
 /**
@@ -95,15 +95,25 @@ routes.put('/users/password',
  * Generate OTP sent through email
  */
 routes.post('/passwords/forgot',
+  checkContentType(),
   wrap(UserController.forgotPassword),
   apiResponse());
 
 /**
- * GET /password-new?token
+ * GET /passwords/new?token
  * Check forgot password token
  */
-routes.get('/password-new',
+routes.get('/passwords/new',
   wrap(UserController.checkToken),
+  apiResponse());
+
+/**
+ * PUT /passwords/new
+ * Update new password
+ */
+routes.put('/passwords/new',
+  wrap(UserController.checkToken),
+  wrap(UserController.resetPassword),
   apiResponse());
 
 /**

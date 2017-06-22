@@ -3,7 +3,7 @@ import logger from 'morgan';
 import passport from 'passport';
 import c from '../../constants';
 import config from '../../../config';
-import { AuthorizationError } from '../../../common/errors';
+import { AuthorizationError, BadRequestError } from '../../../common/errors';
 
 /**
  * Request logger middleware
@@ -31,7 +31,6 @@ export function requestUtilsMiddleware() {
   };
 }
 
-// eslint-disable-next-line no-unused-vars
 export function apiResponse() {
   return (req, res) => {
     const code = res.statusCode;
@@ -56,6 +55,16 @@ export function auth() {
       req.user = user;
       return next();
     })(req, res, next);
+  };
+}
+
+export function checkContentType() {
+  return (req, res, next) => {
+    const contype = req.headers['content-type'];
+    if (!contype || contype.indexOf('application/json') !== 0) {
+      return next(new BadRequestError('Invalid format'));
+    }
+    return next();
   };
 }
 
