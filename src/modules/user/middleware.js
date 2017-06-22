@@ -47,6 +47,26 @@ export function validateLogin({ social = false } = {}) {
   };
 }
 
+export function validateRegistration() {
+  return (req, res, next) => {
+    const hasError = validate(req.boyd, constraints.registration, { format: 'flat' });
+    if (hasError) {
+      return next(new BadRequestError(hasError));
+    }
+    return next();
+  };
+}
+
+export function validateUpdate() {
+  return (req, res, next) => {
+    const hasError = validate(req.boyd, constraints.update, { format: 'flat' });
+    if (hasError) {
+      return next(new BadRequestError(hasError));
+    }
+    return next();
+  };
+}
+
 /**
  * Add token to user
  */

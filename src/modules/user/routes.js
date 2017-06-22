@@ -1,5 +1,5 @@
 import express from 'express';
-import { validateLogin, addToken, userData } from './middleware';
+import { validateLogin, addToken, userData, validateRegistration, validateUpdate } from './middleware';
 import { UserController } from './controller';
 import core from '../core';
 import { AddressController } from '../address/controller';
@@ -66,10 +66,11 @@ routes.get('/users/profile',
 
 /**
  * POST /
- * Create user
+ * Register user
  */
 routes.post('/users',
   checkContentType(),
+  validateRegistration(),
   wrap(UserController.createUser),
   UserController.login,
   addToken,
@@ -82,6 +83,7 @@ routes.post('/users',
  */
 routes.put('/users',
   checkContentType(),
+  validateUpdate(),
   auth(),
   wrap(UserController.updateUser),
   apiResponse());
@@ -97,7 +99,7 @@ routes.put('/users/password',
 
 /**
  * POST /passwords/forgot
- * Generate OTP sent through email
+ * Generate reset link sent through email
  */
 routes.post('/passwords/forgot',
   checkContentType(),
