@@ -25,4 +25,16 @@ constraints.socialLogin = {
   },
 };
 
+constraints.registration = {
+  name: { presence: true },
+  email: {
+    presence: true,
+    email: { message: 'is not a valid email' },
+  },
+  password: { presence: true },
+  gender: { presence: true },
+  phone_number: { presence: true },
+};
+
+
 export default constraints;
