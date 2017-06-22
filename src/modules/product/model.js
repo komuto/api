@@ -68,7 +68,7 @@ class ProductModel extends bookshelf.Model {
       case 'expensive':
         sort = '-harga_produk';
         break;
-      case 'best-selling':
+      case 'selling':
         sort = '-count_sold';
         break;
       default:

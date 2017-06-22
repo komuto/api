@@ -4,8 +4,8 @@ constraints.list = {
   sort: {
     presence: false,
     inclusion: {
-      within: ['newest', 'cheapest', 'expensive', 'best-selling'],
-      message: 'accept only `newest`, `cheapest`, `expensive`, or `best-selling` value',
+      within: ['newest', 'cheapest', 'expensive', 'selling'],
+      message: 'accept only `newest`, `cheapest`, `expensive`, or `selling` value',
     },
   },
   price: {
