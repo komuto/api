@@ -14,14 +14,14 @@ class StoreModel extends bookshelf.Model {
   }
 
   /**
-   * Add relation to user
+   * Add relation to User
    */
   user() {
-    return this.belongsTo('User');
+    return this.belongsTo('User', 'id_users', 'id_users');
   }
 
   /**
-   * Add relation to product
+   * Add relation to Product
    */
   products() {
     return this.hasMany('Product');
@@ -31,6 +31,7 @@ class StoreModel extends bookshelf.Model {
 StoreModel.prototype.serialize = function () {
   return {
     id: this.attributes.id_toko,
+    user_id: this.attributes.id_users,
     name: this.attributes.nama_toko,
     slogan: this.attributes.slogan_toko,
     description: this.attributes.deskripsi_toko,

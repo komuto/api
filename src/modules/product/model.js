@@ -120,6 +120,7 @@ class ProductModel extends bookshelf.Model {
         limit,
         withRelated: [
           'imageProducts',
+          'store.user',
           {
             store: (qb) => {
               if (other && other.verified) {
@@ -134,10 +135,13 @@ class ProductModel extends bookshelf.Model {
     return products.map((product) => {
       const store = product.related('store');
       const images = product.related('imageProducts');
+      const user = product.related('store.user');
+      console.log(user);
       return {
         product,
         store,
         images,
+        user,
       };
     });
   }

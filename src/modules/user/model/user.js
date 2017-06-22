@@ -35,8 +35,18 @@ class UserModel extends bookshelf.Model {
     return 'id_users';
   }
 
+  /**
+   * Add relation to Store
+   */
   store() {
     return this.hasOne('Store', 'id_users', 'id_users');
+  }
+
+  /**
+   * Add relation to Address
+   */
+  addresses() {
+    return this.hasMany('Address', 'id_users', 'id_users');
   }
 
   /**

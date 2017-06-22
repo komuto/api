@@ -17,6 +17,13 @@ class AddressModel extends bookshelf.Model {
     return 'id_alamatuser';
   }
 
+  /**
+   * Add relation to User
+   */
+  user() {
+    return this.belongsTo('User', 'id_users', 'id_users');
+  }
+
   province() {
     return this.belongsTo('Province', 'id_provinsi', 'id_provinsi');
   }
