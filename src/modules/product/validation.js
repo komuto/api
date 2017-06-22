@@ -9,6 +9,9 @@ constraints.list = {
     presence: false,
     inclusion: ['new', 'used'],
   },
+  other: {
+    presence: false,
+  },
 };
 
 constraints.search = {

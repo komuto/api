@@ -41,7 +41,7 @@ class ProductModel extends bookshelf.Model {
    */
   static async get(params) {
     const { page, limit, query, price, condition } = params;
-    let { where, sort } = params;
+    let { where, sort, other } = params;
 
     switch (sort) {
       case 'newest':
@@ -65,6 +65,16 @@ class ProductModel extends bookshelf.Model {
     if (condition) {
       _.assign(where, { jenis_produk: condition === 'new' ? ProductType.NEW : ProductType.USED });
     }
+    if (other) {
+      const otherArr = other.split(',');
+      other = {};
+      _.map(otherArr, (val) => {
+        if (val === 'wholesaler') {
+          _.assign(where, { is_grosir: true });
+        }
+        other[val] = true;
+      });
+    }
     const products = await this.where(where)
       .query((qb) => {
         if (query) {
@@ -73,9 +83,21 @@ class ProductModel extends bookshelf.Model {
         if (price) {
           qb.whereBetween('harga_produk', [price.min, price.max]);
         }
+        if (other && other.discount) {
+          qb.where('disc_produk', '>', 0);
+        }
       })
       .orderBy(sort)
-      .fetchPage({ page, limit, withRelated: ['store', 'imageProducts'] });
+      .fetchPage({
+        page,
+        limit,
+        withRelated: [
+          {
+            store: (qb) => {
+              qb.whereRaw('mulai_tanggal IS NOT NULL');
+            },
+          }, 'imageProducts'],
+      });
 
     return products.map((product) => {
       const store = product.related('store');
@@ -112,7 +134,7 @@ ProductModel.prototype.serialize = function () {
     description: this.attributes.deskripsi_produk,
     price: this.attributes.harga_produk ? parseFloat(this.attributes.harga_produk) : undefined,
     // eslint-disable-next-line max-len
-    attrval: this.attributes.attrval_produk ? parseInt(this.attributes.attrval_produk, 10): undefined,
+    attrval: this.attributes.attrval_produk ? parseInt(this.attributes.attrval_produk, 10) : undefined,
     status: this.attributes.status_produk ? parseInt(this.attributes.status_produk, 10) : undefined,
     // eslint-disable-next-line max-len
     insurance: this.attributes.asuransi_produk ? parseInt(this.attributes.asuransi_produk, 10) : undefined,
