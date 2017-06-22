@@ -68,6 +68,9 @@ routes.get('/users/profile',
  */
 routes.post('/users',
   wrap(UserController.createUser),
+  UserController.login,
+  addToken,
+  userData,
   apiResponse());
 
 /**

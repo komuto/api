@@ -60,6 +60,7 @@ UserController.getUserSocial = async (req, res, next) => {
       response.gender = (response.gender === 'male') ? 'L' : 'P';
       response.password = User.hashPasswordSync('komuto');
       response.photo = response.picture.data.url;
+      response.status = '1';
       req.user = await User.create(User.matchDBColumn(response));
     }
   }
@@ -107,11 +108,13 @@ UserController.createUser = async (req, res, next) => {
   if (user) {
     throw new BadRequestError('Email sudah terdaftar.');
   }
+  const password = req.body.password;
   req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
   req.body.password = User.hashPasswordSync(req.body.password);
   user = await User.create(User.matchDBColumn(req.body));
   const token = await UserToken.generateToken(user.id, TokenType.EMAIL_ACTIVATION);
   UserEmail.send(UserEmail.buildActivation(user.email, token));
+  req.body.password = password;
   return next();
 };
 
@@ -119,15 +122,10 @@ UserController.createUser = async (req, res, next) => {
  * Get profile
  */
 UserController.getProfile = async (req, res, next) => {
-  let user = await User.getById(req.user.id);
-  user = await user.load(['store']);
-  const store = user.related('store');
+  const user = await User.getProfile(req.user.id);
   req.resData = {
     message: 'User Profile',
-    data: {
-      user,
-      store,
-    },
+    data: user,
   };
   return next();
 };

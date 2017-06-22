@@ -13,12 +13,10 @@ export default new LocalStrategy({
     return user.checkPasswordFromApi(password)
       .then((body) => {
         body = JSON.parse(body);
-        if (body.data) {
-          if (_.includes([UserStatus.ACTIVE], user.get('status_users'))) {
-            return done(null, user.toJSON());
-          }
+        if (!body.data) {
+          return done(new BadRequestError('Password salah'), false);
         }
-        return done(new BadRequestError('Password salah'), false);
+        return done(null, user.toJSON());
       });
   });
 });

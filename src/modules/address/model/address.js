@@ -25,8 +25,8 @@ class AddressModel extends bookshelf.Model {
     return this.belongsTo('District', 'id_kotakab', 'id_kotakab');
   }
 
-  subdistrict() {
-    return this.belongsTo('Subdistrict', 'id_kecamatan', 'id_kecamatan');
+  subDistrict() {
+    return this.belongsTo('SubDistrict', 'id_kecamatan', 'id_kecamatan');
   }
 
   village() {
@@ -44,20 +44,20 @@ class AddressModel extends bookshelf.Model {
     if (isPrimary === true) query.alamat_primary = '1';
     if (idAddress) query.id_alamatuser = idAddress;
     const address = await this.where(query).fetch({
-      withRelated: ['province', 'district', 'subdistrict', 'village'],
+      withRelated: ['province', 'district', 'subDistrict', 'village'],
     });
     if (!address) {
       throw new BadRequestError('No address found');
     }
     const province = address.related('province');
     const district = address.related('district');
-    const subdistrict = address.related('subdistrict');
+    const subDistrict = address.related('subDistrict');
     const village = address.related('village');
     return {
       ...address.serialize(),
       province,
       district,
-      subdistrict,
+      subDistrict,
       village };
   }
 
@@ -67,7 +67,7 @@ class AddressModel extends bookshelf.Model {
    */
   static async getFullAddressAll(idUser) {
     const addresses = await this.where({ id_users: idUser }).fetchAll({
-      withRelated: ['province', 'district', 'subdistrict', 'village'],
+      withRelated: ['province', 'district', 'subDistrict', 'village'],
     });
     if (!addresses) {
       throw new BadRequestError('No address found');
@@ -75,13 +75,13 @@ class AddressModel extends bookshelf.Model {
     return addresses.map((address) => {
       const province = address.related('province');
       const district = address.related('district');
-      const subdistrict = address.related('subdistrict');
+      const subDistrict = address.related('subDistrict');
       const village = address.related('village');
       return {
         ...address.serialize(),
         province,
         district,
-        subdistrict,
+        subDistrict,
         village };
     });
   }
