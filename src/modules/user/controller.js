@@ -170,7 +170,7 @@ UserController.checkToken = async (req, res, next) => {
  * Reset password
  */
 UserController.resetPassword = async (req, res, next) => {
-  const password = User.hashPasswordSync(req.body.password)
+  const password = User.hashPasswordSync(req.body.password);
   await User.update({ id_users: req.id }, { password_users: password });
   await UserToken.expire(req.token);
   return next();
