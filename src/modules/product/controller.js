@@ -29,6 +29,7 @@ ProductController.index = async (req, res, next) => {
     other: req.query.other,
     brands: req.query.brands,
     services: req.query.services,
+    address: req.query.address,
   };
   const products = await Product.get(params);
 

@@ -46,8 +46,8 @@ constraints.list = {
   address: {
     presence: false,
     format: {
-      pattern: /^[\d]+.[\d]+/,
-      message: 'accept only two number separated by period. e.g `1.2` (province_id.district_id)',
+      pattern: /^[\d]+/,
+      message: 'accept only number (district_id)',
     },
   },
 };

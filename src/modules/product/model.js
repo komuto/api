@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import core from '../core';
+import { Address } from '../address/model'
 
 const bookshelf = core.postgres.db;
 
@@ -54,7 +55,7 @@ class ProductModel extends bookshelf.Model {
    * Get products
    */
   static async get(params) {
-    const { page, limit, query, price, condition } = params;
+    const { page, limit, query, price, condition, address } = params;
     let { where, sort, other, brands, services } = params;
     let relatedServices = null;
 
@@ -120,7 +121,6 @@ class ProductModel extends bookshelf.Model {
         limit,
         withRelated: [
           'imageProducts',
-          'store.user',
           {
             store: (qb) => {
               if (other && other.verified) {
@@ -132,18 +132,22 @@ class ProductModel extends bookshelf.Model {
         ],
       });
 
-    return products.map((product) => {
+    const results = [];
+    // eslint-disable-next-line no-restricted-syntax
+    for (const product of products.models) {
       const store = product.related('store');
       const images = product.related('imageProducts');
-      const user = product.related('store.user');
-      console.log(user);
-      return {
-        product,
-        store,
-        images,
-        user,
-      };
-    });
+      if (address) {
+        const addressStore = await Address.getStoreAddress(store.toJSON().user_id, address);
+        if (addressStore) {
+          results.push({ product, store, images });
+        }
+      } else {
+        results.push({ product, store, images });
+      }
+    }
+
+    return results;
   }
 
   /**

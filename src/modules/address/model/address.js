@@ -162,6 +162,19 @@ class AddressModel extends bookshelf.Model {
   }
 
   /**
+   * Get store address
+   * @param {number} userId
+   * @param {number} districtId
+   */
+  static async getStoreAddress(userId, districtId) {
+    return await this.where({
+      id_users: userId,
+      id_kotakab: districtId,
+      alamat_originjual: 1,
+    }).fetch();
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData
