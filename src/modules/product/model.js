@@ -53,7 +53,7 @@ class ProductModel extends bookshelf.Model {
    * Get products
    */
   static async get(params) {
-    const { page, limit, query, price, condition, address } = params;
+    const { page, pageSize, query, price, condition, address } = params;
     let { where, sort, other, brands, services } = params;
     let relatedServices = null;
 
@@ -116,7 +116,7 @@ class ProductModel extends bookshelf.Model {
       .orderBy(sort)
       .fetchPage({
         page,
-        limit,
+        pageSize,
         withRelated: [
           'imageProducts',
           {
