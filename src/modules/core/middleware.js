@@ -60,8 +60,9 @@ export function auth() {
 
 export function checkContentType() {
   return (req, res, next) => {
-    const contype = req.headers['content-type'];
-    if (!contype || contype.indexOf('application/json') !== 0) {
+    if (req.method === 'GET') return next();
+    const contentType = req.headers['content-type'];
+    if (!contentType || contentType.indexOf('application/json') !== 0) {
       return next(new BadRequestError('Invalid format'));
     }
     return next();

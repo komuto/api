@@ -84,6 +84,7 @@ app.set('case sensitive routing', true);
 // configure middleware
 app.use(core.middleware.requestLoggerMiddleware());
 app.use(core.middleware.requestUtilsMiddleware());
+app.use(core.middleware.checkContentType());
 
 app.use(core.routes);
 app.use(user.routes);
@@ -105,7 +106,7 @@ app.use((err, req, res, next) => {
   const statusCode = err.httpStatus || 406;
   res.status(statusCode).json({
     status: false,
-    code: err.httpStatus,
+    code: err.httpStatus || 406,
     message: err.message,
     data: err.data || {},
   });

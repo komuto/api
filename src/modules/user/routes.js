@@ -5,7 +5,7 @@ import core from '../core';
 import { AddressController } from '../address/controller';
 
 const routes = express.Router();
-const { apiResponse, auth, checkContentType } = core.middleware;
+const { apiResponse, auth } = core.middleware;
 const { wrap } = core.utils;
 
 /**
@@ -13,7 +13,6 @@ const { wrap } = core.utils;
  * Authenticate user
  */
 routes.post('/users/login',
-  checkContentType(),
   validateLogin(),
   UserController.login,
   addToken,
@@ -25,7 +24,6 @@ routes.post('/users/login',
  * Authenticate user using social media
  */
 routes.post('/users/social-login',
-  checkContentType(),
   validateLogin({ social: true }),
   wrap(UserController.getUserSocial),
   addToken,
@@ -69,7 +67,6 @@ routes.get('/users/profile',
  * Register user
  */
 routes.post('/users',
-  checkContentType(),
   validateRegistration(),
   wrap(UserController.createUser),
   UserController.login,
@@ -82,7 +79,6 @@ routes.post('/users',
  * Update user
  */
 routes.put('/users',
-  checkContentType(),
   validateUpdate(),
   auth(),
   wrap(UserController.updateUser),
@@ -93,7 +89,6 @@ routes.put('/users',
  * Change user password
  */
 routes.put('/users/password',
-  checkContentType(),
   wrap(UserController.updatePassword),
   apiResponse());
 
@@ -111,7 +106,6 @@ routes.get('/users/wishlist',
  * Generate reset link sent through email
  */
 routes.post('/passwords/forgot',
-  checkContentType(),
   wrap(UserController.forgotPassword),
   apiResponse());
 
@@ -128,7 +122,6 @@ routes.get('/passwords/new',
  * Update new password
  */
 routes.put('/passwords/new',
-  checkContentType(),
   wrap(UserController.checkToken),
   wrap(UserController.resetPassword),
   apiResponse());
@@ -138,7 +131,6 @@ routes.put('/passwords/new',
  * Check whether email already used or not
  */
 routes.post('/accounts/email/check',
-  checkContentType(),
   wrap(UserController.checkEmail),
   apiResponse());
 
