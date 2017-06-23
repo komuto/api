@@ -7,7 +7,7 @@ import { validateCreate, validateUpdate } from './middleware';
 const routes = express.Router();
 const { wrap } = core.utils;
 const cache = core.cache;
-const { apiResponse, auth, checkContentType } = core.middleware;
+const { apiResponse, auth } = core.middleware;
 
 /**
  * GET /locations/provinces
@@ -50,7 +50,6 @@ routes.get('/locations/villages',
  * Create address
  */
 routes.post('/users/addresses',
-  checkContentType(),
   auth(),
   validateCreate(),
   wrap(AddressController.createAddress),
@@ -61,7 +60,6 @@ routes.post('/users/addresses',
  * Change address
  */
 routes.put('/users/addresses/:id',
-  checkContentType(),
   auth(),
   validateUpdate(),
   wrap(AddressController.updateAddress),

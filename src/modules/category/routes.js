@@ -13,7 +13,7 @@ const cache = core.cache;
  * View list of categories
  */
 routes.get('/categories',
-  // cache(config.cacheExp),
+  cache(config.cacheExp),
   wrap(CategoryController.getDetailCategories),
   apiResponse());
 
