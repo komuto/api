@@ -16,3 +16,16 @@ CategoryController.getCategories = async (req, res, next) => {
   };
   return next();
 };
+
+/**
+ * Get detail categories
+ */
+CategoryController.getDetailCategories = async (req, res, next) => {
+  const categories = await Category.getDetail(req.params.id);
+  req.resData = {
+    status: true,
+    message: 'Categories Data',
+    data: categories,
+  };
+  return next();
+};

@@ -35,6 +35,22 @@ class CategoryModel extends bookshelf.Model {
     condition = _.omitBy(condition, _.isNil);
     return await this.where(condition).fetchAll();
   }
+
+  /**
+   * Get detail categories
+   * @param {Object} id
+   */
+  static async getDetail(id) {
+    const results = [];
+
+    const categories = await this.get({ parentid_kategoriproduk: 0 });
+
+    for (const category of categories.models) {
+      results.push(category);
+    }
+
+    return results;
+  }
 }
 
 CategoryModel.prototype.serialize = function () {

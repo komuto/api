@@ -13,8 +13,8 @@ const cache = core.cache;
  * View list of categories
  */
 routes.get('/categories',
-  cache(config.cacheExp),
-  wrap(CategoryController.getCategories),
+  // cache(config.cacheExp),
+  wrap(CategoryController.getDetailCategories),
   apiResponse());
 
 /**
