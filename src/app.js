@@ -78,9 +78,6 @@ app.set('env', config.env);
 app.set('x-powered-by', false);
 app.set('case sensitive routing', true);
 
-// connect to data source
-// core.mysql.connect(config.knex);
-
 // configure middleware
 app.use(core.middleware.requestLoggerMiddleware());
 app.use(core.middleware.requestUtilsMiddleware());
