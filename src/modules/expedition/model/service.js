@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import core from '../../core';
+import './expedition';
 
 const bookshelf = core.postgres.db;
 
@@ -14,11 +15,8 @@ class ServiceModel extends bookshelf.Model {
     return 'id_ekspedisiservice';
   }
 
-  /**
-   * Add relation to Products
-   */
-  products() {
-    return this.belongsToMany('Product', 'detil_ekspedisiproduk', 'id_ekspedisiservice', 'id_produk');
+  expedition() {
+    return this.belongsTo('Expedition', 'id_ekspedisi');
   }
 
   /**
@@ -27,11 +25,19 @@ class ServiceModel extends bookshelf.Model {
    */
   static async get(condition = null) {
     condition = _.omitBy(condition, _.isNil);
-    return await this.where(condition).fetchAll();
+    return await this.where(condition).orderBy('id_ekspedisiservice').fetchAll();
   }
 }
 
-ServiceModel.prototype.serialize = function () {
+ServiceModel.prototype.serialize = function (minimal = true) {
+  if (minimal) {
+    return {
+      id: this.attributes.id_ekspedisiservice,
+      name: this.attributes.nama_ekspedisiservice,
+      description: this.attributes.deskripsi_ekspedisiservice,
+      logo: this.attributes.logo_path,
+    };
+  }
   return {
     id: this.attributes.id_ekspedisiservice,
     expedition_id: this.attributes.id_ekspedisi,
@@ -43,5 +49,5 @@ ServiceModel.prototype.serialize = function () {
   };
 };
 
-export const ExpeditionService = ServiceModel;
-export default bookshelf.model('ExpeditionService', ServiceModel);
+export default bookshelf.model('Service', ServiceModel);
+

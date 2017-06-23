@@ -13,7 +13,7 @@ const cache = core.cache;
  * View list of expeditions
  */
 routes.get('/expeditions',
-  cache(config.cacheExp),
+  // cache(config.cacheExp),
   wrap(ExpeditionController.getExpeditions),
   apiResponse());
 
@@ -22,8 +22,17 @@ routes.get('/expeditions',
  * View list of services
  */
 routes.get('/expeditions/services',
-  cache(config.cacheExp),
-  wrap(ExpeditionController.getExpeditionServices),
+  // cache(config.cacheExp),
+  wrap(ExpeditionController.getListExpeditionServices),
+  apiResponse());
+
+/**
+ * GET /expeditions/services
+ * View expedition service
+ */
+routes.get('/expeditions/:id/services',
+  // cache(config.cacheExp),
+  wrap(ExpeditionController.getExpeditionService),
   apiResponse());
 
 export default routes;

@@ -1,5 +1,4 @@
-import { Expedition } from './model/expedition';
-import { ExpeditionService } from './model/service';
+import { Expedition, ExpeditionService } from './model';
 
 export const ExpeditionController = {};
 export default { ExpeditionController };
@@ -8,9 +7,8 @@ export default { ExpeditionController };
  * Get expeditions
  */
 ExpeditionController.getExpeditions = async (req, res, next) => {
-  const expeditions = await Expedition.get();
+  const expeditions = await Expedition.getServices();
   req.resData = {
-    status: true,
     message: 'Expeditions Data',
     data: expeditions,
   };
@@ -20,10 +18,21 @@ ExpeditionController.getExpeditions = async (req, res, next) => {
 /**
  * Get expedition services
  */
-ExpeditionController.getExpeditionServices = async (req, res, next) => {
+ExpeditionController.getListExpeditionServices = async (req, res, next) => {
   const services = await ExpeditionService.get();
   req.resData = {
-    status: true,
+    message: 'Expedition services Data',
+    data: services.serialize(false),
+  };
+  return next();
+};
+
+/**
+ * Get expedition service
+ */
+ExpeditionController.getExpeditionService = async (req, res, next) => {
+  const services = await ExpeditionService.get({ id_ekspedisi: req.params.id });
+  req.resData = {
     message: 'Expedition services Data',
     data: services,
   };
