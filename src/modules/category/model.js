@@ -1,5 +1,7 @@
 import _ from 'lodash';
 import core from '../core';
+import { BadRequestError } from '../../../common/errors';
+import '../brand/model';
 
 const bookshelf = core.postgres.db;
 
@@ -28,12 +30,34 @@ class CategoryModel extends bookshelf.Model {
   }
 
   /**
+   * Relation to subcategory
+   */
+  subcategories() {
+    return this.hasMany('Category', 'parentid_kategoriproduk', 'id_kategoriproduk');
+  }
+
+  /**
    * Get categories by condition
    * @param {Object} condition
    */
   static async get(condition = null) {
     condition = _.omitBy(condition, _.isNil);
     return await this.where(condition).fetchAll();
+  }
+
+  /**
+   * Get categories and subcategories
+   */
+  static async getFullCategories() {
+    const categories = await this.where({}).fetchAll({ withRelated: ['subcategories'] });
+    if (!categories) throw new BadRequestError('No category found');
+    return categories.map((category) => {
+      const subCategories = category.related('subcategories');
+      return {
+        ...category.serialize(),
+        sub_categories: subCategories,
+      };
+    });
   }
 }
 
@@ -46,6 +70,5 @@ CategoryModel.prototype.serialize = function () {
   };
 };
 
-export const Category = CategoryModel;
 export default bookshelf.model('Category', CategoryModel);
 

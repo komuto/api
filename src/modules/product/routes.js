@@ -1,12 +1,12 @@
 import express from 'express';
 import { ProductController } from './controller';
 import core from '../core';
-import { apiResponse } from '../core/middleware';
 import { validateParam } from './middleware';
 import constraints from './validation';
 
 const routes = express.Router();
 const { wrap } = core.utils;
+const { apiResponse } = core.middleware;
 const cache = core.cache;
 
 /**

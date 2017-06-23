@@ -49,7 +49,6 @@ export function validateLogin({ social = false } = {}) {
 
 export function validateRegistration() {
   return (req, res, next) => {
-    console.log(req.body);
     const hasError = validate(req.body, constraints.registration, { format: 'flat' });
     if (hasError) {
       return next(new BadRequestError(hasError));
