@@ -1,11 +1,9 @@
 import _ from 'lodash';
 import moment from 'moment';
 import core from '../core';
-import { Address } from '../address/model'
+import { Address } from '../address/model';
 
 const bookshelf = core.postgres.db;
-
-bookshelf.plugin('pagination');
 
 export const ProductType = {
   USED: 0,
