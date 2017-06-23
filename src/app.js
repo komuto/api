@@ -11,8 +11,7 @@ import moment from 'moment';
 import ch from 'chalk';
 import morgan from 'morgan';
 import winston from 'winston';
-// eslint-disable-next-line no-unused-vars
-import winstonDaily from 'winston-daily-rotate-file';
+import 'winston-daily-rotate-file';
 import config from '../config';
 import c from './constants';
 import core from './modules/core';
@@ -23,8 +22,7 @@ import address from './modules/address';
 import brand from './modules/brand';
 import product from './modules/product';
 import bank from './modules/bank';
-// eslint-disable-next-line no-unused-vars
-import image from './modules/image';
+import './modules/image';
 
 const app = express();
 

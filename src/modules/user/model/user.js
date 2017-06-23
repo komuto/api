@@ -4,6 +4,7 @@ import rp from 'request-promise';
 import config from '../../../../config';
 import core from '../../core';
 import '../../store/model';
+import { Product } from '../../product/model';
 
 const bookshelf = core.postgres.db;
 
@@ -47,6 +48,13 @@ class UserModel extends bookshelf.Model {
    */
   addresses() {
     return this.hasMany('Address', 'id_users', 'id_users');
+  }
+
+  /**
+   * Add relation to Product
+   */
+  wishlist() {
+    return this.belongsToMany('Product', 'wishlist', 'id_users', 'id_produk');
   }
 
   /**
@@ -117,6 +125,20 @@ class UserModel extends bookshelf.Model {
     const user = await this.where('id_users', id).fetch({ withRelated: ['store'] });
     const store = user.related('store');
     return { user, store };
+  }
+
+  static async getWishlist(id) {
+    const user = await this.where('id_users', id).fetch({ withRelated: ['wishlist'] });
+    const productIds = user.related('wishlist').map(product => product.toJSON().id);
+    const products = await Product.query((qb) => {
+      qb.whereIn('id_produk', productIds);
+    }).fetchAll({ withRelated: ['store', 'imageProducts'] });
+
+    return products.map((product) => {
+      const store = product.related('store');
+      const imageProducts = product.related('imageProducts');
+      return { product, store, imageProducts };
+    });
   }
 
   /**

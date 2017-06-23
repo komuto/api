@@ -98,6 +98,15 @@ routes.put('/users/password',
   apiResponse());
 
 /**
+ * GET /users/wishlist
+ * Get wishlist product
+ */
+routes.get('/users/wishlist',
+  auth(),
+  wrap(UserController.getWishlist),
+  apiResponse());
+
+/**
  * POST /passwords/forgot
  * Generate reset link sent through email
  */

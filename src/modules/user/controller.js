@@ -176,3 +176,16 @@ UserController.resetPassword = async (req, res, next) => {
   return next();
 };
 
+/**
+ * Get wishlist
+ */
+UserController.getWishlist = async (req, res, next) => {
+  const products = await User.getWishlist(req.user.id);
+  req.resData = {
+    status: true,
+    message: 'Products Wishlist Data',
+    data: products,
+  };
+  return next();
+};
+
