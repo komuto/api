@@ -16,11 +16,11 @@ const getPrice = (price) => {
  */
 ProductController.index = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
-  const limit = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const pageSize = req.query.size ? parseInt(req.query.size, 10) : 10;
   const price = req.query.price ? getPrice(req.query.price) : null;
   const params = {
     page,
-    limit,
+    pageSize,
     price,
     where: { id_kategoriproduk: req.query.category_id },
     query: req.query.q,
@@ -36,7 +36,7 @@ ProductController.index = async (req, res, next) => {
   req.resData = {
     status: true,
     message: 'Products Data',
-    meta: { page, limit },
+    meta: { page, size: pageSize },
     data: products,
   };
   return next();
