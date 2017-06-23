@@ -1,4 +1,4 @@
-import { Brand } from './model';
+import Brand from './model';
 
 export const BrandController = {};
 export default { BrandController };

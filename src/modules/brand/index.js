@@ -1,4 +1,4 @@
-import * as model from './model';
+import Brand from './model';
 import routes from './routes';
 
-export default { model, routes };
+export default { Brand, routes };

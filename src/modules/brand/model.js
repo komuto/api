@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import core from '../core';
+import '../category/model';
 
 const bookshelf = core.postgres.db;
 
@@ -38,5 +39,4 @@ BrandModel.prototype.serialize = function () {
   };
 };
 
-export const Brand = BrandModel;
 export default bookshelf.model('Brand', BrandModel);
