@@ -17,6 +17,7 @@ const rootDir = path.dirname(__dirname);
 def.publicPath = path.join(rootDir, 'public');
 def.cachePath = path.join(rootDir, 'cache');
 def.tempPath = path.join(rootDir, 'temp');
+def.logPath = path.join(rootDir, 'logs');
 
 def.cdnPath = 'http://cdn.localhost.com';
 
@@ -26,8 +27,8 @@ def.knex.client = 'postgres';
 def.knex.connection = {};
 def.knex.connection.host = '127.0.0.1';
 def.knex.connection.user = 'postgres';
-def.knex.connection.password = '12345678';
-def.knex.connection.database = 'komuto_api';
+def.knex.connection.password = 'root';
+def.knex.connection.database = 'komuto';
 def.knex.connection.charset = 'utf8';
 
 // jwt config
