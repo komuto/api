@@ -35,36 +35,45 @@ export function auth(roles, failedCb) {
 }
 
 /**
- * Login form validation middleware
+ * Format the error response
+ * @param err {object} Error object
+ * @param msg {string} Error title
  */
-export function validateLogin({ social = false } = {}) {
+function formatError(msg, err) {
+  if (err) return new BadRequestError(msg, err);
+  return undefined;
+}
+
+/**
+ * Create the validation middleware
+ * @param rules {object} constraints
+ * @param msg {string} Error title
+ */
+function formatValidation(rules, msg) {
   return (req, res, next) => {
-    const hasError = validate(req.body, !social ? constraints.login : constraints.socialLogin, { format: 'flat' });
-    if (hasError) {
-      return next(new BadRequestError(hasError));
-    }
-    return next();
+    const hasError = validate(req.body, rules);
+    return next(formatError(msg, hasError));
   };
+}
+
+/**
+ * Login form validation middleware
+ * @param
+ */
+export function validateLogin() {
+  return formatValidation(constraints.login, 'Login failed');
+}
+
+export function validateSocialLogin() {
+  return formatValidation(constraints.socialLogin, 'Login failed');
 }
 
 export function validateRegistration() {
-  return (req, res, next) => {
-    const hasError = validate(req.body, constraints.registration, { format: 'flat' });
-    if (hasError) {
-      return next(new BadRequestError(hasError));
-    }
-    return next();
-  };
+  return formatValidation(constraints.registration, 'Registration failed');
 }
 
 export function validateUpdate() {
-  return (req, res, next) => {
-    const hasError = validate(req.body, constraints.update, { format: 'flat' });
-    if (hasError) {
-      return next(new BadRequestError(hasError));
-    }
-    return next();
-  };
+  return formatValidation(constraints.update, 'User update failed');
 }
 
 /**

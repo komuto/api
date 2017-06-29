@@ -5,7 +5,7 @@ class ServiceNotFoundError extends RuntimeError {}
 class ConfigurationError extends RuntimeError {}
 
 class APIError extends Error {
-  constructor(msg, httpStatus, previousError) {
+  constructor(msg, data, previousError, httpStatus) {
     if (msg instanceof Error) {
       previousError = msg;
       msg = previousError.message;
@@ -13,37 +13,38 @@ class APIError extends Error {
 
     super(msg);
     this.httpStatus = httpStatus || status.INTERNAL_SERVER_ERROR;
+    this.data = data;
     this.previousError = previousError;
   }
 }
 
 class AuthorizationError extends APIError {
-  constructor(msg, previousError) {
-    super(msg, status.UNAUTHORIZED, previousError);
+  constructor(msg, data, previousError) {
+    super(msg, data, previousError, status.UNAUTHORIZED);
   }
 }
 
 class AuthenticationError extends APIError {
-  constructor(msg, previousError) {
-    super(msg, status.FORBIDDEN, previousError);
+  constructor(msg, data, previousError) {
+    super(msg, data, previousError, status.FORBIDDEN);
   }
 }
 
 class BadRequestError extends APIError {
-  constructor(msg, previousError) {
-    super(msg, status.BAD_REQUEST, previousError);
+  constructor(msg, data, previousError) {
+    super(msg, data, previousError, status.BAD_REQUEST);
   }
 }
 
 class InternalServerError extends APIError {
-  constructor(msg, previousError) {
-    super(msg, status.INTERNAL_SERVER_ERROR, previousError);
+  constructor(msg, data, previousError) {
+    super(msg, data, previousError, status.INTERNAL_SERVER_ERROR);
   }
 }
 
 class NotFoundError extends APIError {
-  constructor(msg, previousError) {
-    super(msg, status.NOT_FOUND, previousError);
+  constructor(msg, data, previousError) {
+    super(msg, data, previousError, status.NOT_FOUND);
   }
 }
 

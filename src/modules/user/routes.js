@@ -1,5 +1,5 @@
 import express from 'express';
-import { validateLogin, addToken, userData, validateRegistration, validateUpdate } from './middleware';
+import { validateLogin, validateSocialLogin, addToken, userData, validateRegistration, validateUpdate } from './middleware';
 import { UserController } from './controller';
 import core from '../core';
 import { AddressController } from '../address/controller';
@@ -24,7 +24,7 @@ routes.post('/users/login',
  * Authenticate user using social media
  */
 routes.post('/users/social-login',
-  validateLogin({ social: true }),
+  validateSocialLogin(),
   wrap(UserController.getUserSocial),
   addToken,
   userData,

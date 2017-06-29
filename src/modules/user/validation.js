@@ -23,6 +23,9 @@ constraints.socialLogin = {
   provider_uid: {
     presence: true,
   },
+  access_token: {
+    presence: true,
+  },
 };
 
 constraints.registration = {
