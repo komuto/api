@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import moment from 'moment';
-import core from '../core';
-import { Address } from '../address/model';
+import core from '../../core';
+import { model } from '../../address';
 
+const Address = model;
 const bookshelf = core.postgres.db;
 
 export const ProductType = {
@@ -128,6 +129,7 @@ class ProductModel extends bookshelf.Model {
           },
           relatedServices,
         ],
+        debug: true,
       });
 
     const results = [];
@@ -191,5 +193,5 @@ ProductModel.prototype.serialize = function () {
   };
 };
 
-export const Product = ProductModel;
-export default bookshelf.model('Product', ProductModel);
+export const Product = bookshelf.model('Product', ProductModel);
+export default { Product, ProductType };

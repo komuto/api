@@ -1,4 +1,4 @@
-import { Product } from './model';
+import { Product, Review } from './model';
 
 export const ProductController = {};
 export default { ProductController };
@@ -34,7 +34,6 @@ ProductController.index = async (req, res, next) => {
   const products = await Product.get(params);
 
   req.resData = {
-    status: true,
     message: 'Products Data',
     meta: { page, size: pageSize },
     data: products,
@@ -48,9 +47,15 @@ ProductController.index = async (req, res, next) => {
 ProductController.search = async (req, res, next) => {
   const results = await Product.search(req.query.q);
   req.resData = {
-    status: true,
     message: 'Products Search Result',
     data: results,
   };
+  return next();
+};
+
+ProductController.createReview = async (req, res, next) => {
+  req.body.user_id = req.user.id;
+  req.body.product_id = req.params.id;
+  await Review.create(Review.matchDBColumn(req.body));
   return next();
 };

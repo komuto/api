@@ -6,7 +6,7 @@ import constraints from './validation';
 
 const routes = express.Router();
 const { wrap } = core.utils;
-const { apiResponse } = core.middleware;
+const { apiResponse, auth } = core.middleware;
 const cache = core.cache;
 
 /**
@@ -26,6 +26,15 @@ routes.get('/products',
 routes.get('/products/search',
   validateParam(constraints.search),
   wrap(ProductController.search),
+  apiResponse());
+
+/**
+ * POST /products/id/reviews
+ * Create a product review
+ */
+routes.post('/products/:id/reviews',
+  auth(),
+  wrap(ProductController.createReview),
   apiResponse());
 
 export default routes;
