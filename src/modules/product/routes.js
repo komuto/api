@@ -37,4 +37,11 @@ routes.post('/products/:id/reviews',
   wrap(ProductController.createReview),
   apiResponse());
 
+/**
+ * Get /products/id/reviews
+ */
+routes.get('/products/:id/reviews',
+  wrap(ProductController.getReviews),
+  apiResponse());
+
 export default routes;

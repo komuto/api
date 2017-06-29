@@ -1,4 +1,5 @@
 import { Product, Review } from './model';
+import { BadRequestError } from '../../../common/errors';
 
 export const ProductController = {};
 export default { ProductController };
@@ -16,7 +17,7 @@ const getPrice = (price) => {
  */
 ProductController.index = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
-  const pageSize = req.query.size ? parseInt(req.query.size, 10) : 10;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const price = req.query.price ? getPrice(req.query.price) : null;
   const params = {
     page,
@@ -35,7 +36,7 @@ ProductController.index = async (req, res, next) => {
 
   req.resData = {
     message: 'Products Data',
-    meta: { page, size: pageSize },
+    meta: { page, limit: pageSize },
     data: products,
   };
   return next();
@@ -56,6 +57,27 @@ ProductController.search = async (req, res, next) => {
 ProductController.createReview = async (req, res, next) => {
   req.body.user_id = req.user.id;
   req.body.product_id = req.params.id;
-  await Review.create(Review.matchDBColumn(req.body));
+  if (!await Review.getByOtherId(req.user.id, req.params.id)) {
+    await Review.create(Review.matchDBColumn(req.body));
+  } else {
+    return next(new BadRequestError('Create review failed',
+      { id: ['You have already submitted your review for this product'] }));
+  }
   return next();
 };
+
+ProductController.getReviews = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const reviews = await Review.get(
+    { id_produk: req.params.id },
+    { page, pageSize });
+
+  req.resData = {
+    message: 'Review List Data',
+    meta: reviews.pagination,
+    data: reviews.models,
+  };
+  return next();
+};
+

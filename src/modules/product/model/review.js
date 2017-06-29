@@ -1,6 +1,6 @@
-import _ from 'lodash';
 import moment from 'moment';
 import core from '../../core';
+import '../../user/model/user';
 
 const bookshelf = core.postgres.db;
 
@@ -14,6 +14,9 @@ class ReviewModel extends bookshelf.Model {
     return 'id_ulasanproduk';
   }
 
+  user() {
+    return this.belongsTo('User', 'id_users');
+  }
   /**
    * Create a new line item
    * @param {Object} data
@@ -25,20 +28,38 @@ class ReviewModel extends bookshelf.Model {
   }
 
   /**
-   * Get a line item by id
-   * @param {Integer} id
+   * Get a line item by id other than primary id
+   * @param userId {Integer}
+   * @param productId {integer}
    */
-  static async getById(id) {
-    return await this.where({ address_id: id }).fetch();
+  static async getByOtherId(userId, productId) {
+    return await this.where({ id_users: userId, id_produk: productId }).fetch();
   }
 
   /**
    * Get a line item by condition
-   * @param {Object} condition
+   * @param data {Object}
    */
-  static async get(condition = null) {
-    condition = _.omitBy(condition, _.isNil);
-    return await this.where(condition).fetchAll();
+  static async get(data, { pageSize, page }) {
+    const reviews = await this.where(data)
+      .orderBy('-id_ulasanproduk')
+      .fetchPage({
+        pageSize,
+        page,
+        withRelated: ['user'],
+      });
+    const { pageSize: limit, rowCount: total, pageCount: pages } = reviews.pagination;
+    const models = reviews.models.map((review) => {
+      const { name, id, photo } = review.related('user').serialize();
+      return {
+        ...review.serialize(),
+        user: { id, name, photo },
+      };
+    });
+    return {
+      pagination: { page: reviews.pagination.page, limit, total, pages },
+      models,
+    };
   }
 
   /**
@@ -63,13 +84,15 @@ class ReviewModel extends bookshelf.Model {
   }
 }
 
-// ReviewModel.prototype.serialize = function () {
-//   return {
-//     id: this.attributes.id_kotakab,
-//     ro_id: this.attributes.id_ro,
-//     name: this.attributes.nama_kotakab,
-//   };
-// };
+ReviewModel.prototype.serialize = function () {
+  return {
+    id: this.attributes.id_ulasanproduk,
+    review: this.attributes.isi_ulasanproduk,
+    quality: this.attributes.kualitasproduk,
+    accuracy: this.attributes.akurasiproduk,
+    created_at: moment(this.attributes.tgl_ulasanproduk).unix(),
+  };
+};
 
 export const Review = bookshelf.model('Review', ReviewModel);
 export default { Review };
