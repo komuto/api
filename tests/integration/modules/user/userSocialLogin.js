@@ -2,7 +2,7 @@
 import request from 'supertest';
 import app from '../../../../src/app';
 
-describe('POST /users/login/ - user login', () => {
+describe('POST /users/social-login/ - user login', () => {
   it('user social login any without any params', () => {
     return request(app)
       .post('/users/social-login')
@@ -84,7 +84,7 @@ describe('POST /users/login/ - user login', () => {
     return request(app)
       .post('/users/social-login')
       .send({
-        provider_name: "faceb",
+        provider_name: "f",
         provider_uid: "1544425745587692",
         access_token: "EAAViKAqZCMswBAEq2e1wH6wQZBhSpyxZBYpLSMuSnEZB6OjEI0YgHlz3B3ZBy6ChWNDoHYPZC1eFGmywzKZA21TrxTmhk5bVHiN7fVxvwZCZAeFZAsgNdvRVPPHERKmrioUEpATKmaDHevzN0eTwa7UMN0xPWCVlvOGCg2yJPAHEEfIxTmNFIG8WS7KLPcwtYZAXUoZD"
       })
