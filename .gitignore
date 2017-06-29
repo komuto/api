@@ -10,6 +10,7 @@ public/image/*
 .DS_Store
 __MACOSX
 *.log
+*.logs
 *.local.json
 *.jwt.js
 *.local.yml
