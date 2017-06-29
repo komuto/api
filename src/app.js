@@ -29,7 +29,7 @@ const app = express();
 const logger = new (winston.Logger)({
   transports: [
     new winston.transports.DailyRotateFile({
-      filename: './../logs/log',
+      filename: config.logPath,
       datePattern: 'yyyy-MM-dd.',
       prepend: true,
       level: 'debug',
