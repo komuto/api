@@ -1,9 +1,9 @@
 import moment from 'moment';
-import core from '../../core';
+import core from '../core';
 
 const bookshelf = core.postgres.db;
 
-class ProductModel extends bookshelf.Model {
+class ImageProductModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
     return 'gambar_produk';
@@ -21,7 +21,7 @@ class ProductModel extends bookshelf.Model {
   }
 }
 
-ProductModel.prototype.serialize = function () {
+ImageProductModel.prototype.serialize = function () {
   return {
     id: this.attributes.id_gambarproduk,
     product_id: this.attributes.id_produk,
@@ -31,5 +31,5 @@ ProductModel.prototype.serialize = function () {
   };
 };
 
-export const ImageProduct = ProductModel;
-export default bookshelf.model('ImageProduct', ProductModel);
+export const ImageProduct = bookshelf.model('ImageProduct', ImageProductModel);
+export default { ImageProduct };

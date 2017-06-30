@@ -167,11 +167,12 @@ class AddressModel extends bookshelf.Model {
    * @param {number} districtId
    */
   static async getStoreAddress(userId, districtId) {
-    return await this.where({
+    const param = {
       id_users: userId,
-      id_kotakab: districtId,
       alamat_originjual: 1,
-    }).fetch();
+    };
+    if (districtId) param.id_kotakab = districtId;
+    return await this.where(param).fetch({ withRelated: ['province'] });
   }
 
   /**

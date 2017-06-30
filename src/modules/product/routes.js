@@ -38,7 +38,16 @@ routes.post('/products/:id/reviews',
   apiResponse());
 
 /**
- * Get /products/id/reviews
+ * GET /products/id
+ * Get full detailed product
+ */
+routes.get('/products/:id',
+  wrap(ProductController.getProduct),
+  apiResponse());
+
+/**
+ * GET /products/id/reviews
+ * Get all reviews of a product
  */
 routes.get('/products/:id/reviews',
   wrap(ProductController.getReviews),

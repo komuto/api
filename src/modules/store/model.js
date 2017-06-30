@@ -1,5 +1,6 @@
 import moment from 'moment';
 import core from '../core';
+import '../user/model/user';
 
 const bookshelf = core.postgres.db;
 
@@ -53,5 +54,5 @@ StoreModel.prototype.serialize = function () {
   };
 };
 
-export const Store = StoreModel;
-export default bookshelf.model('Store', StoreModel);
+export const Store = bookshelf.model('Store', StoreModel);
+export default { Store };

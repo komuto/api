@@ -2,8 +2,12 @@ import _ from 'lodash';
 import moment from 'moment';
 import core from '../../core';
 import { model } from '../../address';
+import '../../store/model';
+import '../../image/model';
+import '../../category/model';
+import './review';
 
-const Address = model;
+const { Address } = model;
 const bookshelf = core.postgres.db;
 
 export const ProductType = {
@@ -32,7 +36,7 @@ class ProductModel extends bookshelf.Model {
   /**
    * Add relation to ImageProduct
    */
-  imageProducts() {
+  images() {
     return this.hasMany('ImageProduct', 'id_produk', 'id_produk');
   }
 
@@ -41,6 +45,13 @@ class ProductModel extends bookshelf.Model {
    */
   category() {
     return this.belongsTo('Category', 'id_kategoriproduk', 'id_kategoriproduk');
+  }
+
+  /**
+   * Add relation to review
+   */
+  reviews() {
+    return this.hasMany('Review', 'id_produk');
   }
 
   /**
@@ -119,7 +130,7 @@ class ProductModel extends bookshelf.Model {
         page,
         pageSize,
         withRelated: [
-          'imageProducts',
+          'images',
           {
             store: (qb) => {
               if (other && other.verified) {
@@ -136,7 +147,7 @@ class ProductModel extends bookshelf.Model {
     // eslint-disable-next-line no-restricted-syntax
     for (const product of products.models) {
       const store = product.related('store');
-      const images = product.related('imageProducts');
+      const images = product.related('images');
       if (address) {
         const addressStore = await Address.getStoreAddress(store.toJSON().user_id, address);
         if (addressStore) {
@@ -160,10 +171,41 @@ class ProductModel extends bookshelf.Model {
       qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
     }).fetchAll();
   }
+
+  /**
+   * Get product with its relation
+   * @param id {integer} product id
+   */
+  static async getFullProduct(id) {
+    let product = await this.where({ id_produk: id }).fetch({
+      withRelated: ['category', 'store', 'images', 'reviews.user.addresses'],
+    });
+    const category = product.related('category').serialize();
+    const store = product.related('store').serialize();
+    const address = await Address.getStoreAddress(store.user_id);
+    store.province = address.related('province').serialize();
+    const images = product.related('images');
+    const reviews = product.related('reviews').map((review) => {
+      const { name, id: userId, photo } = review.related('user').serialize();
+      return {
+        ...review.serialize(),
+        user: { id: userId, name, photo },
+      };
+    });
+    product = product.serialize();
+    product.count_review = reviews.length;
+    return {
+      product,
+      category,
+      store,
+      images,
+      reviews,
+    };
+  }
 }
 
 ProductModel.prototype.serialize = function () {
-  return {
+  const products = {
     id: this.attributes.id_produk,
     category_id: this.attributes.id_kategoriproduk,
     store_id: this.attributes.id_toko,
@@ -182,8 +224,8 @@ ProductModel.prototype.serialize = function () {
     margin_dropshipper: this.attributes.margin_dropshiper,
     is_dropshipper: this.attributes.is_dropshiper,
     is_wholesaler: this.attributes.is_grosir,
-    count_sold: this.attributes.count_sold,
-    count_popular: this.attributes.count_populer,
+    count_sold: this.attributes.count_sold ? this.attributes.count_sold : 0,
+    count_popular: this.attributes.count_populer ? this.attributes.count_populer : 0,
     identifier_brand: this.attributes.identifier_brand,
     identifier_catalog: this.attributes.identifier_katalog,
     // eslint-disable-next-line max-len
@@ -191,6 +233,8 @@ ProductModel.prototype.serialize = function () {
     // eslint-disable-next-line max-len
     created_at: this.attributes.date_created_produk ? moment(this.attributes.date_created_produk).unix() : undefined,
   };
+
+  return products;
 };
 
 export const Product = bookshelf.model('Product', ProductModel);

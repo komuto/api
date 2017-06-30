@@ -81,3 +81,13 @@ ProductController.getReviews = async (req, res, next) => {
   return next();
 };
 
+ProductController.getProduct = async (req, res, next) => {
+  const product = await Product.getFullProduct(req.params.id);
+
+  req.resData = {
+    message: 'Product Detail Data',
+    data: product,
+  };
+  return next();
+};
+
