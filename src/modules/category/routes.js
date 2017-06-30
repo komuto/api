@@ -5,7 +5,7 @@ import config from '../../../config';
 
 const routes = express.Router();
 const { wrap } = core.utils;
-const { apiResponse } = core.middleware
+const { apiResponse } = core.middleware;
 const cache = core.cache;
 
 /**
