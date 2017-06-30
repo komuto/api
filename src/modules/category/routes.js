@@ -22,6 +22,7 @@ routes.get('/categories',
  * View complete list of categories
  */
 routes.get('/categories/sub',
+  cache(config.cacheExp),
   wrap(CategoryController.getFullCategories),
   apiResponse());
 

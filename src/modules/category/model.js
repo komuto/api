@@ -65,7 +65,7 @@ class CategoryModel extends bookshelf.Model {
    * Get categories and subcategories
    */
   static async getFullCategories() {
-    const categories = await this.where({}).fetchAll({ withRelated: ['subcategories'] });
+    const categories = await this.where({ parentid_kategoriproduk: 0 }).fetchAll({ withRelated: ['subcategories'] });
     if (!categories) throw new BadRequestError('No category found');
     return categories.map((category) => {
       const subCategories = category.related('subcategories');
