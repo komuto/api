@@ -106,7 +106,7 @@ AddressController.updateAddress = async (req, res, next) => {
 };
 
 AddressController.deleteAddress = async (req, res, next) => {
-  if (await Address.checkPrimary(req.user.id, req.params.id)) {
+  if (!await Address.checkPrimary(req.user.id, req.params.id)) {
     throw new BadRequestError('Harus mempunyai alamat primary');
   }
   await Address.delete(req.params.id);
