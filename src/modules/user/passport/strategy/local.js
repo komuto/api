@@ -1,7 +1,7 @@
-import _ from 'lodash';
 import { Strategy as LocalStrategy } from 'passport-local';
-import { User, UserStatus } from '../../model';
+import { User } from '../../model';
 import { BadRequestError } from '../../../../../common/errors';
+import msg from '../../../../../common/messages';
 
 export default new LocalStrategy({
   usernameField: 'email',
@@ -9,7 +9,7 @@ export default new LocalStrategy({
   passReqToCallback: false,
 }, (email, password, done) => {
   new User({ email_users: email }).fetch().then((user) => {
-    if (!user) return done(new BadRequestError('Email belum terdaftar'), false);
+    if (!user) return done(new BadRequestError(msg.users.login.failed), false);
     return user.checkPasswordFromApi(password)
       .then((body) => {
         body = JSON.parse(body);
