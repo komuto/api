@@ -49,6 +49,7 @@ StoreModel.prototype.serialize = function () {
     created_at: moment(this.attributes.tgl_create_toko).unix(),
     status_at: moment(this.attributes.tglstatus_toko).unix(),
     verification_at: moment(this.attributes.tanggal_verifikasi).unix(),
+    is_verified: !!this.attributes.sampai_tanggal,
     start_at: this.attributes.mulai_tanggal ? moment(this.attributes.mulai_tanggal).unix() : null,
     end_at: this.attributes.sampai_tanggal ? moment(this.attributes.sampai_tanggal).unix() : null,
   };

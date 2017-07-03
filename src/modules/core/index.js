@@ -12,6 +12,7 @@ const cache = apicache
   .options({ redisClient: redis.createClient() })
   .middleware;
 
+// TODO: move
 const imageProduct = file => `${config.imageUrl}/produk/${file}`;
 
 export default { utils, controller, middleware, postgres, routes, cache, imageProduct };
