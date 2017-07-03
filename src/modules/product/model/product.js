@@ -133,6 +133,7 @@ class ProductModel extends bookshelf.Model {
         }
       })
       .orderBy(sort)
+      .orderBy('id_produk')
       .fetchPage({
         page,
         pageSize,
