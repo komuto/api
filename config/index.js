@@ -31,6 +31,12 @@ def.knex.connection.password = 'root';
 def.knex.connection.database = 'komuto';
 def.knex.connection.charset = 'utf8';
 
+def.knex.connection.host = 'db-development.aptmi.com';
+def.knex.connection.user = 'komuto';
+def.knex.connection.password = 'Apt4M3d14C0mut0';
+def.knex.connection.database = 'komuto';
+def.knex.connection.charset = 'utf8';
+
 // jwt config
 def.jwt = {};
 def.jwt.secretOrKey = 'MY-APP';
@@ -58,7 +64,10 @@ def.komutoUrl = 'http://api.komutodev.aptmi.com/komuto-api/';
 def.frontendKomuto = 'https://komuto.skyshi.com';
 
 // cache expired
-def.cacheExp = '30 minutes';
+def.cache = {};
+def.cache.debug = true;
+def.cache.enable = false;
+def.cache.duration = 1800000; // in ms: 30 minutes
 
 cfg.resolveLocalConfig(__dirname, (err, file) => {
   // eslint-disable-next-line global-require, import/no-dynamic-require
