@@ -62,6 +62,13 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to User
+   */
+  likes() {
+    return this.hasMany('User', 'id_produk').through('Wishlist', 'id_users', 'id_produk', 'id_users');
+  }
+
+  /**
    * Get products
    */
   static async get(params) {
@@ -126,6 +133,7 @@ class ProductModel extends bookshelf.Model {
         }
       })
       .orderBy(sort)
+      .orderBy('id_produk')
       .fetchPage({
         page,
         pageSize,
@@ -139,14 +147,18 @@ class ProductModel extends bookshelf.Model {
             },
           },
           relatedServices,
+          'likes',
         ],
       });
 
     const results = [];
     // eslint-disable-next-line no-restricted-syntax
-    for (const product of products.models) {
+    for (let product of products.models) {
       const store = product.related('store');
       const images = product.related('images');
+      const likes = product.related('likes');
+      product = product.toJSON();
+      product.count_like = likes.length;
       if (address) {
         const addressStore = await Address.getStoreAddress(store.toJSON().user_id, address);
         if (addressStore) {
@@ -224,6 +236,7 @@ ProductModel.prototype.serialize = function () {
     margin_dropshipper: this.attributes.margin_dropshiper,
     is_dropshipper: this.attributes.is_dropshiper,
     is_wholesaler: this.attributes.is_grosir,
+    is_discount: !!this.attributes.disc_produk,
     count_sold: this.attributes.count_sold ? this.attributes.count_sold : 0,
     count_popular: this.attributes.count_populer ? this.attributes.count_populer : 0,
     identifier_brand: this.attributes.identifier_brand,

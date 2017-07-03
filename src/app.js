@@ -4,7 +4,6 @@ import bodyParser from 'body-parser';
 import compression from 'compression';
 import cors from 'cors';
 import helmet from 'helmet';
-import jsend from 'jsend';
 import statusMonitor from 'express-status-monitor';
 import responseTime from 'response-time';
 import moment from 'moment';
@@ -56,14 +55,16 @@ process.on('unhandledRejection', (err) => {
 
 app.use(statusMonitor());
 app.use(responseTime());
-app.use(jsend.middleware);
 app.use(cors());
 app.use(helmet());
 app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(config.publicPath, { maxAge: c.ONE_YEAR }));
-
+app.use((req, res, next) => {
+  res.header("Content-Type",'application/json');
+  next();
+});
 app.set('trust proxy', 1);
 
 // configure passport middleware
