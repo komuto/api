@@ -3,6 +3,7 @@ import { ProductController } from './controller';
 import core from '../core';
 import { validateParam } from './middleware';
 import constraints from './validation';
+import { ReviewController } from '../review';
 
 const routes = express.Router();
 const { wrap } = core.utils;
@@ -34,7 +35,7 @@ routes.get('/products/search',
  */
 routes.post('/products/:id/reviews',
   auth(),
-  wrap(ProductController.createReview),
+  wrap(ReviewController.createReview),
   apiResponse());
 
 /**
@@ -50,7 +51,7 @@ routes.get('/products/:id',
  * Get all reviews of a product
  */
 routes.get('/products/:id/reviews',
-  wrap(ProductController.getReviews),
+  wrap(ReviewController.getProductReviews),
   apiResponse());
 
 export default routes;

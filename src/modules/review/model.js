@@ -1,6 +1,6 @@
 import moment from 'moment';
-import core from '../../core';
-import '../../user/model/user';
+import core from '../core';
+import '../user/model/user';
 
 const bookshelf = core.postgres.db;
 
@@ -37,10 +37,25 @@ class ReviewModel extends bookshelf.Model {
   }
 
   /**
+   * Get a line item by id
+   * @param id {Integer}
+   */
+  static async getById(id) {
+    const review = await this.where({ id_ulasanproduk: id }).fetch({ withRelated: ['user'] });
+    const { id: userId, name, photo } = review.related('user').serialize();
+    return {
+      ...review.serialize(true),
+      user: { id: userId, name, photo },
+    };
+  }
+
+  /**
    * Get a line item by condition
    * @param data {Object}
+   * @param {Integer} pageSize limit
+   * @param {Integer} page
    */
-  static async get(data, { pageSize, page }) {
+  static async getAll(data, { pageSize, page }) {
     const reviews = await this.where(data)
       .orderBy('-id_ulasanproduk')
       .fetchPage({
@@ -84,14 +99,16 @@ class ReviewModel extends bookshelf.Model {
   }
 }
 
-ReviewModel.prototype.serialize = function () {
-  return {
+ReviewModel.prototype.serialize = function (full = false) {
+  const review = {
     id: this.attributes.id_ulasanproduk,
     review: this.attributes.isi_ulasanproduk,
     quality: this.attributes.kualitasproduk,
     accuracy: this.attributes.akurasiproduk,
     created_at: moment(this.attributes.tgl_ulasanproduk).unix(),
   };
+  if (full) review.product_id = this.attributes.id_produk;
+  return review;
 };
 
 export const Review = bookshelf.model('Review', ReviewModel);
