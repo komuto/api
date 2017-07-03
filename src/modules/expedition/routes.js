@@ -2,7 +2,6 @@ import express from 'express';
 import { ExpeditionController } from './controller';
 import core from '../core';
 import { apiResponse } from '../core/middleware';
-import config from '../../../config';
 
 const routes = express.Router();
 const { wrap } = core.utils;
@@ -13,7 +12,7 @@ const cache = core.cache;
  * View list of expeditions
  */
 routes.get('/expeditions',
-  // cache(config.cacheExp),
+  cache(),
   wrap(ExpeditionController.getExpeditions),
   apiResponse());
 
@@ -22,7 +21,7 @@ routes.get('/expeditions',
  * View list of services
  */
 routes.get('/expeditions/services',
-  // cache(config.cacheExp),
+  cache(),
   wrap(ExpeditionController.getListExpeditionServices),
   apiResponse());
 
@@ -31,7 +30,7 @@ routes.get('/expeditions/services',
  * View expedition service
  */
 routes.get('/expeditions/:id/services',
-  // cache(config.cacheExp),
+  cache(),
   wrap(ExpeditionController.getExpeditionService),
   apiResponse());
 
