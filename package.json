@@ -24,6 +24,7 @@
     "fb": "^2.0.0",
     "helmet": "^3.3.0",
     "http-status": "^0.2.3",
+    "jest-cli": "^20.0.4",
     "jsonwebtoken": "^7.2.1",
     "knex": "^0.12.8",
     "lodash": "^4.17.3",
@@ -74,7 +75,7 @@
     "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.6.0",
     "flow-bin": "^0.37.4",
-    "jest": "^18.1.0",
+    "jest": "^20.0.4",
     "rimraf": "^2.5.4",
     "supertest": "^2.0.1"
   },
