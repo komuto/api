@@ -1,5 +1,5 @@
 import moment from 'moment';
-import core from '../core';
+import core from '../../core';
 
 const bookshelf = core.postgres.db;
 

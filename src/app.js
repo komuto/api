@@ -22,7 +22,6 @@ import address from './modules/address';
 import brand from './modules/brand';
 import product from './modules/product';
 import bank from './modules/bank';
-import './modules/image';
 
 const app = express();
 

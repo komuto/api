@@ -3,7 +3,7 @@ import moment from 'moment';
 import core from '../../core';
 import { model } from '../../address';
 import '../../store/model';
-import '../../image/model';
+import './imageProduct';
 import '../../category/model';
 import './review';
 
@@ -140,7 +140,6 @@ class ProductModel extends bookshelf.Model {
           },
           relatedServices,
         ],
-        debug: true,
       });
 
     const results = [];
@@ -182,8 +181,7 @@ class ProductModel extends bookshelf.Model {
     });
     const category = product.related('category').serialize();
     const store = product.related('store').serialize();
-    const address = await Address.getStoreAddress(store.user_id);
-    store.province = address.related('province').serialize();
+    const getAddress = Address.getStoreAddress(store.user_id);
     const images = product.related('images');
     const reviews = product.related('reviews').map((review) => {
       const { name, id: userId, photo } = review.related('user').serialize();
@@ -192,6 +190,8 @@ class ProductModel extends bookshelf.Model {
         user: { id: userId, name, photo },
       };
     });
+    const address = await getAddress;
+    store.province = address.related('province').serialize();
     product = product.serialize();
     product.count_review = reviews.length;
     return {

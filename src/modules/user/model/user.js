@@ -4,7 +4,8 @@ import rp from 'request-promise';
 import config from '../../../../config';
 import core from '../../core';
 import '../../store/model';
-import { Product } from '../../product/model';
+import './wishlist';
+import '../../product/model/product';
 
 const bookshelf = core.postgres.db;
 
@@ -53,8 +54,8 @@ class UserModel extends bookshelf.Model {
   /**
    * Add relation to Product
    */
-  wishlist() {
-    return this.belongsToMany('Product', 'wishlist', 'id_users', 'id_produk');
+  products() {
+    return this.hasMany('Product', 'id_users').through('Wishlist', 'id_produk', 'id_users', 'id_produk');
   }
 
   /**
@@ -128,16 +129,12 @@ class UserModel extends bookshelf.Model {
   }
 
   static async getWishlist(id) {
-    const user = await this.where('id_users', id).fetch({ withRelated: ['wishlist'] });
-    const productIds = user.related('wishlist').map(product => product.toJSON().id);
-    const products = await Product.query((qb) => {
-      qb.whereIn('id_produk', productIds);
-    }).fetchAll({ withRelated: ['store', 'imageProducts'] });
-
+    const user = await this.where('id_users', id).fetch({ withRelated: ['products.store', 'products.images'] });
+    const products = user.related('products');
     return products.map((product) => {
       const store = product.related('store');
-      const imageProducts = product.related('imageProducts');
-      return { product, store, imageProducts };
+      const images = product.related('images');
+      return { product, store, images };
     });
   }
 
