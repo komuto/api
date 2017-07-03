@@ -13,7 +13,7 @@ const cache = core.cache;
  * View list of categories
  */
 routes.get('/categories',
-  cache(config.cacheExp),
+  cache(),
   wrap(CategoryController.getDetailCategories),
   apiResponse());
 
@@ -22,7 +22,7 @@ routes.get('/categories',
  * View complete list of categories
  */
 routes.get('/categories/sub',
-  cache(config.cacheExp),
+  cache(),
   wrap(CategoryController.getFullCategories),
   apiResponse());
 
@@ -31,7 +31,7 @@ routes.get('/categories/sub',
  * View list of sub categories
  */
 routes.get('/categories/:id/sub-categories',
-  cache(config.cacheExp),
+  cache(),
   wrap(CategoryController.getCategories),
   apiResponse());
 

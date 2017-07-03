@@ -13,7 +13,7 @@ const cache = core.cache;
  * View list of brands
  */
 routes.get('/brands',
-  cache(config.cacheExp),
+  cache(),
   wrap(BrandController.index),
   apiResponse());
 
