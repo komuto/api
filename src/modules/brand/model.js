@@ -36,6 +36,7 @@ BrandModel.prototype.serialize = function () {
     id: this.attributes.id_brand,
     category_id: this.attributes.id_kategoriproduk,
     name: this.attributes.nama_brand,
+    is_checked: null,
   };
 };
 
