@@ -1,5 +1,3 @@
-import apicache from 'apicache';
-import redis from 'redis';
 import './initialize';
 import * as utils from './utils';
 import * as middleware from './middleware';
@@ -8,10 +6,6 @@ import postgres from './knex';
 import routes from './routes';
 import cache from './cache';
 import config from './../../../config';
-
-const cache = apicache
-  .options({ redisClient: redis.createClient() })
-  .middleware;
 
 const imageProduct = file => `${config.imageUrl}/produk/${file}`;
 
