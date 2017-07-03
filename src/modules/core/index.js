@@ -6,9 +6,12 @@ import * as middleware from './middleware';
 import controller from './controller';
 import postgres from './knex';
 import routes from './routes';
+import config from './../../../config';
 
 const cache = apicache
   .options({ redisClient: redis.createClient() })
   .middleware;
 
-export default { utils, controller, middleware, postgres, routes, cache };
+const imageProduct = file => `${config.imageUrl}/produk/${file}`;
+
+export default { utils, controller, middleware, postgres, routes, cache, imageProduct };
