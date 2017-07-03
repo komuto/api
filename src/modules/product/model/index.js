@@ -1,4 +1,4 @@
-import { Review } from './review';
 import { Product, ProductType } from './product';
+import { ImageProduct } from './imageProduct';
 
-export default { Review, Product, ProductType };
+export default { ImageProduct, Product, ProductType };

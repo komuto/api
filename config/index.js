@@ -62,6 +62,7 @@ def.url = (dir = '/') => {
 // komuto url
 def.komutoUrl = 'http://api.komutodev.aptmi.com/komuto-api/';
 def.frontendKomuto = 'https://komuto.skyshi.com';
+def.imageUrl = 'http://188.166.246.46/uploads';
 
 // cache expired
 def.cache = {};

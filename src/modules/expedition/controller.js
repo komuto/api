@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { Expedition, ExpeditionService } from './model';
 
 export const ExpeditionController = {};
@@ -19,10 +20,20 @@ ExpeditionController.getExpeditions = async (req, res, next) => {
  * Get expedition services
  */
 ExpeditionController.getListExpeditionServices = async (req, res, next) => {
-  const services = await ExpeditionService.get();
+  const expeditions = await Expedition.getServices();
+  const services = [];
+
+  _.forEach(expeditions, (expedition) => {
+    _.forEach(expedition.services.models, (service) => {
+      service = service.toJSON();
+      service.full_name = `${expedition.name} ${service.name}`;
+      services.push(service);
+    });
+  });
+
   req.resData = {
     message: 'Expedition services Data',
-    data: services.serialize(false),
+    data: services,
   };
   return next();
 };
