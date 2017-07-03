@@ -78,7 +78,6 @@ describe('GET users address', () => {
 
   it('GET single address /users/address should work', async () => {
     const addressModel = new AddressModel(testData.token);
-    console.log('helloo');
     const addressCreatedData = await addressModel.create({
       "province_id": 34,
       "district_id": 3404,
@@ -94,7 +93,6 @@ describe('GET users address', () => {
     });
     const addressPrimaryData = await addressModel.getPrimary();
     const id = addressPrimaryData.data.id;
-    console.log('addressCreatedData', addressCreatedData);
     const data = await addressModel.get(id);
 
     expect(data.status).toBe(true);

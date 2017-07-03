@@ -20,13 +20,30 @@ class UserModel {
           password
         })
         .set('Content-Type', 'application/json')
-        .expect(200)
         .then(res => {
           resolve(res.body);
         })
         .catch(err => {
           resolve(err);
-        });;
+        });
+    });
+  }
+  socialLogin(provider_name = '', provider_uid = '', access_token = '') {
+    return new Promise((resolve, reject) => {
+      request(app)
+        .post('/users/social-login')
+        .send({
+          provider_name,
+          provider_uid,
+          access_token
+        })
+        .set('Content-Type', 'application/json')
+        .then((res) => {
+          resolve(res.body);
+        })
+        .catch(err => {
+          resolve(err);
+        });
     });
   }
 }
