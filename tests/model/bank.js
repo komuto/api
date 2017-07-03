@@ -2,23 +2,11 @@ import request from 'supertest';
 import Promise from 'bluebird';
 import app from '../../src/app';
 
-class UserModel {
-  constructor(token = null) {
-    this.token = token;
-  }
-
-  static setToken(token) {
-    this.token = token;
-  }
-
-  login(email, password) {
+class BankModel {
+  get(id) {
     return new Promise((resolve, reject) => {
       request(app)
-        .post('/users/login')
-        .send({
-          email,
-          password
-        })
+        .get('/banks/'+ id)
         .set('Content-Type', 'application/json')
         .then(res => {
           resolve(res.body);
@@ -28,15 +16,10 @@ class UserModel {
         });
     });
   }
-  socialLogin(provider_name = '', provider_uid = '', access_token = '') {
+  getAll() {
     return new Promise((resolve, reject) => {
       request(app)
-        .post('/users/social-login')
-        .send({
-          provider_name,
-          provider_uid,
-          access_token
-        })
+        .get('/banks/')
         .set('Content-Type', 'application/json')
         .then((res) => {
           resolve(res.body);
@@ -48,4 +31,4 @@ class UserModel {
   }
 }
 
-export default UserModel;
+export default BankModel;

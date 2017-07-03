@@ -17,7 +17,7 @@ const rootDir = path.dirname(__dirname);
 def.publicPath = path.join(rootDir, 'public');
 def.cachePath = path.join(rootDir, 'cache');
 def.tempPath = path.join(rootDir, 'temp');
-def.logPath = path.join(rootDir, 'logs');
+def.logPath = path.join(rootDir, 'logs/log');
 
 def.cdnPath = 'http://cdn.localhost.com';
 
@@ -28,6 +28,12 @@ def.knex.connection = {};
 def.knex.connection.host = '127.0.0.1';
 def.knex.connection.user = 'postgres';
 def.knex.connection.password = 'root';
+def.knex.connection.database = 'komuto';
+def.knex.connection.charset = 'utf8';
+
+def.knex.connection.host = 'db-development.aptmi.com';
+def.knex.connection.user = 'komuto';
+def.knex.connection.password = 'Apt4M3d14C0mut0';
 def.knex.connection.database = 'komuto';
 def.knex.connection.charset = 'utf8';
 
@@ -59,7 +65,10 @@ def.frontendKomuto = 'https://komuto.skyshi.com';
 def.imageUrl = 'http://188.166.246.46/uploads';
 
 // cache expired
-def.cacheExp = '30 minutes';
+def.cache = {};
+def.cache.debug = true;
+def.cache.enable = true;
+def.cache.duration = 1800000; // in ms: 30 minutes
 
 cfg.resolveLocalConfig(__dirname, (err, file) => {
   // eslint-disable-next-line global-require, import/no-dynamic-require

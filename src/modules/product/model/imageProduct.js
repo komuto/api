@@ -1,5 +1,6 @@
 import moment from 'moment';
 import core from '../../core';
+import { imageProduct } from './../config';
 
 const bookshelf = core.postgres.db;
 
@@ -25,7 +26,7 @@ ImageProductModel.prototype.serialize = function () {
   return {
     id: this.attributes.id_gambarproduk,
     product_id: this.attributes.id_produk,
-    file: core.imageProduct(this.attributes.file_gambarproduk),
+    file: imageProduct(this.attributes.file_gambarproduk),
     created_at: moment(this.attributes.created_gambarproduk).unix(),
     updated_at: moment(this.attributes.updated_gambarproduk).unix(),
   };

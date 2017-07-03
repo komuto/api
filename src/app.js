@@ -4,7 +4,6 @@ import bodyParser from 'body-parser';
 import compression from 'compression';
 import cors from 'cors';
 import helmet from 'helmet';
-import jsend from 'jsend';
 import statusMonitor from 'express-status-monitor';
 import responseTime from 'response-time';
 import moment from 'moment';
@@ -22,6 +21,7 @@ import address from './modules/address';
 import brand from './modules/brand';
 import product from './modules/product';
 import bank from './modules/bank';
+import review from './modules/review';
 
 const app = express();
 
@@ -55,14 +55,16 @@ process.on('unhandledRejection', (err) => {
 
 app.use(statusMonitor());
 app.use(responseTime());
-app.use(jsend.middleware);
 app.use(cors());
 app.use(helmet());
 app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(config.publicPath, { maxAge: c.ONE_YEAR }));
-
+app.use((req, res, next) => {
+  res.header("Content-Type",'application/json');
+  next();
+});
 app.set('trust proxy', 1);
 
 // configure passport middleware
@@ -90,6 +92,7 @@ app.use(address.routes);
 app.use(brand.routes);
 app.use(product.routes);
 app.use(bank.routes);
+app.use(review.routes);
 
 app.use((req, res, next) => {
   const err = new Error('Path Not Found');

@@ -1,5 +1,4 @@
 /* eslint-disable no-undef */
-import request from 'supertest';
 import AddressModel from '../../../model/address';
 import UserModel from '../../../model/user';
 

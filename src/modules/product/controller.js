@@ -1,5 +1,8 @@
-import { Product, Review } from './model';
+import { Product } from './model';
+import { model } from '../review';
 import { BadRequestError } from '../../../common/errors';
+
+const { Review } = model;
 
 export const ProductController = {};
 export default { ProductController };
@@ -50,33 +53,6 @@ ProductController.search = async (req, res, next) => {
   req.resData = {
     message: 'Products Search Result',
     data: results,
-  };
-  return next();
-};
-
-ProductController.createReview = async (req, res, next) => {
-  req.body.user_id = req.user.id;
-  req.body.product_id = req.params.id;
-  if (!await Review.getByOtherId(req.user.id, req.params.id)) {
-    await Review.create(Review.matchDBColumn(req.body));
-  } else {
-    return next(new BadRequestError('Create review failed',
-      { id: ['You have already submitted your review for this product'] }));
-  }
-  return next();
-};
-
-ProductController.getReviews = async (req, res, next) => {
-  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
-  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const reviews = await Review.get(
-    { id_produk: req.params.id },
-    { page, pageSize });
-
-  req.resData = {
-    message: 'Review List Data',
-    meta: reviews.pagination,
-    data: reviews.models,
   };
   return next();
 };

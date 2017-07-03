@@ -5,8 +5,7 @@ import { model } from '../../address';
 import '../../store/model';
 import './imageProduct';
 import '../../category/model';
-import './review';
-import '../../user/model';
+import '../../review/model';
 
 const { Address } = model;
 const bookshelf = core.postgres.db;
