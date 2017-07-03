@@ -49,5 +49,5 @@ ServiceModel.prototype.serialize = function (minimal = true) {
   };
 };
 
-export default bookshelf.model('Service', ServiceModel);
+export default bookshelf.model('ExpeditionService', ServiceModel);
 

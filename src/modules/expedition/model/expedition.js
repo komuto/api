@@ -16,7 +16,7 @@ class ExpeditionModel extends bookshelf.Model {
   }
 
   services() {
-    return this.hasMany('Service', 'id_ekspedisi');
+    return this.hasMany('ExpeditionService', 'id_ekspedisi');
   }
 
   /**
