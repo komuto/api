@@ -1,8 +1,4 @@
 import { Product } from './model';
-import { model } from '../review';
-import { BadRequestError } from '../../../common/errors';
-
-const { Review } = model;
 
 export const ProductController = {};
 export default { ProductController };
