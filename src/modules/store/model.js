@@ -3,6 +3,7 @@ import core from '../core';
 import '../user/model/user';
 
 const bookshelf = core.postgres.db;
+const IMAGE_PATH = 'toko';
 
 class StoreModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -36,11 +37,11 @@ StoreModel.prototype.serialize = function () {
     name: this.attributes.nama_toko,
     slogan: this.attributes.slogan_toko,
     description: this.attributes.deskripsi_toko,
-    logo: this.attributes.logo_toko,
+    logo: core.imagePath(IMAGE_PATH, this.attributes.logo_toko),
     custom_domain: this.attributes.custom_domain,
     status: parseInt(this.attributes.status_toko, 10),
     remarks_status: this.attributes.remarks_status_toko,
-    cover_image: this.attributes.pathcoverimage_toko,
+    cover_image: core.imagePath(IMAGE_PATH, this.attributes.pathcoverimage_toko),
     seller_theme_id: this.attributes.identifier_themesseller,
     reputation: this.attributes.reputasi_toko,
     store_id_number: this.attributes.no_ktp_toko,
@@ -49,6 +50,7 @@ StoreModel.prototype.serialize = function () {
     created_at: moment(this.attributes.tgl_create_toko).unix(),
     status_at: moment(this.attributes.tglstatus_toko).unix(),
     verification_at: moment(this.attributes.tanggal_verifikasi).unix(),
+    is_verified: !!this.attributes.sampai_tanggal,
     start_at: this.attributes.mulai_tanggal ? moment(this.attributes.mulai_tanggal).unix() : null,
     end_at: this.attributes.sampai_tanggal ? moment(this.attributes.sampai_tanggal).unix() : null,
   };

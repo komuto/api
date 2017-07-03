@@ -5,8 +5,8 @@ import controller from './controller';
 import postgres from './knex';
 import routes from './routes';
 import cache from './cache';
-import config from './../../../config';
+import config from '../../../config';
 
-const imageProduct = file => `${config.imageUrl}/produk/${file}`;
+const imagePath = (path, file) => `${config.imageUrl}/${path}/${file}`;
 
-export default { utils, controller, middleware, postgres, routes, cache, imageProduct };
+export default { utils, controller, middleware, postgres, routes, cache, imagePath };

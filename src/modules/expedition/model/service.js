@@ -36,6 +36,7 @@ ServiceModel.prototype.serialize = function (minimal = true) {
       name: this.attributes.nama_ekspedisiservice,
       description: this.attributes.deskripsi_ekspedisiservice,
       logo: this.attributes.logo_path,
+      is_checked: null,
     };
   }
   return {
@@ -49,5 +50,5 @@ ServiceModel.prototype.serialize = function (minimal = true) {
   };
 };
 
-export default bookshelf.model('Service', ServiceModel);
+export default bookshelf.model('ExpeditionService', ServiceModel);
 
