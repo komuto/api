@@ -63,26 +63,29 @@ class ExpeditionModel extends bookshelf.Model {
       headers: {
         key: '78b9624fc632fd9923625b297a3f7035',
       },
-    }).then((res) => {
-      const result = JSON.parse(res).rajaongkir.results[0];
-      const results = [];
+    })
+      .then((res) => {
+        const result = JSON.parse(res).rajaongkir.results[0];
+        const results = [];
 
-      _.forEach(result.costs.reverse(), (cost) => {
-        const found = _.find(services, { name: cost.service });
-        if (found !== undefined) {
-          results.push({
-            id: found.id,
-            name: found.name,
-            full_name: `${result.code.toUpperCase()} ${cost.service}`,
-            description: cost.description,
-            cost: cost.cost[0].value,
-            etd: cost.cost[0].etd,
-          });
-        }
+        _.forEach(result.costs.reverse(), (cost) => {
+          const found = _.find(services, { name: cost.service });
+          if (found !== undefined) {
+            results.push({
+              id: found.id,
+              name: found.name,
+              full_name: `${result.code.toUpperCase()} ${cost.service}`,
+              description: cost.description,
+              cost: cost.cost[0].value,
+              etd: cost.cost[0].etd,
+            });
+          }
+        });
+        return results;
+      })
+      .catch(() => {
+        throw new BadRequestError('No expedition cost found');
       });
-
-      return results;
-    });
   }
 }
 
