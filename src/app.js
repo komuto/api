@@ -44,6 +44,8 @@ logger.stream = {
   },
 };
 
+core.cacheClear();
+
 morgan.token('body', req => `\n${JSON.stringify(req.body, null, 2)}`);
 
 app.use(morgan(`${ch.red(':method')} ${ch.green(':url')} ${ch.yellow(':response-time ms')} :body`, { stream: logger.stream }));

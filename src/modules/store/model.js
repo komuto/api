@@ -41,7 +41,8 @@ StoreModel.prototype.serialize = function () {
     custom_domain: this.attributes.custom_domain,
     status: parseInt(this.attributes.status_toko, 10),
     remarks_status: this.attributes.remarks_status_toko,
-    cover_image: core.imagePath(IMAGE_PATH, this.attributes.pathcoverimage_toko),
+    cover_image: this.attributes.pathcoverimage_toko ?
+      core.imagePath(IMAGE_PATH, this.attributes.pathcoverimage_toko) : null,
     seller_theme_id: this.attributes.identifier_themesseller,
     reputation: this.attributes.reputasi_toko,
     store_id_number: this.attributes.no_ktp_toko,
