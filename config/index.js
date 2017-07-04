@@ -67,8 +67,9 @@ def.imageUrl = 'http://188.166.246.46/uploads';
 
 // cache expired
 def.cache = {};
+def.cache.prefix = 'komuto-api';
 def.cache.debug = true;
-def.cache.enable = false;
+def.cache.enable = true;
 def.cache.duration = 1800000; // in ms: 30 minutes
 
 cfg.resolveLocalConfig(__dirname, (err, file) => {
