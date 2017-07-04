@@ -1,4 +1,4 @@
-import { emailMsg, genderMsg } from './message';
+import { emailMsg, genderMsg, passwordMsg, providerNameMsg, uidMsg, tokenMsg, nameMsg, phoneNumberMsg } from './message';
 
 const constraints = {};
 
@@ -7,11 +7,11 @@ const constraints = {};
  */
 constraints.login = {
   email: {
-    presence: true,
+    presence: { message: emailMsg.presence },
     email: { message: emailMsg.not_valid },
   },
   password: {
-    presence: true,
+    presence: { message: passwordMsg.presence },
   },
 };
 
@@ -20,28 +20,28 @@ constraints.login = {
  */
 constraints.socialLogin = {
   provider_name: {
-    presence: true,
+    presence: { message: providerNameMsg.presence },
   },
   provider_uid: {
-    presence: true,
+    presence: { message: uidMsg.presence },
   },
   access_token: {
-    presence: true,
+    presence: { message: tokenMsg.presence },
   },
 };
 
 constraints.registration = {
-  name: { presence: true },
+  name: { presence: { message: nameMsg.presence } },
   email: {
-    presence: true,
+    presence: { message: emailMsg.presence },
     email: { message: emailMsg.not_valid },
   },
-  password: { presence: true },
+  password: { presence: { message: passwordMsg.presence } },
   gender: {
-    presence: true,
+    presence: { message: genderMsg.presence },
     format: { pattern: /^male|female$/, message: genderMsg.not_valid },
   },
-  phone_number: { presence: true },
+  phone_number: { presence: { message: phoneNumberMsg.presence } },
 };
 
 constraints.update = {

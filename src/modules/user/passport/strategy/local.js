@@ -9,12 +9,12 @@ export default new LocalStrategy({
   passReqToCallback: false,
 }, (email, password, done) => {
   new User({ email_users: email }).fetch().then((user) => {
-    if (!user) return done(new BadRequestError(emailMsg.not_found), false);
+    if (!user) return done(new BadRequestError(loginMsg.title, emailMsg.not_found), false);
     return user.checkPasswordFromApi(password)
       .then((body) => {
         body = JSON.parse(body);
         if (!body.data) {
-          return done(new BadRequestError(loginMsg.wrong_password), false);
+          return done(new BadRequestError(loginMsg.title, loginMsg.wrong_password), false);
         }
         return done(null, user.toJSON());
       });

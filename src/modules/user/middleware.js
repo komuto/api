@@ -1,13 +1,14 @@
 import _ from 'lodash';
-import validate from 'validate.js';
 import jwt from 'jsonwebtoken';
 import constraints from './validation';
 import utils from '../../../common/utils';
 import { BadRequestError } from '../../../common/errors';
 import { jwt as jwtOptions } from '../../../config';
 import { loginMsg, registrationMsg, updateMsg, userMsg } from './message';
+import { middleware } from '../core';
 
 export const ROLE_ALL = '*';
+const { formatValidation } = middleware;
 
 /**
  * Auth middleware
@@ -35,32 +36,6 @@ export function auth(roles, failedCb) {
   };
 }
 
-/**
- * Format the error response
- * @param err {object} Error object
- * @param msg {string} Error title
- */
-function formatError(msg, err) {
-  if (err) return new BadRequestError(msg, err);
-  return undefined;
-}
-
-/**
- * Create the validation middleware
- * @param rules {object} constraints
- * @param msg {string} Error title
- */
-function formatValidation(rules, msg) {
-  return (req, res, next) => {
-    const hasError = validate(req.body, rules);
-    return next(formatError(msg, hasError));
-  };
-}
-
-/**
- * Login form validation middleware
- * @param
- */
 export function validateLogin() {
   return formatValidation(constraints.login, loginMsg.title);
 }
