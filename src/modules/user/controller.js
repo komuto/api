@@ -4,12 +4,34 @@ import { User, UserToken, TokenType } from './model';
 import { UserEmail } from './email';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
-import { registrationMsg, updateMsg, userMsg, emailMsg, activateMsg, resetPassMsg, tokenMsg } from './message';
+import { registrationMsg, updateMsg, userMsg, emailMsg, activateMsg, resetPassMsg, tokenMsg, loginMsg, fbMsg } from './message';
 
 const fb = new Facebook(config.fb);
 
 export const UserController = {};
 export default { UserController };
+
+function formatFbError(code, e) {
+  const session = [102, 190, 458, 459, 460, 463, 464, 467];
+  const down = [1, 2, 4, 17, 341, 368];
+  if (session.includes(code) || code === 'OAuthException') return fbMsg.session_expired;
+  else if (down.includes(code)) return fbMsg.api_down;
+  // code 10 and 200-299 for not granted permission
+  else if (code === 10 || (code >= 200 && code < 300)) return fbMsg.permission_denied;
+  // Code outside above range, use original fb message
+  return e.message;
+}
+
+async function getFbData(uid) {
+  try {
+    return await fb.api(uid, { fields: 'id,name,email,gender,picture.type(large)' });
+  } catch (e) {
+    const error = e.response.error;
+    throw new BadRequestError(
+      loginMsg.title,
+      formatFbError(error.code ? error.code : error.type, error));
+  }
+}
 
 /**
  * View user
@@ -42,7 +64,7 @@ UserController.getUserSocial = async (req, res, next) => {
   // Case where provider name and uid not found on db
   if (!req.user) {
     fb.setAccessToken(access_token);
-    const response = await fb.api(uid, { fields: 'id,name,email,gender,picture.type(large)' });
+    const response = await getFbData(uid);
     const user = await User.getByEmail(response.email);
     // Case where user already created but provider name and uid do not match
     if (user) {

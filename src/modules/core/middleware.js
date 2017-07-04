@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import logger from 'morgan';
 import passport from 'passport';
+import validate from 'validate.js';
 import c from '../../constants';
 import config from '../../../config';
 import { AuthorizationError, BadRequestError } from '../../../common/errors';
@@ -66,6 +67,29 @@ export function checkContentType() {
       return next(new BadRequestError('Invalid format'));
     }
     return next();
+  };
+}
+
+
+/**
+ * Format the error response
+ * @param err {object} Error object
+ * @param msg {string} Error title
+ */
+function formatError(msg, err) {
+  if (err) return new BadRequestError(msg, err);
+  return undefined;
+}
+
+/**
+ * Create the validation middleware
+ * @param rules {object} constraints
+ * @param msg {string} Error title
+ */
+export function formatValidation(rules, msg) {
+  return (req, res, next) => {
+    const hasError = validate(req.body, rules);
+    return next(formatError(msg, hasError));
   };
 }
 
