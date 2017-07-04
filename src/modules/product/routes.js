@@ -51,7 +51,7 @@ routes.get('/products/:id',
  * Get all reviews of a product
  */
 routes.get('/products/:id/reviews',
-  wrap(ReviewController.getProductReviews),
+  wrap(ReviewController.getReviews),
   apiResponse());
 
 export default routes;
