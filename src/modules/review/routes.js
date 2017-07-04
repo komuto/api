@@ -7,6 +7,14 @@ const { wrap } = utils;
 const { apiResponse } = middleware;
 
 /**
+ * GET /reviews/search
+ * Get list of reviews
+ */
+routes.get('/reviews/search',
+  wrap(ReviewController.getReviews),
+  apiResponse());
+
+/**
  * GET /reviews/id
  * Get individual review
  */

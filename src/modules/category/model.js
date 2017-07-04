@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import slug from 'slug';
 import core from '../core';
 import { BadRequestError } from '../../../common/errors';
 import '../brand/model';
@@ -46,22 +47,6 @@ class CategoryModel extends bookshelf.Model {
   }
 
   /**
-   * Get detail categories
-   * @param {Object} id
-   */
-  static async getDetail(id) {
-    const results = [];
-
-    const categories = await this.get({ parentid_kategoriproduk: 0 });
-
-    for (const category of categories.models) {
-      results.push(category);
-    }
-
-    return results;
-  }
-
-  /**
    * Get categories and subcategories
    */
   static async getFullCategories() {
@@ -83,6 +68,7 @@ CategoryModel.prototype.serialize = function () {
     parent_id: this.attributes.parentid_kategoriproduk,
     icon: this.attributes.iconpath_kategoriproduk,
     name: this.attributes.nama_kategoriproduk,
+    slug: slug(this.attributes.nama_kategoriproduk, { lower: true, charmap: '' }),
   };
 };
 

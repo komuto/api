@@ -29,14 +29,16 @@ ReviewController.getReview = async (req, res, next) => {
 };
 
 /**
- * Gel all reviews on a product
+ * Gel all reviews
  */
-ReviewController.getProductReviews = async (req, res, next) => {
+ReviewController.getReviews = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  req.query.getProductId = true; // Include product id on review response
   const reviews = await Review.getAll(
-    { id_produk: req.params.id },
-    { page, pageSize });
+    req.params.id ? { product_id: req.params.id } : req.query,
+    { page, pageSize },
+  );
 
   req.resData = {
     message: 'Review List Data',

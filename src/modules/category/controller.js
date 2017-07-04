@@ -29,7 +29,6 @@ CategoryController.getFullCategories = async (req, res, next) => {
 CategoryController.getBrands = async (req, res, next) => {
   const brands = await Brand.get({ id_kategoriproduk: req.params.id });
   req.resData = {
-    status: true,
     message: 'Brands List Data',
     data: brands,
   };
@@ -39,11 +38,10 @@ CategoryController.getBrands = async (req, res, next) => {
 /**
  * Get detail categories
  */
-CategoryController.getDetailCategories = async (req, res, next) => {
-  const categories = await Category.getDetail(req.params.id);
+CategoryController.getListCategories = async (req, res, next) => {
+  const categories = await Category.get({ parentid_kategoriproduk: 0 });
   req.resData = {
-    status: true,
-    message: 'Categories Data',
+    message: 'Category List Data',
     data: categories,
   };
   return next();

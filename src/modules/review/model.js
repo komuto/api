@@ -1,6 +1,7 @@
 import moment from 'moment';
 import core from '../core';
 import '../user/model/user';
+import '../product/model/product';
 
 const bookshelf = core.postgres.db;
 
@@ -17,6 +18,7 @@ class ReviewModel extends bookshelf.Model {
   user() {
     return this.belongsTo('User', 'id_users');
   }
+
   /**
    * Create a new line item
    * @param {Object} data
@@ -56,18 +58,22 @@ class ReviewModel extends bookshelf.Model {
    * @param {Integer} page
    */
   static async getAll(data, { pageSize, page }) {
-    const reviews = await this.where(data)
-      .orderBy('-id_ulasanproduk')
-      .fetchPage({
-        pageSize,
-        page,
-        withRelated: ['user'],
-      });
+    const withRelated = ['user'];
+    const reviews = await this.query((qb) => {
+      if (data.store_id) {
+        qb.innerJoin('produk', 'produk.id_produk', 'ulasan_produk.id_produk');
+        qb.where('id_toko', data.store_id);
+      }
+      if (data.q) qb.whereRaw('LOWER(isi_ulasanproduk) LIKE ?', `%${data.q.toLowerCase()}%`);
+      if (data.product_id) qb.where('ulasan_produk.id_produk', data.product_id);
+      if (data.user_id) qb.where('ulasan_produk.id_users', data.user_id);
+    }).orderBy('-id_ulasanproduk')
+      .fetchPage({ pageSize, page, withRelated });
     const { pageSize: limit, rowCount: total, pageCount: pages } = reviews.pagination;
     const models = reviews.models.map((review) => {
       const { name, id, photo } = review.related('user').serialize();
       return {
-        ...review.serialize(),
+        ...review.serialize(data.getProductId),
         user: { id, name, photo },
       };
     });

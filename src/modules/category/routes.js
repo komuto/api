@@ -14,7 +14,7 @@ const cache = core.cache;
  */
 routes.get('/categories',
   cache(),
-  wrap(CategoryController.getDetailCategories),
+  wrap(CategoryController.getListCategories),
   apiResponse());
 
 /**
