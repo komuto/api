@@ -1,5 +1,4 @@
 import core from '../../core';
-import { BadRequestError } from '../../../../common/errors';
 import './province';
 import './district';
 import './sub_district';
@@ -42,9 +41,9 @@ class AddressModel extends bookshelf.Model {
 
   /**
    * Get Full Address
-   * @param {number} user id
-   * @param {boolean} fetch only primary address
-   * @param {number} address id
+   * @param idUser {integer} user id
+   * @param isPrimary {boolean} fetch only primary address
+   * @param idAddress {integer} address id
    */
   static async getFullAddress(idUser, isPrimary = false, idAddress) {
     const query = { id_users: idUser };
@@ -54,7 +53,7 @@ class AddressModel extends bookshelf.Model {
       withRelated: ['province', 'district', 'subDistrict', 'village'],
     });
     if (!address) {
-      throw new BadRequestError('No address found');
+      return false;
     }
     const province = address.related('province');
     const district = address.related('district');
@@ -70,14 +69,14 @@ class AddressModel extends bookshelf.Model {
 
   /**
    * Get All Address
-   * @param {number} user id
+   * @param idUser {integer} user id
    */
   static async getFullAddressAll(idUser) {
     const addresses = await this.where({ id_users: idUser }).fetchAll({
       withRelated: ['province', 'district', 'subDistrict', 'village'],
     });
     if (!addresses) {
-      throw new BadRequestError('No address found');
+      return false;
     }
     return addresses.map((address) => {
       const province = address.related('province');
@@ -112,7 +111,7 @@ class AddressModel extends bookshelf.Model {
 
   /**
    * Delete address
-   * @param {number} address id
+   * @param id {integer} address id
    */
   static async delete(id) {
     await this.where('id_alamatuser', id).destroy();
@@ -120,7 +119,7 @@ class AddressModel extends bookshelf.Model {
 
   /**
    * Get a line item by id
-   * @param {Integer} id
+   * @param {integer} id
    */
   static async getById(id) {
     return await this.where({ address_id: id }).fetch();
@@ -136,22 +135,21 @@ class AddressModel extends bookshelf.Model {
 
   /**
    * Check if primary address already in db
-   * @param {number} user id
-   * @param {number} OPTIONAL address id
+   * @param idUser {integer} user id
+   * @param idAddress {integer} OPTIONAL address id
    */
   static async checkPrimary(idUser, idAddress) {
     const query = { id_users: idUser, alamat_primary: '1' };
     if (idAddress) {
       query.id_alamatuser = idAddress;
     }
-    const address = await this.where(query).fetch();
-    return address;
+    return await this.where(query).fetch();
   }
 
   /**
    * Check if there are other primary address beside the supplied idAddress
-   * @param {number} user id
-   * @param {number} OPTIONAL address id
+   * @param idUser {integer} user id
+   * @param idAddress {integer} OPTIONAL address id
    */
   static async checkOtherPrimary(idUser, idAddress) {
     const address = await this.query({
@@ -163,8 +161,8 @@ class AddressModel extends bookshelf.Model {
 
   /**
    * Get store address
-   * @param {number} userId
-   * @param {number} districtId
+   * @param {integer} userId
+   * @param {integer} districtId
    */
   static async getStoreAddress(userId, districtId) {
     const param = {

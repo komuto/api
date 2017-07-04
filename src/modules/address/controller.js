@@ -1,11 +1,13 @@
 import { Address, Province, District, SubDistrict, Village } from './model';
+import { getMsg, createMsg, addressMsg } from './message';
 import { BadRequestError } from '../../../common/errors';
 
 export const AddressController = {};
 export default { AddressController };
 
 AddressController.getPrimaryAddress = async (req, res, next) => {
-  const address = await Address.getFullAddress(req.user.id, true);
+  let address = await Address.getFullAddress(req.user.id, true);
+  if (!address) address = {};
   req.resData = {
     message: 'Address Information',
     data: address,
@@ -15,6 +17,7 @@ AddressController.getPrimaryAddress = async (req, res, next) => {
 
 AddressController.getAddress = async (req, res, next) => {
   const address = await Address.getFullAddress(req.user.id, false, req.params.id);
+  if (!address) throw new BadRequestError(getMsg.title, addressMsg.not_found);
   req.resData = {
     message: 'Address Information',
     data: address,
@@ -23,7 +26,8 @@ AddressController.getAddress = async (req, res, next) => {
 };
 
 AddressController.getListAddress = async (req, res, next) => {
-  const addresses = await Address.getFullAddressAll(req.user.id);
+  let addresses = await Address.getFullAddressAll(req.user.id);
+  if (!addresses) addresses = [];
   req.resData = {
     message: 'Address Information',
     data: addresses,
@@ -73,7 +77,7 @@ AddressController.getVillages = async (req, res, next) => {
 AddressController.createAddress = async (req, res, next) => {
   if (req.body.is_primary) {
     if (await Address.checkPrimary(req.user.id)) {
-      throw new BadRequestError('Email primary sudah terdaftar');
+      throw new BadRequestError(createMsg.title, addressMsg.duplicate_primary);
     }
   }
   req.body.user_id = req.user.id;
@@ -85,18 +89,11 @@ AddressController.createAddress = async (req, res, next) => {
 
 AddressController.updateAddress = async (req, res, next) => {
   if (req.body.is_primary !== undefined) {
-    // Switch status when there are other primary address
+    // Change primary address status to this if there are other primary address
     if (req.body.is_primary) {
       const address = await Address.checkOtherPrimary(req.user.id, req.params.id);
       if (address) {
         await Address.update({ id_alamatuser: address.id }, { alamat_primary: '0' });
-      }
-    } else {
-      // Case when changing primary address to non primary
-      // without changing other address to primary
-      const address = Address.checkPrimary(req.user.id, req.params.id);
-      if (address) {
-        throw new BadRequestError('Harus mempunyai alamat primary');
       }
     }
     req.body.is_primary = req.body.is_primary ? '1' : '0';
@@ -106,9 +103,6 @@ AddressController.updateAddress = async (req, res, next) => {
 };
 
 AddressController.deleteAddress = async (req, res, next) => {
-  if (!await Address.checkPrimary(req.user.id, req.params.id)) {
-    throw new BadRequestError('Harus mempunyai alamat primary');
-  }
   await Address.delete(req.params.id);
   return next();
 };

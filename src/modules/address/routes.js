@@ -1,7 +1,6 @@
 import express from 'express';
 import { AddressController } from './controller';
 import core from '../core';
-import config from '../../../config';
 import { validateCreate, validateUpdate } from './middleware';
 
 const routes = express.Router();
