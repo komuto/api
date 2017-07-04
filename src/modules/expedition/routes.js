@@ -26,12 +26,20 @@ routes.get('/expeditions/services',
   apiResponse());
 
 /**
- * GET /expeditions/services
+ * GET /expeditions/:id/services
  * View expedition service
  */
 routes.get('/expeditions/:id/services',
   cache(),
   wrap(ExpeditionController.getExpeditionService),
+  apiResponse());
+
+/**
+ * GET /expeditions/:id/cost
+ * View expedition cost
+ */
+routes.post('/expeditions/:id/cost',
+  wrap(ExpeditionController.getExpeditionCost),
   apiResponse());
 
 export default routes;

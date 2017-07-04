@@ -32,7 +32,7 @@ ExpeditionController.getListExpeditionServices = async (req, res, next) => {
   });
 
   req.resData = {
-    message: 'Expedition services Data',
+    message: 'Expedition Services Data',
     data: services,
   };
   return next();
@@ -44,8 +44,20 @@ ExpeditionController.getListExpeditionServices = async (req, res, next) => {
 ExpeditionController.getExpeditionService = async (req, res, next) => {
   const services = await ExpeditionService.get({ id_ekspedisi: req.params.id });
   req.resData = {
-    message: 'Expedition services Data',
+    message: 'Expedition Services Data',
     data: services,
+  };
+  return next();
+};
+
+/**
+ * Get expedition cost
+ */
+ExpeditionController.getExpeditionCost = async (req, res, next) => {
+  const cost = await Expedition.getCost(req.params.id, req.body);
+  req.resData = {
+    message: 'Expedition Cost Data',
+    data: cost,
   };
   return next();
 };
