@@ -1,7 +1,6 @@
 import moment from 'moment';
 import md5 from 'md5';
 import core from '../../core';
-import { BadRequestError } from '../../../../common/errors';
 
 const bookshelf = core.postgres.db;
 
@@ -64,7 +63,7 @@ class UserTokenModel extends bookshelf.Model {
       status_tokenuser: TokenStatus.ACTIVE,
     }).fetch();
     if (!token) {
-      throw new BadRequestError('Token not found');
+      return false;
     }
     return token.get('id_users');
   }

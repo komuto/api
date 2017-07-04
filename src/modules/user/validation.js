@@ -1,3 +1,5 @@
+import { emailMsg, genderMsg } from './message';
+
 const constraints = {};
 
 /**
@@ -6,7 +8,7 @@ const constraints = {};
 constraints.login = {
   email: {
     presence: true,
-    email: { message: 'is not a valid email' },
+    email: { message: emailMsg.not_valid },
   },
   password: {
     presence: true,
@@ -32,20 +34,20 @@ constraints.registration = {
   name: { presence: true },
   email: {
     presence: true,
-    email: { message: 'is not a valid email' },
+    email: { message: emailMsg.not_valid },
   },
   password: { presence: true },
   gender: {
     presence: true,
-    format: { pattern: /^male|female$/, message: 'is not a valid gender' },
+    format: { pattern: /^male|female$/, message: genderMsg.not_valid },
   },
   phone_number: { presence: true },
 };
 
 constraints.update = {
-  email: { email: { message: 'is not a valid email' } },
+  email: { email: { message: emailMsg.not_valid } },
   approval_cooperative_status: { pattern: /^[0-4]$/ },
-  gender: { format: { pattern: /^male|female$/, message: 'is not a valid gender' } },
+  gender: { format: { pattern: /^male|female$/, message: genderMsg.not_valid } },
   status: { pattern: /^[0-3]$/ },
 };
 

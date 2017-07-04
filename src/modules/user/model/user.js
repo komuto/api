@@ -7,6 +7,7 @@ import '../../store/model';
 import './wishlist';
 import '../../product/model/product';
 
+
 const bookshelf = core.postgres.db;
 
 // used by bcrypt to generate new salt

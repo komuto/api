@@ -4,6 +4,7 @@ import { User, UserToken, TokenType } from './model';
 import { UserEmail } from './email';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
+import { registrationMsg, updateMsg, userMsg, emailMsg, activateMsg, resetPassMsg, tokenMsg } from './message';
 
 const fb = new Facebook(config.fb);
 
@@ -91,7 +92,7 @@ UserController.updateUser = async (req, res, next) => {
 UserController.updatePassword = async (req, res, next) => {
   const user = await new User({ email_users: req.body.email }).fetch();
   if (!user) {
-    throw new BadRequestError('Invalid user.');
+    throw new BadRequestError(updateMsg.title, userMsg.not_found);
   }
   if (await user.checkPassword(req.body.old_password)) {
     const password = User.hashPasswordSync(req.body.password);
@@ -106,7 +107,7 @@ UserController.updatePassword = async (req, res, next) => {
 UserController.createUser = async (req, res, next) => {
   let user = await User.getByEmail(req.body.email);
   if (user) {
-    throw new BadRequestError('Email sudah terdaftar.');
+    throw new BadRequestError(registrationMsg.title, emailMsg.duplicate);
   }
   const password = req.body.password;
   req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
@@ -133,7 +134,7 @@ UserController.getProfile = async (req, res, next) => {
 UserController.forgotPassword = async (req, res, next) => {
   const user = await User.getByEmail(req.body.email);
   if (!user) {
-    throw new BadRequestError('Email belum terdaftar');
+    throw new BadRequestError(updateMsg.title, emailMsg.not_found);
   }
   const token = await UserToken.generateToken(user.id, TokenType.FORGOT_PASSWORD);
   UserEmail.send(UserEmail.buildForgotPassword(req.body.email, token));
@@ -143,7 +144,7 @@ UserController.forgotPassword = async (req, res, next) => {
 UserController.checkEmail = async (req, res, next) => {
   const user = await User.getByEmail(req.body.email);
   if (user) {
-    throw new BadRequestError('Email sudah terdaftar');
+    throw new BadRequestError(registrationMsg.title, emailMsg.not_available);
   }
   req.resData = { message: 'Email Available' };
   return next();
@@ -151,6 +152,7 @@ UserController.checkEmail = async (req, res, next) => {
 
 UserController.activateUser = async (req, res, next) => {
   const id = await UserToken.getId(req.query.token, TokenType.EMAIL_ACTIVATION);
+  if (!id) throw new BadRequestError(activateMsg.title, tokenMsg.not_valid);
   await User.activate(id);
   await UserToken.expire(req.query.token);
   return next();
@@ -162,6 +164,7 @@ UserController.activateUser = async (req, res, next) => {
 UserController.checkToken = async (req, res, next) => {
   const token = req.query.token || req.body.token;
   req.id = await UserToken.getId(token, TokenType.FORGOT_PASSWORD);
+  if (!req.id) throw new BadRequestError(resetPassMsg.title, tokenMsg.not_valid);
   req.token = token;
   return next();
 };

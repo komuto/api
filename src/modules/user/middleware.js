@@ -5,6 +5,7 @@ import constraints from './validation';
 import utils from '../../../common/utils';
 import { BadRequestError } from '../../../common/errors';
 import { jwt as jwtOptions } from '../../../config';
+import { loginMsg, registrationMsg, updateMsg, userMsg } from './message';
 
 export const ROLE_ALL = '*';
 
@@ -61,19 +62,19 @@ function formatValidation(rules, msg) {
  * @param
  */
 export function validateLogin() {
-  return formatValidation(constraints.login, 'Login failed');
+  return formatValidation(constraints.login, loginMsg.title);
 }
 
 export function validateSocialLogin() {
-  return formatValidation(constraints.socialLogin, 'Login failed');
+  return formatValidation(constraints.socialLogin, loginMsg.title);
 }
 
 export function validateRegistration() {
-  return formatValidation(constraints.registration, 'Registration failed');
+  return formatValidation(constraints.registration, registrationMsg.title);
 }
 
 export function validateUpdate() {
-  return formatValidation(constraints.update, 'User update failed');
+  return formatValidation(constraints.update, updateMsg.title);
 }
 
 /**
@@ -90,7 +91,7 @@ export function addToken(req, res, next) {
  */
 export function userData(req, res, next) {
   if (!req.user) {
-    return next(new BadRequestError('Invalid user'));
+    return next(new BadRequestError(userMsg.not_found));
   }
 
   req.resData = {
