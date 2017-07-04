@@ -27,12 +27,12 @@ routes.get('/categories/sub',
   apiResponse());
 
 /**
- * GET /categories/:id/sub-categories
+ * GET /categories/:id
  * View list of sub categories
  */
-routes.get('/categories/:id/sub-categories',
+routes.get('/categories/:id',
   cache(),
-  wrap(CategoryController.getCategories),
+  wrap(CategoryController.getDetailCategories),
   apiResponse());
 
 /**

@@ -4,14 +4,10 @@ import { Brand } from '../brand';
 export const CategoryController = {};
 export default { CategoryController };
 
-/**
- * Get categories
- */
-CategoryController.getCategories = async (req, res, next) => {
-  const id = typeof req.params.id !== 'undefined' ? req.params.id : 0;
-  const categories = await Category.get({ parentid_kategoriproduk: id });
+CategoryController.getDetailCategories = async (req, res, next) => {
+  const categories = await Category.getDetailCategories(req.params.id);
   req.resData = {
-    message: 'Categories Data',
+    message: 'Category List Data',
     data: categories,
   };
   return next();

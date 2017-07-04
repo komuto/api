@@ -11,6 +11,7 @@ class CategoryModel extends bookshelf.Model {
   get tableName() {
     return 'kategori_produk';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_kategoriproduk';
@@ -44,6 +45,19 @@ class CategoryModel extends bookshelf.Model {
   static async get(condition = null) {
     condition = _.omitBy(condition, _.isNil);
     return await this.where(condition).fetchAll();
+  }
+
+  /**
+   * Get categories and subcategories
+   */
+  static async getDetailCategories(id) {
+    const category = await this.where({ id_kategoriproduk: id }).fetch({ withRelated: ['subcategories'] });
+    if (!category) throw new BadRequestError('No category found');
+    const subCategories = category.related('subcategories');
+    return {
+      ...category.serialize(),
+      sub_categories: subCategories,
+    };
   }
 
   /**
