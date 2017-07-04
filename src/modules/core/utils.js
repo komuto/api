@@ -32,3 +32,15 @@ export function config(key, defaultValue) {
 
   return cfg[key];
 }
+
+/**
+ * Wrapper function for default value
+ * @param {*} key
+ * @param {*} defaultValue
+ * @param {*} transform
+ */
+export function input(key, defaultValue, transform = null) {
+  if (key === undefined) return defaultValue;
+  if (transform) return transform;
+  return key;
+}

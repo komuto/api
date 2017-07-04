@@ -7,7 +7,7 @@ import '../../store/model';
 import './wishlist';
 import '../../product/model/product';
 
-
+const input = core.utils.input;
 const bookshelf = core.postgres.db;
 
 // used by bcrypt to generate new salt
@@ -201,23 +201,22 @@ class UserModel extends bookshelf.Model {
 UserModel.prototype.serialize = function () {
   return {
     id: this.attributes.id_users,
-    marketplace_id: this.attributes.marketplaceuser ? this.attributes.marketplaceuser : null,
+    marketplace_id: input(this.attributes.marketplaceuser, null),
     name: this.attributes.namalengkap_users,
     email: this.attributes.email_users,
-    cooperative_member_number: this.attributes.no_anggotakoperasi_users ?
-      this.attributes.no_anggotakoperasi_users : null,
+    cooperative_member_number: input(this.attributes.no_anggotakoperasi_users, null),
     approval_cooperative_status: this.attributes.approval_koperasi_users,
-    photo: this.attributes.pathfoto_users ? this.attributes.pathfoto_users : null,
-    phone_number: this.attributes.nohp_users ? this.attributes.nohp_users : null,
+    photo: input(this.attributes.pathfoto_users),
+    phone_number: input(this.attributes.nohp_users, null),
     gender: this.attributes.jeniskelamin_users === 'L' ? 'male' : 'female',
     status: parseInt(this.attributes.status_users, 10),
-    mother_name: this.attributes.ibukandung_users ? this.attributes.ibukandung_users : null,
-    auth_key: this.attributes.auth_key ? this.attributes.auth_key : null,
-    saldo_wallet: this.attributes.saldo_wallet ? this.attributes.saldo_wallet : 0,
-    place_of_birth: this.attributes.kota_lahir ? this.attributes.kota_lahir : null,
-    date_of_birth: this.attributes.tgl_lahir ? this.attributes.tgl_lahir : null,
+    mother_name: input(this.attributes.ibukandung_users, 'asdasd'),
+    auth_key: input(this.attributes.auth_key, null),
+    saldo_wallet: input(this.attributes.saldo_wallet, 0),
+    place_of_birth: input(this.attributes.kota_lahir, null),
+    date_of_birth: input(this.attributes.tgl_lahir, null),
     created_at: moment(this.attributes.tgl_create_users).unix(),
-    join_at: this.attributes.tgl_join_koperasi ? this.attributes.tgl_join_koperasi : null,
+    join_at: input(this.attributes.tgl_join_koperasi, null),
     status_at: moment(this.attributes.tglstatus_users).unix(),
     provider_name: this.attributes.hybridauth_provider_name,
     provider_uid: this.attributes.hybridauth_provider_uid,

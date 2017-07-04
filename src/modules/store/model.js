@@ -2,6 +2,7 @@ import moment from 'moment';
 import core from '../core';
 import '../user/model/user';
 
+const input = core.utils.input;
 const bookshelf = core.postgres.db;
 const IMAGE_PATH = 'toko';
 
@@ -31,29 +32,33 @@ class StoreModel extends bookshelf.Model {
 }
 
 StoreModel.prototype.serialize = function () {
+  const attr = this.attributes;
   return {
-    id: this.attributes.id_toko,
-    user_id: this.attributes.id_users,
-    name: this.attributes.nama_toko,
-    slogan: this.attributes.slogan_toko,
-    description: this.attributes.deskripsi_toko,
-    logo: core.imagePath(IMAGE_PATH, this.attributes.logo_toko),
-    custom_domain: this.attributes.custom_domain,
-    status: parseInt(this.attributes.status_toko, 10),
-    remarks_status: this.attributes.remarks_status_toko,
-    cover_image: this.attributes.pathcoverimage_toko ?
-      core.imagePath(IMAGE_PATH, this.attributes.pathcoverimage_toko) : null,
-    seller_theme_id: this.attributes.identifier_themesseller,
-    reputation: this.attributes.reputasi_toko,
-    store_id_number: this.attributes.no_ktp_toko,
-    total_favorite: this.attributes.jumlahfavorit_toko,
-    note: this.attributes.note,
-    created_at: moment(this.attributes.tgl_create_toko).unix(),
-    status_at: moment(this.attributes.tglstatus_toko).unix(),
-    verification_at: moment(this.attributes.tanggal_verifikasi).unix(),
-    is_verified: !!this.attributes.sampai_tanggal,
-    start_at: this.attributes.mulai_tanggal ? moment(this.attributes.mulai_tanggal).unix() : null,
-    end_at: this.attributes.sampai_tanggal ? moment(this.attributes.sampai_tanggal).unix() : null,
+    id: attr.id_toko,
+    user_id: attr.id_users,
+    name: attr.nama_toko,
+    slogan: attr.slogan_toko,
+    description: attr.deskripsi_toko,
+    logo: core.imagePath(IMAGE_PATH, attr.logo_toko),
+    custom_domain: attr.custom_domain,
+    status: parseInt(attr.status_toko, 10),
+    remarks_status: attr.remarks_status_toko,
+    cover_image: input(
+      attr.pathcoverimage_toko,
+      null,
+      core.imagePath(IMAGE_PATH, attr.pathcoverimage_toko)
+    ),
+    seller_theme_id: attr.identifier_themesseller,
+    reputation: attr.reputasi_toko,
+    store_id_number: attr.no_ktp_toko,
+    total_favorite: attr.jumlahfavorit_toko,
+    note: attr.note,
+    created_at: moment(attr.tgl_create_toko).unix(),
+    status_at: moment(attr.tglstatus_toko).unix(),
+    verification_at: moment(attr.tanggal_verifikasi).unix(),
+    is_verified: !!attr.sampai_tanggal,
+    start_at: input(attr.mulai_tanggal, null, moment(attr.mulai_tanggal).unix()),
+    end_at: input(attr.sampai_tanggal, null, moment(attr.sampai_tanggal).unix()),
   };
 };
 
