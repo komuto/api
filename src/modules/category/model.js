@@ -66,7 +66,7 @@ CategoryModel.prototype.serialize = function () {
   return {
     id: this.attributes.id_kategoriproduk,
     parent_id: this.attributes.parentid_kategoriproduk,
-    icon: this.attributes.iconpath_kategoriproduk,
+    icon: core.assetPath(this.attributes.iconpath_kategoriproduk),
     name: this.attributes.nama_kategoriproduk,
     slug: slug(this.attributes.nama_kategoriproduk, { lower: true, charmap: '' }),
   };

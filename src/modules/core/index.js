@@ -7,6 +7,8 @@ import routes from './routes';
 import cache from './cache';
 import config from '../../../config';
 
-const imagePath = (path, file) => `${config.imageUrl}/${path}/${file}`;
+const imagePath = (path, file) => `${config.assetUrl}/uploads/${path}/${file}`;
 
-export default { utils, controller, middleware, postgres, routes, cache, imagePath };
+const assetPath = file => `${config.assetUrl}/images/img-kategori/${file}`;
+
+export default { utils, controller, middleware, postgres, routes, cache, imagePath, assetPath };
