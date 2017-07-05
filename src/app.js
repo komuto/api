@@ -22,6 +22,7 @@ import brand from './modules/brand';
 import product from './modules/product';
 import bank from './modules/bank';
 import review from './modules/review';
+import store from './modules/store';
 
 const app = express();
 
@@ -95,6 +96,7 @@ app.use(brand.routes);
 app.use(product.routes);
 app.use(bank.routes);
 app.use(review.routes);
+app.use(store.routes);
 
 app.use((req, res, next) => {
   const err = new Error('Path Not Found');

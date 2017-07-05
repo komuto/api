@@ -48,6 +48,7 @@
     "sendgrid": "^5.1.1",
     "sharp": "^0.17.2",
     "slug": "^0.9.1",
+    "to-title-case": "^1.0.0",
     "uuid": "^3.0.1",
     "validate.js": "^0.11.1",
     "winston": "^2.3.1",

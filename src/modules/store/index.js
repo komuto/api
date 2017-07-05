@@ -1,3 +1,4 @@
 import * as model from './model';
+import routes from './routes';
 
-export default { model };
+export default { model, routes };
