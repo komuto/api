@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import toTitleCase from 'to-title-case';
 import core from '../../core';
 import './address';
 
@@ -58,7 +59,7 @@ class ProvinceModel extends bookshelf.Model {
 ProvinceModel.prototype.serialize = function () {
   return {
     id: this.attributes.id_provinsi,
-    name: this.attributes.nama_provinsi,
+    name: toTitleCase(this.attributes.nama_provinsi),
   };
 };
 

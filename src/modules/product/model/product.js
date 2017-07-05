@@ -7,7 +7,7 @@ import './imageProduct';
 import '../../category/model';
 import '../../review/model';
 
-const input = core.utils.input;
+const { input } = core.utils;
 const { Address } = model;
 const bookshelf = core.postgres.db;
 

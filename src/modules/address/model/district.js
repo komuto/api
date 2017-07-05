@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import toTitleCase from 'to-title-case';
 import core from '../../core';
 import './address';
 
@@ -59,7 +60,7 @@ DistrictModel.prototype.serialize = function () {
   return {
     id: this.attributes.id_kotakab,
     ro_id: this.attributes.id_ro,
-    name: this.attributes.nama_kotakab,
+    name: toTitleCase(this.attributes.nama_kotakab),
   };
 };
 
