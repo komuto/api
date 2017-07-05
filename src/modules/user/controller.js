@@ -5,10 +5,12 @@ import { UserEmail } from './email';
 import { utils } from '../core';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
+import { model } from '../store';
 import { registrationMsg, updateMsg, emailMsg, activateMsg, resetPassMsg, tokenMsg, loginMsg, fbMsg } from './message';
 
 const fb = new Facebook(config.fb);
 const { formatSingularErr } = utils;
+const { Catalog } = model;
 
 export const UserController = {};
 export default { UserController };
@@ -209,9 +211,20 @@ UserController.resetPassword = async (req, res, next) => {
 UserController.getWishlist = async (req, res, next) => {
   const products = await User.getWishlist(req.user.id);
   req.resData = {
-    status: true,
     message: 'Products Wishlist Data',
     data: products,
+  };
+  return next();
+};
+
+/**
+ * Get store catalog
+ */
+UserController.getUserCatalog = async (req, res, next) => {
+  const catalogs = await Catalog.getUserCatalog(req.user.id);
+  req.resData = {
+    message: 'Store Catalog Data',
+    data: catalogs,
   };
   return next();
 };
