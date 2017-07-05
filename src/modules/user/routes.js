@@ -103,6 +103,15 @@ routes.get('/users/wishlist',
   apiResponse());
 
 /**
+ * GET /users/store/catalogs
+ * Get the user's store catalogs
+ */
+routes.get('/users/store/catalogs',
+  auth(),
+  wrap(UserController.getUserCatalog),
+  apiResponse());
+
+/**
  * POST /passwords/forgot
  * Generate reset link sent through email
  */

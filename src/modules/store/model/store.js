@@ -1,6 +1,7 @@
 import moment from 'moment';
 import core from '../../core';
 import './catalog';
+import '../../user/model/user';
 
 const { input } = core.utils;
 const bookshelf = core.postgres.db;
