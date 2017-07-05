@@ -40,7 +40,7 @@ export function config(key, defaultValue) {
  * @param {*} transform
  */
 export function input(key, defaultValue, transform = null) {
-  if (key === undefined) return defaultValue;
+  if (key === undefined || !key) return defaultValue;
   if (transform) return transform;
   return key;
 }
