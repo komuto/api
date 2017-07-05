@@ -1,6 +1,9 @@
 import { Address, Province, District, SubDistrict, Village } from './model';
 import { getMsg, createMsg, addressMsg } from './message';
 import { BadRequestError } from '../../../common/errors';
+import { utils } from '../core';
+
+const { formatSingularErr } = utils;
 
 export const AddressController = {};
 export default { AddressController };
@@ -17,7 +20,7 @@ AddressController.getPrimaryAddress = async (req, res, next) => {
 
 AddressController.getAddress = async (req, res, next) => {
   const address = await Address.getFullAddress(req.user.id, false, req.params.id);
-  if (!address) throw new BadRequestError(getMsg.title, addressMsg.not_found);
+  if (!address) throw new BadRequestError(getMsg.title, formatSingularErr('address', addressMsg.not_found));
   req.resData = {
     message: 'Address Information',
     data: address,
@@ -77,7 +80,7 @@ AddressController.getVillages = async (req, res, next) => {
 AddressController.createAddress = async (req, res, next) => {
   if (req.body.is_primary) {
     if (await Address.checkPrimary(req.user.id)) {
-      throw new BadRequestError(createMsg.title, addressMsg.duplicate_primary);
+      throw new BadRequestError(createMsg.title, formatSingularErr('address', addressMsg.duplicate_primary));
     }
   }
   req.body.user_id = req.user.id;

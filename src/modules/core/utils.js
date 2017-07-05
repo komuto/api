@@ -44,3 +44,14 @@ export function input(key, defaultValue, transform = null) {
   if (transform) return transform;
   return key;
 }
+
+/**
+ * Format error other than validate.js, for consistent error response.
+ * Singular because once the error encountered the api will throw the error,
+ * thus not allowing it to have multiple error messages
+ * @param obj {string} the object property of the message
+ * @param message {string}
+ */
+export function formatSingularErr(obj, message) {
+  return { [obj]: [message] };
+}

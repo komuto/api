@@ -1,6 +1,6 @@
 const Message = {
   loginMsg: {
-    wrong_password: { password: 'Password salah' },
+    wrong_password: 'Password salah',
     title: 'Login gagal',
   },
   registrationMsg: {
@@ -16,27 +16,27 @@ const Message = {
     title: 'Update user gagal',
   },
   emailMsg: {
-    not_valid: { email: 'Email tidak valid' },
-    not_found: { email: 'Email tidak terdaftar' },
-    duplicate: { email: 'Email sudah terdaftar' },
-    not_available: { email: 'Email sudah terdaftar' },
+    not_valid: 'Email tidak valid',
+    not_found: 'Email tidak terdaftar',
+    duplicate: 'Email sudah terdaftar',
+    not_available: 'Email sudah terdaftar',
     presence: 'harus diisi',
   },
   userMsg: {
-    not_found: { token: 'User tidak terdaftar' },
+    not_found: 'User tidak terdaftar',
   },
   genderMsg: {
-    not_valid: { gender: 'Jenis kelamin tidak valid' },
+    not_valid: 'Jenis kelamin tidak valid',
     presence: 'harus diisi',
   },
   tokenMsg: {
-    not_valid: { token: 'Token tidak valid' },
+    not_valid: 'Token tidak valid',
     presence: 'harus diisi',
   },
   fbMsg: {
-    session_expired: { session: 'Sesi user atau access token telah expired' },
-    api_down: { fb: 'Tidak bisa mengakses facebook api' },
-    permission_denied: { permission: 'Belum diberikan permisi seperlunya untuk bisa mengakses' },
+    session_expired: 'Sesi user atau access token telah expired',
+    api_down: 'Tidak bisa mengakses facebook api',
+    permission_denied: 'Belum diberikan permisi seperlunya untuk bisa mengakses',
   },
   passwordMsg: {
     presence: 'harus diisi',
@@ -52,6 +52,12 @@ const Message = {
   },
   uidMsg: {
     presence: 'harus diisi',
+  },
+  apprCoopMsg: {
+    not_valid: 'Approval cooperative status tidak valid',
+  },
+  statusMsg: {
+    not_valid: 'Status tidak valid',
   },
 };
 
