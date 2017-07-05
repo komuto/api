@@ -8,13 +8,14 @@ import { ReviewController } from '../review';
 const routes = express.Router();
 const { wrap } = core.utils;
 const { apiResponse, auth } = core.middleware;
-const cache = core.cache;
+const { cache } = core;
 
 /**
  * GET /products
  * View list of products
  */
 routes.get('/products',
+  auth(false),
   cache('5 minutes'),
   validateParam(constraints.list),
   wrap(ProductController.index),

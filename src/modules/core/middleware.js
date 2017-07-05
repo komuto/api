@@ -46,10 +46,10 @@ export function apiResponse() {
   };
 }
 
-export function auth() {
+export function auth(authorization = true) {
   return (req, res, next) => {
     passport.authenticate('jwt', (err, user) => {
-      if (!user) {
+      if (!user && authorization) {
         err = new AuthorizationError('unauthorized');
         return next(err);
       }
