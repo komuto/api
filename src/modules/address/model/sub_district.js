@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import toTitleCase from 'to-title-case';
 import core from '../../core';
 import './address';
 
@@ -58,7 +59,7 @@ class SubDistrictModel extends bookshelf.Model {
 SubDistrictModel.prototype.serialize = function () {
   return {
     id: parseInt(this.attributes.id_kecamatan, 10),
-    name: this.attributes.nama_kecamatan,
+    name: toTitleCase(this.attributes.nama_kecamatan),
   };
 };
 

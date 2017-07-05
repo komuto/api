@@ -19,14 +19,17 @@ class ReviewModel extends bookshelf.Model {
     return this.belongsTo('User', 'id_users');
   }
 
+  product() {
+    return this.belongsTo('Product', 'id_produk');
+  }
+
   /**
    * Create a new line item
    * @param {Object} data
    */
   static async create(data) {
     data.tgl_ulasanproduk = moment();
-    const review = await new this(data).save();
-    return review;
+    return await new this(data).save();
   }
 
   /**
@@ -109,8 +112,8 @@ ReviewModel.prototype.serialize = function (full = false) {
   const review = {
     id: this.attributes.id_ulasanproduk,
     review: this.attributes.isi_ulasanproduk,
-    quality: this.attributes.kualitasproduk,
-    accuracy: this.attributes.akurasiproduk,
+    quality: parseInt(this.attributes.kualitasproduk, 10),
+    accuracy: parseInt(this.attributes.akurasiproduk, 10),
     created_at: moment(this.attributes.tgl_ulasanproduk).unix(),
   };
   if (full) review.product_id = this.attributes.id_produk;
