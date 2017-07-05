@@ -2,10 +2,6 @@ import _ from 'lodash';
 import moment from 'moment';
 import core from '../../core';
 import { model } from '../../address';
-import '../../store/model';
-import './imageProduct';
-import '../../category/model';
-import '../../review/model';
 
 const { input } = core.utils;
 const { Address } = model;
