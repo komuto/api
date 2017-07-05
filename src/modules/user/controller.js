@@ -2,11 +2,13 @@ import { Facebook } from 'fb';
 import passport from 'passport';
 import { User, UserToken, TokenType } from './model';
 import { UserEmail } from './email';
+import { utils } from '../core';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
-import { registrationMsg, updateMsg, userMsg, emailMsg, activateMsg, resetPassMsg, tokenMsg, loginMsg, fbMsg } from './message';
+import { registrationMsg, updateMsg, emailMsg, activateMsg, resetPassMsg, tokenMsg, loginMsg, fbMsg } from './message';
 
 const fb = new Facebook(config.fb);
+const { formatSingularErr } = utils;
 
 export const UserController = {};
 export default { UserController };
@@ -14,10 +16,10 @@ export default { UserController };
 function formatFbError(code, e) {
   const session = [102, 190, 458, 459, 460, 463, 464, 467];
   const down = [1, 2, 4, 17, 341, 368];
-  if (session.includes(code) || code === 'OAuthException') return fbMsg.session_expired;
+  if (session.includes(code) || code === 'OAuthException') return formatSingularErr('session', fbMsg.session_expired);
   else if (down.includes(code)) return fbMsg.api_down;
   // code 10 and 200-299 for not granted permission
-  else if (code === 10 || (code >= 200 && code < 300)) return fbMsg.permission_denied;
+  else if (code === 10 || (code >= 200 && code < 300)) return formatSingularErr('permission', fbMsg.permission_denied);
   // Code outside above range, use original fb message
   return e.message;
 }
@@ -114,7 +116,7 @@ UserController.updateUser = async (req, res, next) => {
 UserController.updatePassword = async (req, res, next) => {
   const user = await new User({ email_users: req.body.email }).fetch();
   if (!user) {
-    throw new BadRequestError(updateMsg.title, userMsg.not_found);
+    throw new BadRequestError(updateMsg.title, formatSingularErr('email', emailMsg.not_found));
   }
   if (await user.checkPassword(req.body.old_password)) {
     const password = User.hashPasswordSync(req.body.password);
@@ -129,7 +131,7 @@ UserController.updatePassword = async (req, res, next) => {
 UserController.createUser = async (req, res, next) => {
   let user = await User.getByEmail(req.body.email);
   if (user) {
-    throw new BadRequestError(registrationMsg.title, emailMsg.duplicate);
+    throw new BadRequestError(registrationMsg.title, formatSingularErr('email', emailMsg.duplicate));
   }
   const password = req.body.password;
   req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
@@ -156,7 +158,7 @@ UserController.getProfile = async (req, res, next) => {
 UserController.forgotPassword = async (req, res, next) => {
   const user = await User.getByEmail(req.body.email);
   if (!user) {
-    throw new BadRequestError(updateMsg.title, emailMsg.not_found);
+    throw new BadRequestError(updateMsg.title, formatSingularErr('email', emailMsg.not_found));
   }
   const token = await UserToken.generateToken(user.id, TokenType.FORGOT_PASSWORD);
   UserEmail.send(UserEmail.buildForgotPassword(req.body.email, token));
@@ -166,7 +168,7 @@ UserController.forgotPassword = async (req, res, next) => {
 UserController.checkEmail = async (req, res, next) => {
   const user = await User.getByEmail(req.body.email);
   if (user) {
-    throw new BadRequestError(registrationMsg.title, emailMsg.not_available);
+    throw new BadRequestError(registrationMsg.title, formatSingularErr('email', emailMsg.not_available));
   }
   req.resData = { message: 'Email Available' };
   return next();
@@ -174,7 +176,7 @@ UserController.checkEmail = async (req, res, next) => {
 
 UserController.activateUser = async (req, res, next) => {
   const id = await UserToken.getId(req.query.token, TokenType.EMAIL_ACTIVATION);
-  if (!id) throw new BadRequestError(activateMsg.title, tokenMsg.not_valid);
+  if (!id) throw new BadRequestError(activateMsg.title, formatSingularErr('token', tokenMsg.not_valid));
   await User.activate(id);
   await UserToken.expire(req.query.token);
   return next();
@@ -186,7 +188,7 @@ UserController.activateUser = async (req, res, next) => {
 UserController.checkToken = async (req, res, next) => {
   const token = req.query.token || req.body.token;
   req.id = await UserToken.getId(token, TokenType.FORGOT_PASSWORD);
-  if (!req.id) throw new BadRequestError(resetPassMsg.title, tokenMsg.not_valid);
+  if (!req.id) throw new BadRequestError(resetPassMsg.title, formatSingularErr('token', tokenMsg.not_valid));
   req.token = token;
   return next();
 };

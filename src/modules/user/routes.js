@@ -89,6 +89,7 @@ routes.put('/users',
  * Change user password
  */
 routes.put('/users/password',
+  validateUpdate(),
   wrap(UserController.updatePassword),
   apiResponse());
 
