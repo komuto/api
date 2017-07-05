@@ -83,7 +83,7 @@
   "scripts": {
     "lint": "eslint src scripts tests",
     "check": "flow check",
-    "test": "jest --forceExit",
+    "test": "jest",
     "test:coverage": "jest --coverage",
     "build": "node scripts/build.js",
     "build:watch": "node scripts/build.js --watch",
@@ -100,7 +100,6 @@
       "src/**/*.{js,jsx}"
     ],
     "coverageDirectory": "<rootDir>/coverage/",
-    "mocksPattern": "(?:[\\/]|^)tests[\\/]mocks[\\/]",
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/src/server.js"
