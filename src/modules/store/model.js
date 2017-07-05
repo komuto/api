@@ -62,8 +62,8 @@ class StoreModel extends bookshelf.Model {
     products.each((product) => {
       store.total_product_sold += product.toJSON().count_sold;
       const productReviews = product.related('reviews').map((review) => {
-        quality = review.toJSON().quality;
-        accuracy = review.toJSON().accuracy;
+        quality += review.toJSON().quality;
+        accuracy += review.toJSON().accuracy;
         const { name, id: userId, photo } = review.related('user').serialize();
         const reviewProduct = review.related('product');
         const images = reviewProduct.related('images').serialize();
