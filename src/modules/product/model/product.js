@@ -73,7 +73,7 @@ class ProductModel extends bookshelf.Model {
    * Get products
    */
   static async get(params) {
-    const { page, pageSize, query, price, condition, address } = params;
+    const { page, pageSize, query, price, condition, address, userId } = params;
     let { where, sort, other, brands, services } = params;
     let relatedServices = null;
 
@@ -153,13 +153,14 @@ class ProductModel extends bookshelf.Model {
       });
 
     const results = [];
-    // eslint-disable-next-line no-restricted-syntax
-    for (let product of products.models) {
+    products.each(async (product) => {
       const store = product.related('store');
       const images = product.related('images');
       const likes = product.related('likes');
+      const isLiked = userId ? _.find(likes.models, o => o.attributes.id_users === userId) : false;
       product = product.toJSON();
       product.count_like = likes.length;
+      product.is_liked = !!isLiked;
       if (address) {
         const addressStore = await Address.getStoreAddress(store.toJSON().user_id, address);
         if (addressStore) {
@@ -168,7 +169,7 @@ class ProductModel extends bookshelf.Model {
       } else {
         results.push({ product, store, images });
       }
-    }
+    });
 
     return results;
   }
@@ -226,9 +227,9 @@ ProductModel.prototype.serialize = function () {
     name: attr.nama_produk,
     stock: attr.stock_produk,
     weight: attr.berat_produk,
-    type: input(attr.jenis_produk,undefined,parseInt(attr.jenis_produk, 10)),
+    type: input(attr.jenis_produk, undefined, parseInt(attr.jenis_produk, 10)),
     description: attr.deskripsi_produk,
-    price: input(attr.harga_produk,undefined,parseFloat(attr.harga_produk)),
+    price: input(attr.harga_produk, undefined, parseFloat(attr.harga_produk)),
     attrval: input(attr.attrval_produk, undefined, parseInt(attr.attrval_produk, 10)),
     status: input(attr.status_produk, undefined, parseInt(attr.status_produk, 10)),
     insurance: input(attr.asuransi_produk, undefined, parseInt(attr.asuransi_produk, 10)),
