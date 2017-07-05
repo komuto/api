@@ -3,7 +3,7 @@ import moment from 'moment';
 import rp from 'request-promise';
 import config from '../../../../config';
 import core from '../../core';
-import '../../store/model';
+import '../../store/model/store';
 import './wishlist';
 import '../../product/model/product';
 
