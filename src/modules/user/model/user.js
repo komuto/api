@@ -14,6 +14,7 @@ const bookshelf = core.postgres.db;
 // 8 rounds will produce about 40 hashes per second on a 2GHz core
 // see: https://www.npmjs.com/package/bcrypt
 const SALT_ROUND = 8;
+const IMAGE_PATH = 'user';
 
 export const UserRoles = {
   ROLE_ADMIN: 'admin',
@@ -206,11 +207,15 @@ UserModel.prototype.serialize = function () {
     email: this.attributes.email_users,
     cooperative_member_number: input(this.attributes.no_anggotakoperasi_users, null),
     approval_cooperative_status: this.attributes.approval_koperasi_users,
-    photo: input(this.attributes.pathfoto_users),
+    photo: input(
+      this.attributes.pathfoto_users,
+      null,
+      core.imagePath(IMAGE_PATH, this.attributes.pathfoto_users),
+    ),
     phone_number: input(this.attributes.nohp_users, null),
     gender: this.attributes.jeniskelamin_users === 'L' ? 'male' : 'female',
     status: parseInt(this.attributes.status_users, 10),
-    mother_name: input(this.attributes.ibukandung_users, 'asdasd'),
+    mother_name: input(this.attributes.ibukandung_users, null),
     auth_key: input(this.attributes.auth_key, null),
     saldo_wallet: input(this.attributes.saldo_wallet, 0),
     place_of_birth: input(this.attributes.kota_lahir, null),
