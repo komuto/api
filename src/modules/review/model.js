@@ -4,6 +4,7 @@ import '../user/model/user';
 import '../product/model/product';
 
 const bookshelf = core.postgres.db;
+const { parseNum, parseDate } = core.utils;
 
 class ReviewModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -34,7 +35,7 @@ class ReviewModel extends bookshelf.Model {
 
   /**
    * Get a line item by id other than primary id
-   * @param userId {Integer}
+   * @param userId {integer}
    * @param productId {integer}
    */
   static async getByOtherId(userId, productId) {
@@ -43,7 +44,7 @@ class ReviewModel extends bookshelf.Model {
 
   /**
    * Get a line item by id
-   * @param id {Integer}
+   * @param id {integer}
    */
   static async getById(id) {
     const review = await this.where({ id_ulasanproduk: id }).fetch({ withRelated: ['user'] });
@@ -57,8 +58,8 @@ class ReviewModel extends bookshelf.Model {
   /**
    * Get a line item by condition
    * @param data {Object}
-   * @param {Integer} pageSize limit
-   * @param {Integer} page
+   * @param {integer} pageSize limit
+   * @param {integer} page
    */
   static async getAll(data, { pageSize, page }) {
     const withRelated = ['user'];
@@ -112,9 +113,9 @@ ReviewModel.prototype.serialize = function (full = false) {
   const review = {
     id: this.attributes.id_ulasanproduk,
     review: this.attributes.isi_ulasanproduk,
-    quality: parseInt(this.attributes.kualitasproduk, 10),
-    accuracy: parseInt(this.attributes.akurasiproduk, 10),
-    created_at: moment(this.attributes.tgl_ulasanproduk).unix(),
+    quality: parseNum(this.attributes.kualitasproduk),
+    accuracy: parseNum(this.attributes.akurasiproduk),
+    created_at: parseDate(this.attributes.tgl_ulasanproduk),
   };
   if (full) review.product_id = this.attributes.id_produk;
   return review;
