@@ -11,7 +11,8 @@ const imagePath = (path, file) => {
   if (!file) return null;
   return `${config.assetUrl}/uploads/${path}/${file}`;
 };
-const assetPath = file => `${config.assetUrl}/images/img-kategori/${file}`;
+const categoryPath = file => `${config.assetUrl}/images/img-kategori/${file}`;
+const expeditionPath = file => `${config.assetUrl}/img/pengiriman/${file}`;
 const cache = apiCache.cache;
 const cacheClear = apiCache.cacheClear;
 
@@ -24,5 +25,6 @@ export default {
   cache,
   cacheClear,
   imagePath,
-  assetPath,
+  categoryPath,
+  expeditionPath,
 };
