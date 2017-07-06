@@ -20,6 +20,13 @@ class ServiceModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to Store
+   */
+  store() {
+    return this.belongsToMany('Store', 'detil_ekspedisitoko', 'id_ekspedisiservice', 'id_toko');
+  }
+
+  /**
    * Get expeditions by condition
    * @param {Object} condition
    */

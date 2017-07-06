@@ -112,6 +112,15 @@ routes.get('/users/store/catalogs',
   apiResponse());
 
 /**
+ * GET /users/store/expeditions
+ * Get the user's store expeditions
+ */
+routes.get('/users/store/expeditions',
+  auth(),
+  wrap(UserController.getUserExpeditions),
+  apiResponse());
+
+/**
  * POST /passwords/forgot
  * Generate reset link sent through email
  */

@@ -1,4 +1,5 @@
 import moment from 'moment';
+import _ from 'lodash';
 import core from '../../core';
 import './catalog';
 import '../../user/model/user';
@@ -37,6 +38,14 @@ class StoreModel extends bookshelf.Model {
    */
   catalogs() {
     return this.hasMany('Catalog', 'id_toko', 'id_toko');
+  }
+
+  /**
+   * Add relation to ExpeditionService
+   */
+  expeditionServices() {
+    return this.belongsToMany('ExpeditionService', 'detil_ekspedisitoko', 'id_toko', 'id_ekspedisiservice')
+      .withPivot(['status_ekspedisitoko']);
   }
 
   /**
@@ -149,6 +158,35 @@ class StoreModel extends bookshelf.Model {
         reviews,
       },
     };
+  }
+
+  /**
+   * Get list expedition service
+   * @param userId {integer} user id
+   */
+  static async getUserExpeditions(userId) {
+    const expeditions = [];
+    const store = await this.where({ id_users: userId }).fetch({
+      withRelated: [
+        {
+          expeditionServices: (qb) => {
+            qb.where('status_ekspedisitoko', '0');
+          },
+        },
+        'expeditionServices.expedition',
+      ],
+    });
+    const expeditionServices = store.related('expeditionServices');
+    expeditionServices.each((service) => {
+      const expedition = service.related('expedition').serialize();
+      const found = _.find(expeditions, { id: expedition.id });
+      if (found === undefined) {
+        expedition.services = [service];
+        return expeditions.push(expedition);
+      }
+      return found.services.push(service);
+    });
+    return expeditions;
   }
 }
 

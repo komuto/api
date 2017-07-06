@@ -10,7 +10,7 @@ import { registrationMsg, updateMsg, emailMsg, activateMsg, resetPassMsg, tokenM
 
 const fb = new Facebook(config.fb);
 const { formatSingularErr } = utils;
-const { Catalog } = model;
+const { Catalog, Store } = model;
 
 export const UserController = {};
 export default { UserController };
@@ -229,3 +229,14 @@ UserController.getUserCatalog = async (req, res, next) => {
   return next();
 };
 
+/**
+ * Get store expedition
+ */
+UserController.getUserExpeditions = async (req, res, next) => {
+  const expeditions = await Store.getUserExpeditions(req.user.id);
+  req.resData = {
+    message: 'Store Expeditions Data',
+    data: expeditions,
+  };
+  return next();
+};
