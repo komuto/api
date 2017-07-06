@@ -14,6 +14,7 @@ const Message = {
   },
   updateMsg: {
     title: 'Update user gagal',
+    not_valid: 'Update request field tidak valid',
   },
   emailMsg: {
     not_valid: 'Email tidak valid',

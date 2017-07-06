@@ -1,5 +1,7 @@
 import { Facebook } from 'fb';
 import passport from 'passport';
+import moment from 'moment';
+import _ from 'lodash';
 import { User, UserToken, TokenType } from './model';
 import { UserEmail } from './email';
 import { utils } from '../core';
@@ -107,8 +109,19 @@ UserController.getBalance = (req, res, next) => {
  * Update user
  */
 UserController.updateUser = async (req, res, next) => {
-  req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
-  await User.update({ id_users: req.user.id }, User.matchDBColumn(req.body));
+  const { name, cooperative_member_number, photo, phone_number, place_of_birth } = req.body;
+  let gender;
+  let dateOfBirth;
+  if (req.body.gender) gender = (req.body.gender === 'male') ? 'L' : 'P';
+  if (req.body.date_of_birth) dateOfBirth = moment.unix(req.body.date_of_birth);
+  // eslint-disable-next-line
+  const check = { name, cooperative_member_number, photo, phone_number, gender, place_of_birth, date_of_birth: dateOfBirth };
+  const data = _.omitBy(check, _.isUndefined);
+  if (_.isEmpty(data)) {
+    console.log('coming in');
+    throw new BadRequestError(updateMsg.title, formatSingularErr('field', updateMsg.not_valid));
+  }
+  await User.update({ id_users: req.user.id }, User.matchDBColumn(data));
   return next();
 };
 
@@ -249,18 +262,6 @@ UserController.getUserExpeditions = async (req, res, next) => {
   const expeditions = await Store.getUserExpeditions(req.user.id);
   req.resData = {
     message: 'Store Expeditions Data',
-    data: expeditions,
-  };
-  return next();
-};
-
-/**
- * Get store expedition manage
- */
-UserController.getUserExpeditionsManage = async (req, res, next) => {
-  const expeditions = await Store.getUserExpeditions(req.user.id, true);
-  req.resData = {
-    message: 'Store Expeditions Manage Data',
     data: expeditions,
   };
   return next();
