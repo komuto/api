@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import moment from 'moment';
 import cfg from '../../../config';
 
 /**
@@ -39,10 +40,31 @@ export function config(key, defaultValue) {
  * @param {*} defaultValue
  * @param {*} transform
  */
-export function input(key, defaultValue, transform = null) {
-  if (key === undefined || !key) return defaultValue;
-  if (transform !== null) return transform;
+export function checkNull(key, defaultValue, transform = null) {
+  if (key === undefined) return defaultValue;
+  if (transform) return transform;
   return key;
+}
+
+export function parseDate(key, defaultValue = null) {
+  return checkNull(key, defaultValue, moment(key).unix());
+}
+
+export function parseNum(key, defaultValue = null) {
+  if (key === 0) return defaultValue || 0;
+  return checkNull(key, defaultValue, parseInt(key, 10));
+}
+
+export function parseDec(key, defaultValue = null) {
+  return checkNull(key, defaultValue, parseFloat(key));
+}
+
+export function defaultNull(key) {
+  return checkNull(key, null);
+}
+
+export function defaultUndenfined(key) {
+  return checkNull(key, undefined);
 }
 
 /**

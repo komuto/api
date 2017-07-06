@@ -1,8 +1,8 @@
-import moment from 'moment';
 import core from '../../core';
 import '../../product/model/product';
 
 const bookshelf = core.postgres.db;
+const { parseDate, defaultNull } = core.utils;
 
 class CatalogModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -51,9 +51,8 @@ CatalogModel.prototype.serialize = function () {
     id: this.attributes.id_katalog,
     store_id: this.attributes.id_toko,
     name: this.attributes.nama_katalog,
-    count_product: this.attributes.count_product ? this.attributes.count_product : undefined,
-    created_at: this.attributes.datecreate_katalog ?
-      moment(this.attributes.datecreate_katalog).unix() : undefined,
+    count_product: defaultNull(this.attributes.count_product),
+    created_at: parseDate(this.attributes.datecreate_katalog),
   };
 };
 
