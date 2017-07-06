@@ -253,3 +253,15 @@ UserController.getUserExpeditions = async (req, res, next) => {
   };
   return next();
 };
+
+/**
+ * Get store expedition manage
+ */
+UserController.getUserExpeditionsManage = async (req, res, next) => {
+  const expeditions = await Store.getUserExpeditions(req.user.id, true);
+  req.resData = {
+    message: 'Store Expeditions Manage Data',
+    data: expeditions,
+  };
+  return next();
+};

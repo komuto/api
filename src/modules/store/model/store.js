@@ -172,14 +172,15 @@ class StoreModel extends bookshelf.Model {
   /**
    * Get list expedition service
    * @param userId {integer} user id
+   * @param isManaged {boolean} manage status
    */
-  static async getUserExpeditions(userId) {
+  static async getUserExpeditions(userId, isManaged = false) {
     const expeditions = [];
     const store = await this.where({ id_users: userId }).fetch({
       withRelated: [
         {
           expeditionServices: (qb) => {
-            qb.where('status_ekspedisitoko', '0');
+            if (!isManaged) qb.where('status_ekspedisitoko', '0');
           },
         },
         'expeditionServices.expedition',
@@ -189,6 +190,11 @@ class StoreModel extends bookshelf.Model {
     expeditionServices.each((service) => {
       const expedition = service.related('expedition').serialize();
       const found = _.find(expeditions, { id: expedition.id });
+      if (isManaged) {
+        const isActive = service.pivot.toJSON().status_ekspedisitoko;
+        service = service.serialize();
+        service.is_active = isActive === '0';
+      }
       if (found === undefined) {
         expedition.services = [service];
         return expeditions.push(expedition);
