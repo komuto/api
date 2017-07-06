@@ -1,5 +1,7 @@
 import moment from 'moment';
 import core from '../../core';
+import './catalog';
+import '../../user/model/user';
 
 const { input } = core.utils;
 const bookshelf = core.postgres.db;
@@ -10,6 +12,7 @@ class StoreModel extends bookshelf.Model {
   get tableName() {
     return 'toko';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_toko';
@@ -30,23 +33,37 @@ class StoreModel extends bookshelf.Model {
   }
 
   /**
-   * Get store with its relation
-   * @param id {integer} store id
+   * Add relation to Catalog
    */
-  static async getFullStore(id) {
+  catalogs() {
+    return this.hasMany('Catalog', 'id_toko', 'id_toko');
+  }
+
+  /**
+   * Get detail catalogs
+   */
+  static getCatalogs(store) {
+    return store.related('catalogs').map((catalog) => {
+      const catalogProducts = catalog.related('products').map((product) => {
+        const images = product.related('images').serialize();
+        return {
+          ...product.serialize(false),
+          image: images.length ? images[0] : {},
+        };
+      });
+      return {
+        ...catalog.serialize(),
+        products: catalogProducts,
+      };
+    });
+  }
+
+  /**
+   * Get detail user
+   */
+  static getOriginAndDistrict(store) {
     let origin = null;
     let district = null;
-    let quality = 0;
-    let accuracy = 0;
-    const reviews = [];
-    let store = await this.where({ id_toko: id }).fetch({
-      withRelated: [
-        'user.addresses.district',
-        'user.addresses.province',
-        'products.reviews.user',
-        'products.reviews.product.images',
-      ],
-    });
     const user = store.related('user');
     user.related('addresses').each((val) => {
       if (val.toJSON().is_sale_address) {
@@ -55,11 +72,20 @@ class StoreModel extends bookshelf.Model {
         origin = `${district.name}, ${province.name}`;
       }
     });
-    let products = store.related('products');
-    store = store.serialize();
-    store.total_product_sold = 0;
+    return { origin, district };
+  }
+
+  /**
+   * Get reviews
+   */
+  static getReviews(store) {
+    let quality = 0;
+    let accuracy = 0;
+    let totalSold = 0;
+    const reviews = [];
+    const products = store.related('products');
     products.each((product) => {
-      store.total_product_sold += product.toJSON().count_sold;
+      totalSold += product.toJSON().count_sold;
       const productReviews = product.related('reviews').map((review) => {
         quality += review.toJSON().quality;
         accuracy += review.toJSON().accuracy;
@@ -70,19 +96,53 @@ class StoreModel extends bookshelf.Model {
           ...review.serialize(),
           user: { id: userId, name, photo },
           product: {
-            ...reviewProduct.serialize(),
-            images,
+            ...reviewProduct.serialize(false),
+            image: images.length ? images[0] : {},
           },
         };
       });
       if (productReviews.length) reviews.push(...productReviews);
     });
+    return { reviews, totalSold, quality, accuracy };
+  }
+
+  /**
+   * Get store with its relation
+   * @param id {integer} store id
+   */
+  static async getFullStore(id) {
+    let store = await this.where({ id_toko: id }).fetch({
+      withRelated: [
+        'user.addresses.district',
+        'user.addresses.province',
+        'products.reviews.user',
+        {
+          'products.reviews.product.images': (qb) => {
+            qb.limit(1);
+          },
+        },
+        {
+          'catalogs.products': (qb) => {
+            qb.limit(3);
+          },
+        },
+        {
+          'catalogs.products.images': (qb) => {
+            qb.limit(1);
+          },
+        },
+      ],
+    });
+    const catalogs = this.getCatalogs(store);
+    const { origin, district } = this.getOriginAndDistrict(store);
+    const { reviews, totalSold, quality, accuracy } = this.getReviews(store);
+    store = store.serialize();
+    store.total_product_sold = totalSold;
     store.origin = origin;
-    products = products.serialize();
     return {
       store,
+      catalogs,
       district,
-      products,
       rating: {
         quality: quality / reviews.length,
         accuracy: accuracy / reviews.length,

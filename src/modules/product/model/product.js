@@ -2,10 +2,6 @@ import _ from 'lodash';
 import moment from 'moment';
 import core from '../../core';
 import { model } from '../../address';
-import '../../store/model';
-import './imageProduct';
-import '../../category/model';
-import '../../review/model';
 
 const { input } = core.utils;
 const { Address } = model;
@@ -218,8 +214,17 @@ class ProductModel extends bookshelf.Model {
   }
 }
 
-ProductModel.prototype.serialize = function () {
+ProductModel.prototype.serialize = function (full = true) {
   const attr = this.attributes;
+  if (!full) {
+    return {
+      id: attr.id_produk,
+      name: attr.nama_produk,
+      price: input(attr.harga_produk, undefined, parseFloat(attr.harga_produk)),
+      discount: attr.disc_produk,
+      is_discount: !!attr.disc_produk,
+    };
+  }
   return {
     id: attr.id_produk,
     category_id: attr.id_kategoriproduk,

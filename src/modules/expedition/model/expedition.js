@@ -58,7 +58,7 @@ class ExpeditionModel extends bookshelf.Model {
         destination: body.destination_ro_id,
         destinationType: 'city',
         weight: body.weight,
-        courier: expedition.toJSON().ro_courier,
+        courier: expedition.toJSON().name.toLowerCase(),
       },
       headers: {
         key: '78b9624fc632fd9923625b297a3f7035',

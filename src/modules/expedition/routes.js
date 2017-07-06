@@ -2,6 +2,8 @@ import express from 'express';
 import { ExpeditionController } from './controller';
 import core from '../core';
 import { apiResponse } from '../core/middleware';
+import { validateParam } from './middleware';
+import constraints from './validation';
 
 const routes = express.Router();
 const { wrap } = core.utils;
@@ -39,6 +41,7 @@ routes.get('/expeditions/:id/services',
  * View expedition cost
  */
 routes.post('/expeditions/:id/cost',
+  validateParam(constraints.cost),
   wrap(ExpeditionController.getExpeditionCost),
   apiResponse());
 
