@@ -24,11 +24,7 @@ ExpeditionController.getListExpeditionServices = async (req, res, next) => {
   const services = [];
 
   _.forEach(expeditions, (expedition) => {
-    _.forEach(expedition.services.models, (service) => {
-      service = service.toJSON();
-      service.full_name = `${expedition.name} ${service.name}`;
-      services.push(service);
-    });
+    services.push(...expedition.services);
   });
 
   req.resData = {
