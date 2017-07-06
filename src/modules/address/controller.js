@@ -1,5 +1,5 @@
 import { Address, Province, District, SubDistrict, Village } from './model';
-import { getMsg, createMsg, addressMsg } from './message';
+import { getMsg, addressMsg } from './message';
 import { BadRequestError } from '../../../common/errors';
 import { utils } from '../core';
 
@@ -78,15 +78,14 @@ AddressController.getVillages = async (req, res, next) => {
 };
 
 AddressController.createAddress = async (req, res, next) => {
-  if (req.body.is_primary) {
-    if (await Address.checkPrimary(req.user.id)) {
-      throw new BadRequestError(createMsg.title, formatSingularErr('address', addressMsg.duplicate_primary));
-    }
-  }
   req.body.user_id = req.user.id;
   req.body.is_primary = req.body.is_primary ? '1' : '0';
   req.body.is_sale_address = '0';
-  await Address.create(Address.matchDBColumn(req.body));
+  const address = await Address.create(Address.matchDBColumn(req.body));
+  req.resData = {
+    message: 'Address Data',
+    data: address,
+  };
   return next();
 };
 
@@ -102,6 +101,11 @@ AddressController.updateAddress = async (req, res, next) => {
     req.body.is_primary = req.body.is_primary ? '1' : '0';
   }
   await Address.update({ id_alamatuser: req.params.id }, Address.matchDBColumn(req.body));
+  const address = await Address.forge({ id_alamatuser: req.params.id }).fetch();
+  req.resData = {
+    message: 'Address Data',
+    data: address,
+  };
   return next();
 };
 

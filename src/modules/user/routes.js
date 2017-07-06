@@ -38,21 +38,6 @@ routes.get('/users/balance',
   UserController.getBalance,
   apiResponse());
 
-routes.get('/users/address',
-  auth(),
-  wrap(AddressController.getPrimaryAddress),
-  apiResponse());
-
-routes.get('/users/addresses/:id',
-  auth(),
-  wrap(AddressController.getAddress),
-  apiResponse());
-
-routes.get('/users/addresses',
-  auth(),
-  wrap(AddressController.getListAddress),
-  apiResponse());
-
 /**
  * GET /users/profile
  * View user
