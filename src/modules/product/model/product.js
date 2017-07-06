@@ -219,7 +219,7 @@ ProductModel.prototype.serialize = function (full = true) {
     return {
       id: attr.id_produk,
       name: attr.nama_produk,
-      price: input(attr.harga_produk, undefined, parseFloat(attr.harga_produk)),
+      price: parseDec(attr.harga_produk),
       discount: attr.disc_produk,
       is_discount: !!attr.disc_produk,
     };
