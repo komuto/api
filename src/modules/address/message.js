@@ -8,6 +8,10 @@ const Message = {
   updateMsg: {
     title: 'Update address gagal',
   },
+  deleteMsg: {
+    title: 'Delete address gagal',
+    not_valid: 'Alamat tidak ditemukan',
+  },
   nameMsg: {
     presence: 'Nama harus diisi',
   },

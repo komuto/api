@@ -1,5 +1,5 @@
 import { Address, Province, District, SubDistrict, Village } from './model';
-import { getMsg, addressMsg } from './message';
+import { getMsg, addressMsg, deleteMsg } from './message';
 import { BadRequestError } from '../../../common/errors';
 import { utils } from '../core';
 
@@ -110,6 +110,9 @@ AddressController.updateAddress = async (req, res, next) => {
 };
 
 AddressController.deleteAddress = async (req, res, next) => {
+  const address = await Address.where({ id_alamatuser: req.params.id,
+    id_users: req.user.id }).fetch();
+  if (!address) throw new BadRequestError(deleteMsg.title, formatSingularErr('address', deleteMsg.not_valid));
   await Address.delete(req.params.id);
   return next();
 };
