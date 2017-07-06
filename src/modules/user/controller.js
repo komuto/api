@@ -10,7 +10,7 @@ import { registrationMsg, updateMsg, emailMsg, activateMsg, resetPassMsg, tokenM
 
 const fb = new Facebook(config.fb);
 const { formatSingularErr } = utils;
-const { Catalog } = model;
+const { Store, Catalog, StoreExpedition } = model;
 
 export const UserController = {};
 export default { UserController };
@@ -226,6 +226,19 @@ UserController.getUserCatalog = async (req, res, next) => {
     message: 'Store Catalog Data',
     data: catalogs,
   };
+  return next();
+};
+
+/**
+ * Update expeditions
+ */
+UserController.updateExpeditions = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const collection = req.body.map((data) => {
+    data.store_id = storeId;
+    return StoreExpedition.matchDBColumn(data, true);
+  });
+  await StoreExpedition.updateBatch(collection);
   return next();
 };
 

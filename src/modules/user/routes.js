@@ -112,6 +112,15 @@ routes.get('/users/store/catalogs',
   apiResponse());
 
 /**
+ * PUT /users/store/expeditions
+ * Create/update expedition status
+ */
+routes.put('/users/store/expeditions',
+  auth(),
+  wrap(UserController.updateExpeditions),
+  apiResponse());
+
+/**
  * POST /passwords/forgot
  * Generate reset link sent through email
  */

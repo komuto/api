@@ -1,9 +1,8 @@
-import moment from 'moment';
 import core from '../../core';
 import './catalog';
 import '../../user/model/user';
 
-const { input } = core.utils;
+const { parseDate } = core.utils;
 const bookshelf = core.postgres.db;
 const IMAGE_PATH = 'toko';
 
@@ -164,22 +163,18 @@ StoreModel.prototype.serialize = function () {
     custom_domain: attr.custom_domain,
     status: parseInt(attr.status_toko, 10),
     remarks_status: attr.remarks_status_toko,
-    cover_image: input(
-      attr.pathcoverimage_toko,
-      null,
-      core.imagePath(IMAGE_PATH, attr.pathcoverimage_toko),
-    ),
+    cover_image: core.imagePath(IMAGE_PATH, attr.pathcoverimage_toko),
     seller_theme_id: attr.identifier_themesseller,
     reputation: attr.reputasi_toko,
     store_id_number: attr.no_ktp_toko,
     total_favorite: attr.jumlahfavorit_toko,
     note: attr.note,
-    created_at: moment(attr.tgl_create_toko).unix(),
-    status_at: moment(attr.tglstatus_toko).unix(),
-    verification_at: moment(attr.tanggal_verifikasi).unix(),
+    created_at: parseDate(attr.tgl_create_toko),
+    status_at: parseDate(attr.tglstatus_toko),
+    verification_at: parseDate(attr.tanggal_verifikasi),
     is_verified: !!attr.sampai_tanggal,
-    start_at: input(attr.mulai_tanggal, null, moment(attr.mulai_tanggal).unix()),
-    end_at: input(attr.sampai_tanggal, null, moment(attr.sampai_tanggal).unix()),
+    start_at: parseDate(attr.mulai_tanggal),
+    end_at: parseDate(attr.sampai_tanggal),
   };
 };
 
