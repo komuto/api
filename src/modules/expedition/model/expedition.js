@@ -98,7 +98,7 @@ ExpeditionModel.prototype.serialize = function (minimal = false) {
     return {
       id: this.attributes.id_ekspedisi,
       name: this.attributes.nama_ekspedisi,
-      logo: this.attributes.logo_path,
+      logo: core.expeditionPath(this.attributes.logo_path),
       insurance_fee: parseFloat(this.attributes.asurasi_fee),
     };
   }
@@ -108,7 +108,7 @@ ExpeditionModel.prototype.serialize = function (minimal = false) {
     status: parseInt(this.attributes.status_ekspedisi, 10),
     method: this.attributes.method_ekspedisi,
     status_at: moment(this.attributes.tglstatus_ekspedisi).unix(),
-    logo: this.attributes.logo_path,
+    logo: core.expeditionPath(this.attributes.logo_path),
     insurance_fee: parseFloat(this.attributes.asurasi_fee),
   };
 };

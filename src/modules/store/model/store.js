@@ -22,21 +22,21 @@ class StoreModel extends bookshelf.Model {
    * Add relation to User
    */
   user() {
-    return this.belongsTo('User', 'id_users', 'id_users');
+    return this.belongsTo('User', 'id_users');
   }
 
   /**
    * Add relation to Product
    */
   products() {
-    return this.hasMany('Product', 'id_toko', 'id_toko');
+    return this.hasMany('Product', 'id_toko');
   }
 
   /**
    * Add relation to Catalog
    */
   catalogs() {
-    return this.hasMany('Catalog', 'id_toko', 'id_toko');
+    return this.hasMany('Catalog', 'id_toko');
   }
 
   /**
@@ -64,6 +64,16 @@ class StoreModel extends bookshelf.Model {
         products: catalogProducts,
       };
     });
+  }
+
+  /**
+   * Get marketplace id with store id
+   * @param id {integer} store id
+   */
+  static async getMarketplaceId(id) {
+    const store = await new this({ id_toko: id }).fetch({ withRelated: ['user'] });
+    const user = store.related('user');
+    return user.get('id_marketplaceuser');
   }
 
   /**
@@ -162,14 +172,15 @@ class StoreModel extends bookshelf.Model {
   /**
    * Get list expedition service
    * @param userId {integer} user id
+   * @param isManaged {boolean} manage status
    */
-  static async getUserExpeditions(userId) {
+  static async getUserExpeditions(userId, isManaged = false) {
     const expeditions = [];
     const store = await this.where({ id_users: userId }).fetch({
       withRelated: [
         {
           expeditionServices: (qb) => {
-            qb.where('status_ekspedisitoko', '0');
+            if (!isManaged) qb.where('status_ekspedisitoko', '0');
           },
         },
         'expeditionServices.expedition',
@@ -179,6 +190,11 @@ class StoreModel extends bookshelf.Model {
     expeditionServices.each((service) => {
       const expedition = service.related('expedition').serialize();
       const found = _.find(expeditions, { id: expedition.id });
+      if (isManaged) {
+        const isActive = service.pivot.toJSON().status_ekspedisitoko;
+        service = service.serialize();
+        service.is_active = isActive === '0';
+      }
       if (found === undefined) {
         expedition.services = [service];
         return expeditions.push(expedition);
