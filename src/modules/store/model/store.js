@@ -22,21 +22,21 @@ class StoreModel extends bookshelf.Model {
    * Add relation to User
    */
   user() {
-    return this.belongsTo('User', 'id_users', 'id_users');
+    return this.belongsTo('User', 'id_users');
   }
 
   /**
    * Add relation to Product
    */
   products() {
-    return this.hasMany('Product', 'id_toko', 'id_toko');
+    return this.hasMany('Product', 'id_toko');
   }
 
   /**
    * Add relation to Catalog
    */
   catalogs() {
-    return this.hasMany('Catalog', 'id_toko', 'id_toko');
+    return this.hasMany('Catalog', 'id_toko');
   }
 
   /**
@@ -64,6 +64,16 @@ class StoreModel extends bookshelf.Model {
         products: catalogProducts,
       };
     });
+  }
+
+  /**
+   * Get marketplace id with store id
+   * @param id {integer} store id
+   */
+  static async getMarketplaceId(id) {
+    const store = await new this({ id_toko: id }).fetch({ withRelated: ['user'] });
+    const user = store.related('user');
+    return user.get('id_marketplaceuser');
   }
 
   /**
