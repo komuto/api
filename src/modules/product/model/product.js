@@ -1,9 +1,8 @@
 import _ from 'lodash';
-import moment from 'moment';
 import core from '../../core';
 import { model } from '../../address';
 
-const { input } = core.utils;
+const { parseNum, parseDec, parseDate } = core.utils;
 const { Address } = model;
 const bookshelf = core.postgres.db;
 
@@ -232,23 +231,23 @@ ProductModel.prototype.serialize = function (full = true) {
     name: attr.nama_produk,
     stock: attr.stock_produk,
     weight: attr.berat_produk,
-    type: input(attr.jenis_produk, undefined, parseInt(attr.jenis_produk, 10)),
+    type: parseNum(attr.jenis_produk, 0),
     description: attr.deskripsi_produk,
-    price: input(attr.harga_produk, undefined, parseFloat(attr.harga_produk)),
-    attrval: input(attr.attrval_produk, undefined, parseInt(attr.attrval_produk, 10)),
-    status: input(attr.status_produk, undefined, parseInt(attr.status_produk, 10)),
-    insurance: input(attr.asuransi_produk, undefined, parseInt(attr.asuransi_produk, 10)),
+    price: parseDec(attr.harga_produk),
+    attrval: parseNum(attr.attrval_produk, 0),
+    status: parseNum(attr.status_produk, 0),
+    insurance: parseNum(attr.asuransi_produk, 0),
     discount: attr.disc_produk,
     margin_dropshipper: attr.margin_dropshiper,
     is_dropshipper: attr.is_dropshiper,
     is_wholesaler: attr.is_grosir,
     is_discount: !!attr.disc_produk,
-    count_sold: attr.count_sold ? attr.count_sold : 0,
-    count_popular: attr.count_populer ? attr.count_populer : 0,
+    count_sold: parseNum(attr.count_sold, 0),
+    count_popular: parseNum(attr.count_populer, 0),
     identifier_brand: attr.identifier_brand,
     identifier_catalog: attr.identifier_katalog,
-    status_at: input(attr.tglstatus_produk, undefined, moment(attr.tglstatus_produk).unix()),
-    created_at: input(attr.date_created_produk, undefined, moment(attr.date_created_produk).unix()),
+    status_at: parseDate(attr.tglstatus_produk),
+    created_at: parseDate(attr.date_created_produk),
   };
 };
 

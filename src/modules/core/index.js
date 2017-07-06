@@ -7,7 +7,10 @@ import routes from './routes';
 import * as apiCache from './cache';
 import config from '../../../config';
 
-const imagePath = (path, file) => `${config.assetUrl}/uploads/${path}/${file}`;
+const imagePath = (path, file) => {
+  if (!file) return null;
+  return `${config.assetUrl}/uploads/${path}/${file}`;
+};
 const assetPath = file => `${config.assetUrl}/images/img-kategori/${file}`;
 const cache = apiCache.cache;
 const cacheClear = apiCache.cacheClear;

@@ -10,12 +10,13 @@ describe('POST /users/social-login/ - user login', () => {
     expect(data.status).toBe(false);
     expect(data.code).toBe(400);
     expect(typeof data.data).toBe('object');
-    expect(data.data.message).toEqual('Provider name can\'t be blank');
-    expect(data.data.message).toEqual('Provider uid can\'t be blank');
-    expect(data.data.message).toEqual('Access token can\'t be blank');
-    expect(data.data.provider_name).toEqual(expect.arrayContaining(['Provider name can\'t be blank']));
-    expect(data.data.provider_uid).toEqual(expect.arrayContaining(['Provider uid can\'t be blank']));
-    expect(data.data.access_token).toEqual(expect.arrayContaining(['Access token can\'t be blank']));
+    /*expect(data.data.message).toEqual('Provider name harus diisi');
+    expect(data.data.message).toEqual('Provider uid harus diisi');
+    expect(data.data.message).toEqual('Access token harus diisi');
+    */
+    expect(data.data.provider_name).toEqual(expect.arrayContaining(['Provider name harus diisi']));
+    expect(data.data.provider_uid).toEqual(expect.arrayContaining(['Provider uid harus diisi']));
+    expect(data.data.access_token).toEqual(expect.arrayContaining(['Access token harus diisi']));
   });
 
   it('user social login without provider_name', async () => {
@@ -24,8 +25,8 @@ describe('POST /users/social-login/ - user login', () => {
     expect(data.status).toBe(false);
     expect(data.code).toBe(400);
     expect(typeof data.data).toBe('object');
-    expect(data.data.message).toEqual('Provider name can\'t be blank');
-    expect(data.data.provider_uid).toEqual(expect.arrayContaining(['Provider name can\'t be blank']));
+    // expect(data.data.message).toEqual('Provider name harus diisi');
+    expect(data.data.provider_name).toEqual(expect.arrayContaining(['Provider name harus diisi']));
   });
 
   it('user social login without access_token', async () => {
@@ -34,8 +35,8 @@ describe('POST /users/social-login/ - user login', () => {
     expect(data.status).toBe(false);
     expect(data.code).toBe(400);
     expect(typeof data.data).toBe('object');
-    expect(data.data.message).toEqual('Access token can\'t be blank');
-    expect(data.data.access_token).toEqual(expect.arrayContaining(['Access token can\'t be blank']));
+    // expect(data.data.message).toEqual('Access token harus diisi');
+    expect(data.data.access_token).toEqual(expect.arrayContaining(['Access token harus diisi']));
   });
 
   it('user social login without provider_uid', async () => {
@@ -44,17 +45,17 @@ describe('POST /users/social-login/ - user login', () => {
     expect(data.status).toBe(false);
     expect(data.code).toBe(400);
     expect(typeof data.data).toBe('object');
-    expect(data.data.message).toEqual('Provider uid can\'t be blank');
-    expect(data.data.provider_name).toEqual(expect.arrayContaining(['Provider uid can\'t be blank']));
+    // expect(data.data.message).toEqual('Provider uid harus diisi');
+    expect(data.data.provider_uid).toEqual(expect.arrayContaining(['Provider uid harus diisi']));
   });
 
   it('user social login with invalid provider_name', async () => {
     const userModel = new UserModel();
     const data = await userModel.socialLogin('faceb', 1544425745587692, "EAAViKAqZCMswBAEq2e1wH6wQZBhSpyxZBYpLSMuSnEZB6OjEI0YgHlz3B3ZBy6ChWNDoHYPZC1eFGmywzKZA21TrxTmhk5bVHiN7fVxvwZCZAeFZAsgNdvRVPPHERKmrioUEpATKmaDHevzN0eTwa7UMN0xPWCVlvOGCg2yJPAHEEfIxTmNFIG8WS7KLPcwtYZAXUoZD");
     expect(data.status).toBe(false);
-    expect(data.code).toBe(400);
+    expect(data.code).toBe(406);
     expect(typeof data.data).toBe('object');
-    expect(data.data.message).toEqual('Invalid provider name value');
+    // expect(data.data.message).toEqual('Invalid provider name value');
     expect(data.data.provider_name).toEqual(expect.arrayContaining(['Invalid provider name value']));
 
   });

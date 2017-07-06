@@ -4,7 +4,7 @@ import UserModel from '../../../model/user';
 
 describe('POST /users/address', () => {
   var testData = {};
-  beforeAll(async () => {
+  beforeAll(async (done) => {
     const userModel = new UserModel();
     const user = await userModel.login('andrew@skyshi.com', 'andrew');
 
@@ -18,6 +18,7 @@ describe('POST /users/address', () => {
         await addressModel.del(testData.address.id);
       }
     }
+    return done();
   });
 
   it('create address with empty parameter', async () => {

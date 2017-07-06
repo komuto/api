@@ -26,7 +26,7 @@ describe('GET banks information', () => {
     }));
   });
 
-  it('GET all address /addresses should return data', async () => {
+  it('GET all bank /banks should return data', async () => {
     const bankModel = new BankModel();
     const data = await bankModel.getAll();
 

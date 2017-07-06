@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import moment from 'moment';
 import core from '../../core';
 import './expedition';
 
 const bookshelf = core.postgres.db;
+const { parseNum, parseDate } = core.utils;
 
 class ServiceModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -17,6 +17,13 @@ class ServiceModel extends bookshelf.Model {
 
   expedition() {
     return this.belongsTo('Expedition', 'id_ekspedisi');
+  }
+
+  /**
+   * Add relation to Store
+   */
+  store() {
+    return this.belongsToMany('Store', 'detil_ekspedisitoko', 'id_ekspedisiservice', 'id_toko');
   }
 
   /**
@@ -44,8 +51,8 @@ ServiceModel.prototype.serialize = function (minimal = true) {
     expedition_id: this.attributes.id_ekspedisi,
     name: this.attributes.nama_ekspedisiservice,
     description: this.attributes.deskripsi_ekspedisiservice,
-    status: parseInt(this.attributes.status_ekspedisiservice, 10),
-    status_at: moment(this.attributes.tglstatus_ekspedisiservice).unix(),
+    status: parseNum(this.attributes.status_ekspedisiservice),
+    status_at: parseDate(this.attributes.tglstatus_ekspedisiservice),
     logo: this.attributes.logo_path,
   };
 };

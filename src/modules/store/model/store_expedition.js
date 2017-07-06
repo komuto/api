@@ -2,6 +2,7 @@ import moment from 'moment';
 import core from '../../core';
 
 const bookshelf = core.postgres.db;
+const { parseDate } = core.utils;
 
 class StoreExpeditionModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -9,16 +10,33 @@ class StoreExpeditionModel extends bookshelf.Model {
     return 'detil_ekspedisitoko';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get idAttribute() {
+    return 'id_ekspedisiservice';
+  }
+
   /**
    * Save batch store expedition
    * @param collection {array}
    */
-  static async createBatch(collection) {
-    await new this(collection).invokeThen('save');
-  }
-
-  static async update(data, newData) {
-    await this.where(data).save(newData, { patch: true });
+  static async updateBatch(collection) {
+    let counter = -1;
+    const checker = await Promise.all(collection.map((storeExpedition) => {
+      const { id_toko, id_ekspedisiservice } = storeExpedition;
+      return new this({ id_toko, id_ekspedisiservice }).fetch();
+    }));
+    return await Promise.all(collection.map((storeExpedition) => {
+      counter += 1;
+      const { id_toko, id_ekspedisiservice } = storeExpedition;
+      if (checker[counter]) {
+        const { status_ekspedisitoko, tglstatus_ekspedisitoko } = storeExpedition;
+        return this.where({ id_toko, id_ekspedisiservice }).save({
+          status_ekspedisitoko,
+          tglstatus_ekspedisitoko },
+          { patch: true });
+      }
+      return new this(storeExpedition).save();
+    }));
   }
 
   static matchDBColumn(data, full = false) {
@@ -40,10 +58,10 @@ StoreExpeditionModel.prototype.serialize = function () {
   return {
     store_id: this.attributes.id_toko,
     expedition_service_id: this.attributes.id_ekspedisiservice,
-    status: this.attributes.id_toko,
-    created_at: moment(this.attributes.tglstatus_ekspedisitoko).unix(),
+    status: this.attributes.status_eskpedisitoko,
+    created_at: parseDate(this.attributes.tglstatus_ekspedisitoko),
   };
-}
+};
 
 export const StoreExpedition = bookshelf.model('StoreExpedition', StoreExpeditionModel);
 export default { StoreExpedition };

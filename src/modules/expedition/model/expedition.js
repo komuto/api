@@ -2,7 +2,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import rp from 'request-promise';
 import core from '../../core';
-import './service';
+import './expedition_service';
 import { BadRequestError } from '../../../../common/errors';
 
 const bookshelf = core.postgres.db;
@@ -34,7 +34,11 @@ class ExpeditionModel extends bookshelf.Model {
   static async getServices() {
     const expeditions = await this.where({}).fetchAll({ withRelated: ['services'] });
     return expeditions.map((expedition) => {
-      const services = expedition.related('services');
+      const services = expedition.related('services').map((service) => {
+        service = service.serialize();
+        service.full_name = `${expedition.toJSON().name} ${service.name}`;
+        return service;
+      });
       return {
         ...expedition.serialize(true),
         services,
@@ -106,7 +110,6 @@ ExpeditionModel.prototype.serialize = function (minimal = false) {
     status_at: moment(this.attributes.tglstatus_ekspedisi).unix(),
     logo: this.attributes.logo_path,
     insurance_fee: parseFloat(this.attributes.asurasi_fee),
-    ro_courier: this.attributes.ro_courier,
   };
 };
 

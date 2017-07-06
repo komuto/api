@@ -1,4 +1,4 @@
 import Expedition from './expedition';
-import ExpeditionService from './service';
+import ExpeditionService from './expedition_service';
 
 export default { Expedition, ExpeditionService };

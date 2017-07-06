@@ -1,9 +1,9 @@
-import moment from 'moment';
+import _ from 'lodash';
 import core from '../../core';
 import './catalog';
 import '../../user/model/user';
 
-const { input } = core.utils;
+const { parseDate } = core.utils;
 const bookshelf = core.postgres.db;
 const IMAGE_PATH = 'toko';
 
@@ -37,6 +37,14 @@ class StoreModel extends bookshelf.Model {
    */
   catalogs() {
     return this.hasMany('Catalog', 'id_toko', 'id_toko');
+  }
+
+  /**
+   * Add relation to ExpeditionService
+   */
+  expeditionServices() {
+    return this.belongsToMany('ExpeditionService', 'detil_ekspedisitoko', 'id_toko', 'id_ekspedisiservice')
+      .withPivot(['status_ekspedisitoko']);
   }
 
   /**
@@ -150,6 +158,35 @@ class StoreModel extends bookshelf.Model {
       },
     };
   }
+
+  /**
+   * Get list expedition service
+   * @param userId {integer} user id
+   */
+  static async getUserExpeditions(userId) {
+    const expeditions = [];
+    const store = await this.where({ id_users: userId }).fetch({
+      withRelated: [
+        {
+          expeditionServices: (qb) => {
+            qb.where('status_ekspedisitoko', '0');
+          },
+        },
+        'expeditionServices.expedition',
+      ],
+    });
+    const expeditionServices = store.related('expeditionServices');
+    expeditionServices.each((service) => {
+      const expedition = service.related('expedition').serialize();
+      const found = _.find(expeditions, { id: expedition.id });
+      if (found === undefined) {
+        expedition.services = [service];
+        return expeditions.push(expedition);
+      }
+      return found.services.push(service);
+    });
+    return expeditions;
+  }
 }
 
 StoreModel.prototype.serialize = function () {
@@ -164,22 +201,18 @@ StoreModel.prototype.serialize = function () {
     custom_domain: attr.custom_domain,
     status: parseInt(attr.status_toko, 10),
     remarks_status: attr.remarks_status_toko,
-    cover_image: input(
-      attr.pathcoverimage_toko,
-      null,
-      core.imagePath(IMAGE_PATH, attr.pathcoverimage_toko),
-    ),
+    cover_image: core.imagePath(IMAGE_PATH, attr.pathcoverimage_toko),
     seller_theme_id: attr.identifier_themesseller,
     reputation: attr.reputasi_toko,
     store_id_number: attr.no_ktp_toko,
     total_favorite: attr.jumlahfavorit_toko,
     note: attr.note,
-    created_at: moment(attr.tgl_create_toko).unix(),
-    status_at: moment(attr.tglstatus_toko).unix(),
-    verification_at: moment(attr.tanggal_verifikasi).unix(),
+    created_at: parseDate(attr.tgl_create_toko),
+    status_at: parseDate(attr.tglstatus_toko),
+    verification_at: parseDate(attr.tanggal_verifikasi),
     is_verified: !!attr.sampai_tanggal,
-    start_at: input(attr.mulai_tanggal, null, moment(attr.mulai_tanggal).unix()),
-    end_at: input(attr.sampai_tanggal, null, moment(attr.sampai_tanggal).unix()),
+    start_at: parseDate(attr.mulai_tanggal),
+    end_at: parseDate(attr.sampai_tanggal),
   };
 };
 

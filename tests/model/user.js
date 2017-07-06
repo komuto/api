@@ -46,6 +46,57 @@ class UserModel {
         });
     });
   }
+  emailCheck(email) {
+    return new Promise((resolve, reject) => {
+      request(app)
+        .post('/accounts/email/check')
+        .send({
+          email
+        })
+        .set('Content-Type', 'application/json')
+        .then((res) => {
+          resolve(res.body);
+        })
+        .catch(err => {
+          resolve(err);
+        });
+    });
+  }
+  forgot(email) {
+    return new Promise((resolve, reject) => {
+      request(app)
+        .post('/passwords/forgot')
+        .send({
+          email
+        })
+        .set('Content-Type', 'application/json')
+        .then((res) => {
+          resolve(res.body);
+        })
+        .catch(err => {
+          resolve(err);
+        });
+    });
+  }
+  updatePassword(email, oldPassword, newPassword) {
+    return new Promise((resolve, reject) => {
+      request(app)
+        .put('/users/password')
+        .send({
+          email: "andrew@skyshi.com",
+          password: "andrew",
+          old_password: "andrew123"
+        })
+
+        .set('Content-Type', 'application/json')
+        .then(res => {
+          resolve(res.body)
+        })
+        .catch(err => {
+          resolve(err);
+        });
+    });
+  }
 }
 
 export default UserModel;

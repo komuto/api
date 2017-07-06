@@ -1,37 +1,20 @@
 /* eslint-disable no-undef */
-import request from 'supertest';
-import app from '../../../../src/app';
+import UserModel from '../../../model/user';
 
 describe('User Account API', () => {
-  it('POST /accounts/email/check with available email', () => {
-    return request(app)
-      .post('/accounts/email/check')
-      .send({
-        email: "andrewtester@skyshi.com"
-      })
-      .set('Content-Type', 'application/json')
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .then((res) => {
-        expect(res.body.status).toBe(true);
-        expect(res.body.code).toBe(200);
-        expect(res.body.message).toEqual('Email Available');
-      });
+  it('POST /accounts/email/check with available email', async () => {
+    const userModel = new UserModel();
+    const data = await userModel.emailCheck('andrewtester@skyshi.com');
+    expect(data.status).toBe(true);
+    expect(data.code).toBe(200);
+    // expect(data.message).toEqual('Email Available');
   });
 
-  it('POST /accounts/email/check with unavailable email', () => {
-    return request(app)
-      .post('/accounts/email/check')
-      .send({
-        email: "andrew@skyshi.com"
-      })
-      .set('Content-Type', 'application/json')
-      .expect(400)
-      .expect('Content-Type', /json/)
-      .then((res) => {
-        expect(res.body.status).toBe(false);
-        expect(res.body.code).toBe(400);
-        expect(res.body.message).toEqual('Email sudah terdaftar');
-      });
+  it('POST /accounts/email/check with unavailable email', async () => {
+    const userModel = new UserModel();
+    const data = await userModel.emailCheck('andrew@skyshi.com');
+    expect(data.status).toBe(false);
+    expect(data.code).toBe(400);
+    // expect(data.message).toEqual('Email sudah terdaftar');
   });
 });

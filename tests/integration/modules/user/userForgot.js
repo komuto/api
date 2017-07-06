@@ -1,38 +1,21 @@
 /* eslint-disable no-undef */
-import request from 'supertest';
-import app from '../../../../src/app';
+import UserModel from '../../../model/user';
 
 describe('POST /passwords/forgot', () => {
 
-  it('user make request with invalid email', () => {
-    return request(app)
-      .post('/passwords/forgot')
-      .send({
-        email: "andrewtester@skyshi.com"
-      })
-      .set('Content-Type', 'application/json')
-      .expect(400)
-      .expect('Content-Type', /json/)
-      .then((res) => {
-        expect(res.body.status).toBe(false);
-        expect(res.body.code).toBe(400);
-        expect(res.body.message).toEqual('Email belum terdaftar');
-        // expect(res.body.data.email).toEqual(expect.arrayContaining(['Email belum terdaftar']));
-      });
+  it('user make request with invalid email', async () => {
+    const userModel = new UserModel();
+    const data = await userModel.forgot('andrewtester@skyshi.com');
+    expect(data.status).toBe(false);
+    expect(data.code).toBe(400);
+    // expect(data.message).toEqual('Email belum terdaftar');
+    // expect(data.data.email).toEqual(expect.arrayContaining(['Email belum terdaftar']));
   });
 
-  it('user make request with valid email', () => {
-    return request(app)
-      .post('/passwords/forgot')
-      .send({
-        email: "andrew@skyshi.com"
-      })
-      .set('Content-Type', 'application/json')
-      .expect(200)
-      .expect('Content-Type', /json/)
-      .then((res) => {
-        expect(res.body.status).toBe(true);
-        expect(res.body.code).toBe(200);
-      });
+  it('user make request with valid email', async () => {
+    const userModel = new UserModel();
+    const data = await userModel.forgot('andrew@skyshi.com');
+    expect(data.status).toBe(true);
+    expect(data.code).toBe(200);
   });
 });
