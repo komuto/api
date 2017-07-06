@@ -4,6 +4,7 @@ import './catalog';
 import '../../user/model/user';
 
 const { parseDate } = core.utils;
+import { BadRequestError } from '../../../../common/errors';
 const bookshelf = core.postgres.db;
 const IMAGE_PATH = 'toko';
 
@@ -202,6 +203,41 @@ class StoreModel extends bookshelf.Model {
       return found.services.push(service);
     });
     return expeditions;
+  }
+
+  /**
+   * Create store
+   * @param data {object} store data
+   */
+  static async create(data) {
+    const store = await this.where({ id_users: data.id_users }).fetch();
+    if (store) throw new BadRequestError('Toko sudah ada');
+    return await new this(data).save();
+  }
+
+  /**
+   * Transform supplied data properties to match with db column
+   * @param {object} data
+   * @return {object} newData
+   */
+  static matchDBColumn(data) {
+    const column = {
+      user_id: 'id_users',
+      name: 'nama_toko',
+      slogan: 'slogan_toko',
+      description: 'deskripsi_toko',
+      logo: 'logo_toko',
+      created_at: 'tgl_create_toko',
+      status: 'status_toko',
+      status_at: 'tglstatus_toko',
+      seller_theme_id: 'identifier_themesseller',
+      store_id_number: 'no_ktp_toko',
+    };
+    const newData = {};
+    Object.keys(data).forEach((prop) => {
+      if (column[prop]) newData[column[prop]] = data[prop];
+    });
+    return newData;
   }
 }
 

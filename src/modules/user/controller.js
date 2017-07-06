@@ -9,6 +9,7 @@ import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
 import { model } from '../store';
 import { registrationMsg, updateMsg, emailMsg, activateMsg, resetPassMsg, tokenMsg, loginMsg, fbMsg } from './message';
+import { Address } from '../address/model';
 
 const fb = new Facebook(config.fb);
 const { formatSingularErr } = utils;
@@ -275,6 +276,32 @@ UserController.getUserExpeditionsManage = async (req, res, next) => {
   req.resData = {
     message: 'Store Expeditions Manage Data',
     data: expeditions,
+  };
+  return next();
+};
+
+/**
+ * Get store expedition manage
+ */
+UserController.createStore = async (req, res, next) => {
+  _.assign(req.body.store, {
+    user_id: req.user.id,
+    status: 1,
+    seller_theme_id: 0,
+    store_id_number: req.body.user.id_number,
+    created_at: moment(),
+    status_at: moment(),
+  });
+  const store = await Store.create(Store.matchDBColumn(req.body.store));
+  const user = await User.update({ id_users: req.user.id }, User.matchDBColumn(req.body.user));
+  Store.where('id_toko', store.toJSON().id).destroy();
+  _.assign(req.body.address, { is_sale_address: 1, user_id: req.user.id });
+  const address = await Address.storeAddress(Address.matchDBColumn(req.body.address));
+  // const expeditions = await Expedition.storeExpeditions(req.body.expeditions, store);
+
+  req.resData = {
+    message: 'Store Data',
+    data: { store, user, address },
   };
   return next();
 };

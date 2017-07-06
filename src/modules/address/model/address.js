@@ -174,6 +174,15 @@ class AddressModel extends bookshelf.Model {
   }
 
   /**
+   * Get store address
+   * @param {integer} userId
+   * @param {integer} districtId
+   */
+  static async storeAddress(data) {
+    return await new this(data).save();
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData

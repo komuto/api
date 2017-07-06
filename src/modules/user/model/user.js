@@ -96,7 +96,7 @@ class UserModel extends bookshelf.Model {
    * @return {Object} user updated field only
    */
   static async update(data, newData) {
-    await this.where(data).save(newData, { patch: true });
+    return await this.where(data).save(newData, { patch: true });
   }
 
   /**
