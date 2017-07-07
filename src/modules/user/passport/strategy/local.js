@@ -13,7 +13,7 @@ export default new LocalStrategy({
 }, (email, password, done) => {
   new User({ email_users: email }).fetch().then((user) => {
     if (!user) return done(new BadRequestError(loginMsg.title, formatSingularErr('email', emailMsg.not_found)), false);
-    return user.checkPasswordFromApi(password)
+    return User.checkPasswordFromApi(password, user.get('password_users'))
       .then((body) => {
         body = JSON.parse(body);
         if (!body.data) {

@@ -99,7 +99,18 @@ class AddressModel extends bookshelf.Model {
    */
   static async create(data) {
     try {
-      return await new this(data).save();
+      const address = await new this(data).save();
+      await address.load(['province', 'district', 'subDistrict', 'village']);
+      const province = address.related('province');
+      const district = address.related('district');
+      const subDistrict = address.related('subDistrict');
+      const village = address.related('village');
+      return {
+        ...address.serialize(),
+        province,
+        district,
+        subDistrict,
+        village };
     } catch (err) {
       throw new BadRequestError('Gagal membuat alamat');
     }
@@ -111,7 +122,19 @@ class AddressModel extends bookshelf.Model {
    * @param {Object} newData
    */
   static async update(data, newData) {
-    return await this.where(data).save(newData, { method: 'update' });
+    const address = await this.where(data).save(newData, { method: 'update' });
+    await address.refresh({ withRelated: ['province', 'district', 'subDistrict', 'village'] });
+
+    const province = address.related('province');
+    const district = address.related('district');
+    const subDistrict = address.related('subDistrict');
+    const village = address.related('village');
+    return {
+      ...address.serialize(),
+      province,
+      district,
+      subDistrict,
+      village };
   }
 
   /**

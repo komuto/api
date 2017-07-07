@@ -10,7 +10,7 @@ export default new JwtStrategy(jwtParams, (jwtPayload, done) => {
   new User({ id_users: jwtPayload.id_users }).fetch()
     .then((user) => {
       if (!user) return done(null, false);
-      return done(null, user.toJSON());
+      return done(null, user.serialize(true));
     })
     .catch(e => done(e, false));
 });

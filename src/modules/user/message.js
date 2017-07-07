@@ -10,7 +10,7 @@ const Message = {
     title: 'Aktivasi gagal',
   },
   resetPassMsg: {
-    title: 'Reset Password gagal',
+    title: 'Update password gagal',
   },
   updateMsg: {
     title: 'Update user gagal',
@@ -41,6 +41,7 @@ const Message = {
   },
   passwordMsg: {
     presence: 'harus diisi',
+    not_match: 'Password lama salah',
   },
   nameMsg: {
     presence: 'harus diisi',

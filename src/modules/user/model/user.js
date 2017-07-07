@@ -171,20 +171,12 @@ class UserModel extends bookshelf.Model {
   }
 
   /**
-   * Compare plain password with it's hashed password
-   * @param {string} plain
-   * @return {bool}
-   */
-  checkPassword(plain) {
-    return bcrypt.compareSync(plain, this.get('password_users'));
-  }
-
-  /**
    * Compare plain password with it's hashed password from komuto api
    * @param {string} plain
+   * @param {string} hashed
    * @return {bool}
    */
-  async checkPasswordFromApi(plain) {
+  static async checkPasswordFromApi(plain, hashed) {
     return await rp.post({
       url: config.komutoUrl,
       form: {
@@ -192,36 +184,42 @@ class UserModel extends bookshelf.Model {
         function: 'validatepassword',
         param: {
           password: plain,
-          hash: this.get('password_users'),
+          hash: hashed,
         },
       },
     });
   }
 }
 
-UserModel.prototype.serialize = function () {
-  return {
-    id: this.attributes.id_users,
-    marketplace_id: defaultNull(this.attributes.marketplaceuser),
-    name: this.attributes.namalengkap_users,
-    email: this.attributes.email_users,
-    cooperative_member_number: defaultNull(this.attributes.no_anggotakoperasi_users),
-    approval_cooperative_status: this.attributes.approval_koperasi_users,
-    photo: core.imagePath(IMAGE_PATH, this.attributes.pathfoto_users),
-    phone_number: defaultNull(this.attributes.nohp_users),
-    gender: this.attributes.jeniskelamin_users === 'L' ? 'male' : 'female',
-    status: parseInt(this.attributes.status_users, 10),
-    mother_name: defaultNull(this.attributes.ibukandung_users),
-    auth_key: defaultNull(this.attributes.auth_key),
-    saldo_wallet: checkNull(this.attributes.saldo_wallet, 0),
-    place_of_birth: defaultNull(this.attributes.kota_lahir),
-    date_of_birth: defaultNull(this.attributes.tgl_lahir),
-    created_at: moment(this.attributes.tgl_create_users).unix(),
-    join_at: defaultNull(this.attributes.tgl_join_koperasi),
-    status_at: moment(this.attributes.tglstatus_users).unix(),
-    provider_name: this.attributes.hybridauth_provider_name,
-    provider_uid: this.attributes.hybridauth_provider_uid,
+UserModel.prototype.serialize = function (pass = false) {
+  const attr = this.attributes;
+  const user = {
+    id: attr.id_users,
+    marketplace_id: defaultNull(attr.marketplaceuser),
+    name: attr.namalengkap_users,
+    email: attr.email_users,
+    cooperative_member_number: defaultNull(attr.no_anggotakoperasi_users),
+    approval_cooperative_status: attr.approval_koperasi_users,
+    photo: core.imagePath(IMAGE_PATH, attr.pathfoto_users),
+    phone_number: defaultNull(attr.nohp_users),
+    gender: attr.jeniskelamin_users === 'L' ? 'male' : 'female',
+    status: parseInt(attr.status_users, 10),
+    mother_name: defaultNull(attr.ibukandung_users),
+    auth_key: defaultNull(attr.auth_key),
+    saldo_wallet: checkNull(attr.saldo_wallet, 0),
+    place_of_birth: defaultNull(attr.kota_lahir),
+    date_of_birth: defaultNull(attr.tgl_lahir),
+    created_at: moment(attr.tgl_create_users).unix(),
+    join_at: defaultNull(attr.tgl_join_koperasi),
+    status_at: moment(attr.tglstatus_users).unix(),
+    provider_name: attr.hybridauth_provider_name,
+    provider_uid: attr.hybridauth_provider_uid,
   };
+  if (pass) {
+    user.password = attr.password_users;
+    return user;
+  }
+  return user;
 };
 
 
