@@ -113,6 +113,6 @@ AddressController.deleteAddress = async (req, res, next) => {
   const address = await Address.where({ id_alamatuser: req.params.id,
     id_users: req.user.id }).fetch();
   if (!address) throw new BadRequestError(deleteMsg.title, formatSingularErr('address', deleteMsg.not_valid));
-  await Address.delete(req.params.id);
+  await Address.destroy(req.params.id);
   return next();
 };

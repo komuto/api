@@ -2,6 +2,7 @@ import _ from 'lodash';
 import core from '../../core';
 import './catalog';
 import '../../user/model/user';
+import { BadRequestError } from '../../../../common/errors';
 
 const { parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -202,6 +203,52 @@ class StoreModel extends bookshelf.Model {
       return found.services.push(service);
     });
     return expeditions;
+  }
+
+  /**
+   * Create store
+   * @param data {object} store data
+   */
+  static async create(data) {
+    const store = await this.where({ id_users: data.id_users }).fetch();
+    if (store) throw new BadRequestError('Toko sudah ada');
+    return await new this(data).save();
+  }
+
+  /**
+   * Create store expeditions
+   * @param store {object} store data
+   * @param services {object} expedition services data
+   */
+  static async createExpeditionServices(store, services) {
+    return services.forEach(async (service) => {
+      await store.expeditionServices().attach(service).catch(() => {});
+    });
+  }
+
+  /**
+   * Transform supplied data properties to match with db column
+   * @param {object} data
+   * @return {object} newData
+   */
+  static matchDBColumn(data) {
+    const column = {
+      user_id: 'id_users',
+      name: 'nama_toko',
+      slogan: 'slogan_toko',
+      description: 'deskripsi_toko',
+      logo: 'logo_toko',
+      created_at: 'tgl_create_toko',
+      status: 'status_toko',
+      status_at: 'tglstatus_toko',
+      seller_theme_id: 'identifier_themesseller',
+      store_id_number: 'no_ktp_toko',
+    };
+    const newData = {};
+    Object.keys(data).forEach((prop) => {
+      if (column[prop]) newData[column[prop]] = data[prop];
+    });
+    return newData;
   }
 }
 

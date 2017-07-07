@@ -9,6 +9,7 @@ import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
 import { model } from '../store';
 import { registrationMsg, updateMsg, emailMsg, activateMsg, resetPassMsg, tokenMsg, loginMsg, fbMsg } from './message';
+import { Address } from '../address/model';
 
 const fb = new Facebook(config.fb);
 const { formatSingularErr } = utils;
@@ -118,7 +119,6 @@ UserController.updateUser = async (req, res, next) => {
   const check = { name, cooperative_member_number, photo, phone_number, gender, place_of_birth, date_of_birth: dateOfBirth };
   const data = _.omitBy(check, _.isUndefined);
   if (_.isEmpty(data)) {
-    console.log('coming in');
     throw new BadRequestError(updateMsg.title, formatSingularErr('field', updateMsg.not_valid));
   }
   await User.update({ id_users: req.user.id }, User.matchDBColumn(data));
@@ -275,6 +275,39 @@ UserController.getUserExpeditionsManage = async (req, res, next) => {
   req.resData = {
     message: 'Store Expeditions Manage Data',
     data: expeditions,
+  };
+  return next();
+};
+
+/**
+ * Get store expedition manage
+ */
+UserController.createStore = async (req, res, next) => {
+  const expeditionServices = req.body.expedition_services;
+  const storeData = _.assign(req.body.store, {
+    user_id: req.user.id,
+    status: 1,
+    seller_theme_id: 0,
+    store_id_number: req.body.user.id_number,
+    created_at: moment(),
+    status_at: moment(),
+  });
+  const store = await Store.create(Store.matchDBColumn(storeData));
+  const user = await User.update({ id_users: req.user.id }, User.matchDBColumn(req.body.user));
+  const addressData = _.assign(req.body.address, {
+    is_sale_address: 1,
+    is_primary: 0,
+    is_tender_address: 0,
+    user_id: req.user.id,
+    alias_address: req.body.address.address,
+  });
+  const address = await Address.create(Address.matchDBColumn(addressData));
+  const services = expeditionServices.map(data => (StoreExpedition.matchDBColumn(data, true)));
+  await Store.createExpeditionServices(store, services);
+
+  req.resData = {
+    message: 'Store Data',
+    data: { store, user, address, expedition_services: expeditionServices },
   };
   return next();
 };

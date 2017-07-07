@@ -124,6 +124,15 @@ routes.get('/users/store/expeditions/manage',
   apiResponse());
 
 /**
+ * POST /users/store
+ * Create store
+ */
+routes.post('/users/store',
+  auth(),
+  wrap(UserController.createStore),
+  apiResponse());
+
+/**
  * POST /passwords/forgot
  * Generate reset link sent through email
  */

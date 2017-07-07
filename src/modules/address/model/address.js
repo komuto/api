@@ -3,6 +3,7 @@ import './province';
 import './district';
 import './sub_district';
 import './village';
+import { BadRequestError } from '../../../../common/errors';
 
 const bookshelf = core.postgres.db;
 
@@ -97,18 +98,22 @@ class AddressModel extends bookshelf.Model {
    * @param {Object} data
    */
   static async create(data) {
-    const address = await new this(data).save();
-    await address.load(['province', 'district', 'subDistrict', 'village']);
-    const province = address.related('province');
-    const district = address.related('district');
-    const subDistrict = address.related('subDistrict');
-    const village = address.related('village');
-    return {
-      ...address.serialize(),
-      province,
-      district,
-      subDistrict,
-      village };
+    try {
+      const address = await new this(data).save();
+      await address.load(['province', 'district', 'subDistrict', 'village']);
+      const province = address.related('province');
+      const district = address.related('district');
+      const subDistrict = address.related('subDistrict');
+      const village = address.related('village');
+      return {
+        ...address.serialize(),
+        province,
+        district,
+        subDistrict,
+        village };
+    } catch (err) {
+      throw new BadRequestError('Gagal membuat alamat');
+    }
   }
 
   /**
@@ -136,7 +141,7 @@ class AddressModel extends bookshelf.Model {
    * Delete address
    * @param id {integer} address id
    */
-  static async delete(id) {
+  static async destroy(id) {
     await this.where('id_alamatuser', id).destroy();
   }
 
@@ -235,9 +240,9 @@ AddressModel.prototype.serialize = function () {
     postal_code: this.attributes.kodepos_user,
     address: this.attributes.alamat_user,
     alias_address: this.attributes.alamat_alias,
-    is_primary_address: this.attributes.alamat_primary === '1',
-    is_sale_address: this.attributes.alamat_originjual === '1',
-    is_tender_address: this.attributes.alamat_originlelang === '1',
+    is_primary_address: this.attributes.alamat_primary === 1,
+    is_sale_address: this.attributes.alamat_originjual === 1,
+    is_tender_address: this.attributes.alamat_originlelang === 1,
   };
 };
 
