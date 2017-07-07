@@ -30,7 +30,6 @@ constraints.createAddress = {
   name: { presence: { message: nameMsg.presence } },
   address: { presence: { message: addressMsg.presence } },
   alias_address: { presence: { message: aliasAddressMsg.presence } },
-  is_primary: { presence: { message: isPrimaryMsg.presence } },
 };
 
 constraints.updateAddress = {
