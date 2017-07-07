@@ -3,6 +3,7 @@ import './province';
 import './district';
 import './sub_district';
 import './village';
+import { BadRequestError } from '../../../../common/errors';
 
 const bookshelf = core.postgres.db;
 
@@ -97,7 +98,11 @@ class AddressModel extends bookshelf.Model {
    * @param {Object} data
    */
   static async create(data) {
-    await new this(data).save();
+    try {
+      return await new this(data).save();
+    } catch (err) {
+      throw new BadRequestError('Gagal membuat alamat');
+    }
   }
 
   /**
@@ -113,7 +118,7 @@ class AddressModel extends bookshelf.Model {
    * Delete address
    * @param id {integer} address id
    */
-  static async delete(id) {
+  static async destroy(id) {
     await this.where('id_alamatuser', id).destroy();
   }
 
@@ -174,15 +179,6 @@ class AddressModel extends bookshelf.Model {
   }
 
   /**
-   * Get store address
-   * @param {integer} userId
-   * @param {integer} districtId
-   */
-  static async storeAddress(data) {
-    return await new this(data).save();
-  }
-
-  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData
@@ -221,9 +217,9 @@ AddressModel.prototype.serialize = function () {
     postal_code: this.attributes.kodepos_user,
     address: this.attributes.alamat_user,
     alias_address: this.attributes.alamat_alias,
-    is_primary_address: this.attributes.alamat_primary === '1',
-    is_sale_address: this.attributes.alamat_originjual === '1',
-    is_tender_address: this.attributes.alamat_originlelang === '1',
+    is_primary_address: this.attributes.alamat_primary === 1,
+    is_sale_address: this.attributes.alamat_originjual === 1,
+    is_tender_address: this.attributes.alamat_originlelang === 1,
   };
 };
 

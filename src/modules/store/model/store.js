@@ -2,9 +2,9 @@ import _ from 'lodash';
 import core from '../../core';
 import './catalog';
 import '../../user/model/user';
+import { BadRequestError } from '../../../../common/errors';
 
 const { parseDate } = core.utils;
-import { BadRequestError } from '../../../../common/errors';
 const bookshelf = core.postgres.db;
 const IMAGE_PATH = 'toko';
 
@@ -213,6 +213,17 @@ class StoreModel extends bookshelf.Model {
     const store = await this.where({ id_users: data.id_users }).fetch();
     if (store) throw new BadRequestError('Toko sudah ada');
     return await new this(data).save();
+  }
+
+  /**
+   * Create store expeditions
+   * @param store {object} store data
+   * @param services {object} expedition services data
+   */
+  static async createExpeditionServices(store, services) {
+    return services.forEach(async (service) => {
+      await store.expeditionServices().attach(service).catch(() => {});
+    });
   }
 
   /**

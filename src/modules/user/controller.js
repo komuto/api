@@ -119,7 +119,6 @@ UserController.updateUser = async (req, res, next) => {
   const check = { name, cooperative_member_number, photo, phone_number, gender, place_of_birth, date_of_birth: dateOfBirth };
   const data = _.omitBy(check, _.isUndefined);
   if (_.isEmpty(data)) {
-    console.log('coming in');
     throw new BadRequestError(updateMsg.title, formatSingularErr('field', updateMsg.not_valid));
   }
   await User.update({ id_users: req.user.id }, User.matchDBColumn(data));
@@ -284,7 +283,8 @@ UserController.getUserExpeditionsManage = async (req, res, next) => {
  * Get store expedition manage
  */
 UserController.createStore = async (req, res, next) => {
-  _.assign(req.body.store, {
+  const expeditionServices = req.body.expedition_services;
+  const storeData = _.assign(req.body.store, {
     user_id: req.user.id,
     status: 1,
     seller_theme_id: 0,
@@ -292,16 +292,22 @@ UserController.createStore = async (req, res, next) => {
     created_at: moment(),
     status_at: moment(),
   });
-  const store = await Store.create(Store.matchDBColumn(req.body.store));
+  const store = await Store.create(Store.matchDBColumn(storeData));
   const user = await User.update({ id_users: req.user.id }, User.matchDBColumn(req.body.user));
-  Store.where('id_toko', store.toJSON().id).destroy();
-  _.assign(req.body.address, { is_sale_address: 1, user_id: req.user.id });
-  const address = await Address.storeAddress(Address.matchDBColumn(req.body.address));
-  // const expeditions = await Expedition.storeExpeditions(req.body.expeditions, store);
+  const addressData = _.assign(req.body.address, {
+    is_sale_address: 1,
+    is_primary: 0,
+    is_tender_address: 0,
+    user_id: req.user.id,
+    alias_address: req.body.address.address,
+  });
+  const address = await Address.create(Address.matchDBColumn(addressData));
+  const services = expeditionServices.map(data => (StoreExpedition.matchDBColumn(data, true)));
+  await Store.createExpeditionServices(store, services);
 
   req.resData = {
     message: 'Store Data',
-    data: { store, user, address },
+    data: { store, user, address, expedition_services: expeditionServices },
   };
   return next();
 };

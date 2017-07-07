@@ -106,6 +106,6 @@ AddressController.updateAddress = async (req, res, next) => {
 };
 
 AddressController.deleteAddress = async (req, res, next) => {
-  await Address.delete(req.params.id);
+  await Address.destroy(req.params.id);
   return next();
 };
