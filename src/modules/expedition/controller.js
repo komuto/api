@@ -50,7 +50,7 @@ ExpeditionController.getExpeditionService = async (req, res, next) => {
  * Get expedition cost
  */
 ExpeditionController.getExpeditionCost = async (req, res, next) => {
-  const cost = await Expedition.getCost(req.params.id, req.body);
+  const cost = await Expedition.getCost(req.params.id, req.query);
   req.resData = {
     message: 'Expedition Cost Data',
     data: cost,

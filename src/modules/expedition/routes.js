@@ -40,8 +40,9 @@ routes.get('/expeditions/:id/services',
  * GET /expeditions/:id/cost
  * View expedition cost
  */
-routes.post('/expeditions/:id/cost',
+routes.get('/expeditions/:id/cost',
   validateParam(constraints.cost),
+  cache(),
   wrap(ExpeditionController.getExpeditionCost),
   apiResponse());
 
