@@ -23,6 +23,7 @@ import product from './modules/product';
 import bank from './modules/bank';
 import review from './modules/review';
 import store from './modules/store';
+import image from './modules/image';
 
 const app = express();
 
@@ -65,7 +66,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(config.publicPath, { maxAge: c.ONE_YEAR }));
 app.use((req, res, next) => {
-  res.header("Content-Type",'application/json');
+  res.header('Content-Type', 'application/json');
   next();
 });
 app.set('trust proxy', 1);
@@ -85,6 +86,9 @@ app.set('case sensitive routing', true);
 // configure middleware
 app.use(core.middleware.requestLoggerMiddleware());
 app.use(core.middleware.requestUtilsMiddleware());
+
+app.use(image.routes);
+
 app.use(core.middleware.checkContentType());
 
 app.use(core.routes);
