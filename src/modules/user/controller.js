@@ -8,7 +8,7 @@ import { utils } from '../core';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
 import { model } from '../store';
-import { registrationMsg, updateMsg, emailMsg, activateMsg, resetPassMsg, tokenMsg, loginMsg, fbMsg } from './message';
+import { registrationMsg, updateMsg, emailMsg, activateMsg, resetPassMsg, tokenMsg, loginMsg, fbMsg, passwordMsg } from './message';
 import { Address } from '../address/model';
 
 const fb = new Facebook(config.fb);
@@ -129,15 +129,16 @@ UserController.updateUser = async (req, res, next) => {
  * Update user password
  */
 UserController.updatePassword = async (req, res, next) => {
-  const user = await new User({ email_users: req.body.email }).fetch();
-  if (!user) {
-    throw new BadRequestError(updateMsg.title, formatSingularErr('email', emailMsg.not_found));
-  }
-  if (await user.checkPassword(req.body.old_password)) {
-    const password = User.hashPasswordSync(req.body.password);
-    await User.update({ id_users: user.get('id_users') }, { password_users: password });
-  }
-  return next();
+  User.checkPasswordFromApi(req.body.old_password, req.user.password).then((body) => {
+    body = JSON.parse(body);
+    if (body.data) {
+      const password = User.hashPasswordSync(req.body.password);
+      User.update({ id_users: req.user.id }, { password_users: password });
+    } else {
+      throw passwordMsg.not_match;
+    }
+    return next();
+  }).catch(e => next(new BadRequestError(resetPassMsg.title, formatSingularErr('password', e))));
 };
 
 /**

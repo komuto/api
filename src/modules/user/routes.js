@@ -75,6 +75,7 @@ routes.put('/users',
  */
 routes.put('/users/password',
   validateUpdate(),
+  auth(),
   wrap(UserController.updatePassword),
   apiResponse());
 
