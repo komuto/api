@@ -100,8 +100,8 @@ AddressController.updateAddress = async (req, res, next) => {
     }
     req.body.is_primary = req.body.is_primary ? '1' : '0';
   }
-  await Address.update({ id_alamatuser: req.params.id }, Address.matchDBColumn(req.body));
-  const address = await Address.forge({ id_alamatuser: req.params.id }).fetch();
+  const address = await Address.update({ id_alamatuser: req.params.id }, Address.matchDBColumn(req.body));
+  //const address = await Address.forge({ id_alamatuser: req.params.id }).fetch();
   req.resData = {
     message: 'Address Data',
     data: address,
