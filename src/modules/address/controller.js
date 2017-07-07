@@ -79,7 +79,7 @@ AddressController.getVillages = async (req, res, next) => {
 
 AddressController.createAddress = async (req, res, next) => {
   req.body.user_id = req.user.id;
-  req.body.is_primary = req.body.is_primary ? '1' : '0';
+  req.body.is_primary = '0';
   req.body.is_sale_address = '0';
   const address = await Address.create(Address.matchDBColumn(req.body));
   req.resData = {
@@ -100,8 +100,8 @@ AddressController.updateAddress = async (req, res, next) => {
     }
     req.body.is_primary = req.body.is_primary ? '1' : '0';
   }
-  const address = await Address.update({ id_alamatuser: req.params.id }, Address.matchDBColumn(req.body));
-  //const address = await Address.forge({ id_alamatuser: req.params.id }).fetch();
+  const address = await Address.update({ id_alamatuser: req.params.id },
+    Address.matchDBColumn(req.body));
   req.resData = {
     message: 'Address Data',
     data: address,

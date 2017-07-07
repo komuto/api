@@ -123,7 +123,7 @@ class AddressModel extends bookshelf.Model {
    */
   static async update(data, newData) {
     const address = await this.where(data).save(newData, { method: 'update' });
-    await address.refresh({withRelated: ['province', 'district', 'subDistrict', 'village']});
+    await address.refresh({ withRelated: ['province', 'district', 'subDistrict', 'village'] });
 
     const province = address.related('province');
     const district = address.related('district');
