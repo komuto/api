@@ -226,6 +226,11 @@ class StoreModel extends bookshelf.Model {
     });
   }
 
+  static async getStoreId(id) {
+    const store = await new this({ id_users: id }).fetch();
+    return store.get('id_toko');
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data

@@ -35,7 +35,7 @@ class StoreExpeditionModel extends bookshelf.Model {
           tglstatus_ekspedisitoko },
           { patch: true });
       }
-      return new this(storeExpedition).save();
+      return new this().save(storeExpedition);
     }));
   }
 
