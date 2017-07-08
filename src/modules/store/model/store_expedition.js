@@ -15,27 +15,32 @@ class StoreExpeditionModel extends bookshelf.Model {
     return 'id_ekspedisiservice';
   }
 
+  initialize() {
+    this.on('updating', (model, attrs, options) => {
+      const { id_toko, id_ekspedisiservice } = attrs;
+      ['id_toko', 'id_ekspedisiservice'].forEach((prop) => {
+        model.unset(prop);
+        delete attrs[prop];
+      });
+      options.patch = true;
+      options.query.where({ id_toko, id_ekspedisiservice });
+    }, this);
+  }
+
   /**
    * Save batch store expedition
    * @param collection {array}
    */
   static async updateBatch(collection) {
-    let counter = -1;
     const checker = await Promise.all(collection.map((storeExpedition) => {
       const { id_toko, id_ekspedisiservice } = storeExpedition;
-      return new this({ id_toko, id_ekspedisiservice }).fetch();
+      return new this({ id_toko, id_ekspedisiservice }).fetch({ columns: 'id_toko' });
     }));
-    return await Promise.all(collection.map((storeExpedition) => {
-      counter += 1;
-      const { id_toko, id_ekspedisiservice } = storeExpedition;
-      if (checker[counter]) {
-        const { status_ekspedisitoko, tglstatus_ekspedisitoko } = storeExpedition;
-        return this.where({ id_toko, id_ekspedisiservice }).save({
-          status_ekspedisitoko,
-          tglstatus_ekspedisitoko },
-          { patch: true });
-      }
-      return new this().save(storeExpedition);
+    return await Promise.all(Object.keys(checker).map((key) => {
+      let method;
+      if (checker[key]) method = 'update';
+      else method = 'insert';
+      return new this().save(collection[key], { method });
     }));
   }
 
