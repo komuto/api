@@ -129,16 +129,14 @@ UserController.updateUser = async (req, res, next) => {
  * Update user password
  */
 UserController.updatePassword = async (req, res, next) => {
-  User.checkPasswordFromApi(req.body.old_password, req.user.password).then((body) => {
-    body = JSON.parse(body);
-    if (body.data) {
-      const password = User.hashPasswordSync(req.body.password);
-      User.update({ id_users: req.user.id }, { password_users: password });
-    } else {
-      throw passwordMsg.not_match;
-    }
-    return next();
-  }).catch(e => next(new BadRequestError(resetPassMsg.title, formatSingularErr('password', e))));
+  const check = await User.checkPasswordFromApi(req.body.old_password, req.user.password);
+  if (check) {
+    const password = User.hashPasswordSync(req.body.password);
+    await User.update({ id_users: req.user.id }, { password_users: password });
+  } else {
+    throw new BadRequestError(resetPassMsg.title, formatSingularErr('password', passwordMsg.not_match));
+  }
+  return next();
 };
 
 /**

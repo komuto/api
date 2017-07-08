@@ -10,16 +10,12 @@ export default new LocalStrategy({
   usernameField: 'email',
   passwordField: 'password',
   passReqToCallback: false,
-}, (email, password, done) => {
-  new User({ email_users: email }).fetch().then((user) => {
-    if (!user) return done(new BadRequestError(loginMsg.title, formatSingularErr('email', emailMsg.not_found)), false);
-    return User.checkPasswordFromApi(password, user.get('password_users'))
-      .then((body) => {
-        body = JSON.parse(body);
-        if (!body.data) {
-          return done(new BadRequestError(loginMsg.title, formatSingularErr('password', loginMsg.wrong_password)), false);
-        }
-        return done(null, user.toJSON());
-      });
-  });
+}, async (email, password, done) => {
+  const user = await new User({ email_users: email }).fetch();
+  if (!user) return done(new BadRequestError(loginMsg.title, formatSingularErr('email', emailMsg.not_found)), false);
+  const check = await User.checkPasswordFromApi(password, user.get('password_users'));
+  if (!check) {
+    return done(new BadRequestError(loginMsg.title, formatSingularErr('password', loginMsg.wrong_password)), false);
+  }
+  return done(null, user.serialize(true));
 });

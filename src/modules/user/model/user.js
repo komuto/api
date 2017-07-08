@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import moment from 'moment';
-import rp from 'request-promise';
+import rp from 'request-promise-native';
 import config from '../../../../config';
 import core from '../../core';
 import '../../store/model/store';
@@ -177,7 +177,7 @@ class UserModel extends bookshelf.Model {
    * @return {bool}
    */
   static async checkPasswordFromApi(plain, hashed) {
-    return await rp.post({
+    const res = await rp.post({
       url: config.komutoUrl,
       form: {
         page: 'login',
@@ -188,6 +188,7 @@ class UserModel extends bookshelf.Model {
         },
       },
     });
+    return JSON.parse(res).data;
   }
 }
 
