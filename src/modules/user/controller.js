@@ -152,7 +152,7 @@ UserController.createUser = async (req, res, next) => {
   req.body.password = User.hashPasswordSync(req.body.password);
   user = await User.create(User.matchDBColumn(req.body));
   const token = await UserToken.generateToken(user.id, TokenType.EMAIL_ACTIVATION);
-  UserEmail.send(UserEmail.buildActivation(user.email, token));
+  UserEmail.sendActivateAccount(user.email, token);
   req.body.password = password;
   return next();
 };
@@ -175,7 +175,7 @@ UserController.forgotPassword = async (req, res, next) => {
     throw new BadRequestError(updateMsg.title, formatSingularErr('email', emailMsg.not_found));
   }
   const token = await UserToken.generateToken(user.id, TokenType.FORGOT_PASSWORD);
-  UserEmail.send(UserEmail.buildForgotPassword(req.body.email, token));
+  UserEmail.sendForgotPassword(req.body.email, token);
   return next();
 };
 

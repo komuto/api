@@ -6,6 +6,7 @@ import postgres from './knex';
 import routes from './routes';
 import * as apiCache from './cache';
 import config from '../../../config';
+import { email } from './email';
 
 const imagePath = (path, file) => {
   if (!file) return null;
@@ -18,6 +19,7 @@ const cacheClear = apiCache.cacheClear;
 
 export default {
   utils,
+  email,
   controller,
   middleware,
   postgres,
