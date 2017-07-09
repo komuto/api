@@ -64,6 +64,10 @@ class ProductModel extends bookshelf.Model {
     return this.hasMany('User', 'id_produk').through('Wishlist', 'id_users', 'id_produk', 'id_users');
   }
 
+  wholesale() {
+    return this.hasMany('Wholesale', 'id_produk');
+  }
+
   /**
    * Get products
    */
@@ -180,42 +184,117 @@ class ProductModel extends bookshelf.Model {
     }).fetchAll();
   }
 
+  static loadExpeditions(product) {
+    // checking whether expedition id is already in the list or not
+    const checker = [];
+    return product.related('expeditionServices')
+      .reduce((res, service) => {
+        const expeditionId = service.get('id_ekspedisi');
+        if (!checker.includes(expeditionId)) {
+          const expedition = service.related('expedition').serialize(true);
+          checker.push(expeditionId);
+          res.push(expedition);
+        }
+        return res;
+      }, []);
+  }
+
+  static loadReviewsRatings(product) {
+    const accSum = [0, 0];
+    const qtySum = [0, 0];
+    const reviews = product.related('reviews').map((review) => {
+      const { name, id: userId, photo } = review.related('user').serialize();
+      review = review.serialize();
+      const { quality, accuracy } = review;
+      this.ratingSum(accSum, accuracy);
+      this.ratingSum(qtySum, quality);
+      return {
+        ...review,
+        user: { id: userId, name, photo },
+      };
+    });
+    return { reviews, rating: { accuracy: accSum, quality: qtySum } };
+  }
+
+  /**
+   * Adding to be averaged later
+   * @param ref [array] array reference
+   * @param rating [integer]
+   */
+  static ratingSum(ref, rating) {
+    if (rating) {
+      ref[0] += rating;
+      ref[1] += 1;
+    }
+  }
+
+  static ratingAvg(res) {
+    res = (res[0] / res[1]).toFixed(1);
+    // e.g.: if the rating is 5.0 change it to 5
+    if (res[2] === '0') res = res[0];
+    return res;
+  }
+
   /**
    * Get product with its relation
    * @param id {integer} product id
    */
   static async getFullProduct(id) {
     let product = await this.where({ id_produk: id }).fetch({
-      withRelated: ['category', 'store', 'images', 'reviews.user.addresses'],
+      withRelated: ['category', 'store', 'images', 'reviews.user.addresses', 'expeditionServices.expedition'],
     });
+    // Eager load other products so it doesn't block other process by not awaiting directly
+    const getOtherProds = this.query((qb) => {
+      qb.where('id_toko', product.get('id_toko'));
+      qb.whereNot('id_produk', id);
+      qb.orderBy('id_produk', 'desc');
+      qb.limit(3);
+    }).fetchAll();
+
+    let wholesaler;
+    if (product.get('is_grosir')) {
+      await product.load('wholesale');
+      wholesaler = product.related('wholesale').serialize();
+    } else wholesaler = [];
+
     const category = product.related('category').serialize();
     const store = product.related('store').serialize();
-    const getAddress = Address.getStoreAddress(store.user_id);
     const images = product.related('images');
-    const reviews = product.related('reviews').map((review) => {
-      const { name, id: userId, photo } = review.related('user').serialize();
-      return {
-        ...review.serialize(),
-        user: { id: userId, name, photo },
-      };
-    });
-    const address = await getAddress;
-    store.province = address.related('province').serialize();
+    const getAddress = Address.getStoreAddress(store.user_id);
+    const expeditions = this.loadExpeditions(product);
+    const { reviews, rating } = this.loadReviewsRatings(product);
+
+    if (!_.isEmpty(reviews)) {
+      rating.quality = this.ratingAvg(rating.quality);
+      rating.accuracy = this.ratingAvg(rating.accuracy);
+    } else {
+      rating.quality = '-';
+      rating.accuracy = '-';
+    }
+
     product = product.serialize();
     product.count_review = reviews.length;
+    const address = await getAddress;
+    store.province = address.related('province').serialize();
+    const otherProds = await getOtherProds;
+
     return {
       product,
       category,
       store,
       images,
       reviews,
+      rating,
+      wholesaler,
+      other_products: otherProds.serialize(true),
+      expeditions,
     };
   }
 }
 
-ProductModel.prototype.serialize = function (full = true) {
+ProductModel.prototype.serialize = function (minimal = false) {
   const attr = this.attributes;
-  if (!full) {
+  if (minimal) {
     return {
       id: attr.id_produk,
       name: attr.nama_produk,

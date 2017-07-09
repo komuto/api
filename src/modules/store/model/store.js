@@ -56,7 +56,7 @@ class StoreModel extends bookshelf.Model {
       const catalogProducts = catalog.related('products').map((product) => {
         const images = product.related('images').serialize();
         return {
-          ...product.serialize(false),
+          ...product.serialize(true),
           image: images.length ? images[0] : {},
         };
       });
