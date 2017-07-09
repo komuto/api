@@ -138,7 +138,7 @@ routes.post('/users/store',
  * Generate reset link sent through email
  */
 routes.post('/passwords/forgot',
-  UserController.forgotPassword,
+  wrap(UserController.forgotPassword),
   apiResponse());
 
 /**
