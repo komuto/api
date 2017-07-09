@@ -46,16 +46,16 @@ export function checkNull(key, defaultValue, transform = null) {
   return key;
 }
 
-export function parseDate(key, defaultValue = null) {
+export function parseDate(key, defaultValue) {
   return checkNull(key, defaultValue, moment(key).unix());
 }
 
-export function parseNum(key, defaultValue = null) {
+export function parseNum(key, defaultValue) {
   if (key === 0) return defaultValue || 0;
   return checkNull(key, defaultValue, parseInt(key, 10));
 }
 
-export function parseDec(key, defaultValue = null) {
+export function parseDec(key, defaultValue) {
   return checkNull(key, defaultValue, parseFloat(key));
 }
 

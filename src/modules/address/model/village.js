@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import toTitleCase from 'to-title-case';
 import core from '../../core';
-import './address';
 
 const bookshelf = core.postgres.db;
 
@@ -30,7 +29,7 @@ class VillageModel extends bookshelf.Model {
 
   /**
    * Update line item
-   * @param {Integer} id
+   * @param {integer} id
    * @param {Object} data
    */
   static async update(id, data) {
@@ -40,7 +39,7 @@ class VillageModel extends bookshelf.Model {
 
   /**
    * Get a line item by id
-   * @param {Integer} id
+   * @param {integer} id
    */
   static async getById(id) {
     return await this.where({ address_id: id }).fetch();

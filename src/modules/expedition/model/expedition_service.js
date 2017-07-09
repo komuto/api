@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import core from '../../core';
-import './expedition';
 
 const bookshelf = core.postgres.db;
 const { parseNum, parseDate } = core.utils;

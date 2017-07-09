@@ -2,7 +2,6 @@ import _ from 'lodash';
 import slug from 'slug';
 import core from '../core';
 import { BadRequestError } from '../../../common/errors';
-import '../brand/model';
 
 const bookshelf = core.postgres.db;
 

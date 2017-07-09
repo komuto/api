@@ -1,8 +1,4 @@
 import core from '../../core';
-import './province';
-import './district';
-import './sub_district';
-import './village';
 import { BadRequestError } from '../../../../common/errors';
 
 const bookshelf = core.postgres.db;

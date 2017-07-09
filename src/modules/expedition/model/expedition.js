@@ -2,7 +2,6 @@ import _ from 'lodash';
 import moment from 'moment';
 import rp from 'request-promise-native';
 import core from '../../core';
-import './expedition_service';
 import { BadRequestError } from '../../../../common/errors';
 
 const bookshelf = core.postgres.db;
@@ -35,7 +34,7 @@ class ExpeditionModel extends bookshelf.Model {
     const expeditions = await this.where({}).fetchAll({ withRelated: ['services'] });
     return expeditions.map((expedition) => {
       const services = expedition.related('services').map((service) => {
-        service = service.serialize();
+        service = service.serialize(false);
         service.full_name = `${expedition.toJSON().name} ${service.name}`;
         return service;
       });

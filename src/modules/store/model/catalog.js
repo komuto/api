@@ -1,5 +1,4 @@
 import core from '../../core';
-import '../../product/model/product';
 
 const bookshelf = core.postgres.db;
 const { parseDate, defaultNull } = core.utils;

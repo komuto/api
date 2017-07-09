@@ -1,7 +1,5 @@
 import moment from 'moment';
 import core from '../core';
-import '../user/model/user';
-import '../product/model/product';
 
 const bookshelf = core.postgres.db;
 const { parseNum, parseDate } = core.utils;

@@ -3,9 +3,6 @@ import moment from 'moment';
 import rp from 'request-promise-native';
 import config from '../../../../config';
 import core from '../../core';
-import '../../store/model/store';
-import './wishlist';
-import '../../product/model/product';
 
 const { defaultNull, checkNull } = core.utils;
 const bookshelf = core.postgres.db;
@@ -56,7 +53,7 @@ class UserModel extends bookshelf.Model {
   /**
    * Add relation to Product
    */
-  products() {
+  wishlistProducts() {
     return this.hasMany('Product', 'id_users').through('Wishlist', 'id_produk', 'id_users', 'id_produk');
   }
 
@@ -131,8 +128,8 @@ class UserModel extends bookshelf.Model {
   }
 
   static async getWishlist(id) {
-    const user = await this.where('id_users', id).fetch({ withRelated: ['products.store', 'products.images'] });
-    const products = user.related('products');
+    const user = await this.where('id_users', id).fetch({ withRelated: ['wishlistProducts.store', 'wishlistProducts.images'] });
+    const products = user.related('wishlistProducts');
     return products.map((product) => {
       const store = product.related('store');
       const images = product.related('images');

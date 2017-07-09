@@ -1,7 +1,5 @@
 import _ from 'lodash';
 import core from '../../core';
-import './catalog';
-import '../../user/model/user';
 import { BadRequestError } from '../../../../common/errors';
 
 const { parseDate } = core.utils;

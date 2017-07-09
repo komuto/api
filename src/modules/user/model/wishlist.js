@@ -1,6 +1,4 @@
 import core from '../../core';
-import './user';
-import '../../product/model/product';
 
 const bookshelf = core.postgres.db;
 
