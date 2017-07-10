@@ -1,22 +1,11 @@
 import express from 'express';
 import { ImageController } from './controller';
 import { utils, middleware } from '../core';
-import { validateParam, imagePath, validateParamMulti, imagePathMulti } from './middleware';
+import { validateParam, imagePath } from './middleware';
 
 const routes = express.Router();
 const { wrap } = utils;
 const { apiResponse, auth } = middleware;
-
-/**
- * POST /image
- * Upload single image
- */
-routes.post('/image',
-  auth(),
-  validateParam(),
-  imagePath(),
-  wrap(ImageController.singleImage),
-  apiResponse());
 
 /**
  * POST /images
@@ -24,9 +13,9 @@ routes.post('/image',
  */
 routes.post('/images',
   auth(),
-  validateParamMulti(),
-  imagePathMulti(),
-  wrap(ImageController.multiImages),
+  validateParam(),
+  imagePath(),
+  wrap(ImageController.upload),
   apiResponse());
 
 export default routes;

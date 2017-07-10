@@ -6,19 +6,7 @@ import { BadRequestError } from '../../../common/errors';
 export const ImageController = {};
 export default { ImageController };
 
-ImageController.singleImage = async (req, res, next) => {
-  const image = req.body.image;
-  fs.writeFile(image.path, image.buffer, (err) => {
-    if (err) throw new BadRequestError('Gagal upload image');
-    req.resData = {
-      message: 'success',
-      data: { name: image.filename },
-    };
-    return next();
-  });
-};
-
-ImageController.multiImages = async (req, res, next) => {
+ImageController.upload = async (req, res, next) => {
   const images = req.body.images;
   const names = [];
   const promises = _.map(images, (image) => {
@@ -37,7 +25,7 @@ ImageController.multiImages = async (req, res, next) => {
 
   req.resData = {
     message: 'success',
-    data: names,
+    data: req.body.is_single ? names[0] : names,
   };
   return next();
 };
