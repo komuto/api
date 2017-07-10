@@ -52,6 +52,10 @@ export function validateUpdate() {
   return formatValidation(constraints.update, updateMsg.title);
 }
 
+export function validateUpdatePhone() {
+  return formatValidation(constraints.updatePhone, updateMsg.title);
+}
+
 /**
  * Add token to user
  */

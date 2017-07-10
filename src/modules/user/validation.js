@@ -55,4 +55,10 @@ constraints.update = {
     message: birthMsg.place_not_valid } },
 };
 
+constraints.updatePhone = {
+  phone_number: {
+    presence: { message: phoneNumberMsg.presence },
+    format: { pattern: /^[0-9]+$/, message: phoneNumberMsg.not_valid } },
+};
+
 export default constraints;

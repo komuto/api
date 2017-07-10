@@ -48,6 +48,7 @@ const Message = {
   },
   phoneNumberMsg: {
     presence: 'harus diisi',
+    not_valid: 'harus angka',
   },
   providerNameMsg: {
     presence: 'harus diisi',
