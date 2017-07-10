@@ -44,6 +44,7 @@ routes.post('/products/:id/reviews',
  * Get full detailed product
  */
 routes.get('/products/:id',
+  auth(false),
   wrap(ProductController.getProduct),
   apiResponse());
 

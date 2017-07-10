@@ -332,3 +332,12 @@ UserController.createStore = async (req, res, next) => {
   };
   return next();
 };
+
+UserController.getPhone = (req, res, next) => {
+  const { phone_number } = req.user;
+  req.resData = {
+    message: 'Phone Number Data',
+    data: { phone_number },
+  };
+  return next();
+};

@@ -194,4 +194,12 @@ routes.get('/accounts/profile',
   wrap(UserController.getAccountProfile),
   apiResponse());
 
+/**
+ * Get user phone
+ */
+routes.get('/accounts/phone',
+  auth(),
+  UserController.getPhone,
+  apiResponse());
+
 export default routes;
