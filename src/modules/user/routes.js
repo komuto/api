@@ -2,7 +2,8 @@ import express from 'express';
 import { validateLogin, validateSocialLogin, addToken, userData, validateRegistration, validateUpdate } from './middleware';
 import { UserController } from './controller';
 import core from '../core';
-import { AddressController } from '../address/controller';
+import { validateParam } from './../store/middleware';
+import constraints from './../store/validation';
 
 const routes = express.Router();
 const { apiResponse, auth } = core.middleware;
@@ -130,6 +131,7 @@ routes.get('/users/store/expeditions/manage',
  */
 routes.post('/users/store',
   auth(),
+  validateParam(constraints.create),
   wrap(UserController.createStore),
   apiResponse());
 
