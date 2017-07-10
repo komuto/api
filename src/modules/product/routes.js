@@ -55,4 +55,13 @@ routes.get('/products/:id/reviews',
   wrap(ReviewController.getReviews),
   apiResponse());
 
+/**
+ * GET /products/id/wishlist
+ * Add to wishlist
+ */
+routes.get('/products/:id/wishlist',
+  auth(),
+  wrap(ProductController.addWishlist),
+  apiResponse());
+
 export default routes;

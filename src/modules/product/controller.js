@@ -1,4 +1,5 @@
 import { Product } from './model';
+import { Wishlist } from './../user/model';
 
 export const ProductController = {};
 export default { ProductController };
@@ -61,6 +62,17 @@ ProductController.getProduct = async (req, res, next) => {
   req.resData = {
     message: 'Product Detail Data',
     data: product,
+  };
+  return next();
+};
+
+/**
+ * Add to wishlist
+ */
+ProductController.addWishlist = async (req, res, next) => {
+  await Wishlist.addWishlist(req.params.id, req.user.id);
+  req.resData = {
+    message: 'Success',
   };
   return next();
 };
