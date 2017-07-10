@@ -129,7 +129,7 @@ class UserModel extends bookshelf.Model {
   }
 
   static async getUserProfile(id) {
-    const user = await this.where('id_users', id).fetch({ withRelated: ['store', 'birthPlace'], debug: true });
+    const user = await this.where('id_users', id).fetch({ withRelated: ['store', 'birthPlace'] });
     const store = user.related('store');
     return { user: user.serialize(false, true), store };
   }

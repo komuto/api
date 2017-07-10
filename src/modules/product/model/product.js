@@ -237,16 +237,17 @@ class ProductModel extends bookshelf.Model {
 
   /**
    * Get product with its relation
-   * @param id {integer} product id
+   * @param productId {integer} product id
+   * @param userId {integer} user id
    */
-  static async getFullProduct(id) {
-    let product = await this.where({ id_produk: id }).fetch({
-      withRelated: ['category', 'store', 'images', 'reviews.user.addresses', 'expeditionServices.expedition'],
+  static async getFullProduct(productId, userId) {
+    let product = await this.where({ id_produk: productId }).fetch({
+      withRelated: ['category', 'store', 'images', 'reviews.user.addresses', 'expeditionServices.expedition', 'likes'],
     });
     // Eager load other products so it doesn't block other process by not awaiting directly
     const getOtherProds = this.query((qb) => {
       qb.where('id_toko', product.get('id_toko'));
-      qb.whereNot('id_produk', id);
+      qb.whereNot('id_produk', productId);
       qb.orderBy('id_produk', 'desc');
       qb.limit(3);
     }).fetchAll();
@@ -261,6 +262,9 @@ class ProductModel extends bookshelf.Model {
     const store = product.related('store').serialize();
     const images = product.related('images');
     const getAddress = Address.getStoreAddress(store.user_id);
+    const likes = product.related('likes');
+    console.log(likes);
+    const isLiked = userId ? _.find(likes.models, o => o.attributes.id_users === userId) : false;
     const expeditions = this.loadExpeditions(product);
     const { reviews, rating } = this.loadReviewsRatings(product);
 
@@ -274,6 +278,8 @@ class ProductModel extends bookshelf.Model {
 
     product = product.serialize();
     product.count_review = reviews.length;
+    product.count_like = likes.length;
+    product.is_liked = !!isLiked;
     const address = await getAddress;
     store.province = address.related('province').serialize();
     const otherProds = await getOtherProds;

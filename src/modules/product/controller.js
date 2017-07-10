@@ -56,7 +56,7 @@ ProductController.search = async (req, res, next) => {
 };
 
 ProductController.getProduct = async (req, res, next) => {
-  const product = await Product.getFullProduct(req.params.id);
+  const product = await Product.getFullProduct(req.params.id, req.user.id);
 
   req.resData = {
     message: 'Product Detail Data',
