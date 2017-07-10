@@ -265,8 +265,8 @@ class ProductModel extends bookshelf.Model {
     const { reviews, rating } = this.loadReviewsRatings(product);
 
     if (!_.isEmpty(reviews)) {
-      rating.quality = this.ratingAvg(rating.quality);
-      rating.accuracy = this.ratingAvg(rating.accuracy);
+      rating.quality = parseFloat(this.ratingAvg(rating.quality));
+      rating.accuracy = parseFloat(this.ratingAvg(rating.accuracy));
     } else {
       rating.quality = '-';
       rating.accuracy = '-';

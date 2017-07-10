@@ -110,18 +110,30 @@ UserController.getBalance = (req, res, next) => {
  * Update user
  */
 UserController.updateUser = async (req, res, next) => {
-  const { name, cooperative_member_number, photo, phone_number, place_of_birth } = req.body;
-  let gender;
-  let dateOfBirth;
-  if (req.body.gender) gender = (req.body.gender === 'male') ? 'L' : 'P';
-  if (req.body.date_of_birth) dateOfBirth = moment.unix(req.body.date_of_birth);
+  if (req.body.gender) req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
+  if (req.body.date_of_birth) req.body.date_of_birth = moment.unix(req.body.date_of_birth);
   // eslint-disable-next-line
-  const check = { name, cooperative_member_number, photo, phone_number, gender, place_of_birth, date_of_birth: dateOfBirth };
-  const data = _.omitBy(check, _.isUndefined);
+  const { name, cooperative_member_number, photo, phone_number, gender, date_of_birth, place_of_birth } = req.body;
+  // eslint-disable-next-line
+  const check = { name, cooperative_member_number, photo, phone_number, gender, place_of_birth, date_of_birth };
+  const data = User.matchDBColumn(check);
   if (_.isEmpty(data)) {
     throw new BadRequestError(updateMsg.title, formatSingularErr('field', updateMsg.not_valid));
   }
-  await User.update({ id_users: req.user.id }, User.matchDBColumn(data));
+  await User.update({ id_users: req.user.id }, data);
+  return next();
+};
+
+UserController.updateAccount = async (req, res, next) => {
+  if (req.body.gender) req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
+  if (req.body.date_of_birth) req.body.date_of_birth = moment.unix(req.body.date_of_birth);
+  const { name, photo, gender, place_of_birth, date_of_birth } = req.body;
+  const check = { name, photo, gender, place_of_birth, date_of_birth };
+  const data = User.matchDBColumn(check);
+  if (_.isEmpty(data)) {
+    throw new BadRequestError(updateMsg.title, formatSingularErr('field', updateMsg.not_valid));
+  }
+  await User.update({ id_users: req.user.id }, data);
   return next();
 };
 
@@ -158,13 +170,23 @@ UserController.createUser = async (req, res, next) => {
 };
 
 /**
- * Get profile
+ * Get user profile
  */
-UserController.getProfile = async (req, res, next) => {
-  const user = await User.getProfile(req.user.id);
+UserController.getUserProfile = async (req, res, next) => {
+  const user = await User.getUserProfile(req.user.id);
   req.resData = {
     message: 'User Profile',
     data: user,
+  };
+  return next();
+};
+
+UserController.getAccountProfile = async (req, res, next) => {
+  const { id, name, photo, gender, place_of_birth, date_of_birth } = req.user;
+  const birthPlace = await User.getBirthPlace(place_of_birth);
+  req.resData = {
+    message: 'Profile Data',
+    data: { id, name, photo, gender, place_of_birth: birthPlace, date_of_birth },
   };
   return next();
 };

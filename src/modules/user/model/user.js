@@ -1,11 +1,14 @@
 import bcrypt from 'bcrypt';
 import moment from 'moment';
+import toTitleCase from 'to-title-case';
 import rp from 'request-promise-native';
 import config from '../../../../config';
 import core from '../../core';
+import { model } from '../../address';
 
-const { defaultNull, checkNull } = core.utils;
+const { defaultNull, checkNull, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
+const { District } = model;
 
 // used by bcrypt to generate new salt
 // 8 rounds will produce about 40 hashes per second on a 2GHz core
@@ -55,6 +58,10 @@ class UserModel extends bookshelf.Model {
    */
   wishlistProducts() {
     return this.hasMany('Product', 'id_users').through('Wishlist', 'id_produk', 'id_users', 'id_produk');
+  }
+
+  birthPlace() {
+    return this.belongsTo('District', 'kota_lahir');
   }
 
   /**
@@ -121,10 +128,10 @@ class UserModel extends bookshelf.Model {
     return user ? user.serialize() : user;
   }
 
-  static async getProfile(id) {
-    const user = await this.where('id_users', id).fetch({ withRelated: ['store'] });
+  static async getUserProfile(id) {
+    const user = await this.where('id_users', id).fetch({ withRelated: ['store', 'birthPlace'], debug: true });
     const store = user.related('store');
-    return { user, store };
+    return { user: user.serialize(false, true), store };
   }
 
   static async getWishlist(id) {
@@ -135,6 +142,17 @@ class UserModel extends bookshelf.Model {
       const images = product.related('images');
       return { product, store, images };
     });
+  }
+
+  /**
+   * Get birthplace name by district id
+   * @param id {integer} district id
+   */
+  static async getBirthPlace(id) {
+    let name;
+    const birthPlace = await new District({ id_kotakab: id }).fetch({ columns: 'nama_kotakab' });
+    if (birthPlace) name = toTitleCase(birthPlace.get('nama_kotakab').split(' ')[1]);
+    return defaultNull(name);
   }
 
   /**
@@ -162,7 +180,7 @@ class UserModel extends bookshelf.Model {
     };
     const newData = {};
     Object.keys(data).forEach((prop) => {
-      if (column[prop]) newData[column[prop]] = data[prop];
+      if (column[prop] && data[prop] !== undefined) newData[column[prop]] = data[prop];
     });
     return newData;
   }
@@ -189,8 +207,23 @@ class UserModel extends bookshelf.Model {
   }
 }
 
-UserModel.prototype.serialize = function (pass = false) {
+/**
+ * @param pass {bool} true = include password
+ * @param birth {bool} true = get name of the district id
+ * @param account {bool} true = minimal for account collection
+ */
+UserModel.prototype.serialize = function (pass = false, birth = false, account = false) {
   const attr = this.attributes;
+  if (account) {
+    return {
+      id: attr.id_users,
+      name: attr.namalengkap_users,
+      photo: core.imagePath(IMAGE_PATH, attr.pathfoto_users),
+      gender: attr.jeniskelamin_users === 'L' ? 'male' : 'female',
+      place_of_birth: defaultNull(attr.kota_lahir),
+      date_of_birth: defaultNull(attr.tgl_lahir),
+    };
+  }
   const user = {
     id: attr.id_users,
     marketplace_id: defaultNull(attr.marketplaceuser),
@@ -206,9 +239,9 @@ UserModel.prototype.serialize = function (pass = false) {
     auth_key: defaultNull(attr.auth_key),
     saldo_wallet: checkNull(attr.saldo_wallet, 0),
     place_of_birth: defaultNull(attr.kota_lahir),
-    date_of_birth: defaultNull(attr.tgl_lahir),
+    date_of_birth: parseDate(attr.tgl_lahir, null),
     created_at: moment(attr.tgl_create_users).unix(),
-    join_at: defaultNull(attr.tgl_join_koperasi),
+    join_at: parseDate(attr.tgl_join_koperasi),
     status_at: moment(attr.tglstatus_users).unix(),
     provider_name: attr.hybridauth_provider_name,
     provider_uid: attr.hybridauth_provider_uid,
@@ -216,6 +249,11 @@ UserModel.prototype.serialize = function (pass = false) {
   if (pass) {
     user.password = attr.password_users;
     return user;
+  }
+  if (birth) {
+    this.load({ birthPlace: qb => qb.column('nama_kotakab') });
+    const name = this.related('birthPlace').get('nama_kotakab');
+    if (name) user.place_of_birth = toTitleCase(name.split(' ')[1]);
   }
   return user;
 };

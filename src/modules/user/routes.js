@@ -45,7 +45,7 @@ routes.get('/users/balance',
  */
 routes.get('/users/profile',
   auth(),
-  wrap(UserController.getProfile),
+  wrap(UserController.getUserProfile),
   apiResponse());
 
 /**
@@ -68,6 +68,16 @@ routes.put('/users',
   validateUpdate(),
   auth(),
   wrap(UserController.updateUser),
+  apiResponse());
+
+/**
+ * PUT /accounts/profile
+ * Update user account
+ */
+routes.put('/accounts/profile',
+  validateUpdate(),
+  auth(),
+  wrap(UserController.updateAccount),
   apiResponse());
 
 /**
@@ -174,6 +184,14 @@ routes.post('/accounts/email/check',
  */
 routes.get('/signup-verification',
   wrap(UserController.activateUser),
+  apiResponse());
+
+/**
+ * Get user account profile
+ */
+routes.get('/accounts/profile',
+  auth(),
+  wrap(UserController.getAccountProfile),
   apiResponse());
 
 export default routes;

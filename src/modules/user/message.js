@@ -61,6 +61,9 @@ const Message = {
   statusMsg: {
     not_valid: 'Status tidak valid',
   },
+  birthMsg: {
+    place_not_valid: 'Tempat lahir bukan kode wilayah valid',
+  },
 };
 
 export default Message;
