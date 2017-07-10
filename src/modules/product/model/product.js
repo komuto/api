@@ -263,7 +263,6 @@ class ProductModel extends bookshelf.Model {
     const images = product.related('images');
     const getAddress = Address.getStoreAddress(store.user_id);
     const likes = product.related('likes');
-    console.log(likes);
     const isLiked = userId ? _.find(likes.models, o => o.attributes.id_users === userId) : false;
     const expeditions = this.loadExpeditions(product);
     const { reviews, rating } = this.loadReviewsRatings(product);
