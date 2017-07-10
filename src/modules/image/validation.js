@@ -13,4 +13,17 @@ constraints.single = {
   },
 };
 
+constraints.multi = {
+  images: {
+    presence: true,
+  },
+  type: {
+    presence: true,
+    inclusion: {
+      within: ['product'],
+      message: 'accept only `product` value',
+    },
+  },
+};
+
 export default constraints;

@@ -18,10 +18,12 @@ def.publicPath = path.join(rootDir, 'public');
 def.cachePath = path.join(rootDir, 'cache');
 def.tempPath = path.join(rootDir, 'temp');
 def.logPath = path.join(rootDir, 'logs/log');
-def.imagePath = path.join(rootDir, 'public/image');
 
+// images
+def.imagePath = path.join(rootDir, 'public/image');
 def.imageFolder = {};
 def.imageFolder.store = 'toko';
+def.imageFolder.product = 'produk';
 
 def.cdnPath = 'http://cdn.localhost.com';
 
