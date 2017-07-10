@@ -69,6 +69,16 @@ routes.put('/users',
   apiResponse());
 
 /**
+ * PUT /accounts/profile
+ * Update user account
+ */
+routes.put('/accounts/profile',
+  validateUpdate(),
+  auth(),
+  wrap(UserController.updateAccount),
+  apiResponse());
+
+/**
  * PUT /users/password
  * Change user password
  */

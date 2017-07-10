@@ -1,4 +1,4 @@
-import { emailMsg, genderMsg, passwordMsg, providerNameMsg, uidMsg, tokenMsg, nameMsg, phoneNumberMsg, apprCoopMsg, statusMsg } from './message';
+import { emailMsg, genderMsg, passwordMsg, providerNameMsg, uidMsg, tokenMsg, nameMsg, phoneNumberMsg, apprCoopMsg, statusMsg, birthMsg } from './message';
 
 const constraints = {};
 
@@ -49,6 +49,10 @@ constraints.update = {
   approval_cooperative_status: { format: { pattern: /^[0-4]$/, message: apprCoopMsg.not_valid } },
   gender: { format: { pattern: /^male|female$/, message: genderMsg.not_valid } },
   status: { format: { pattern: /^[0-3]$/, message: statusMsg.not_valid } },
+  place_of_birth: { numericality: {
+    greaterThanOrEqualTo: 1000,
+    lessThanOrEqualTo: 9999,
+    message: birthMsg.place_not_valid } },
 };
 
 export default constraints;

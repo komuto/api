@@ -180,7 +180,7 @@ class UserModel extends bookshelf.Model {
     };
     const newData = {};
     Object.keys(data).forEach((prop) => {
-      if (column[prop]) newData[column[prop]] = data[prop];
+      if (column[prop] && data[prop] !== undefined) newData[column[prop]] = data[prop];
     });
     return newData;
   }
@@ -252,7 +252,8 @@ UserModel.prototype.serialize = function (pass = false, birth = false, account =
   }
   if (birth) {
     this.load({ birthPlace: qb => qb.column('nama_kotakab') });
-    user.place_of_birth = toTitleCase(this.related('birthPlace').get('nama_kotakab').split(' ')[1]);
+    const name = this.related('birthPlace').get('nama_kotakab');
+    if (name) user.place_of_birth = toTitleCase(name.split(' ')[1]);
   }
   return user;
 };
