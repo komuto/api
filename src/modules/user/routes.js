@@ -2,7 +2,6 @@ import express from 'express';
 import { validateLogin, validateSocialLogin, addToken, userData, validateRegistration, validateUpdate } from './middleware';
 import { UserController } from './controller';
 import core from '../core';
-import { AddressController } from '../address/controller';
 
 const routes = express.Router();
 const { apiResponse, auth } = core.middleware;
@@ -44,7 +43,7 @@ routes.get('/users/balance',
  */
 routes.get('/users/profile',
   auth(),
-  wrap(UserController.getProfile),
+  wrap(UserController.getUserProfile),
   apiResponse());
 
 /**
@@ -172,6 +171,14 @@ routes.post('/accounts/email/check',
  */
 routes.get('/signup-verification',
   wrap(UserController.activateUser),
+  apiResponse());
+
+/**
+ * Get user account profile
+ */
+routes.get('/accounts/profile',
+  auth(),
+  wrap(UserController.getAccountProfile),
   apiResponse());
 
 export default routes;

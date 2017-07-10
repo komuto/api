@@ -158,13 +158,23 @@ UserController.createUser = async (req, res, next) => {
 };
 
 /**
- * Get profile
+ * Get user profile
  */
-UserController.getProfile = async (req, res, next) => {
-  const user = await User.getProfile(req.user.id);
+UserController.getUserProfile = async (req, res, next) => {
+  const user = await User.getUserProfile(req.user.id);
   req.resData = {
     message: 'User Profile',
     data: user,
+  };
+  return next();
+};
+
+UserController.getAccountProfile = async (req, res, next) => {
+  const { id, name, photo, gender, place_of_birth, date_of_birth } = req.user;
+  const birthPlace = await User.getBirthPlace(place_of_birth);
+  req.resData = {
+    message: 'Profile Data',
+    data: { id, name, photo, gender, place_of_birth: birthPlace, date_of_birth },
   };
   return next();
 };
