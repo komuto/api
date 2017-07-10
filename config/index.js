@@ -20,6 +20,9 @@ def.tempPath = path.join(rootDir, 'temp');
 def.logPath = path.join(rootDir, 'logs/log');
 def.imagePath = path.join(rootDir, 'public/image');
 
+def.imageFolder = {};
+def.imageFolder.store = 'toko';
+
 def.cdnPath = 'http://cdn.localhost.com';
 
 // knexjs config
