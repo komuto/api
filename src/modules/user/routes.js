@@ -1,5 +1,5 @@
 import express from 'express';
-import { validateLogin, validateSocialLogin, addToken, userData, validateRegistration, validateUpdate } from './middleware';
+import { validateLogin, validateSocialLogin, addToken, userData, validateRegistration, validateUpdate, validateUpdatePhone } from './middleware';
 import { UserController } from './controller';
 import core from '../core';
 import { validateParam } from './../store/middleware';
@@ -200,6 +200,15 @@ routes.get('/accounts/profile',
 routes.get('/accounts/phone',
   auth(),
   UserController.getPhone,
+  apiResponse());
+
+/**
+ * Update user phone
+ */
+routes.put('/accounts/phone',
+  validateUpdatePhone(),
+  auth(),
+  wrap(UserController.updatePhone),
   apiResponse());
 
 export default routes;

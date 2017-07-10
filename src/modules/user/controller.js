@@ -341,3 +341,9 @@ UserController.getPhone = (req, res, next) => {
   };
   return next();
 };
+
+UserController.updatePhone = async (req, res, next) => {
+  const { phone_number: nohp_users } = req.body;
+  await User.update({ id_users: req.user.id }, { nohp_users });
+  return next();
+};
