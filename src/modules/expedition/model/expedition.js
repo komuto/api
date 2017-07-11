@@ -66,6 +66,8 @@ class ExpeditionModel extends bookshelf.Model {
       headers: {
         key: '78b9624fc632fd9923625b297a3f7035',
       },
+    }).catch(() => {
+      throw new BadRequestError('No expedition found');
     });
     const result = JSON.parse(res).rajaongkir.results[0];
     const results = [];
@@ -83,6 +85,7 @@ class ExpeditionModel extends bookshelf.Model {
         });
       }
     });
+    if (results.length === 0) throw new BadRequestError('No expedition found');
     return results;
   }
 }
