@@ -24,6 +24,7 @@ import bank from './modules/bank';
 import review from './modules/review';
 import store from './modules/store';
 import image from './modules/image';
+import bucket from './modules/bucket';
 
 const app = express();
 
@@ -101,6 +102,7 @@ app.use(product.routes);
 app.use(bank.routes);
 app.use(review.routes);
 app.use(store.routes);
+app.use(bucket.routes);
 
 app.use((req, res, next) => {
   const err = new Error('Path Not Found');
