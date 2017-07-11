@@ -16,7 +16,7 @@ const { cache } = core;
  */
 routes.get('/products',
   auth(false),
-  cache('5 minutes'),
+  // cache('5 minutes'),
   validateParam(constraints.list),
   wrap(ProductController.index),
   apiResponse());
