@@ -1,8 +1,9 @@
 import moment from 'moment';
 import core from '../../core';
+import config from '../../../../config';
 
 const bookshelf = core.postgres.db;
-const IMAGE_PATH = 'produk';
+const IMAGE_PATH = config.imageFolder.product;
 
 class ImageProductModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this

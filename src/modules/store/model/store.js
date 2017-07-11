@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import core from '../../core';
 import { BadRequestError } from '../../../../common/errors';
+import config from '../../../../config';
 
 const { parseDate } = core.utils;
 const bookshelf = core.postgres.db;
-const IMAGE_PATH = 'toko';
+const IMAGE_PATH = config.imageFolder.store;
 
 class StoreModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
