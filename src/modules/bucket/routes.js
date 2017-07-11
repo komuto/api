@@ -27,4 +27,12 @@ routes.get('/promo',
   wrap(BucketController.getPromo),
   apiResponse());
 
+/**
+ * Get bucket
+ */
+routes.get('/users/bucket',
+  auth(),
+  wrap(BucketController.getBucket),
+  apiResponse());
+
 export default routes;

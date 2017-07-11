@@ -1,6 +1,8 @@
 import core from '../../core';
 import './item';
+import './shipping';
 
+const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
 
 class BucketModel extends bookshelf.Model {
@@ -29,6 +31,37 @@ class BucketModel extends bookshelf.Model {
       status_bucket: 0,
     }).fetch({ withRelated: ['items'] });
     return bucket ? bucket.related('items').length : 0;
+  }
+
+  /**
+   * Get bucket
+   */
+  static async get(userId) {
+    const bucket = await this.where({ id_users: userId, status_bucket: 0 }).fetch({
+      withRelated: [
+        'items.product.store',
+        {
+          'items.product.images': (qb) => {
+            qb.limit(1);
+          },
+        },
+        'items.shipping',
+      ],
+    });
+    const items = bucket.related('items').map((item) => {
+      const product = item.related('product');
+      const shipping = item.related('shipping');
+      const store = product.related('store');
+      const images = product.related('images').serialize();
+      return {
+        item,
+        image: images.length ? images[0] : null,
+        product,
+        store,
+        shipping,
+      };
+    });
+    return { bucket, items };
   }
 
   /**
@@ -62,14 +95,14 @@ BucketModel.prototype.serialize = function () {
     id: this.attributes.id_ulasanproduk,
     user_id: this.attributes.id_users,
     promo_id: this.attributes.id_promo,
-    order_at: this.attributes.tgl_orderbucket,
-    admin_fee: this.attributes.biaya_admin,
-    total_price: this.attributes.total_bucket,
-    wallet: this.attributes.wallet_bucket,
-    final_price: this.attributes.finalprice_bucket,
+    order_at: parseDate(this.attributes.tgl_orderbucket),
+    admin_fee: parseNum(this.attributes.biaya_admin),
+    total_price: parseNum(this.attributes.total_bucket),
+    wallet: parseNum(this.attributes.wallet_bucket),
+    final_price: parseNum(this.attributes.finalprice_bucket),
     payment_method: this.attributes.method_paymentbucket,
-    status: this.attributes.status_bucket,
-    status_at: this.attributes.tglstatus_bucket,
+    status: parseNum(this.attributes.status_bucket),
+    status_at: parseDate(this.attributes.tglstatus_bucket),
   };
 };
 

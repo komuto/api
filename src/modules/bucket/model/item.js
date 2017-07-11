@@ -1,5 +1,6 @@
 import core from '../../core';
 
+const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
 
 class ItemModel extends bookshelf.Model {
@@ -10,6 +11,20 @@ class ItemModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_listbucket';
+  }
+
+  /**
+   * Add relation to product
+   */
+  product() {
+    return this.belongsTo('Product', 'id_produk');
+  }
+
+  /**
+   * Add relation to shipping
+   */
+  shipping() {
+    return this.belongsTo('Shipping', 'id_pengiriman_produk');
   }
 
   /**
@@ -48,17 +63,17 @@ ItemModel.prototype.serialize = function () {
     bucket_id: this.attributes.id_bucket,
     product_id: this.attributes.id_produk,
     invoice_id: this.attributes.id_invoice,
-    shipping_id: this.attributes.id_pengiriman_produk,
-    dropshipper_id: this.attributes.id_dropshipper,
+    shipping_id: parseNum(this.attributes.id_pengiriman_produk),
+    dropshipper_id: parseNum(this.attributes.id_dropshipper),
     qty: this.attributes.qty_listbucket,
     weight: this.attributes.beratproduk_listbucket,
     option_information: this.attributes.keteranganopsi_listbucket,
-    delivery_cost: this.attributes.ongkir_listbucket,
-    additional_cost: this.attributes.biayatambahan_listbucket,
-    total_price: this.attributes.hargatotal_listbucket,
-    final_price: this.attributes.hargafinal_listbucket,
-    status: this.attributes.status_listbucket,
-    status_at: this.attributes.tglstatus_listbucket,
+    delivery_cost: parseNum(this.attributes.ongkir_listbucket),
+    additional_cost: parseNum(this.attributes.biayatambahan_listbucket),
+    total_price: parseNum(this.attributes.hargatotal_listbucket),
+    final_price: parseNum(this.attributes.hargafinal_listbucket),
+    status: parseNum(this.attributes.status_listbucket),
+    status_at: parseDate(this.attributes.tglstatus_listbucket),
   };
 };
 

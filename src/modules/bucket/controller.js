@@ -20,3 +20,12 @@ BucketController.getPromo = async (req, res, next) => {
   };
   return next();
 };
+
+BucketController.getBucket = async (req, res, next) => {
+  const bucket = await Bucket.get(req.user.id);
+  req.resData = {
+    message: 'Bucket Data',
+    data: bucket,
+  };
+  return next();
+};

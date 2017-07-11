@@ -3,7 +3,6 @@ import core from '../../core';
 import { BadRequestError } from '../../../../common/errors';
 
 const { parseNum, parseDate } = core.utils;
-
 const bookshelf = core.postgres.db;
 
 class PromoModel extends bookshelf.Model {

@@ -42,7 +42,7 @@ export function config(key, defaultValue) {
  */
 export function checkNull(key, defaultValue, transform = null) {
   if (key === undefined) return defaultValue;
-  if (transform) return transform;
+  if (transform !== null) return transform;
   return key;
 }
 
