@@ -23,7 +23,7 @@ StoreController.makeFavorite = async (req, res, next) => {
     referred_toko: req.params.id,
     referred_marketplace: await Store.getMarketplaceId(req.params.id) || 0,
   };
-  const favorite = new FavoriteStore({ status_tokofavorit: '1', ...data }).fetch();
+  const favorite = await FavoriteStore.where({ status_tokofavorit: '1', ...data }).fetch({ columns: 'id_tokofavorit' });
   if (favorite) throw new BadRequestError(favoriteMsg.title, formatSingularErr('repeat_favorite', favoriteMsg.repeat_favorite));
   await FavoriteStore.create(data);
   return next();
