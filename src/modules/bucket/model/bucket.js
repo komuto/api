@@ -39,7 +39,7 @@ class BucketModel extends bookshelf.Model {
   static matchDBColumn(data) {
     const column = {
       user_id: 'id_users',
-      promotion_id: 'id_promo',
+      promo_id: 'id_promo',
       order_at: 'tgl_orderbucket',
       admin_fee: 'biaya_admin',
       total_price: 'total_bucket',
@@ -61,7 +61,7 @@ BucketModel.prototype.serialize = function () {
   return {
     id: this.attributes.id_ulasanproduk,
     user_id: this.attributes.id_users,
-    promotion_id: this.attributes.id_promo,
+    promo_id: this.attributes.id_promo,
     order_at: this.attributes.tgl_orderbucket,
     admin_fee: this.attributes.biaya_admin,
     total_price: this.attributes.total_bucket,
