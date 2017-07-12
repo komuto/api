@@ -351,11 +351,13 @@ UserController.updatePhone = async (req, res, next) => {
 UserController.sendSms = async (req, res, next) => {
   if (!req.user.phone_number) throw new BadRequestError(OTPMsg.title, formatSingularErr('phone_number', phoneNumberMsg.not_available));
   const data = { id_users: req.user.id, no_hp: req.user.phone_number };
-  const otp = await OTP.create(data);
+  // check if otp is already created
+  let otp = await OTP.query((qb) => {
+    qb.whereNot({ status: OTPStatus.USED });
+    qb.where({ ...data }).andWhere('date_expired', '>', moment());
+  }).fetch({ debug: true });
+  if (!otp) otp = await OTP.create(data);
   await otp.sendSms();
   await otp.save({ status: OTPStatus.SENT }, { patch: true });
-  req.resData = {
-    data: otp,
-  };
   return next();
 };

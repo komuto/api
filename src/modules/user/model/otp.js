@@ -36,8 +36,8 @@ class OTPModel extends bookshelf.Model {
    */
   async sendSms() {
     const { no_hp: phone, date_created: created, date_expired: expired, kode } = this.attributes;
-    const createdSend = created.format('YYYY-MM-DD HH:mm:ss');
-    const expiredSend = expired.format('HH:mm');
+    const createdSend = moment(created).format('YYYY-MM-DD HH:mm:ss');
+    const expiredSend = moment(expired).format('HH:mm');
     const body = {
       jenis: 'kirimsms',
       tujuan: phone,
