@@ -45,17 +45,19 @@ class BucketModel extends bookshelf.Model {
             qb.limit(1);
           },
         },
-        'items.shipping',
+        'items.shipping.address',
+        'items.shipping.expeditionService.expedition',
       ],
     });
     const items = bucket.related('items').map((item) => {
-      const product = item.related('product');
+      let product = item.related('product');
       const shipping = item.related('shipping');
       const store = product.related('store');
       const images = product.related('images').serialize();
+      product = product.serialize(true);
+      product.image = images.length ? images[0].file : null;
       return {
         item,
-        image: images.length ? images[0] : null,
         product,
         store,
         shipping,
