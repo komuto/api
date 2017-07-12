@@ -49,6 +49,7 @@ const Message = {
   phoneNumberMsg: {
     presence: 'harus diisi',
     not_valid: 'harus angka',
+    not_available: 'Belum punya no hp',
   },
   providerNameMsg: {
     presence: 'harus diisi',
@@ -64,6 +65,13 @@ const Message = {
   },
   birthMsg: {
     place_not_valid: 'Tempat lahir bukan kode wilayah valid',
+  },
+  OTPMsg: {
+    title: 'Kirim OTP gagal',
+    titleVerify: 'Verifikasi hp gagal',
+    presence: 'harus diisi',
+    not_valid: 'tidak valid',
+    not_found: 'Kode tidak ditemukan atau expired',
   },
 };
 

@@ -1,4 +1,5 @@
 import core from '../../core';
+import { BadRequestError } from '../../../../common/errors';
 import './item';
 import './shipping';
 
@@ -23,6 +24,13 @@ class BucketModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to promo
+   */
+  promo() {
+    return this.belongsTo('Promo', 'id_promo');
+  }
+
+  /**
    * Get count
    */
   static async getCount(userId) {
@@ -39,29 +47,33 @@ class BucketModel extends bookshelf.Model {
   static async get(userId) {
     const bucket = await this.where({ id_users: userId, status_bucket: 0 }).fetch({
       withRelated: [
+        'promo',
         'items.product.store',
         {
           'items.product.images': (qb) => {
             qb.limit(1);
           },
         },
-        'items.shipping',
+        'items.shipping.address',
+        'items.shipping.expeditionService.expedition',
       ],
     });
+    if (!bucket) throw new BadRequestError('No bucket found');
     const items = bucket.related('items').map((item) => {
-      const product = item.related('product');
+      let product = item.related('product');
       const shipping = item.related('shipping');
       const store = product.related('store');
       const images = product.related('images').serialize();
+      product = product.serialize(true);
+      product.image = images.length ? images[0].file : null;
+      product.store = store.serialize();
       return {
-        item,
-        image: images.length ? images[0] : null,
+        ...item.serialize(),
         product,
-        store,
         shipping,
       };
     });
-    return { bucket, items };
+    return { ...bucket.serialize(), items };
   }
 
   /**
@@ -91,10 +103,11 @@ class BucketModel extends bookshelf.Model {
 }
 
 BucketModel.prototype.serialize = function () {
-  return {
+  const bucket = {
     id: this.attributes.id_ulasanproduk,
     user_id: this.attributes.id_users,
     promo_id: this.attributes.id_promo,
+    promo: this.relations.promo ? this.related('promo') : undefined,
     order_at: parseDate(this.attributes.tgl_orderbucket),
     admin_fee: parseNum(this.attributes.biaya_admin),
     total_price: parseNum(this.attributes.total_bucket),
@@ -104,6 +117,8 @@ BucketModel.prototype.serialize = function () {
     status: parseNum(this.attributes.status_bucket),
     status_at: parseDate(this.attributes.tglstatus_bucket),
   };
+  if (this.relations.promo) delete bucket.promo_id;
+  return bucket;
 };
 
 export const Bucket = bookshelf.model('Bucket', BucketModel);

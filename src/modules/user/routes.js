@@ -1,5 +1,5 @@
 import express from 'express';
-import { validateLogin, validateSocialLogin, addToken, userData, validateRegistration, validateUpdate, validateUpdatePhone } from './middleware';
+import { validateLogin, validateSocialLogin, addToken, userData, validateRegistration, validateUpdate, validateUpdatePhone, validateVerifyPhone } from './middleware';
 import { UserController } from './controller';
 import core from '../core';
 import { validateParam } from './../store/middleware';
@@ -206,9 +206,23 @@ routes.get('/accounts/phone',
  * Update user phone
  */
 routes.put('/accounts/phone',
-  validateUpdatePhone(),
   auth(),
+  validateUpdatePhone(),
   wrap(UserController.updatePhone),
+  apiResponse());
+
+/**
+ * Send phone verification code
+ */
+routes.post('/accounts/phone/send-verification',
+  auth(),
+  wrap(UserController.sendSms),
+  apiResponse());
+
+routes.post('/accounts/phone/verify',
+  auth(),
+  validateVerifyPhone(),
+  wrap(UserController.verifyPhone),
   apiResponse());
 
 export default routes;

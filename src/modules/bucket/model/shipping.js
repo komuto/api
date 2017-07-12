@@ -49,14 +49,20 @@ class ShippingModel extends bookshelf.Model {
 }
 
 ShippingModel.prototype.serialize = function () {
-  return {
-    id: this.attributes.id_pengiriman_produk,
+  const shipping = {
+    id: parseNum(this.attributes.id_pengiriman_produk),
     expedition_service_id: this.attributes.id_ekspedisiservice,
-    address_id: this.attributes.id_ekspedisiservice,
+    address_id: this.attributes.id_alamatuser,
     delivery_cost: parseNum(this.attributes.harga_ongkir),
     insurance_fee: parseNum(this.attributes.nilai_asuransi),
     note: this.attributes.keterangan,
+    is_insurance: !!parseNum(this.attributes.nilai_asuransi),
+    address: this.relations.address ? this.related('address') : undefined,
+    expedition_service: this.relations.expeditionService ? this.related('expeditionService') : undefined,
   };
+  if (this.relations.address) delete shipping.address_id;
+  if (this.relations.expeditionService) delete shipping.expedition_service_id;
+  return shipping;
 };
 
 export const Shipping = bookshelf.model('Shipping', ShippingModel);

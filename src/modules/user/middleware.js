@@ -4,7 +4,7 @@ import constraints from './validation';
 import utils from '../../../common/utils';
 import { BadRequestError } from '../../../common/errors';
 import { jwt as jwtOptions } from '../../../config';
-import { loginMsg, registrationMsg, updateMsg, userMsg } from './message';
+import { loginMsg, registrationMsg, updateMsg, userMsg, OTPMsg } from './message';
 import { middleware } from '../core';
 
 export const ROLE_ALL = '*';
@@ -54,6 +54,10 @@ export function validateUpdate() {
 
 export function validateUpdatePhone() {
   return formatValidation(constraints.updatePhone, updateMsg.title);
+}
+
+export function validateVerifyPhone() {
+  return formatValidation(constraints.verifyPhone, OTPMsg.titleVerify);
 }
 
 /**

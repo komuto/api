@@ -42,6 +42,7 @@ ServiceModel.prototype.serialize = function (minimal = true) {
       name: this.attributes.nama_ekspedisiservice,
       description: this.attributes.deskripsi_ekspedisiservice,
       logo: this.attributes.logo_path,
+      expedition: this.relations.expedition ? this.related('expedition') : undefined,
       is_checked: false,
     };
   }
