@@ -41,7 +41,7 @@ export function config(key, defaultValue) {
  * @param {*} transform
  */
 export function checkNull(key, defaultValue, transform = null) {
-  if (key === undefined) return defaultValue;
+  if (key === undefined || key === null) return defaultValue;
   if (transform !== null) return transform;
   return key;
 }

@@ -30,6 +30,15 @@ class ExpeditionModel extends bookshelf.Model {
     return await this.where(condition).fetchAll();
   }
 
+  /**
+   * Get expedition by id
+   * @param {number} id
+   */
+  static async findById(id) {
+    const expedition = await this.where({ id_ekspedisi: id }).fetch();
+    return expedition ? expedition.toJSON() : expedition;
+  }
+
   static async getServices() {
     const expeditions = await this.where({}).fetchAll({ withRelated: ['services'] });
     return expeditions.map((expedition) => {

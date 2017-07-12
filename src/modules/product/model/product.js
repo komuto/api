@@ -69,6 +69,14 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
+   * Get product by id
+   */
+  static async findById(id) {
+    const product = await this.where({ id_produk: id }).fetch();
+    return product ? product.toJSON() : product;
+  }
+
+  /**
    * Get products
    */
   static async get(params) {

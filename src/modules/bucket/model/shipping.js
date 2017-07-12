@@ -28,6 +28,13 @@ class ShippingModel extends bookshelf.Model {
   }
 
   /**
+   * Create shipping
+   */
+  static async create(data) {
+    return await new this(data).save();
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData
@@ -35,7 +42,7 @@ class ShippingModel extends bookshelf.Model {
   static matchDBColumn(data) {
     const column = {
       expedition_service_id: 'id_ekspedisiservice',
-      address_id: 'id_ekspedisiservice',
+      address_id: 'id_alamatuser',
       delivery_cost: 'harga_ongkir',
       insurance_fee: 'nilai_asuransi',
       note: 'keterangan',

@@ -1,4 +1,7 @@
-import { Bucket, Promo } from './model';
+import { Bucket, Promo, Item, Shipping } from './model';
+import { Product } from '../product/model';
+import { Expedition } from '../expedition/model';
+import { BadRequestError } from '../../../common/errors';
 
 export const BucketController = {};
 export default { BucketController };
@@ -31,7 +34,39 @@ BucketController.getBucket = async (req, res, next) => {
 };
 
 BucketController.addToCart = async (req, res, next) => {
-  await Bucket.addToCart(req.user.id, req.body);
+  const body = req.body;
+  const bucket = await Bucket.findBucket(req.user.id);
+  const product = await Product.findById(body.product_id);
+  if (!product) throw new BadRequestError('Product no found');
+  let insuranceCost = 0;
+  if (body.is_insurance) {
+    const expedition = await Expedition.findById(body.expedition_id);
+    insuranceCost = ((product.price * body.qty) * expedition.insurance_fee) / 100;
+  }
+  const shippingObj = Shipping.matchDBColumn({
+    expedition_service_id: body.expedition_service_id,
+    address_id: body.address_id,
+    delivery_cost: body.delivery_cost,
+    insurance_fee: insuranceCost,
+    note: body.note,
+  });
+  const shipping = await Shipping.create(shippingObj);
+  const itemObj = Item.matchDBColumn({
+    bucket_id: bucket.id,
+    product_id: product.id,
+    shipping_id: shipping.id,
+    qty: body.qty,
+    note: body.note,
+    delivery_cost: body.delivery_cost,
+    additional_cost: body.additional_cost,
+    weight: product.weight * body.qty,
+    total_price: product.price * body.qty,
+    final_price: (product.price * body.qty) + body.delivery_cost
+    + body.additional_cost + insuranceCost,
+    status: 1,
+    status_at: new Date(),
+  });
+  await Item.create(itemObj);
   req.resData = {
     message: 'Success',
   };

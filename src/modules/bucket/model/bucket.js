@@ -1,3 +1,4 @@
+import ModelBase from 'bookshelf-modelbase';
 import core from '../../core';
 import { BadRequestError } from '../../../../common/errors';
 import './item';
@@ -5,20 +6,27 @@ import './shipping';
 
 const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
+bookshelf.plugin(ModelBase.pluggable);
 
 class BucketModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
     return 'bucket';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_bucket';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   /**
    * Add relation to item
-    */
+   */
   items() {
     return this.hasMany('Item', 'id_bucket');
   }
@@ -77,10 +85,22 @@ class BucketModel extends bookshelf.Model {
   }
 
   /**
-   * Add to cart
+   * Find bucket
    */
-  static async addToCart(userId, body) {
-    return { userId, body };
+  static async findBucket(userId) {
+    return await this.findOrCreate({
+      id_users: userId,
+      status_bucket: 0,
+    }, {
+      defaults: this.matchDBColumn({
+        admin_fee: 0,
+        total_price: 0,
+        wallet: 0,
+        final_price: 0,
+        order_at: new Date(),
+        status_at: new Date(),
+      }),
+    });
   }
 
   /**

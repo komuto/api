@@ -4,7 +4,7 @@ import cfg from '../../../config';
 
 /**
  * Connect to mysql instance
- * @param {string} dsn
+ * @param {object} config
  * @return {Promise}
  * TODO: add log file for debugging
  */

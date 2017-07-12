@@ -28,6 +28,13 @@ class ItemModel extends bookshelf.Model {
   }
 
   /**
+   * Create item
+   */
+  static async create(data) {
+    return await new this(data).save();
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData
@@ -41,7 +48,7 @@ class ItemModel extends bookshelf.Model {
       dropshipper_id: 'id_dropshipper',
       qty: 'qty_listbucket',
       weight: 'beratproduk_listbucket',
-      option_information: 'keteranganopsi_listbucket',
+      note: 'keteranganopsi_listbucket',
       delivery_cost: 'ongkir_listbucket',
       additional_cost: 'biayatambahan_listbucket',
       total_price: 'hargatotal_listbucket',
@@ -67,7 +74,7 @@ ItemModel.prototype.serialize = function () {
     dropshipper_id: parseNum(this.attributes.id_dropshipper),
     qty: this.attributes.qty_listbucket,
     weight: this.attributes.beratproduk_listbucket,
-    option_information: this.attributes.keteranganopsi_listbucket,
+    note: this.attributes.keteranganopsi_listbucket,
     delivery_cost: parseNum(this.attributes.ongkir_listbucket),
     additional_cost: parseNum(this.attributes.biayatambahan_listbucket),
     total_price: parseNum(this.attributes.hargatotal_listbucket),
