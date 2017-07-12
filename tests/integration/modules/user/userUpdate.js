@@ -26,7 +26,7 @@ describe('POST user update', () => {
     const userModel = new UserModel(testData.token);
     const data = await userModel.updatePassword('andrew@skyshi.com', 'andrewtest', 'andrew');
     expect(data.status).toBe(false);
-    expect(data.code).toBe(400);
+    expect(data.code).toBe(401);
     expect(typeof data.data).toBe('object');
     // expect(data.message).toEqual('Password salah');
     expect(data.data.password).toEqual(expect.arrayContaining(['Password salah']));
