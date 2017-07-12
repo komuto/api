@@ -36,7 +36,8 @@ class ExpeditionModel extends bookshelf.Model {
    */
   static async findById(id) {
     const expedition = await this.where({ id_ekspedisi: id }).fetch();
-    return expedition ? expedition.toJSON() : expedition;
+    if (expedition) return expedition.toJSON();
+    throw new BadRequestError('No expedition found');
   }
 
   static async getServices() {

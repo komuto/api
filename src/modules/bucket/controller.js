@@ -1,7 +1,6 @@
 import { Bucket, Promo, Item, Shipping } from './model';
 import { Product } from '../product/model';
 import { Expedition } from '../expedition/model';
-import { BadRequestError } from '../../../common/errors';
 
 export const BucketController = {};
 export default { BucketController };
@@ -37,7 +36,6 @@ BucketController.addToCart = async (req, res, next) => {
   const body = req.body;
   const bucket = await Bucket.findBucket(req.user.id);
   const product = await Product.findById(body.product_id);
-  if (!product) throw new BadRequestError('Product no found');
   let insuranceCost = 0;
   if (body.is_insurance) {
     const expedition = await Expedition.findById(body.expedition_id);

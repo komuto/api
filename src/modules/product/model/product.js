@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import core from '../../core';
 import { model } from '../../address';
+import { BadRequestError } from '../../../../common/errors';
 
 const { parseNum, parseDec, parseDate } = core.utils;
 const { Address } = model;
@@ -73,7 +74,8 @@ class ProductModel extends bookshelf.Model {
    */
   static async findById(id) {
     const product = await this.where({ id_produk: id }).fetch();
-    return product ? product.toJSON() : product;
+    if (product) return product.toJSON();
+    throw new BadRequestError('No product found');
   }
 
   /**
