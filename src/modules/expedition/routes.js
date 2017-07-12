@@ -1,8 +1,7 @@
 import express from 'express';
 import { ExpeditionController } from './controller';
 import core from '../core';
-import { apiResponse } from '../core/middleware';
-import { validateParam } from './middleware';
+import { apiResponse, validateParam } from '../core/middleware';
 import constraints from './validation';
 
 const routes = express.Router();

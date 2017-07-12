@@ -29,3 +29,11 @@ BucketController.getBucket = async (req, res, next) => {
   };
   return next();
 };
+
+BucketController.addToCart = async (req, res, next) => {
+  await Bucket.addToCart(req.user.id, req.body);
+  req.resData = {
+    message: 'Success',
+  };
+  return next();
+};

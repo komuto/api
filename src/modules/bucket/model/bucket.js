@@ -77,6 +77,13 @@ class BucketModel extends bookshelf.Model {
   }
 
   /**
+   * Add to cart
+   */
+  static async addToCart(userId, body) {
+    return { userId, body };
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData

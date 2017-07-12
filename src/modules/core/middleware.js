@@ -93,3 +93,14 @@ export function formatValidation(rules, msg) {
   };
 }
 
+export function validateParam(constraints, isBody = false) {
+  return (req, res, next) => {
+    const hasError = validate(isBody ? req.body : req.query, constraints);
+    if (hasError) {
+      const err = new BadRequestError('Invalid parameter');
+      err.data = hasError;
+      return next(err);
+    }
+    return next();
+  };
+}
