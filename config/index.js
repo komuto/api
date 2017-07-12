@@ -71,6 +71,11 @@ def.komutoUrl = 'http://api.komutodev.aptmi.com/komuto-api/';
 def.frontendKomuto = 'https://komuto.skyshi.com';
 def.assetUrl = 'http://188.166.246.46';
 
+// OTP sms
+def.otp = {};
+def.otp.apiUrl = 'http://180.250.93.178:6754/index.php/sms/';
+def.otp.apiKey = 'a12ea25c2ffa6f262f00f1c19ad335549c94ab34';
+
 // cache expired
 def.cache = {};
 def.cache.prefix = 'komuto-api';

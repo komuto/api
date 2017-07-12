@@ -211,4 +211,12 @@ routes.put('/accounts/phone',
   wrap(UserController.updatePhone),
   apiResponse());
 
+/**
+ * Send phone verification code
+ */
+routes.post('/accounts/phone/send-verification',
+  auth(),
+  wrap(UserController.sendSms),
+  apiResponse());
+
 export default routes;
