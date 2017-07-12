@@ -297,16 +297,23 @@ class ProductModel extends bookshelf.Model {
   }
 }
 
-ProductModel.prototype.serialize = function (minimal = false) {
+ProductModel.prototype.serialize = function (minimal = false, wishlist = false) {
   const attr = this.attributes;
+  const user = {
+    id: attr.id_produk,
+    name: attr.nama_produk,
+    price: parseDec(attr.harga_produk),
+    discount: attr.disc_produk,
+    is_discount: !!attr.disc_produk,
+  };
+  if (wishlist) {
+    user.is_liked = true;
+    user.is_wholesaler = attr.is_grosir;
+    user.created_at = parseDate(attr.date_created_produk);
+    user.count_sold = parseNum(attr.count_sold);
+  }
   if (minimal) {
-    return {
-      id: attr.id_produk,
-      name: attr.nama_produk,
-      price: parseDec(attr.harga_produk),
-      discount: attr.disc_produk,
-      is_discount: !!attr.disc_produk,
-    };
+    return user;
   }
   return {
     id: attr.id_produk,
@@ -326,8 +333,8 @@ ProductModel.prototype.serialize = function (minimal = false) {
     is_dropshipper: attr.is_dropshiper,
     is_wholesaler: attr.is_grosir,
     is_discount: !!attr.disc_produk,
-    count_sold: parseNum(attr.count_sold, 0),
-    count_popular: parseNum(attr.count_populer, 0),
+    count_sold: attr.count_sold,
+    count_popular: attr.count_populer,
     identifier_brand: attr.identifier_brand,
     identifier_catalog: attr.identifier_katalog,
     status_at: parseDate(attr.tglstatus_produk),

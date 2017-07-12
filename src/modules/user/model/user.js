@@ -135,11 +135,14 @@ class UserModel extends bookshelf.Model {
   }
 
   static async getWishlist(id) {
-    const user = await this.where('id_users', id).fetch({ withRelated: ['wishlistProducts.store', 'wishlistProducts.images'] });
+    const user = await this.where('id_users', id).fetch({ withRelated: ['wishlistProducts.store', 'wishlistProducts.images', 'wishlistProducts.likes'] });
     const products = user.related('wishlistProducts');
     return products.map((product) => {
       const store = product.related('store');
       const images = product.related('images');
+      const countLike = product.related('likes').length;
+      console.log('sold', product.get('count_sold'));
+      product = { ...product.serialize(true, true), count_like: countLike };
       return { product, store, images };
     });
   }
