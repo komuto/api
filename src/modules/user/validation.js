@@ -1,4 +1,4 @@
-import { emailMsg, genderMsg, passwordMsg, providerNameMsg, uidMsg, tokenMsg, nameMsg, phoneNumberMsg, apprCoopMsg, statusMsg, birthMsg } from './message';
+import { emailMsg, genderMsg, passwordMsg, providerNameMsg, uidMsg, tokenMsg, nameMsg, phoneNumberMsg, apprCoopMsg, statusMsg, birthMsg, OTPMsg } from './message';
 
 const constraints = {};
 
@@ -60,5 +60,14 @@ constraints.updatePhone = {
     presence: { message: phoneNumberMsg.presence },
     format: { pattern: /^[0-9]+$/, message: phoneNumberMsg.not_valid } },
 };
+
+constraints.verifyPhone = {
+  code: {
+    presence: { message: OTPMsg.presence },
+    numericality: {
+      greaterThanOrEqualTo: 10000,
+      lessThanOrEqualTo: 99999,
+      message: OTPMsg.not_valid } },
+}
 
 export default constraints;

@@ -350,14 +350,20 @@ UserController.updatePhone = async (req, res, next) => {
 
 UserController.sendSms = async (req, res, next) => {
   if (!req.user.phone_number) throw new BadRequestError(OTPMsg.title, formatSingularErr('phone_number', phoneNumberMsg.not_available));
-  const data = { id_users: req.user.id, no_hp: req.user.phone_number };
+  const data = { id_users: req.user.id, no_hp: req.user.phone_number, status: OTPStatus.DRAFT };
   // check if otp is already created
-  let otp = await OTP.query((qb) => {
-    qb.whereNot({ status: OTPStatus.USED });
-    qb.where({ ...data }).andWhere('date_expired', '>', moment());
-  }).fetch({ debug: true });
+  let otp = await OTP.query(qb => qb.where(data).andWhere('date_expired', '>', moment())).fetch();
   if (!otp) otp = await OTP.create(data);
   await otp.sendSms();
-  await otp.save({ status: OTPStatus.SENT }, { patch: true });
+  await otp.save({ status: OTPStatus.SENT });
+  return next();
+};
+
+UserController.verifyPhone = async (req, res, next) => {
+  const data = { id_users: req.user.id, no_hp: req.user.phone_number, kode: req.body.code };
+  const status = OTPStatus.USED;
+  const otp = await OTP.query(qb => qb.where(data).andWhereNot({ status }).andWhere('date_expired', '>', moment())).fetch();
+  if (!otp) throw new BadRequestError(OTPMsg.title, formatSingularErr('code', OTPMsg.not_found));
+  await otp.save({ status });
   return next();
 };

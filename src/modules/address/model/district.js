@@ -50,7 +50,7 @@ class DistrictModel extends bookshelf.Model {
    * @param {Object} condition
    */
   static async get(condition = null) {
-    condition = _.omitBy(condition, _.isNil);
+    condition = _.pickBy(condition, _.identity);
     return await this.where(condition).fetchAll();
   }
 }

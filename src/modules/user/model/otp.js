@@ -23,7 +23,6 @@ class OTPModel extends bookshelf.Model {
     const created = moment();
     data = {
       ...data,
-      status: OTPStatus.DRAFT,
       kode: Math.floor((Math.random() * (99999 - 10000)) + 10000),
       date_created: created,
       date_expired: created.clone().add(1, 'hour'),

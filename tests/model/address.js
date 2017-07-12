@@ -84,6 +84,21 @@ class AddressModel {
         });
     });
   }
+  async update(id, params) {
+    return new Promise(resolve => {
+      request(app)
+        .put('/users/addresses/'+ id)
+        .send(params)
+        .set('Authorization', 'JWT ' + this.token)
+        .set('Content-Type', 'application/json')
+        .then(res => {
+          resolve(res.body);
+        })
+        .catch(err => {
+          resolve(err.body);
+        });
+    });
+  }
 }
 
 export default AddressModel;

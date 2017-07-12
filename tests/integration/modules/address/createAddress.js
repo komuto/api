@@ -2,7 +2,7 @@
 import AddressModel from '../../../model/address';
 import UserModel from '../../../model/user';
 
-describe('POST /users/address', () => {
+describe('POST /users/address : create address', () => {
   var testData = {};
   beforeAll(async (done) => {
     const userModel = new UserModel();
@@ -63,7 +63,7 @@ describe('POST /users/address', () => {
     ]));
 
   });
-  it('create address again should be rejected', async () => {
+/*  it('create primary address again should be rejected', async () => {
     const addressModel = new AddressModel(testData.token);
     const data = await addressModel.create({
       "province_id": 34,
@@ -80,7 +80,7 @@ describe('POST /users/address', () => {
     });
     expect(data.status).toBe(false);
     expect(data.code).toBe(400);
-  });
+  });*/
 });
 
 

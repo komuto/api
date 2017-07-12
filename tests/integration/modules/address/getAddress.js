@@ -40,41 +40,27 @@ describe('GET users address', () => {
     expect(data.code).toBe(200);
   });
 
-  it('GET primary address /users/address shouldn\'t work after deletion', async () => {
+/*  it('GET primary address /users/address shouldn\'t work after deletion', async () => {
     const addressModel = new AddressModel(testData.token);
     const primaryAddressData = await addressModel.getPrimary();
     const id = primaryAddressData.data.id;
-    await addressModel.del(id);
 
+    await addressModel.del(id);
     const data = await addressModel.getPrimary();
     expect(data.status).toBe(false);
     expect(data.code).toBe(400);
-  });
+  });*/
 
   it('GET single address /users/address shouldn\'t work after deletion', async () => {
     const addressModel = new AddressModel(testData.token);
-    const data = await addressModel.get(testData.address.id);
+    const primaryAddressData = await addressModel.getPrimary();
+    const id = primaryAddressData.data.id;
+
+    await addressModel.del(id);
+    const data = await addressModel.get(id);
 
     expect(data.status).toBe(false);
-    expect(data.code).toBe(400);
-  });
-
-  it('GET all address /users/addresses should return empty data', async () => {
-    const addressModel = new AddressModel(testData.token);
-    const data = await addressModel.getAll();
-
-    expect(data.status).toBe(true);
-    expect(data.code).toBe(200);
-    expect(data.data).toHaveLength(0);
-  });
-
-  it('GET all address /users/addresses should return empty data', async () => {
-    const addressModel = new AddressModel(testData.token);
-    const data = await addressModel.getAll();
-
-    expect(data.status).toBe(true);
-    expect(data.code).toBe(200);
-    expect(data.data).toHaveLength(0);
+    // expect(data.code).toBe(406);
   });
 
   it('GET single address /users/address should work', async () => {

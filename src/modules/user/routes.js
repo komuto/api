@@ -7,6 +7,7 @@ import {
   validateRegistration,
   validateUpdate,
   validateUpdatePhone,
+  validateVerifyPhone,
 } from './middleware';
 import { UserController } from './controller';
 import core from '../core';
@@ -213,8 +214,8 @@ routes.get('/accounts/phone',
  * Update user phone
  */
 routes.put('/accounts/phone',
-  validateUpdatePhone(),
   auth(),
+  validateUpdatePhone(),
   wrap(UserController.updatePhone),
   apiResponse());
 
@@ -224,6 +225,12 @@ routes.put('/accounts/phone',
 routes.post('/accounts/phone/send-verification',
   auth(),
   wrap(UserController.sendSms),
+  apiResponse());
+
+routes.post('/accounts/phone/verify',
+  auth(),
+  validateVerifyPhone(),
+  wrap(UserController.verifyPhone),
   apiResponse());
 
 export default routes;

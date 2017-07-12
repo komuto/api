@@ -3,11 +3,11 @@ import Promise from 'bluebird';
 import app from '../../src/app';
 import querystring from 'querystring';
 
-class ExpeditionModel {
-  getServices() {
+class LocationModel {
+  getProvinces() {
     return new Promise((resolve, reject) => {
       request(app)
-        .get('/expeditions/services')
+        .get('/locations/provinces')
         .set('Content-Type', 'application/json')
         .then(res => {
           resolve(res.body);
@@ -17,10 +17,10 @@ class ExpeditionModel {
         });
     });
   }
-  getAll() {
+  getDistricts(params = {}) {
     return new Promise((resolve, reject) => {
       request(app)
-        .get('/expeditions/')
+        .get('/locations/districts?'+ querystring.stringify(params))
         .set('Content-Type', 'application/json')
         .then((res) => {
           resolve(res.body);
@@ -30,11 +30,23 @@ class ExpeditionModel {
         });
     });
   }
-  getCost(expedition_id, params = {}) {
+  getSubDistricts(params = {}) {
     return new Promise((resolve, reject) => {
-      const path = `/expeditions/${expedition_id}/cost?`+ querystring.stringify(params);
       request(app)
-        .get(path)
+        .get('/locations/sub-districts?'+ querystring.stringify(params))
+        .set('Content-Type', 'application/json')
+        .then((res) => {
+          resolve(res.body);
+        })
+        .catch(err => {
+          resolve(err);
+        });
+    });
+  }
+  getVillages(params = {}) {
+    return new Promise((resolve, reject) => {
+      request(app)
+        .get('/locations/villages?'+ querystring.stringify(params))
         .set('Content-Type', 'application/json')
         .then((res) => {
           resolve(res.body);
@@ -46,4 +58,4 @@ class ExpeditionModel {
   }
 }
 
-export default ExpeditionModel;
+export default LocationModel;
