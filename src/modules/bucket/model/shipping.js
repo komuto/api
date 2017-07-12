@@ -1,4 +1,5 @@
 import core from '../../core';
+import { BadRequestError } from '../../../../common/errors';
 
 const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -31,7 +32,9 @@ class ShippingModel extends bookshelf.Model {
    * Create shipping
    */
   static async create(data) {
-    return await new this(data).save();
+    return await new this(data).save().catch(() => {
+      throw new BadRequestError('Error save shipping');
+    });
   }
 
   /**
