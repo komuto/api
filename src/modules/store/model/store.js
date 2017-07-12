@@ -56,7 +56,7 @@ class StoreModel extends bookshelf.Model {
         const images = product.related('images').serialize();
         return {
           ...product.serialize(true),
-          image: images.length ? images[0] : null,
+          image: images.length ? images[0].file : null,
         };
       });
       return {
@@ -115,7 +115,7 @@ class StoreModel extends bookshelf.Model {
           user: { id: userId, name, photo },
           product: {
             ...reviewProduct.serialize(false),
-            image: images.length ? images[0] : {},
+            image: images.length ? images[0].file : null,
           },
         };
       });
