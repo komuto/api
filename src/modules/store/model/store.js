@@ -34,7 +34,7 @@ class StoreModel extends bookshelf.Model {
       reputation: this.get('reputasi_toko'),
       store_id_number: this.get('no_ktp_toko'),
       total_favorite: this.get('jumlahfavorit_toko'),
-      note: this.get('note'),
+      term_condition: this.get('note'),
       created_at: parseDate(this.get('tgl_create_toko')),
       status_at: parseDate(this.get('tglstatus_toko')),
       verification_at: parseDate(this.get('tanggal_verifikasi')),

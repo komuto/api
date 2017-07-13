@@ -50,19 +50,20 @@ class ProductModel extends bookshelf.Model {
       slug: slug(this.get('nama_produk'), { lower: true, charmap: '' }),
       stock: this.get('stock_produk'),
       weight: this.get('berat_produk'),
-      type: parseNum(this.get('jenis_produk'), 0),
+      condition: parseNum(this.get('jenis_produk'), 0),
       description: this.get('deskripsi_produk'),
       price: parseDec(this.get('harga_produk')),
       attrval: parseNum(this.get('attrval_produk'), 0),
       status: parseNum(this.get('status_produk'), 0),
-      insurance: parseNum(this.get('asuransi_produk'), 0),
+      is_insurance: !!parseNum(this.get('asuransi_produk'), 0),
       discount: this.get('disc_produk'),
       margin_dropshipper: this.get('margin_dropshiper'),
       is_dropshipper: this.get('is_dropshiper'),
       is_wholesaler: this.get('is_grosir'),
       is_discount: !!this.get('disc_produk'),
-      count_sold: this.get('count_sold'),
-      count_popular: this.get('count_populer'),
+      count_sold: parseNum(this.get('count_sold'), 0),
+      count_popular: parseNum(this.get('count_populer'), 0),
+      count_view: 0,
       identifier_brand: this.get('identifier_brand'),
       identifier_catalog: this.get('identifier_katalog'),
       status_at: parseDate(this.get('tglstatus_produk')),
@@ -292,6 +293,9 @@ class ProductModel extends bookshelf.Model {
   }
 
   static ratingAvg(res) {
+    // if there is no rating
+    if (res[1] === 0) return 0;
+
     res = (res[0] / res[1]).toFixed(1);
     // e.g.: if the rating is 5.0 change it to 5
     if (res[2] === '0') res = res[0];
@@ -330,14 +334,8 @@ class ProductModel extends bookshelf.Model {
     const { reviews, rating } = this.loadReviewsRatings(product);
     const { likes, isLiked } = this.loadLikes(product, userId);
 
-    if (!_.isEmpty(reviews)) {
-      rating.quality = parseFloat(this.ratingAvg(rating.quality));
-      rating.accuracy = parseFloat(this.ratingAvg(rating.accuracy));
-    } else {
-      rating.quality = '-';
-      rating.accuracy = '-';
-    }
-
+    rating.quality = parseFloat(this.ratingAvg(rating.quality));
+    rating.accuracy = parseFloat(this.ratingAvg(rating.accuracy));
     product = product.serialize();
     product.count_review = reviews.length;
     product.count_like = likes.length;
@@ -347,14 +345,12 @@ class ProductModel extends bookshelf.Model {
     let otherProds = await getOtherProds;
     otherProds = otherProds.map((otherProduct) => {
       const { likes: like, isLiked: liked } = this.loadLikes(otherProduct, userId);
-      const otherImages = otherProduct.related('images');
+      const image = otherProduct.related('images').models[0].serialize().file;
       return {
-        product: {
-          ...otherProduct.serialize(true),
-          count_like: like.length,
-          is_liked: !!liked,
-        },
-        images: otherImages,
+        ...otherProduct.serialize(true),
+        count_like: like.length,
+        is_liked: !!liked,
+        image,
       };
     });
 
