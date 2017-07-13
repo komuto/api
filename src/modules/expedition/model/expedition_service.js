@@ -33,6 +33,7 @@ class ServiceModel extends bookshelf.Model {
       status: parseNum(this.get('status_ekspedisiservice')),
       status_at: parseDate(this.get('tglstatus_ekspedisiservice')),
       logo: this.get('logo_path'),
+      is_checked: false,
     };
   }
 
