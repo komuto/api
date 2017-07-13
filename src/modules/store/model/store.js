@@ -184,7 +184,7 @@ class StoreModel extends bookshelf.Model {
     store.total_product_sold = totalSold;
     store.origin = origin;
     return {
-      store,
+      ...store,
       catalogs,
       district,
       rating: {
