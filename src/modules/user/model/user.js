@@ -141,7 +141,6 @@ class UserModel extends bookshelf.Model {
       const store = product.related('store');
       const images = product.related('images');
       const countLike = product.related('likes').length;
-      console.log('sold', product.get('count_sold'));
       product = { ...product.serialize(true, true), count_like: countLike };
       return { product, store, images };
     });
