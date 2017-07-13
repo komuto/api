@@ -22,9 +22,9 @@ class AddressModel extends bookshelf.Model {
       postal_code: this.get('kodepos_user'),
       address: this.get('alamat_user'),
       alias_address: this.get('alamat_alias'),
-      is_primary_address: this.get('alamat_primary') === 1,
-      is_sale_address: this.get('alamat_originjual') === 1,
-      is_tender_address: this.get('alamat_originlelang') === 1,
+      is_primary_address: this.get('alamat_primary') === '1',
+      is_sale_address: this.get('alamat_originjual') === '1',
+      is_tender_address: this.get('alamat_originlelang') === '1',
     };
   }
 

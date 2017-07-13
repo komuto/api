@@ -110,6 +110,7 @@ class StoreModel extends bookshelf.Model {
     let district = null;
     const user = store.related('user');
     user.related('addresses').each((val) => {
+      console.log(val.toJSON());
       if (val.toJSON().is_sale_address) {
         const province = val.related('province').serialize();
         district = val.related('district').serialize();
@@ -185,8 +186,8 @@ class StoreModel extends bookshelf.Model {
     store.origin = origin;
     return {
       ...store,
-      catalogs,
       district,
+      catalogs,
       rating: {
         quality: quality / reviews.length,
         accuracy: accuracy / reviews.length,
