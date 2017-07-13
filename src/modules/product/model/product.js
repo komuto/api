@@ -292,6 +292,9 @@ class ProductModel extends bookshelf.Model {
   }
 
   static ratingAvg(res) {
+    // if there is no rating
+    if (res[1] === 0) return 0;
+
     res = (res[0] / res[1]).toFixed(1);
     // e.g.: if the rating is 5.0 change it to 5
     if (res[2] === '0') res = res[0];
@@ -330,14 +333,8 @@ class ProductModel extends bookshelf.Model {
     const { reviews, rating } = this.loadReviewsRatings(product);
     const { likes, isLiked } = this.loadLikes(product, userId);
 
-    if (!_.isEmpty(reviews)) {
-      rating.quality = parseFloat(this.ratingAvg(rating.quality));
-      rating.accuracy = parseFloat(this.ratingAvg(rating.accuracy));
-    } else {
-      rating.quality = '-';
-      rating.accuracy = '-';
-    }
-
+    rating.quality = parseFloat(this.ratingAvg(rating.quality));
+    rating.accuracy = parseFloat(this.ratingAvg(rating.accuracy));
     product = product.serialize();
     product.count_review = reviews.length;
     product.count_like = likes.length;
