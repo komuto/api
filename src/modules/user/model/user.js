@@ -115,6 +115,13 @@ class UserModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation BankAccount
+   */
+  bankAccounts() {
+    return this.hasMany('BankAccount', 'id_users');
+  }
+
+  /**
    * Create password hash from plain text
    * @param {string} str
    */

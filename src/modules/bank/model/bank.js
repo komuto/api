@@ -1,7 +1,7 @@
 import moment from 'moment';
 import _ from 'lodash';
-import core from '../core';
-import { BadRequestError } from '../../../common/errors';
+import core from '../../core';
+import { BadRequestError } from '../../../../common/errors';
 
 const bookshelf = core.postgres.db;
 
@@ -42,5 +42,6 @@ class BankModel extends bookshelf.Model {
   }
 }
 
-export default bookshelf.model('Bank', BankModel);
+export const Bank = bookshelf.model('Bank', BankModel);
+export default { Bank };
 

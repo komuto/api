@@ -4,7 +4,7 @@ import core from '../core';
 
 const routes = express.Router();
 const { wrap } = core.utils;
-const { apiResponse } = core.middleware;
+const { apiResponse, auth } = core.middleware;
 
 /**
  * GET /banks
@@ -20,6 +20,15 @@ routes.get('/banks',
  */
 routes.get('/banks/:id',
   wrap(BankController.getBank),
+  apiResponse());
+
+/**
+ * GET /accounts/banks
+ * View list of bank account
+ */
+routes.get('/accounts/banks',
+  auth(),
+  wrap(BankController.getBankAccounts),
   apiResponse());
 
 export default routes;
