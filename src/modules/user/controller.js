@@ -113,9 +113,9 @@ UserController.updateUser = async (req, res, next) => {
   if (req.body.gender) req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
   if (req.body.date_of_birth) req.body.date_of_birth = moment.unix(req.body.date_of_birth);
   // eslint-disable-next-line
-  const { name, cooperative_member_number, photo, phone_number, gender, date_of_birth, place_of_birth } = req.body;
+  const { name, cooperative_member_number, photo, gender, date_of_birth, place_of_birth } = req.body;
   // eslint-disable-next-line
-  const check = { name, cooperative_member_number, photo, phone_number, gender, place_of_birth, date_of_birth };
+  const check = { name, cooperative_member_number, photo, gender, place_of_birth, date_of_birth };
   const data = User.matchDBColumn(check);
   if (_.isEmpty(data)) {
     throw new BadRequestError(updateMsg.title, formatSingularErr('field', updateMsg.not_valid));

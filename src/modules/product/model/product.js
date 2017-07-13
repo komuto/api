@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import slug from 'slug';
 import core from '../../core';
 import { model } from '../../address';
 import { BadRequestError } from '../../../../common/errors';
@@ -27,6 +28,7 @@ class ProductModel extends bookshelf.Model {
     const user = {
       id: this.get('id_produk'),
       name: this.get('nama_produk'),
+      slug: slug(this.get('nama_produk'), { lower: true, charmap: '' }),
       price: parseDec(this.get('harga_produk')),
       discount: this.get('disc_produk'),
       is_discount: !!this.get('disc_produk'),
@@ -45,6 +47,7 @@ class ProductModel extends bookshelf.Model {
       category_id: this.get('id_kategoriproduk'),
       store_id: this.get('id_toko'),
       name: this.get('nama_produk'),
+      slug: slug(this.get('nama_produk'), { lower: true, charmap: '' }),
       stock: this.get('stock_produk'),
       weight: this.get('berat_produk'),
       type: parseNum(this.get('jenis_produk'), 0),
@@ -270,6 +273,12 @@ class ProductModel extends bookshelf.Model {
     return { reviews, rating: { accuracy: accSum, quality: qtySum } };
   }
 
+  static loadLikes(product, id) {
+    const likes = product.related('likes');
+    const isLiked = id ? _.find(likes.models, o => o.attributes.id_users === id) : false;
+    return { likes, isLiked };
+  }
+
   /**
    * Adding to be averaged later
    * @param ref [array] array reference
@@ -298,13 +307,14 @@ class ProductModel extends bookshelf.Model {
     let product = await this.where({ id_produk: productId }).fetch({
       withRelated: ['category', 'store', 'images', 'reviews.user.addresses', 'expeditionServices.expedition', 'likes'],
     });
+    if (!product) return {};
     // Eager load other products so it doesn't block other process by not awaiting directly
     const getOtherProds = this.query((qb) => {
       qb.where('id_toko', product.get('id_toko'));
       qb.whereNot('id_produk', productId);
       qb.orderBy('id_produk', 'desc');
       qb.limit(3);
-    }).fetchAll();
+    }).fetchAll({ withRelated: ['images', 'likes'] });
 
     let wholesaler;
     if (product.get('is_grosir')) {
@@ -316,10 +326,9 @@ class ProductModel extends bookshelf.Model {
     const store = product.related('store').serialize();
     const images = product.related('images');
     const getAddress = Address.getStoreAddress(store.user_id);
-    const likes = product.related('likes');
-    const isLiked = userId ? _.find(likes.models, o => o.attributes.id_users === userId) : false;
     const expeditions = this.loadExpeditions(product);
     const { reviews, rating } = this.loadReviewsRatings(product);
+    const { likes, isLiked } = this.loadLikes(product, userId);
 
     if (!_.isEmpty(reviews)) {
       rating.quality = parseFloat(this.ratingAvg(rating.quality));
@@ -335,7 +344,19 @@ class ProductModel extends bookshelf.Model {
     product.is_liked = !!isLiked;
     const address = await getAddress;
     store.province = address.related('province').serialize();
-    const otherProds = await getOtherProds;
+    let otherProds = await getOtherProds;
+    otherProds = otherProds.map((otherProduct) => {
+      const { likes: like, isLiked: liked } = this.loadLikes(otherProduct, userId);
+      const otherImages = otherProduct.related('images');
+      return {
+        product: {
+          ...otherProduct.serialize(true),
+          count_like: like.length,
+          is_liked: !!liked,
+        },
+        images: otherImages,
+      };
+    });
 
     return {
       product,
@@ -345,7 +366,7 @@ class ProductModel extends bookshelf.Model {
       reviews,
       rating,
       wholesaler,
-      other_products: otherProds.serialize(true),
+      other_products: otherProds,
       expeditions,
     };
   }
