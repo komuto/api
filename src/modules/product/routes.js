@@ -45,7 +45,7 @@ routes.post('/products/:id/reviews',
  */
 routes.get('/products/:id',
   auth(false),
-  wrap(ProductController.getProduct),
+  ProductController.getProduct,
   apiResponse());
 
 /**
