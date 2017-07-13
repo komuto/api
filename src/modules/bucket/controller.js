@@ -55,14 +55,10 @@ BucketController.addToCart = async (req, res, next) => {
     shipping_id: shipping.id,
     qty: body.qty,
     note: body.note,
-    delivery_cost: body.delivery_cost,
     additional_cost: body.additional_cost,
     weight: product.weight * body.qty,
-    total_price: product.price * body.qty,
-    final_price: (product.price * body.qty) + body.delivery_cost
+    total_price: (product.price * body.qty) + body.delivery_cost
     + body.additional_cost + insuranceCost,
-    status: 1,
-    status_at: new Date(),
   });
   await Item.create(itemObj);
   req.resData = {

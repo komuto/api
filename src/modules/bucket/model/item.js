@@ -1,7 +1,7 @@
 import core from '../../core';
 import { BadRequestError } from '../../../../common/errors';
 
-const { parseNum, parseDate } = core.utils;
+const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
 
 class ItemModel extends bookshelf.Model {
@@ -52,12 +52,8 @@ class ItemModel extends bookshelf.Model {
       qty: 'qty_listbucket',
       weight: 'beratproduk_listbucket',
       note: 'keteranganopsi_listbucket',
-      delivery_cost: 'ongkir_listbucket',
       additional_cost: 'biayatambahan_listbucket',
       total_price: 'hargatotal_listbucket',
-      final_price: 'hargafinal_listbucket',
-      status: 'status_listbucket',
-      status_at: 'tglstatus_listbucket',
     };
     const newData = {};
     Object.keys(data).forEach((prop) => {
@@ -78,12 +74,8 @@ ItemModel.prototype.serialize = function () {
     qty: this.attributes.qty_listbucket,
     weight: this.attributes.beratproduk_listbucket,
     note: this.attributes.keteranganopsi_listbucket,
-    delivery_cost: parseNum(this.attributes.ongkir_listbucket),
     additional_cost: parseNum(this.attributes.biayatambahan_listbucket),
     total_price: parseNum(this.attributes.hargatotal_listbucket),
-    final_price: parseNum(this.attributes.hargafinal_listbucket),
-    status: parseNum(this.attributes.status_listbucket),
-    status_at: parseDate(this.attributes.tglstatus_listbucket),
   };
 };
 
