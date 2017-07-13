@@ -62,7 +62,9 @@ class UserModel extends bookshelf.Model {
       email: this.get('email_users'),
       cooperative_member_number: defaultNull(this.get('no_anggotakoperasi_users')),
       approval_cooperative_status: this.get('approval_koperasi_users'),
-      photo: core.imagePath(IMAGE_PATH, this.get('pathfoto_users')),
+      photo: this.get('pathfoto_users')
+        ? core.imagePath(IMAGE_PATH, this.get('pathfoto_users'))
+        : 'https://www.juptr.io/images/default-user.png',
       phone_number: defaultNull(this.get('nohp_users')),
       gender: this.get('jeniskelamin_users') === 'L' ? 'male' : 'female',
       status: parseInt(this.get('status_users'), 10),
