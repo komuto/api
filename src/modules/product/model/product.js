@@ -347,14 +347,12 @@ class ProductModel extends bookshelf.Model {
     let otherProds = await getOtherProds;
     otherProds = otherProds.map((otherProduct) => {
       const { likes: like, isLiked: liked } = this.loadLikes(otherProduct, userId);
-      const otherImages = otherProduct.related('images');
+      const image = otherProduct.related('images').models[0].serialize().file;
       return {
-        product: {
-          ...otherProduct.serialize(true),
-          count_like: like.length,
-          is_liked: !!liked,
-        },
-        images: otherImages,
+        ...otherProduct.serialize(true),
+        count_like: like.length,
+        is_liked: !!liked,
+        image,
       };
     });
 
