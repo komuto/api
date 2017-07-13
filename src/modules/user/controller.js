@@ -359,11 +359,17 @@ UserController.sendSms = async (req, res, next) => {
   return next();
 };
 
-UserController.verifyPhone = async (req, res, next) => {
+/**
+ * Verify OTP code
+ * wrapped on another function to give ability to decide what error message to use
+ * @param errTitle {string}
+ */
+UserController.verifyOTPCode = errTitle => async (req, res, next) => {
   const data = { id_users: req.user.id, no_hp: req.user.phone_number, kode: req.body.code };
   const status = OTPStatus.USED;
   const otp = await OTP.query(qb => qb.where(data).andWhereNot({ status }).andWhere('date_expired', '>', moment())).fetch();
-  if (!otp) throw new BadRequestError(OTPMsg.title, formatSingularErr('code', OTPMsg.not_found));
+  if (!otp) throw new BadRequestError(errTitle, formatSingularErr('code', OTPMsg.not_found));
   await otp.save({ status });
   return next();
 };
+
