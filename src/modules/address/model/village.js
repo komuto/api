@@ -14,6 +14,13 @@ class VillageModel extends bookshelf.Model {
     return 'id_kelurahan';
   }
 
+  serialize() {
+    return {
+      id: parseInt(this.get('id_kelurahan'), 10),
+      name: toTitleCase(this.get('nama_kelurahan')),
+    };
+  }
+
   address() {
     return this.hasMany('Address');
   }
@@ -54,13 +61,6 @@ class VillageModel extends bookshelf.Model {
     return await this.where(condition).fetchAll();
   }
 }
-
-VillageModel.prototype.serialize = function () {
-  return {
-    id: parseInt(this.attributes.id_kelurahan, 10),
-    name: toTitleCase(this.attributes.nama_kelurahan),
-  };
-};
 
 export const Village = bookshelf.model('Village', VillageModel);
 export default { Village };

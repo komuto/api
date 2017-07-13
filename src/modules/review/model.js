@@ -14,6 +14,18 @@ class ReviewModel extends bookshelf.Model {
     return 'id_ulasanproduk';
   }
 
+  serialize(full = false) {
+    const review = {
+      id: this.get('id_ulasanproduk'),
+      review: this.get('isi_ulasanproduk'),
+      quality: parseNum(this.get('kualitasproduk')),
+      accuracy: parseNum(this.get('akurasiproduk')),
+      created_at: parseDate(this.get('tgl_ulasanproduk')),
+    };
+    if (full) review.product_id = this.get('id_produk');
+    return review;
+  }
+
   user() {
     return this.belongsTo('User', 'id_users');
   }
@@ -106,18 +118,6 @@ class ReviewModel extends bookshelf.Model {
     return newData;
   }
 }
-
-ReviewModel.prototype.serialize = function (full = false) {
-  const review = {
-    id: this.attributes.id_ulasanproduk,
-    review: this.attributes.isi_ulasanproduk,
-    quality: parseNum(this.attributes.kualitasproduk),
-    accuracy: parseNum(this.attributes.akurasiproduk),
-    created_at: parseDate(this.attributes.tgl_ulasanproduk),
-  };
-  if (full) review.product_id = this.attributes.id_produk;
-  return review;
-};
 
 export const Review = bookshelf.model('Review', ReviewModel);
 export default { Review };

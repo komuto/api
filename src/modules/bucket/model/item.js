@@ -14,6 +14,22 @@ class ItemModel extends bookshelf.Model {
     return 'id_listbucket';
   }
 
+  serialize() {
+    return {
+      id: this.get('id_ulasanproduk'),
+      bucket_id: this.get('id_bucket'),
+      product_id: this.get('id_produk'),
+      invoice_id: this.get('id_invoice'),
+      shipping_id: parseNum(this.get('id_pengiriman_produk')),
+      dropshipper_id: parseNum(this.get('id_dropshipper')),
+      qty: this.get('qty_listbucket'),
+      weight: this.get('beratproduk_listbucket'),
+      note: this.get('keteranganopsi_listbucket'),
+      additional_cost: parseNum(this.get('biayatambahan_listbucket')),
+      total_price: parseNum(this.get('hargatotal_listbucket')),
+    };
+  }
+
   /**
    * Add relation to product
    */
@@ -62,22 +78,6 @@ class ItemModel extends bookshelf.Model {
     return newData;
   }
 }
-
-ItemModel.prototype.serialize = function () {
-  return {
-    id: this.attributes.id_ulasanproduk,
-    bucket_id: this.attributes.id_bucket,
-    product_id: this.attributes.id_produk,
-    invoice_id: this.attributes.id_invoice,
-    shipping_id: parseNum(this.attributes.id_pengiriman_produk),
-    dropshipper_id: parseNum(this.attributes.id_dropshipper),
-    qty: this.attributes.qty_listbucket,
-    weight: this.attributes.beratproduk_listbucket,
-    note: this.attributes.keteranganopsi_listbucket,
-    additional_cost: parseNum(this.attributes.biayatambahan_listbucket),
-    total_price: parseNum(this.attributes.hargatotal_listbucket),
-  };
-};
 
 export const Item = bookshelf.model('Item', ItemModel);
 export default { Item };

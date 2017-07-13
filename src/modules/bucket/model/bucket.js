@@ -24,6 +24,22 @@ class BucketModel extends bookshelf.Model {
     return false;
   }
 
+  serialize() {
+    const bucket = {
+      id: this.get('id_ulasanproduk'),
+      user_id: this.get('id_users'),
+      promo_id: this.get('id_promo'),
+      promo: this.relations.promo ? this.related('promo') : undefined,
+      order_at: parseDate(this.get('tgl_orderbucket')),
+      wallet: parseNum(this.get('bayar_wallet')),
+      payment_method: this.get('method_paymentbucket'),
+      status: parseNum(this.get('status_bucket')),
+      status_at: parseDate(this.get('tglstatus_bucket')),
+    };
+    if (this.relations.promo) delete bucket.promo_id;
+    return bucket;
+  }
+
   /**
    * Add relation to item
    */
@@ -122,22 +138,6 @@ class BucketModel extends bookshelf.Model {
     return newData;
   }
 }
-
-BucketModel.prototype.serialize = function () {
-  const bucket = {
-    id: this.attributes.id_ulasanproduk,
-    user_id: this.attributes.id_users,
-    promo_id: this.attributes.id_promo,
-    promo: this.relations.promo ? this.related('promo') : undefined,
-    order_at: parseDate(this.attributes.tgl_orderbucket),
-    wallet: parseNum(this.attributes.bayar_wallet),
-    payment_method: this.attributes.method_paymentbucket,
-    status: parseNum(this.attributes.status_bucket),
-    status_at: parseDate(this.attributes.tglstatus_bucket),
-  };
-  if (this.relations.promo) delete bucket.promo_id;
-  return bucket;
-};
 
 export const Bucket = bookshelf.model('Bucket', BucketModel);
 export default { Bucket };

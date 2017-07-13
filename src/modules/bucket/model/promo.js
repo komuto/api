@@ -15,6 +15,21 @@ class PromoModel extends bookshelf.Model {
     return 'id_promo';
   }
 
+  serialize() {
+    return {
+      id: this.get('id_promo'),
+      marketplace_user_id: this.get('id_marketplaceuser'),
+      promo_code: this.get('kode_promo'),
+      type: parseNum(this.get('jenis_promo')),
+      percentage: this.get('persentase_promo'),
+      nominal: parseNum(this.get('nominal_promo')),
+      start_at: parseDate(this.get('startdate_promo')),
+      expired_at: parseDate(this.get('expdate_promo')),
+      status: parseNum(this.get('status_promo')),
+      status_at: parseDate(this.get('tglstatus_promo')),
+    };
+  }
+
   /**
    * Get promo
    */
@@ -27,21 +42,6 @@ class PromoModel extends bookshelf.Model {
     return promo;
   }
 }
-
-PromoModel.prototype.serialize = function () {
-  return {
-    id: this.attributes.id_promo,
-    marketplace_user_id: this.attributes.id_marketplaceuser,
-    promo_code: this.attributes.kode_promo,
-    type: parseNum(this.attributes.jenis_promo),
-    percentage: this.attributes.persentase_promo,
-    nominal: parseNum(this.attributes.nominal_promo),
-    start_at: parseDate(this.attributes.startdate_promo),
-    expired_at: parseDate(this.attributes.expdate_promo),
-    status: parseNum(this.attributes.status_promo),
-    status_at: parseDate(this.attributes.tglstatus_promo),
-  };
-};
 
 export const Promo = bookshelf.model('Promo', PromoModel);
 export default { Promo };

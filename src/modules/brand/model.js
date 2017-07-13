@@ -13,6 +13,15 @@ class BrandModel extends bookshelf.Model {
     return 'id_brand';
   }
 
+  serialize() {
+    return {
+      id: this.get('id_brand'),
+      category_id: this.get('id_kategoriproduk'),
+      name: this.get('nama_brand'),
+      is_checked: false,
+    };
+  }
+
   /**
    * Add relation to Category
    */
@@ -29,14 +38,5 @@ class BrandModel extends bookshelf.Model {
     return await this.where(condition).fetchAll();
   }
 }
-
-BrandModel.prototype.serialize = function () {
-  return {
-    id: this.attributes.id_brand,
-    category_id: this.attributes.id_kategoriproduk,
-    name: this.attributes.nama_brand,
-    is_checked: false,
-  };
-};
 
 export default bookshelf.model('Brand', BrandModel);

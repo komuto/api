@@ -11,16 +11,16 @@ class WholesaleModel extends bookshelf.Model {
   get idAttribute() {
     return 'id_paramgrosir';
   }
-}
 
-WholesaleModel.prototype.serialize = function () {
-  return {
-    id: this.attributes.id_paramgrosir,
-    min: this.attributes.min_paramgrosir,
-    max: this.attributes.max_paramgrosir,
-    price: parseFloat(this.attributes.harga_paramgrosir),
-  };
-};
+  serialize() {
+    return {
+      id: this.get('id_paramgrosir'),
+      min: this.get('min_paramgrosir'),
+      max: this.get('max_paramgrosir'),
+      price: parseFloat(this.get('harga_paramgrosir')),
+    };
+  }
+}
 
 export const Wholesale = bookshelf.model('Wholesale', WholesaleModel);
 export default { Wholesale };

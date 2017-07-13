@@ -40,6 +40,56 @@ class UserModel extends bookshelf.Model {
   }
 
   /**
+   * @param pass {bool} true = include password
+   * @param birth {bool} true = get name of the district id
+   * @param account {bool} true = minimal for account collection
+   */
+  serialize(pass = false, birth = false, account = false) {
+    if (account) {
+      return {
+        id: this.get('id_users'),
+        name: this.get('namalengkap_users'),
+        photo: core.imagePath(IMAGE_PATH, this.get('pathfoto_users')),
+        gender: this.get('jeniskelamin_users') === 'L' ? 'male' : 'female',
+        place_of_birth: defaultNull(this.get('kota_lahir')),
+        date_of_birth: defaultNull(this.get('tgl_lahir')),
+      };
+    }
+    const user = {
+      id: this.get('id_users'),
+      marketplace_id: defaultNull(this.get('marketplaceuser')),
+      name: this.get('namalengkap_users'),
+      email: this.get('email_users'),
+      cooperative_member_number: defaultNull(this.get('no_anggotakoperasi_users')),
+      approval_cooperative_status: this.get('approval_koperasi_users'),
+      photo: core.imagePath(IMAGE_PATH, this.get('pathfoto_users')),
+      phone_number: defaultNull(this.get('nohp_users')),
+      gender: this.get('jeniskelamin_users') === 'L' ? 'male' : 'female',
+      status: parseInt(this.get('status_users'), 10),
+      mother_name: defaultNull(this.get('ibukandung_users')),
+      auth_key: defaultNull(this.get('auth_key')),
+      saldo_wallet: checkNull(this.get('saldo_wallet'), 0),
+      place_of_birth: defaultNull(this.get('kota_lahir')),
+      date_of_birth: parseDate(this.get('tgl_lahir'), null),
+      created_at: moment(this.get('tgl_create_users')).unix(),
+      join_at: parseDate(this.get('tgl_join_koperasi')),
+      status_at: moment(this.get('tglstatus_users')).unix(),
+      provider_name: this.get('hybridauth_provider_name'),
+      provider_uid: this.get('hybridauth_provider_uid'),
+    };
+    if (pass) {
+      user.password = this.get('password_users');
+      return user;
+    }
+    if (birth) {
+      this.load({ birthPlace: qb => qb.column('nama_kotakab') });
+      const name = this.related('birthPlace').get('nama_kotakab');
+      if (name) user.place_of_birth = toTitleCase(name.split(' ')[1]);
+    }
+    return user;
+  }
+
+  /**
    * Add relation to Store
    */
   store() {
@@ -209,58 +259,6 @@ class UserModel extends bookshelf.Model {
     return JSON.parse(res).data;
   }
 }
-
-/**
- * @param pass {bool} true = include password
- * @param birth {bool} true = get name of the district id
- * @param account {bool} true = minimal for account collection
- */
-UserModel.prototype.serialize = function (pass = false, birth = false, account = false) {
-  const attr = this.attributes;
-  if (account) {
-    return {
-      id: attr.id_users,
-      name: attr.namalengkap_users,
-      photo: core.imagePath(IMAGE_PATH, attr.pathfoto_users),
-      gender: attr.jeniskelamin_users === 'L' ? 'male' : 'female',
-      place_of_birth: defaultNull(attr.kota_lahir),
-      date_of_birth: defaultNull(attr.tgl_lahir),
-    };
-  }
-  const user = {
-    id: attr.id_users,
-    marketplace_id: defaultNull(attr.marketplaceuser),
-    name: attr.namalengkap_users,
-    email: attr.email_users,
-    cooperative_member_number: defaultNull(attr.no_anggotakoperasi_users),
-    approval_cooperative_status: attr.approval_koperasi_users,
-    photo: core.imagePath(IMAGE_PATH, attr.pathfoto_users),
-    phone_number: defaultNull(attr.nohp_users),
-    gender: attr.jeniskelamin_users === 'L' ? 'male' : 'female',
-    status: parseInt(attr.status_users, 10),
-    mother_name: defaultNull(attr.ibukandung_users),
-    auth_key: defaultNull(attr.auth_key),
-    saldo_wallet: checkNull(attr.saldo_wallet, 0),
-    place_of_birth: defaultNull(attr.kota_lahir),
-    date_of_birth: parseDate(attr.tgl_lahir, null),
-    created_at: moment(attr.tgl_create_users).unix(),
-    join_at: parseDate(attr.tgl_join_koperasi),
-    status_at: moment(attr.tglstatus_users).unix(),
-    provider_name: attr.hybridauth_provider_name,
-    provider_uid: attr.hybridauth_provider_uid,
-  };
-  if (pass) {
-    user.password = attr.password_users;
-    return user;
-  }
-  if (birth) {
-    this.load({ birthPlace: qb => qb.column('nama_kotakab') });
-    const name = this.related('birthPlace').get('nama_kotakab');
-    if (name) user.place_of_birth = toTitleCase(name.split(' ')[1]);
-  }
-  return user;
-};
-
 
 export const User = bookshelf.model('User', UserModel);
 export default { User, UserStatus, UserRoles };

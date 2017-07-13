@@ -23,6 +23,50 @@ class ProductModel extends bookshelf.Model {
     return 'id_produk';
   }
 
+  serialize(minimal = false, wishlist = false) {
+    const user = {
+      id: this.get('id_produk'),
+      name: this.get('nama_produk'),
+      price: parseDec(this.get('harga_produk')),
+      discount: this.get('disc_produk'),
+      is_discount: !!this.get('disc_produk'),
+    };
+    if (wishlist) {
+      user.is_liked = true;
+      user.is_wholesaler = this.get('is_grosir');
+      user.created_at = parseDate(this.get('date_created_produk'));
+      user.count_sold = parseNum(this.get('count_sold'));
+    }
+    if (minimal) {
+      return user;
+    }
+    return {
+      id: this.get('id_produk'),
+      category_id: this.get('id_kategoriproduk'),
+      store_id: this.get('id_toko'),
+      name: this.get('nama_produk'),
+      stock: this.get('stock_produk'),
+      weight: this.get('berat_produk'),
+      type: parseNum(this.get('jenis_produk'), 0),
+      description: this.get('deskripsi_produk'),
+      price: parseDec(this.get('harga_produk')),
+      attrval: parseNum(this.get('attrval_produk'), 0),
+      status: parseNum(this.get('status_produk'), 0),
+      insurance: parseNum(this.get('asuransi_produk'), 0),
+      discount: this.get('disc_produk'),
+      margin_dropshipper: this.get('margin_dropshiper'),
+      is_dropshipper: this.get('is_dropshiper'),
+      is_wholesaler: this.get('is_grosir'),
+      is_discount: !!this.get('disc_produk'),
+      count_sold: this.get('count_sold'),
+      count_popular: this.get('count_populer'),
+      identifier_brand: this.get('identifier_brand'),
+      identifier_catalog: this.get('identifier_katalog'),
+      status_at: parseDate(this.get('tglstatus_produk')),
+      created_at: parseDate(this.get('date_created_produk')),
+    };
+  }
+
   /**
    * Add relation to Store
    */
@@ -306,51 +350,6 @@ class ProductModel extends bookshelf.Model {
     };
   }
 }
-
-ProductModel.prototype.serialize = function (minimal = false, wishlist = false) {
-  const attr = this.attributes;
-  const user = {
-    id: attr.id_produk,
-    name: attr.nama_produk,
-    price: parseDec(attr.harga_produk),
-    discount: attr.disc_produk,
-    is_discount: !!attr.disc_produk,
-  };
-  if (wishlist) {
-    user.is_liked = true;
-    user.is_wholesaler = attr.is_grosir;
-    user.created_at = parseDate(attr.date_created_produk);
-    user.count_sold = parseNum(attr.count_sold);
-  }
-  if (minimal) {
-    return user;
-  }
-  return {
-    id: attr.id_produk,
-    category_id: attr.id_kategoriproduk,
-    store_id: attr.id_toko,
-    name: attr.nama_produk,
-    stock: attr.stock_produk,
-    weight: attr.berat_produk,
-    type: parseNum(attr.jenis_produk, 0),
-    description: attr.deskripsi_produk,
-    price: parseDec(attr.harga_produk),
-    attrval: parseNum(attr.attrval_produk, 0),
-    status: parseNum(attr.status_produk, 0),
-    insurance: parseNum(attr.asuransi_produk, 0),
-    discount: attr.disc_produk,
-    margin_dropshipper: attr.margin_dropshiper,
-    is_dropshipper: attr.is_dropshiper,
-    is_wholesaler: attr.is_grosir,
-    is_discount: !!attr.disc_produk,
-    count_sold: attr.count_sold,
-    count_popular: attr.count_populer,
-    identifier_brand: attr.identifier_brand,
-    identifier_catalog: attr.identifier_katalog,
-    status_at: parseDate(attr.tglstatus_produk),
-    created_at: parseDate(attr.date_created_produk),
-  };
-};
 
 export const Product = bookshelf.model('Product', ProductModel);
 export default { Product, ProductType };

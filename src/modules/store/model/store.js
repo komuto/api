@@ -18,6 +18,32 @@ class StoreModel extends bookshelf.Model {
     return 'id_toko';
   }
 
+  serialize() {
+    return {
+      id: this.get('id_toko'),
+      user_id: this.get('id_users'),
+      name: this.get('nama_toko'),
+      slogan: this.get('slogan_toko'),
+      description: this.get('deskripsi_toko'),
+      logo: core.imagePath(IMAGE_PATH, this.get('logo_toko')),
+      custom_domain: this.get('custom_domain'),
+      status: parseInt(this.get('status_toko'), 10),
+      remarks_status: this.get('remarks_status_toko'),
+      cover_image: core.imagePath(IMAGE_PATH, this.get('pathcoverimage_toko')),
+      seller_theme_id: this.get('identifier_themesseller'),
+      reputation: this.get('reputasi_toko'),
+      store_id_number: this.get('no_ktp_toko'),
+      total_favorite: this.get('jumlahfavorit_toko'),
+      note: this.get('note'),
+      created_at: parseDate(this.get('tgl_create_toko')),
+      status_at: parseDate(this.get('tglstatus_toko')),
+      verification_at: parseDate(this.get('tanggal_verifikasi')),
+      is_verified: !!this.get('sampai_tanggal'),
+      start_at: parseDate(this.get('mulai_tanggal')),
+      end_at: parseDate(this.get('sampai_tanggal')),
+    };
+  }
+
   /**
    * Add relation to User
    */
@@ -255,33 +281,6 @@ class StoreModel extends bookshelf.Model {
     return newData;
   }
 }
-
-StoreModel.prototype.serialize = function () {
-  const attr = this.attributes;
-  return {
-    id: attr.id_toko,
-    user_id: attr.id_users,
-    name: attr.nama_toko,
-    slogan: attr.slogan_toko,
-    description: attr.deskripsi_toko,
-    logo: core.imagePath(IMAGE_PATH, attr.logo_toko),
-    custom_domain: attr.custom_domain,
-    status: parseInt(attr.status_toko, 10),
-    remarks_status: attr.remarks_status_toko,
-    cover_image: core.imagePath(IMAGE_PATH, attr.pathcoverimage_toko),
-    seller_theme_id: attr.identifier_themesseller,
-    reputation: attr.reputasi_toko,
-    store_id_number: attr.no_ktp_toko,
-    total_favorite: attr.jumlahfavorit_toko,
-    note: attr.note,
-    created_at: parseDate(attr.tgl_create_toko),
-    status_at: parseDate(attr.tglstatus_toko),
-    verification_at: parseDate(attr.tanggal_verifikasi),
-    is_verified: !!attr.sampai_tanggal,
-    start_at: parseDate(attr.mulai_tanggal),
-    end_at: parseDate(attr.sampai_tanggal),
-  };
-};
 
 export const Store = bookshelf.model('Store', StoreModel);
 export default { Store };

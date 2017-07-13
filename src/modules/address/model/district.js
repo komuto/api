@@ -14,6 +14,14 @@ class DistrictModel extends bookshelf.Model {
     return 'id_kotakab';
   }
 
+  serialize() {
+    return {
+      id: this.get('id_kotakab'),
+      ro_id: this.get('id_ro'),
+      name: toTitleCase(this.get('nama_kotakab')),
+    };
+  }
+
   address() {
     return this.hasMany('Address');
   }
@@ -54,14 +62,6 @@ class DistrictModel extends bookshelf.Model {
     return await this.where(condition).fetchAll();
   }
 }
-
-DistrictModel.prototype.serialize = function () {
-  return {
-    id: this.attributes.id_kotakab,
-    ro_id: this.attributes.id_ro,
-    name: toTitleCase(this.attributes.nama_kotakab),
-  };
-};
 
 export const District = bookshelf.model('District', DistrictModel);
 export default { District };
