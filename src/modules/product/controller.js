@@ -1,4 +1,4 @@
-import { Product } from './model';
+import { Product, Discussion } from './model';
 import { Wishlist } from './../user/model';
 import { BadRequestError } from '../../../common/errors';
 import { utils } from '../core';
@@ -78,6 +78,18 @@ ProductController.addWishlist = async (req, res, next) => {
   await Wishlist.addWishlist(req.params.id, req.user.id);
   req.resData = {
     message: 'Success',
+  };
+  return next();
+};
+
+/**
+ * Get discussions
+ */
+ProductController.getDiscussions = async (req, res, next) => {
+  const discussions = await Discussion.getByProductId(req.params.id);
+  req.resData = {
+    message: 'Success',
+    data: discussions,
   };
   return next();
 };
