@@ -222,7 +222,7 @@ routes.put('/accounts/phone',
 /**
  * Send phone verification code
  */
-routes.post('/accounts/phone/send-verification',
+routes.post('/users/otp',
   auth(),
   wrap(UserController.sendSms),
   apiResponse());
