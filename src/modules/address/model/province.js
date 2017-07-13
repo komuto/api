@@ -14,6 +14,13 @@ class ProvinceModel extends bookshelf.Model {
     return 'id_provinsi';
   }
 
+  serialize() {
+    return {
+      id: this.get('id_provinsi'),
+      name: toTitleCase(this.get('nama_provinsi')),
+    };
+  }
+
   address() {
     return this.hasMany('Address');
   }
@@ -54,13 +61,6 @@ class ProvinceModel extends bookshelf.Model {
     return await this.where(condition).fetchAll();
   }
 }
-
-ProvinceModel.prototype.serialize = function () {
-  return {
-    id: this.attributes.id_provinsi,
-    name: toTitleCase(this.attributes.nama_provinsi),
-  };
-};
 
 export const Province = bookshelf.model('Province', ProvinceModel);
 export default { Province };

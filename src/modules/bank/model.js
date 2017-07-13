@@ -15,6 +15,17 @@ class BankModel extends bookshelf.Model {
     return 'id_masterbank';
   }
 
+  serialize() {
+    return {
+      id: this.get('id_masterbank'),
+      name: this.get('nama_masterbank'),
+      code: this.get('kode_masterbank'),
+      status: this.get('status_masterbank'),
+      status_at: moment(this.get('tglstatus_masterbank')).unix(),
+      logo: this.get('logo_masterbank'),
+    };
+  }
+
   /**
    * Get all banks
    */
@@ -30,17 +41,6 @@ class BankModel extends bookshelf.Model {
     return bank;
   }
 }
-
-BankModel.prototype.serialize = function () {
-  return {
-    id: this.attributes.id_masterbank,
-    name: this.attributes.nama_masterbank,
-    code: this.attributes.kode_masterbank,
-    status: this.attributes.status_masterbank,
-    status_at: moment(this.attributes.tglstatus_masterbank).unix(),
-    logo: this.attributes.logo_masterbank,
-  };
-};
 
 export default bookshelf.model('Bank', BankModel);
 

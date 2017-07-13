@@ -13,6 +13,21 @@ class AddressModel extends bookshelf.Model {
     return 'id_alamatuser';
   }
 
+  serialize() {
+    return {
+      id: this.get('id_alamatuser'),
+      name: this.get('nama_penerima'),
+      email: this.get('email_penerima'),
+      phone_number: this.get('tlp_penerima'),
+      postal_code: this.get('kodepos_user'),
+      address: this.get('alamat_user'),
+      alias_address: this.get('alamat_alias'),
+      is_primary_address: this.get('alamat_primary') === 1,
+      is_sale_address: this.get('alamat_originjual') === 1,
+      is_tender_address: this.get('alamat_originlelang') === 1,
+    };
+  }
+
   /**
    * Add relation to User
    */
@@ -227,21 +242,5 @@ class AddressModel extends bookshelf.Model {
   }
 }
 
-AddressModel.prototype.serialize = function () {
-  return {
-    id: this.attributes.id_alamatuser,
-    name: this.attributes.nama_penerima,
-    email: this.attributes.email_penerima,
-    phone_number: this.attributes.tlp_penerima,
-    postal_code: this.attributes.kodepos_user,
-    address: this.attributes.alamat_user,
-    alias_address: this.attributes.alamat_alias,
-    is_primary_address: this.attributes.alamat_primary === 1,
-    is_sale_address: this.attributes.alamat_originjual === 1,
-    is_tender_address: this.attributes.alamat_originlelang === 1,
-  };
-};
-
-// eslint-disable-next-line import/prefer-default-export
 export const Address = bookshelf.model('Address', AddressModel);
 export default { Address };

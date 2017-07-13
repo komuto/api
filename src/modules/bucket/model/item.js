@@ -1,6 +1,7 @@
 import core from '../../core';
+import { BadRequestError } from '../../../../common/errors';
 
-const { parseNum, parseDate } = core.utils;
+const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
 
 class ItemModel extends bookshelf.Model {
@@ -11,6 +12,22 @@ class ItemModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_listbucket';
+  }
+
+  serialize() {
+    return {
+      id: this.get('id_ulasanproduk'),
+      bucket_id: this.get('id_bucket'),
+      product_id: this.get('id_produk'),
+      invoice_id: this.get('id_invoice'),
+      shipping_id: parseNum(this.get('id_pengiriman_produk')),
+      dropshipper_id: parseNum(this.get('id_dropshipper')),
+      qty: this.get('qty_listbucket'),
+      weight: this.get('beratproduk_listbucket'),
+      note: this.get('keteranganopsi_listbucket'),
+      additional_cost: parseNum(this.get('biayatambahan_listbucket')),
+      total_price: parseNum(this.get('hargatotal_listbucket')),
+    };
   }
 
   /**
@@ -28,6 +45,15 @@ class ItemModel extends bookshelf.Model {
   }
 
   /**
+   * Create item
+   */
+  static async create(data) {
+    return await new this(data).save().catch(() => {
+      throw new BadRequestError('Error save item');
+    });
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData
@@ -41,13 +67,9 @@ class ItemModel extends bookshelf.Model {
       dropshipper_id: 'id_dropshipper',
       qty: 'qty_listbucket',
       weight: 'beratproduk_listbucket',
-      option_information: 'keteranganopsi_listbucket',
-      delivery_cost: 'ongkir_listbucket',
+      note: 'keteranganopsi_listbucket',
       additional_cost: 'biayatambahan_listbucket',
       total_price: 'hargatotal_listbucket',
-      final_price: 'hargafinal_listbucket',
-      status: 'status_listbucket',
-      status_at: 'tglstatus_listbucket',
     };
     const newData = {};
     Object.keys(data).forEach((prop) => {
@@ -56,26 +78,6 @@ class ItemModel extends bookshelf.Model {
     return newData;
   }
 }
-
-ItemModel.prototype.serialize = function () {
-  return {
-    id: this.attributes.id_ulasanproduk,
-    bucket_id: this.attributes.id_bucket,
-    product_id: this.attributes.id_produk,
-    invoice_id: this.attributes.id_invoice,
-    shipping_id: parseNum(this.attributes.id_pengiriman_produk),
-    dropshipper_id: parseNum(this.attributes.id_dropshipper),
-    qty: this.attributes.qty_listbucket,
-    weight: this.attributes.beratproduk_listbucket,
-    option_information: this.attributes.keteranganopsi_listbucket,
-    delivery_cost: parseNum(this.attributes.ongkir_listbucket),
-    additional_cost: parseNum(this.attributes.biayatambahan_listbucket),
-    total_price: parseNum(this.attributes.hargatotal_listbucket),
-    final_price: parseNum(this.attributes.hargafinal_listbucket),
-    status: parseNum(this.attributes.status_listbucket),
-    status_at: parseDate(this.attributes.tglstatus_listbucket),
-  };
-};
 
 export const Item = bookshelf.model('Item', ItemModel);
 export default { Item };

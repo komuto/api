@@ -1,12 +1,11 @@
 import express from 'express';
 import { BucketController } from './controller';
 import { utils, middleware } from '../core';
-import { validateParam } from './middleware';
 import constraints from './validation';
 
 const routes = express.Router();
 const { wrap } = utils;
-const { apiResponse, auth } = middleware;
+const { apiResponse, auth, validateParam } = middleware;
 
 /**
  * GET /buckets/count
@@ -33,6 +32,15 @@ routes.get('/promo',
 routes.get('/users/bucket',
   auth(),
   wrap(BucketController.getBucket),
+  apiResponse());
+
+/**
+ * Add to cart
+ */
+routes.post('/buckets',
+  auth(),
+  validateParam(constraints.cart, true),
+  wrap(BucketController.addToCart),
   apiResponse());
 
 export default routes;

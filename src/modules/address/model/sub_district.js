@@ -14,6 +14,13 @@ class SubDistrictModel extends bookshelf.Model {
     return 'id_kecamatan';
   }
 
+  serialize() {
+    return {
+      id: parseInt(this.get('id_kecamatan'), 10),
+      name: toTitleCase(this.get('nama_kecamatan')),
+    };
+  }
+
   address() {
     return this.hasMany('Address');
   }
@@ -54,13 +61,6 @@ class SubDistrictModel extends bookshelf.Model {
     return await this.where(condition).fetchAll();
   }
 }
-
-SubDistrictModel.prototype.serialize = function () {
-  return {
-    id: parseInt(this.attributes.id_kecamatan, 10),
-    name: toTitleCase(this.attributes.nama_kecamatan),
-  };
-};
 
 export const SubDistrict = bookshelf.model('SubDistrict', SubDistrictModel);
 export default { SubDistrict };

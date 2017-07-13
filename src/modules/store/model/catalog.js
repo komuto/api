@@ -14,12 +14,22 @@ class CatalogModel extends bookshelf.Model {
     return 'id_katalog';
   }
 
+  serialize() {
+    return {
+      id: this.get('id_katalog'),
+      store_id: this.get('id_toko'),
+      name: this.get('nama_katalog'),
+      count_product: defaultNull(this.get('count_product')),
+      created_at: parseDate(this.get('datecreate_katalog')),
+    };
+  }
+
   products() {
     return this.hasMany('Product', 'identifier_katalog');
   }
 
   static async getUserCatalog(id) {
-    const catalogs = await this.query((qb) => {
+    return await this.query((qb) => {
       qb.select('id_katalog', 'nama_katalog');
       qb.count('produk.* as count_product');
       qb.innerJoin('produk', 'katalog.id_katalog', 'produk.identifier_katalog');
@@ -28,7 +38,6 @@ class CatalogModel extends bookshelf.Model {
       qb.groupBy('id_katalog');
       qb.orderBy('id_katalog');
     }).fetchAll();
-    return catalogs;
   }
 
   static matchDBColumn(data) {
@@ -44,16 +53,6 @@ class CatalogModel extends bookshelf.Model {
     return newData;
   }
 }
-
-CatalogModel.prototype.serialize = function () {
-  return {
-    id: this.attributes.id_katalog,
-    store_id: this.attributes.id_toko,
-    name: this.attributes.nama_katalog,
-    count_product: defaultNull(this.attributes.count_product),
-    created_at: parseDate(this.attributes.datecreate_katalog),
-  };
-};
 
 export const Catalog = bookshelf.model('Catalog', CatalogModel);
 export default { Catalog };

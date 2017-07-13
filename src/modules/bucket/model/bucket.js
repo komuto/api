@@ -1,3 +1,4 @@
+import ModelBase from 'bookshelf-modelbase';
 import core from '../../core';
 import { BadRequestError } from '../../../../common/errors';
 import './item';
@@ -5,20 +6,43 @@ import './shipping';
 
 const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
+bookshelf.plugin(ModelBase.pluggable);
 
 class BucketModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
     return 'bucket';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_bucket';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
+  serialize() {
+    const bucket = {
+      id: this.get('id_ulasanproduk'),
+      user_id: this.get('id_users'),
+      promo_id: this.get('id_promo'),
+      promo: this.relations.promo ? this.related('promo') : undefined,
+      order_at: parseDate(this.get('tgl_orderbucket')),
+      wallet: parseNum(this.get('bayar_wallet')),
+      payment_method: this.get('method_paymentbucket'),
+      status: parseNum(this.get('status_bucket')),
+      status_at: parseDate(this.get('tglstatus_bucket')),
+    };
+    if (this.relations.promo) delete bucket.promo_id;
+    return bucket;
+  }
+
   /**
    * Add relation to item
-    */
+   */
   items() {
     return this.hasMany('Item', 'id_bucket');
   }
@@ -77,6 +101,22 @@ class BucketModel extends bookshelf.Model {
   }
 
   /**
+   * Find bucket
+   */
+  static async findBucket(userId) {
+    return await this.findOrCreate({
+      id_users: userId,
+      status_bucket: 0,
+    }, {
+      defaults: this.matchDBColumn({
+        wallet: 0,
+        order_at: new Date(),
+        status_at: new Date(),
+      }),
+    });
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData
@@ -86,10 +126,7 @@ class BucketModel extends bookshelf.Model {
       user_id: 'id_users',
       promo_id: 'id_promo',
       order_at: 'tgl_orderbucket',
-      admin_fee: 'biaya_admin',
-      total_price: 'total_bucket',
-      wallet: 'wallet_bucket',
-      final_price: 'finalprice_bucket',
+      wallet: 'bayar_wallet',
       payment_method: 'method_paymentbucket',
       status: 'status_bucket',
       status_at: 'tglstatus_bucket',
@@ -101,25 +138,6 @@ class BucketModel extends bookshelf.Model {
     return newData;
   }
 }
-
-BucketModel.prototype.serialize = function () {
-  const bucket = {
-    id: this.attributes.id_ulasanproduk,
-    user_id: this.attributes.id_users,
-    promo_id: this.attributes.id_promo,
-    promo: this.relations.promo ? this.related('promo') : undefined,
-    order_at: parseDate(this.attributes.tgl_orderbucket),
-    admin_fee: parseNum(this.attributes.biaya_admin),
-    total_price: parseNum(this.attributes.total_bucket),
-    wallet: parseNum(this.attributes.wallet_bucket),
-    final_price: parseNum(this.attributes.finalprice_bucket),
-    payment_method: this.attributes.method_paymentbucket,
-    status: parseNum(this.attributes.status_bucket),
-    status_at: parseDate(this.attributes.tglstatus_bucket),
-  };
-  if (this.relations.promo) delete bucket.promo_id;
-  return bucket;
-};
 
 export const Bucket = bookshelf.model('Bucket', BucketModel);
 export default { Bucket };

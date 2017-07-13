@@ -14,6 +14,28 @@ class ServiceModel extends bookshelf.Model {
     return 'id_ekspedisiservice';
   }
 
+  serialize(minimal = true) {
+    if (minimal) {
+      return {
+        id: this.get('id_ekspedisiservice'),
+        name: this.get('nama_ekspedisiservice'),
+        description: this.get('deskripsi_ekspedisiservice'),
+        logo: this.get('logo_path'),
+        expedition: this.relations.expedition ? this.related('expedition') : undefined,
+        is_checked: false,
+      };
+    }
+    return {
+      id: this.get('id_ekspedisiservice'),
+      expedition_id: this.get('id_ekspedisi'),
+      name: this.get('nama_ekspedisiservice'),
+      description: this.get('deskripsi_ekspedisiservice'),
+      status: parseNum(this.get('status_ekspedisiservice')),
+      status_at: parseDate(this.get('tglstatus_ekspedisiservice')),
+      logo: this.get('logo_path'),
+    };
+  }
+
   expedition() {
     return this.belongsTo('Expedition', 'id_ekspedisi');
   }
@@ -34,28 +56,6 @@ class ServiceModel extends bookshelf.Model {
     return await this.where(condition).orderBy('id_ekspedisiservice').fetchAll();
   }
 }
-
-ServiceModel.prototype.serialize = function (minimal = true) {
-  if (minimal) {
-    return {
-      id: this.attributes.id_ekspedisiservice,
-      name: this.attributes.nama_ekspedisiservice,
-      description: this.attributes.deskripsi_ekspedisiservice,
-      logo: this.attributes.logo_path,
-      expedition: this.relations.expedition ? this.related('expedition') : undefined,
-      is_checked: false,
-    };
-  }
-  return {
-    id: this.attributes.id_ekspedisiservice,
-    expedition_id: this.attributes.id_ekspedisi,
-    name: this.attributes.nama_ekspedisiservice,
-    description: this.attributes.deskripsi_ekspedisiservice,
-    status: parseNum(this.attributes.status_ekspedisiservice),
-    status_at: parseDate(this.attributes.tglstatus_ekspedisiservice),
-    logo: this.attributes.logo_path,
-  };
-};
 
 export default bookshelf.model('ExpeditionService', ServiceModel);
 

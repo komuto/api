@@ -1,12 +1,20 @@
 import express from 'express';
-import { validateLogin, validateSocialLogin, addToken, userData, validateRegistration, validateUpdate, validateUpdatePhone, validateVerifyPhone } from './middleware';
+import {
+  validateLogin,
+  validateSocialLogin,
+  addToken,
+  userData,
+  validateRegistration,
+  validateUpdate,
+  validateUpdatePhone,
+  validateVerifyPhone,
+} from './middleware';
 import { UserController } from './controller';
 import core from '../core';
-import { validateParam } from './../store/middleware';
 import constraints from './../store/validation';
 
 const routes = express.Router();
-const { apiResponse, auth } = core.middleware;
+const { apiResponse, auth, validateParam } = core.middleware;
 const { wrap } = core.utils;
 
 /**
@@ -141,7 +149,7 @@ routes.get('/users/store/expeditions/manage',
  */
 routes.post('/users/store',
   auth(),
-  validateParam(constraints.create),
+  validateParam(constraints.create, true),
   wrap(UserController.createStore),
   apiResponse());
 

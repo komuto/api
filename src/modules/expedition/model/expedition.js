@@ -17,6 +17,26 @@ class ExpeditionModel extends bookshelf.Model {
     return 'id_ekspedisi';
   }
 
+  serialize(minimal = false) {
+    if (minimal) {
+      return {
+        id: this.get('id_ekspedisi'),
+        name: this.get('nama_ekspedisi'),
+        logo: core.expeditionPath(this.get('logo_path')),
+        insurance_fee: parseFloat(this.get('asurasi_fee')),
+      };
+    }
+    return {
+      id: this.get('id_ekspedisi'),
+      name: this.get('nama_ekspedisi'),
+      status: parseInt(this.get('status_ekspedisi'), 10),
+      method: this.get('method_ekspedisi'),
+      status_at: moment(this.get('tglstatus_ekspedisi')).unix(),
+      logo: core.expeditionPath(this.get('logo_path')),
+      insurance_fee: parseFloat(this.get('asurasi_fee')),
+    };
+  }
+
   services() {
     return this.hasMany('ExpeditionService', 'id_ekspedisi');
   }
@@ -28,6 +48,16 @@ class ExpeditionModel extends bookshelf.Model {
   static async get(condition = null) {
     condition = _.omitBy(condition, _.isNil);
     return await this.where(condition).fetchAll();
+  }
+
+  /**
+   * Get expedition by id
+   * @param {number} id
+   */
+  static async findById(id) {
+    const expedition = await this.where({ id_ekspedisi: id }).fetch();
+    if (expedition) return expedition.toJSON();
+    throw new BadRequestError('No expedition found');
   }
 
   static async getServices() {
@@ -89,25 +119,5 @@ class ExpeditionModel extends bookshelf.Model {
     return results;
   }
 }
-
-ExpeditionModel.prototype.serialize = function (minimal = false) {
-  if (minimal) {
-    return {
-      id: this.attributes.id_ekspedisi,
-      name: this.attributes.nama_ekspedisi,
-      logo: core.expeditionPath(this.attributes.logo_path),
-      insurance_fee: parseFloat(this.attributes.asurasi_fee),
-    };
-  }
-  return {
-    id: this.attributes.id_ekspedisi,
-    name: this.attributes.nama_ekspedisi,
-    status: parseInt(this.attributes.status_ekspedisi, 10),
-    method: this.attributes.method_ekspedisi,
-    status_at: moment(this.attributes.tglstatus_ekspedisi).unix(),
-    logo: core.expeditionPath(this.attributes.logo_path),
-    insurance_fee: parseFloat(this.attributes.asurasi_fee),
-  };
-};
 
 export default bookshelf.model('Expedition', ExpeditionModel);

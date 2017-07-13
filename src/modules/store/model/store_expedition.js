@@ -15,6 +15,15 @@ class StoreExpeditionModel extends bookshelf.Model {
     return 'id_ekspedisiservice';
   }
 
+  serialize() {
+    return {
+      store_id: this.get('id_toko'),
+      expedition_service_id: this.get('id_ekspedisiservice'),
+      status: this.get('status_eskpedisitoko'),
+      created_at: parseDate(this.get('tglstatus_ekspedisitoko')),
+    };
+  }
+
   initialize() {
     this.on('updating', (model, attrs, options) => {
       const { id_toko, id_ekspedisiservice } = attrs;
@@ -58,15 +67,6 @@ class StoreExpeditionModel extends bookshelf.Model {
     return newData;
   }
 }
-
-StoreExpeditionModel.prototype.serialize = function () {
-  return {
-    store_id: this.attributes.id_toko,
-    expedition_service_id: this.attributes.id_ekspedisiservice,
-    status: this.attributes.status_eskpedisitoko,
-    created_at: parseDate(this.attributes.tglstatus_ekspedisitoko),
-  };
-};
 
 export const StoreExpedition = bookshelf.model('StoreExpedition', StoreExpeditionModel);
 export default { StoreExpedition };

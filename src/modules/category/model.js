@@ -16,6 +16,16 @@ class CategoryModel extends bookshelf.Model {
     return 'id_kategoriproduk';
   }
 
+  serialize() {
+    return {
+      id: this.get('id_kategoriproduk'),
+      parent_id: this.get('parentid_kategoriproduk'),
+      icon: core.categoryPath(this.get('iconpath_kategoriproduk')),
+      name: this.get('nama_kategoriproduk'),
+      slug: slug(this.get('nama_kategoriproduk'), { lower: true, charmap: '' }),
+    };
+  }
+
   /**
    * Add relation to Product
    */
@@ -74,16 +84,6 @@ class CategoryModel extends bookshelf.Model {
     });
   }
 }
-
-CategoryModel.prototype.serialize = function () {
-  return {
-    id: this.attributes.id_kategoriproduk,
-    parent_id: this.attributes.parentid_kategoriproduk,
-    icon: core.categoryPath(this.attributes.iconpath_kategoriproduk),
-    name: this.attributes.nama_kategoriproduk,
-    slug: slug(this.attributes.nama_kategoriproduk, { lower: true, charmap: '' }),
-  };
-};
 
 export default bookshelf.model('Category', CategoryModel);
 
