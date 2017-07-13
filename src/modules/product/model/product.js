@@ -50,7 +50,7 @@ class ProductModel extends bookshelf.Model {
       slug: slug(this.get('nama_produk'), { lower: true, charmap: '' }),
       stock: this.get('stock_produk'),
       weight: this.get('berat_produk'),
-      type: parseNum(this.get('jenis_produk'), 0),
+      condition: parseNum(this.get('jenis_produk'), 0),
       description: this.get('deskripsi_produk'),
       price: parseDec(this.get('harga_produk')),
       attrval: parseNum(this.get('attrval_produk'), 0),
