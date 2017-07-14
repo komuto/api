@@ -4,6 +4,10 @@ const Message = {
     not_found: 'Barang tidak ditemukan',
     duplicate_account: 'No rekening sudah dibuat',
   },
+  updateMsg: {
+    title: 'Update rekening gagal',
+    not_found: 'Rekening tidak ditemukan',
+  },
   OTPMsg: {
     title: 'Kirim OTP gagal',
     titleVerify: 'Verifikasi hp gagal',

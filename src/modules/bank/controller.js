@@ -1,6 +1,6 @@
 import { utils } from '../core';
 import { Bank, BankAccount, BankAccountStatus } from './model';
-import { createMsg } from './message';
+import { createMsg, updateMsg } from './message';
 import { BadRequestError } from '../../../common/errors';
 
 const { formatSingularErr } = utils;
@@ -47,6 +47,27 @@ BankController.createBankAccount = async (req, res, next) => {
   bankAccount = await new BankAccount(BankAccount.matchDBColumn(req.body)).save();
   await bankAccount.load('bank');
 
+  req.resData = {
+    message: 'Bank Account Data',
+    data: bankAccount,
+  };
+  return next();
+};
+
+BankController.updateBankAccount = async (req, res, next) => {
+  // Check rekening id
+  const bankAccount = await BankAccount.where({ id_rekeninguser: req.params.id,
+    id_users: req.user.id }).fetch();
+  if (!bankAccount) throw new BadRequestError(updateMsg.title, formatSingularErr('account', updateMsg.not_found));
+  // Check whether no rekening is already used or not
+  const check = await BankAccount.query((qb) => {
+    qb.where({ id_users: req.user.id, nomor_rekening: req.body.holder_account_number });
+    qb.whereNot({ id_rekeninguser: req.params.id });
+  }).fetch();
+  if (check) throw new BadRequestError(updateMsg.title, formatSingularErr('holder_account_number', createMsg.duplicate_account));
+
+  await bankAccount.save(BankAccount.matchDBColumn(req.body), { patch: true });
+  await bankAccount.load('bank');
   req.resData = {
     message: 'Bank Account Data',
     data: bankAccount,

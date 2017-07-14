@@ -2,7 +2,7 @@ import express from 'express';
 import { BankController } from './controller';
 import core from '../core';
 import { controller } from '../user';
-import { createMsg } from './message';
+import { createMsg, updateMsg } from './message';
 import { validateCreateBankAccount } from './middleware';
 
 const routes = express.Router();
@@ -35,11 +35,24 @@ routes.get('/accounts/banks',
   wrap(BankController.getBankAccounts),
   apiResponse());
 
+/**
+ * Create bank account
+ */
 routes.post('/accounts/banks',
   auth(),
   validateCreateBankAccount(),
   wrap(UserController.verifyOTPCode(createMsg.title)),
   wrap(BankController.createBankAccount),
+  apiResponse());
+
+/**
+ * Update bank account
+ */
+routes.put('/accounts/banks/:id',
+  auth(),
+  validateCreateBankAccount(),
+  wrap(UserController.verifyOTPCode(updateMsg.title)),
+  wrap(BankController.updateBankAccount),
   apiResponse());
 
 export default routes;
