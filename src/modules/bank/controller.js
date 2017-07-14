@@ -1,6 +1,6 @@
 import { utils } from '../core';
 import { Bank, BankAccount, BankAccountStatus } from './model';
-import { createMsg, updateMsg, getAccountMsg } from './message';
+import { createMsg, updateMsg, getAccountMsg, deleteMsg } from './message';
 import { BadRequestError } from '../../../common/errors';
 
 const { formatSingularErr } = utils;
@@ -83,5 +83,12 @@ BankController.updateBankAccount = async (req, res, next) => {
     message: 'Bank Account Data',
     data: bankAccount,
   };
+  return next();
+};
+
+BankController.deleteBankAccount = async (req, res, next) => {
+  await BankAccount.where({ id_rekeninguser: req.params.id, id_users: req.user.id })
+    .destroy({ require: true })
+    .catch(() => next(new BadRequestError(deleteMsg.title, formatSingularErr('account', deleteMsg.not_found))));
   return next();
 };

@@ -12,6 +12,10 @@ const Message = {
     title: 'Lihat rekening gagal',
     not_found: 'Rekening tidak ditemukan',
   },
+  deleteMsg: {
+    title: 'Hapus rekening gagal',
+    not_found: 'Rekening tidak ditemukan',
+  },
   masterBankMsg: {
     presence: 'harus diisi',
   },

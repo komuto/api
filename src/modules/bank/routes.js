@@ -2,8 +2,8 @@ import express from 'express';
 import { BankController } from './controller';
 import core from '../core';
 import { controller } from '../user';
-import { createMsg, updateMsg } from './message';
-import { validateCreateBankAccount } from './middleware';
+import { createMsg, updateMsg, deleteMsg } from './message';
+import { validateCreateBankAccount, validateDeleteBankAccount } from './middleware';
 
 const routes = express.Router();
 const { wrap } = core.utils;
@@ -61,6 +61,13 @@ routes.put('/accounts/banks/:id',
   validateCreateBankAccount(),
   wrap(UserController.verifyOTPCode(updateMsg.title)),
   wrap(BankController.updateBankAccount),
+  apiResponse());
+
+routes.delete('/accounts/banks/:id',
+  auth(),
+  validateDeleteBankAccount(),
+  wrap(UserController.verifyOTPCode(deleteMsg.title)),
+  wrap(BankController.deleteBankAccount),
   apiResponse());
 
 export default routes;
