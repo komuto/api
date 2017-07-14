@@ -20,7 +20,7 @@ class CommentModel extends bookshelf.Model {
       return {
         id: this.get('id_subdiskusi'),
         user_id: !this.relations.user ? this.get('id_subdiskusi') : undefined,
-        user: this.relations.user ? this.related('user').serialize(false, false, true) : undefined,
+        user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
         content: this.get('reply_subdiskusi'),
         created_at: parseDate(this.get('tgl_subdiskusi')),
       };

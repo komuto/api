@@ -21,7 +21,7 @@ class DiscussionModel extends bookshelf.Model {
       return {
         id: this.get('id_diskusi'),
         user_id: !this.relations.user ? this.get('id_users') : undefined,
-        user: this.relations.user ? this.related('user').serialize(false, false, true) : undefined,
+        user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
         question: this.get('pertanyaan_diskusi'),
         created_at: parseDate(this.get('tgl_diskusi')),
       };
@@ -29,7 +29,7 @@ class DiscussionModel extends bookshelf.Model {
     return {
       id: this.get('id_diskusi'),
       user_id: !this.relations.user ? this.get('id_users') : undefined,
-      user: this.relations.user ? this.related('user').serialize(false, false, true) : undefined,
+      user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
       product_id: this.get('id_produk'),
       question: this.get('pertanyaan_diskusi'),
       created_at: parseDate(this.get('tgl_diskusi')),

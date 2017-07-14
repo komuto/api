@@ -17,5 +17,5 @@ export default new LocalStrategy({
   if (!check) {
     return done(new BadRequestError(loginMsg.title, formatSingularErr('password', loginMsg.wrong_password)), false);
   }
-  return done(null, user.serialize(true));
+  return done(null, user.serialize({ pass: true }));
 });

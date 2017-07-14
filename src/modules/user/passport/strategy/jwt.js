@@ -10,7 +10,7 @@ export default new JwtStrategy(jwtParams, async (jwtPayload, done) => {
   try {
     const user = await new User({ id_users: jwtPayload.id_users }).fetch();
     if (!user) return done(null, false);
-    return done(null, user.serialize(true));
+    return done(null, user.serialize({ pass: true }));
   } catch (e) {
     return done(e, false);
   }
