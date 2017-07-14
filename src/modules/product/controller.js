@@ -125,7 +125,7 @@ ProductController.createDiscussion = async (req, res, next) => {
   });
   const discussion = await Discussion.create(data);
   req.resData = {
-    message: 'Success',
+    message: 'Discussion Data',
     data: discussion,
   };
   return next();
