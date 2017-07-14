@@ -58,4 +58,10 @@ constraints.search = {
   },
 };
 
+constraints.discussion = {
+  question: {
+    presence: true,
+  },
+};
+
 export default constraints;

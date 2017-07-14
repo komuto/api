@@ -73,6 +73,16 @@ routes.get('/products/:id/discussions',
   apiResponse());
 
 /**
+ * POST /products/id/discussions
+ * Create discussion
+ */
+routes.post('/products/:id/discussions',
+  auth(),
+  validateParam(constraints.discussion, true),
+  wrap(ProductController.createDiscussion),
+  apiResponse());
+
+/**
  * GET /products/id/discussions/id/comments
  * Get all comments of a discussion
  */

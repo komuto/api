@@ -73,6 +73,35 @@ class DiscussionModel extends bookshelf.Model {
       };
     });
   }
+
+  /**
+   * Create discussion
+   */
+  static async create(data) {
+    return await new this(data).save().catch(() => {
+      throw new BadRequestError('Gagal menambah diskusi.');
+    });
+  }
+
+  /**
+   * Transform supplied data properties to match with db column
+   * @param {object} data
+   * @return {object} newData
+   */
+  static matchDBColumn(data) {
+    const column = {
+      user_id: 'id_users',
+      product_id: 'id_produk',
+      question: 'pertanyaan_diskusi',
+      created_at: 'tgl_diskusi',
+      is_deleted: 'hapus_diskusi',
+    };
+    const newData = {};
+    Object.keys(data).forEach((prop) => {
+      if (column[prop] && data[prop] !== undefined) newData[column[prop]] = data[prop];
+    });
+    return newData;
+  }
 }
 
 export const Discussion = bookshelf.model('Discussion', DiscussionModel);
