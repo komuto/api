@@ -256,7 +256,7 @@ class ProductModel extends bookshelf.Model {
       .reduce((res, service) => {
         const expeditionId = service.get('id_ekspedisi');
         if (!checker.includes(expeditionId)) {
-          const expedition = service.related('expedition').serialize(true);
+          const expedition = service.related('expedition').serialize({ minimal: true });
           checker.push(expeditionId);
           res.push(expedition);
         }
