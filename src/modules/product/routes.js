@@ -72,4 +72,12 @@ routes.get('/products/:id/discussions',
   wrap(ProductController.getDiscussions),
   apiResponse());
 
+/**
+ * GET /products/id/discussions/id/comments
+ * Get all comments of a discussion
+ */
+routes.get('/products/:id/discussions/:discussion_id/comments',
+  wrap(ProductController.getComments),
+  apiResponse());
+
 export default routes;

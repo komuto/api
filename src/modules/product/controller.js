@@ -1,4 +1,4 @@
-import { Product, Discussion } from './model';
+import { Product, Discussion, Comment } from './model';
 import { Wishlist } from './../user/model';
 import { BadRequestError } from '../../../common/errors';
 import { utils } from '../core';
@@ -93,6 +93,21 @@ ProductController.getDiscussions = async (req, res, next) => {
     message: 'Product Discussion Data',
     meta: { page, limit: pageSize },
     data: discussions,
+  };
+  return next();
+};
+
+/**
+ * Get comments
+ */
+ProductController.getComments = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const comments = await Comment.getByDiscussionId(req.params.discussion_id, page, pageSize);
+  req.resData = {
+    message: 'Discussion Comments Data',
+    meta: { page, limit: pageSize },
+    data: comments,
   };
   return next();
 };
