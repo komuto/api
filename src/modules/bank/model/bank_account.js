@@ -2,6 +2,11 @@ import core from '../../core';
 
 const bookshelf = core.postgres.db;
 
+export const BankAccountStatus = {
+  PRIMARY: '1',
+  NOT_PRIMARY: '0',
+};
+
 class BankAccountModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -37,6 +42,27 @@ class BankAccountModel extends bookshelf.Model {
    */
   static async getByUserId(userId) {
     return this.where({ id_users: userId }).fetchAll({ withRelated: ['bank'] });
+  }
+
+  /**
+   * Transform supplied data properties to match with db column
+   * @param {object} data
+   * @return {object} newData
+   */
+  static matchDBColumn(data) {
+    const column = {
+      master_bank_id: 'id_masterbank',
+      holder_name: 'nama_pemilikrekening',
+      holder_account_number: 'nomor_rekening',
+      bank_branch_office_name: 'cabang_bankrekeninguser',
+      is_primary: 'primary_rekening',
+      user_id: 'id_users',
+    };
+    const newData = {};
+    Object.keys(data).forEach((prop) => {
+      if (column[prop] && data[prop] !== undefined) newData[column[prop]] = data[prop];
+    });
+    return newData;
   }
 }
 

@@ -12,6 +12,7 @@ import {
 import { UserController } from './controller';
 import core from '../core';
 import constraints from './../store/validation';
+import { OTPMsg } from './message';
 
 const routes = express.Router();
 const { apiResponse, auth, validateParam } = core.middleware;
@@ -230,7 +231,7 @@ routes.post('/users/otp',
 routes.post('/accounts/phone/verify',
   auth(),
   validateVerifyPhone(),
-  wrap(UserController.verifyPhone),
+  wrap(UserController.verifyOTPCode(OTPMsg.titleVerify)),
   apiResponse());
 
 export default routes;

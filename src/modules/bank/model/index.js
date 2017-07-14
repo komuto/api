@@ -1,4 +1,4 @@
 import { Bank } from './bank';
-import { BankAccount } from './bank_account';
+import { BankAccount, BankAccountStatus } from './bank_account';
 
-export default { Bank, BankAccount };
+export default { Bank, BankAccount, BankAccountStatus };
