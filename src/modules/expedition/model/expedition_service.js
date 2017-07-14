@@ -14,7 +14,7 @@ class ServiceModel extends bookshelf.Model {
     return 'id_ekspedisiservice';
   }
 
-  serialize({ minimal = true }) {
+  serialize({ minimal = true } = {}) {
     const service = {
       id: this.get('id_ekspedisiservice'),
       name: this.get('nama_ekspedisiservice'),

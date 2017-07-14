@@ -17,7 +17,7 @@ class ExpeditionModel extends bookshelf.Model {
     return 'id_ekspedisi';
   }
 
-  serialize({ minimal = false }) {
+  serialize({ minimal = false } = {}) {
     const expedition = {
       id: this.get('id_ekspedisi'),
       name: this.get('nama_ekspedisi'),
