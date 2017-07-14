@@ -87,11 +87,12 @@ class DiscussionModel extends bookshelf.Model {
   }
 
   /**
-   * Get discussion by user id
+   * Get discussion by user id or product ids
    */
-  static async getByUserId(userId, page, pageSize) {
-    const discussions = await this.where({ id_users: userId })
-      .orderBy('tgl_diskusi', 'DESC')
+  static async get(data, page, pageSize, isProduct = false) {
+    let query = this.where({ id_users: data });
+    if (isProduct) query = this.forge().where('id_produk', 'in', data);
+    const discussions = await query.orderBy('tgl_diskusi', 'DESC')
       .fetchPage({
         page,
         pageSize,

@@ -10,7 +10,7 @@ import { BadRequestError } from '../../../common/errors';
 import { model } from '../store';
 import { registrationMsg, updateMsg, emailMsg, activateMsg, resetPassMsg, tokenMsg, loginMsg, fbMsg, passwordMsg, OTPMsg, phoneNumberMsg } from './message';
 import { Address } from '../address/model';
-import { Discussion } from '../product/model';
+import { Discussion, Product } from '../product/model';
 
 const fb = new Facebook(config.fb);
 const { formatSingularErr } = utils;
@@ -380,7 +380,24 @@ UserController.verifyOTPCode = errTitle => async (req, res, next) => {
 UserController.getDiscussions = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const discussions = await Discussion.getByUserId(req.user.id, page, pageSize);
+  const discussions = await Discussion.get(req.user.id, page, pageSize);
+  req.resData = {
+    message: 'Discussion Data',
+    meta: { page, limit: pageSize },
+    data: discussions,
+  };
+  return next();
+};
+
+/**
+ * Get store discussions
+ */
+UserController.getStoreDiscussions = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const storeId = await Store.getStoreId(req.user.id);
+  const productIds = await Product.getIdsByStoreId(storeId);
+  const discussions = await Discussion.get(productIds, page, pageSize, true);
   req.resData = {
     message: 'Discussion Data',
     meta: { page, limit: pageSize },

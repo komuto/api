@@ -242,4 +242,12 @@ routes.get('/users/discussions',
   wrap(UserController.getDiscussions),
   apiResponse());
 
+/**
+ * Get store discussions
+ */
+routes.get('/users/store/discussions',
+  auth(),
+  wrap(UserController.getStoreDiscussions),
+  apiResponse());
+
 export default routes;

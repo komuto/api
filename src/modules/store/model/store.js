@@ -253,6 +253,7 @@ class StoreModel extends bookshelf.Model {
 
   static async getStoreId(id) {
     const store = await new this({ id_users: id }).fetch();
+    if (!store) throw new BadRequestError('Tidak ada toko');
     return store.get('id_toko');
   }
 
