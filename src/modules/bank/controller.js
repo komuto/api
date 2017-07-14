@@ -1,6 +1,6 @@
 import { utils } from '../core';
 import { Bank, BankAccount, BankAccountStatus } from './model';
-import { createMsg, updateMsg } from './message';
+import { createMsg, updateMsg, getAccountMsg } from './message';
 import { BadRequestError } from '../../../common/errors';
 
 const { formatSingularErr } = utils;
@@ -34,6 +34,17 @@ BankController.getBankAccounts = async (req, res, next) => {
   req.resData = {
     message: 'Bank Account Data',
     data: bankAccounts,
+  };
+  return next();
+};
+
+BankController.getBankAccount = async (req, res, next) => {
+  const bankAccount = await BankAccount.where({ id_rekeninguser: req.params.id,
+    id_users: req.user.id }).fetch({ withRelated: 'bank' });
+  if (!bankAccount) throw new BadRequestError(getAccountMsg.title, formatSingularErr('account', getAccountMsg.not_found));
+  req.resData = {
+    message: 'Bank Account Data',
+    data: bankAccount,
   };
   return next();
 };

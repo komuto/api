@@ -36,6 +36,14 @@ routes.get('/accounts/banks',
   apiResponse());
 
 /**
+ * Get bank account
+ */
+routes.get('/accounts/banks/:id',
+  auth(),
+  wrap(BankController.getBankAccount),
+  apiResponse());
+
+/**
  * Create bank account
  */
 routes.post('/accounts/banks',
