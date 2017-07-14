@@ -44,45 +44,36 @@ class UserModel extends bookshelf.Model {
    * @param birth {bool} true = get name of the district id
    * @param account {bool} true = minimal for account collection
    */
-  serialize(pass = false, birth = false, account = false) {
-    if (account) {
-      return {
-        id: this.get('id_users'),
-        name: this.get('namalengkap_users'),
-        photo: core.imagePath(IMAGE_PATH, this.get('pathfoto_users')),
-        gender: this.get('jeniskelamin_users') === 'L' ? 'male' : 'female',
-        place_of_birth: defaultNull(this.get('kota_lahir')),
-        date_of_birth: parseDate(this.get('tgl_lahir'), null),
-      };
-    }
-    const user = {
+  serialize({ pass = false, birth = false, account = false } = {}) {
+    let user = {
       id: this.get('id_users'),
-      marketplace_id: defaultNull(this.get('marketplaceuser')),
       name: this.get('namalengkap_users'),
-      email: this.get('email_users'),
-      cooperative_member_number: defaultNull(this.get('no_anggotakoperasi_users')),
-      approval_cooperative_status: this.get('approval_koperasi_users'),
       photo: this.get('pathfoto_users')
         ? core.imagePath(IMAGE_PATH, this.get('pathfoto_users'))
         : 'https://www.juptr.io/images/default-user.png',
-      phone_number: defaultNull(this.get('nohp_users')),
       gender: this.get('jeniskelamin_users') === 'L' ? 'male' : 'female',
+      place_of_birth: defaultNull(this.get('kota_lahir')),
+      date_of_birth: parseDate(this.get('tgl_lahir'), null),
+    };
+    if (account) return user;
+    user = {
+      ...user,
+      marketplace_id: defaultNull(this.get('marketplaceuser')),
+      email: this.get('email_users'),
+      cooperative_member_number: defaultNull(this.get('no_anggotakoperasi_users')),
+      approval_cooperative_status: this.get('approval_koperasi_users'),
+      phone_number: defaultNull(this.get('nohp_users')),
       status: parseInt(this.get('status_users'), 10),
       mother_name: defaultNull(this.get('ibukandung_users')),
       auth_key: defaultNull(this.get('auth_key')),
       saldo_wallet: checkNull(this.get('saldo_wallet'), 0),
-      place_of_birth: defaultNull(this.get('kota_lahir')),
-      date_of_birth: parseDate(this.get('tgl_lahir'), null),
       created_at: moment(this.get('tgl_create_users')).unix(),
       join_at: parseDate(this.get('tgl_join_koperasi')),
       status_at: moment(this.get('tglstatus_users')).unix(),
       provider_name: this.get('hybridauth_provider_name'),
       provider_uid: this.get('hybridauth_provider_uid'),
     };
-    if (pass) {
-      user.password = this.get('password_users');
-      return user;
-    }
+    if (pass) user.password = this.get('password_users');
     if (birth) {
       this.load({ birthPlace: qb => qb.column('nama_kotakab') });
       const name = this.related('birthPlace').get('nama_kotakab');
@@ -190,7 +181,7 @@ class UserModel extends bookshelf.Model {
   static async getUserProfile(id) {
     const user = await this.where('id_users', id).fetch({ withRelated: ['store', 'birthPlace'] });
     const store = user.related('store');
-    return { user: user.serialize(false, true), store };
+    return { user: user.serialize({ birth: true }), store };
   }
 
   static async getWishlist(id) {
