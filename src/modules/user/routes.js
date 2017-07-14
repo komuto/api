@@ -234,4 +234,12 @@ routes.post('/accounts/phone/verify',
   wrap(UserController.verifyOTPCode(OTPMsg.titleVerify)),
   apiResponse());
 
+/**
+ * Get user discussions
+ */
+routes.get('/users/discussions',
+  auth(),
+  wrap(UserController.getDiscussions),
+  apiResponse());
+
 export default routes;

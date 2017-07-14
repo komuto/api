@@ -16,7 +16,7 @@ class DiscussionModel extends bookshelf.Model {
     return 'id_diskusi';
   }
 
-  serialize(minimal = false) {
+  serialize({ minimal = false } = {}) {
     if (minimal) {
       return {
         id: this.get('id_diskusi'),
@@ -53,6 +53,13 @@ class DiscussionModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to Product
+   */
+  product() {
+    return this.belongsTo('Product', 'id_produk');
+  }
+
+  /**
    * Get discussion by product id
    */
   static async getByProductId(productId, page, pageSize) {
@@ -69,7 +76,7 @@ class DiscussionModel extends bookshelf.Model {
     return discussions.map((discussion) => {
       const comments = discussion.related('comments');
       return {
-        ...discussion.serialize(true),
+        ...discussion.serialize({ minimal: true }),
         count_comments: comments.length,
       };
     });
@@ -81,6 +88,39 @@ class DiscussionModel extends bookshelf.Model {
   static async create(data) {
     return await new this(data).save().catch(() => {
       throw new BadRequestError('Gagal menambah diskusi.');
+    });
+  }
+
+  /**
+   * Get discussion by user id
+   */
+  static async getByUserId(userId, page, pageSize) {
+    const discussions = await this.where({ id_users: userId })
+      .orderBy('tgl_diskusi', 'DESC')
+      .fetchPage({
+        page,
+        pageSize,
+        withRelated: [
+          {
+            'product.images': (qb) => {
+              qb.limit(0);
+            },
+          },
+        ],
+      })
+      .catch(() => {
+        throw new BadRequestError('No Discussion Found');
+      });
+
+    return discussions.map((discussion) => {
+      let product = discussion.related('product');
+      const images = product.related('images');
+      product = product.serialize({ minimal: true });
+      product.image = images.length ? images[0].file : null;
+      return {
+        ...discussion.serialize({ minimal: true }),
+        product,
+      };
     });
   }
 
