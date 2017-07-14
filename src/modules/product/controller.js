@@ -86,9 +86,12 @@ ProductController.addWishlist = async (req, res, next) => {
  * Get discussions
  */
 ProductController.getDiscussions = async (req, res, next) => {
-  const discussions = await Discussion.getByProductId(req.params.id);
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const discussions = await Discussion.getByProductId(req.params.id, page, pageSize);
   req.resData = {
-    message: 'Success',
+    message: 'Product Discussion Data',
+    meta: { page, limit: pageSize },
     data: discussions,
   };
   return next();

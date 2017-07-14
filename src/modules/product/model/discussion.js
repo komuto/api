@@ -55,9 +55,13 @@ class DiscussionModel extends bookshelf.Model {
   /**
    * Get discussion by product id
    */
-  static async getByProductId(productId) {
+  static async getByProductId(productId, page, pageSize) {
     const discussions = await this.where({ id_produk: productId })
-      .fetchAll({ withRelated: ['comments', 'user'] })
+      .fetchPage({
+        page,
+        pageSize,
+        withRelated: ['comments', 'user'],
+      })
       .catch(() => {
         throw new BadRequestError('No Product Found');
       });
