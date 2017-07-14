@@ -52,16 +52,10 @@ constraints.list = {
   },
 };
 
-constraints.search = {
-  q: {
-    presence: true,
-  },
-};
+constraints.search = { q: { presence: true } };
 
-constraints.discussion = {
-  question: {
-    presence: true,
-  },
-};
+constraints.discussion = { question: { presence: true } };
+
+constraints.comment = { content: { presence: true } };
 
 export default constraints;

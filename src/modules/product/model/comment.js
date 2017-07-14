@@ -53,6 +53,35 @@ class CommentModel extends bookshelf.Model {
         throw new BadRequestError('No Discussion Found');
       });
   }
+
+  /**
+   * Create discussion
+   */
+  static async create(data) {
+    return await new this(data).save().catch(() => {
+      throw new BadRequestError('Gagal menambah komentar.');
+    });
+  }
+
+  /**
+   * Transform supplied data properties to match with db column
+   * @param {object} data
+   * @return {object} newData
+   */
+  static matchDBColumn(data) {
+    const column = {
+      user_id: 'id_users',
+      discussion_id: 'id_diskusi',
+      content: 'reply_subdiskusi',
+      created_at: 'tgl_subdiskusi',
+      is_deleted: 'hapus_subdiskusi',
+    };
+    const newData = {};
+    Object.keys(data).forEach((prop) => {
+      if (column[prop] && data[prop] !== undefined) newData[column[prop]] = data[prop];
+    });
+    return newData;
+  }
 }
 
 export const Comment = bookshelf.model('Comment', CommentModel);

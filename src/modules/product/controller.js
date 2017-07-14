@@ -131,3 +131,22 @@ ProductController.createDiscussion = async (req, res, next) => {
   return next();
 };
 
+/**
+ * Create comment
+ */
+ProductController.createComment = async (req, res, next) => {
+  const data = Comment.matchDBColumn({
+    user_id: req.user.id,
+    discussion_id: req.params.discussion_id,
+    content: req.body.content,
+    created_at: new Date(),
+    is_deleted: 0,
+  });
+  const comment = await Comment.create(data);
+  req.resData = {
+    message: 'Comment Data',
+    data: comment,
+  };
+  return next();
+};
+

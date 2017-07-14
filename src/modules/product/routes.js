@@ -90,4 +90,14 @@ routes.get('/products/:id/discussions/:discussion_id/comments',
   wrap(ProductController.getComments),
   apiResponse());
 
+/**
+ * POST /products/id/discussions/id/comments
+ * Create comment
+ */
+routes.post('/products/:id/discussions/:discussion_id/comments',
+  auth(),
+  validateParam(constraints.comment, true),
+  wrap(ProductController.createComment),
+  apiResponse());
+
 export default routes;
