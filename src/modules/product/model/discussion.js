@@ -17,22 +17,17 @@ class DiscussionModel extends bookshelf.Model {
   }
 
   serialize({ minimal = false } = {}) {
-    if (minimal) {
-      return {
-        id: this.get('id_diskusi'),
-        user_id: !this.relations.user ? this.get('id_users') : undefined,
-        user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
-        question: this.get('pertanyaan_diskusi'),
-        created_at: parseDate(this.get('tgl_diskusi')),
-      };
-    }
-    return {
+    const discussion = {
       id: this.get('id_diskusi'),
       user_id: !this.relations.user ? this.get('id_users') : undefined,
       user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
-      product_id: this.get('id_produk'),
       question: this.get('pertanyaan_diskusi'),
       created_at: parseDate(this.get('tgl_diskusi')),
+    };
+    if (minimal) return discussion;
+    return {
+      ...discussion,
+      product_id: this.get('id_produk'),
       is_deleted: !!parseNum(this.get('hapus_diskusi')),
       deleted_at: parseDate(this.get('tglhapus_diskusi')),
     };

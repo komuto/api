@@ -81,7 +81,7 @@ class StoreModel extends bookshelf.Model {
       const catalogProducts = catalog.related('products').map((product) => {
         const images = product.related('images').serialize();
         return {
-          ...product.serialize(true),
+          ...product.serialize({ minimal: true }),
           image: images.length ? images[0].file : null,
         };
       });
@@ -140,7 +140,7 @@ class StoreModel extends bookshelf.Model {
           ...review.serialize(),
           user: { id: userId, name, photo },
           product: {
-            ...reviewProduct.serialize(false),
+            ...reviewProduct.serialize(),
             image: images.length ? images[0].file : null,
           },
         };

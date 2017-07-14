@@ -34,7 +34,6 @@ ReviewController.getReview = async (req, res, next) => {
 ReviewController.getReviews = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  req.query.getProductId = true; // Include product id on review response
   const reviews = await Review.getAll(
     req.params.id ? { product_id: req.params.id } : req.query,
     { page, pageSize },

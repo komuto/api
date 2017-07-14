@@ -14,7 +14,7 @@ class ReviewModel extends bookshelf.Model {
     return 'id_ulasanproduk';
   }
 
-  serialize(full = false) {
+  serialize({ minimal = true } = {}) {
     const review = {
       id: this.get('id_ulasanproduk'),
       review: this.get('isi_ulasanproduk'),
@@ -22,7 +22,7 @@ class ReviewModel extends bookshelf.Model {
       accuracy: parseNum(this.get('akurasiproduk')),
       created_at: parseDate(this.get('tgl_ulasanproduk')),
     };
-    if (full) review.product_id = this.get('id_produk');
+    if (!minimal) review.product_id = this.get('id_produk');
     return review;
   }
 
@@ -60,7 +60,7 @@ class ReviewModel extends bookshelf.Model {
     const review = await this.where({ id_ulasanproduk: id }).fetch({ withRelated: ['user'] });
     const { id: userId, name, photo } = review.related('user').serialize();
     return {
-      ...review.serialize(true),
+      ...review.serialize({ minimal: false }),
       user: { id: userId, name, photo },
     };
   }
@@ -87,7 +87,7 @@ class ReviewModel extends bookshelf.Model {
     const models = reviews.models.map((review) => {
       const { name, id, photo } = review.related('user').serialize();
       return {
-        ...review.serialize(data.getProductId),
+        ...review.serialize({ minimal: false }),
         user: { id, name, photo },
       };
     });
