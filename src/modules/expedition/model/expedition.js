@@ -17,23 +17,19 @@ class ExpeditionModel extends bookshelf.Model {
     return 'id_ekspedisi';
   }
 
-  serialize(minimal = false) {
-    if (minimal) {
-      return {
-        id: this.get('id_ekspedisi'),
-        name: this.get('nama_ekspedisi'),
-        logo: core.expeditionPath(this.get('logo_path')),
-        insurance_fee: parseFloat(this.get('asurasi_fee')),
-      };
-    }
-    return {
+  serialize({ minimal = false }) {
+    const expedition = {
       id: this.get('id_ekspedisi'),
       name: this.get('nama_ekspedisi'),
+      logo: core.expeditionPath(this.get('logo_path')),
+      insurance_fee: parseFloat(this.get('asurasi_fee')),
+    };
+    if (minimal) return expedition;
+    return {
+      ...expedition,
       status: parseInt(this.get('status_ekspedisi'), 10),
       method: this.get('method_ekspedisi'),
       status_at: moment(this.get('tglstatus_ekspedisi')).unix(),
-      logo: core.expeditionPath(this.get('logo_path')),
-      insurance_fee: parseFloat(this.get('asurasi_fee')),
     };
   }
 
@@ -64,12 +60,12 @@ class ExpeditionModel extends bookshelf.Model {
     const expeditions = await this.where({}).fetchAll({ withRelated: ['services'] });
     return expeditions.map((expedition) => {
       const services = expedition.related('services').map((service) => {
-        service = service.serialize(false);
+        service = service.serialize({ minimal: false });
         service.full_name = `${expedition.toJSON().name} ${service.name}`;
         return service;
       });
       return {
-        ...expedition.serialize(true),
+        ...expedition.serialize({ minimal: true }),
         services,
       };
     });

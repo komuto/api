@@ -17,4 +17,15 @@ constraints.create = {
   bank_branch_office_name: { presence: { message: bankBranchMsg.presence } },
 };
 
+constraints.delete = {
+  code: {
+    presence: { message: OTPMsg.presence },
+    numericality: {
+      greaterThanOrEqualTo: 10000,
+      lessThanOrEqualTo: 99999,
+      message: OTPMsg.not_valid,
+    },
+  },
+};
+
 export default constraints;

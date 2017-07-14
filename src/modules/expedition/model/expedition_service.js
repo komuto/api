@@ -14,26 +14,23 @@ class ServiceModel extends bookshelf.Model {
     return 'id_ekspedisiservice';
   }
 
-  serialize(minimal = true) {
-    if (minimal) {
-      return {
-        id: this.get('id_ekspedisiservice'),
-        name: this.get('nama_ekspedisiservice'),
-        description: this.get('deskripsi_ekspedisiservice'),
-        logo: this.get('logo_path'),
-        expedition: this.relations.expedition ? this.related('expedition') : undefined,
-        is_checked: false,
-      };
-    }
-    return {
+  serialize({ minimal = true }) {
+    const service = {
       id: this.get('id_ekspedisiservice'),
-      expedition_id: this.get('id_ekspedisi'),
       name: this.get('nama_ekspedisiservice'),
       description: this.get('deskripsi_ekspedisiservice'),
-      status: parseNum(this.get('status_ekspedisiservice')),
-      status_at: parseDate(this.get('tglstatus_ekspedisiservice')),
       logo: this.get('logo_path'),
       is_checked: false,
+    };
+    if (minimal) {
+      return { ...service,
+        expedition: this.relations.expedition ? this.related('expedition') : undefined };
+    }
+    return {
+      ...service,
+      expedition_id: this.get('id_ekspedisi'),
+      status: parseNum(this.get('status_ekspedisiservice')),
+      status_at: parseDate(this.get('tglstatus_ekspedisiservice')),
     };
   }
 
