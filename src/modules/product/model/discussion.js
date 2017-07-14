@@ -57,6 +57,7 @@ class DiscussionModel extends bookshelf.Model {
    */
   static async getByProductId(productId, page, pageSize) {
     const discussions = await this.where({ id_produk: productId })
+      .orderBy('tgl_diskusi', 'DESC')
       .fetchPage({
         page,
         pageSize,

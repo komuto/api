@@ -48,7 +48,7 @@ class CommentModel extends bookshelf.Model {
    */
   static async getByDiscussionId(id, page, pageSize) {
     return await this.where({ id_diskusi: id })
-      .orderBy('tgl_subdiskusi')
+      .orderBy('tgl_subdiskusi', 'DESC')
       .fetchPage({ page, pageSize, withRelated: ['user'] })
       .catch(() => {
         throw new BadRequestError('No Discussion Found');
