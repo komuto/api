@@ -88,7 +88,7 @@ class BucketModel extends bookshelf.Model {
       const shipping = item.related('shipping');
       const store = product.related('store');
       const images = product.related('images').serialize();
-      product = product.serialize(true);
+      product = product.serialize({ minimal: true });
       product.image = images.length ? images[0].file : null;
       product.store = store.serialize();
       return {

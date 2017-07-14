@@ -24,8 +24,8 @@ class ProductModel extends bookshelf.Model {
     return 'id_produk';
   }
 
-  serialize(minimal = false, wishlist = false) {
-    const user = {
+  serialize({ minimal = false, wishlist = false } = {}) {
+    const product = {
       id: this.get('id_produk'),
       name: this.get('nama_produk'),
       slug: slug(this.get('nama_produk'), { lower: true, charmap: '' }),
@@ -34,33 +34,26 @@ class ProductModel extends bookshelf.Model {
       is_discount: !!this.get('disc_produk'),
     };
     if (wishlist) {
-      user.is_liked = true;
-      user.is_wholesaler = this.get('is_grosir');
-      user.created_at = parseDate(this.get('date_created_produk'));
-      user.count_sold = parseNum(this.get('count_sold'));
+      product.is_liked = true;
+      product.is_wholesaler = this.get('is_grosir');
+      product.created_at = parseDate(this.get('date_created_produk'));
+      product.count_sold = parseNum(this.get('count_sold'));
     }
-    if (minimal) {
-      return user;
-    }
+    if (minimal) return product;
     return {
-      id: this.get('id_produk'),
+      ...product,
       category_id: this.get('id_kategoriproduk'),
       store_id: this.get('id_toko'),
-      name: this.get('nama_produk'),
-      slug: slug(this.get('nama_produk'), { lower: true, charmap: '' }),
       stock: this.get('stock_produk'),
       weight: this.get('berat_produk'),
       condition: parseNum(this.get('jenis_produk'), 0),
       description: this.get('deskripsi_produk'),
-      price: parseDec(this.get('harga_produk')),
       attrval: parseNum(this.get('attrval_produk'), 0),
       status: parseNum(this.get('status_produk'), 0),
       insurance: parseNum(this.get('asuransi_produk'), 0),
-      discount: this.get('disc_produk'),
       margin_dropshipper: this.get('margin_dropshiper'),
       is_dropshipper: this.get('is_dropshiper'),
       is_wholesaler: this.get('is_grosir'),
-      is_discount: !!this.get('disc_produk'),
       count_sold: parseNum(this.get('count_sold'), 0),
       count_popular: parseNum(this.get('count_populer'), 0),
       count_view: 0,
@@ -354,7 +347,7 @@ class ProductModel extends bookshelf.Model {
       const { likes: like, isLiked: liked } = this.loadLikes(otherProduct, userId);
       const image = otherProduct.related('images').models[0].serialize().file;
       return {
-        ...otherProduct.serialize(true),
+        ...otherProduct.serialize({ minimal: true }),
         count_like: like.length,
         is_liked: !!liked,
         image,
