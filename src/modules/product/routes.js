@@ -64,4 +64,12 @@ routes.get('/products/:id/wishlist',
   wrap(ProductController.addWishlist),
   apiResponse());
 
+/**
+ * GET /products/id/discussions
+ * Get all discussions of a product
+ */
+routes.get('/products/:id/discussions',
+  wrap(ProductController.getDiscussions),
+  apiResponse());
+
 export default routes;

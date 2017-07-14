@@ -55,7 +55,7 @@ class ProductModel extends bookshelf.Model {
       price: parseDec(this.get('harga_produk')),
       attrval: parseNum(this.get('attrval_produk'), 0),
       status: parseNum(this.get('status_produk'), 0),
-      is_insurance: !!parseNum(this.get('asuransi_produk'), 0),
+      insurance: parseNum(this.get('asuransi_produk'), 0),
       discount: this.get('disc_produk'),
       margin_dropshipper: this.get('margin_dropshiper'),
       is_dropshipper: this.get('is_dropshiper'),
@@ -115,6 +115,13 @@ class ProductModel extends bookshelf.Model {
 
   wholesale() {
     return this.hasMany('Wholesale', 'id_produk');
+  }
+
+  /**
+   * Add relation to Discussion
+   */
+  discussions() {
+    return this.hasMany('Discussion', 'id_produk');
   }
 
   /**
