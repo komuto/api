@@ -87,8 +87,9 @@ BankController.updateBankAccount = async (req, res, next) => {
 };
 
 BankController.deleteBankAccount = async (req, res, next) => {
-  await BankAccount.where({ id_rekeninguser: req.params.id, id_users: req.user.id })
+  const err = await BankAccount.where({ id_rekeninguser: req.params.id, id_users: req.user.id })
     .destroy({ require: true })
-    .catch(() => next(new BadRequestError(deleteMsg.title, formatSingularErr('account', deleteMsg.not_found))));
+    .catch(() => true);
+  if (err === true) throw new BadRequestError(deleteMsg.title, formatSingularErr('account', deleteMsg.not_found));
   return next();
 };
