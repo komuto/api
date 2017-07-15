@@ -1,4 +1,3 @@
-import './initialize';
 import * as utils from './utils';
 import * as middleware from './middleware';
 import controller from './controller';

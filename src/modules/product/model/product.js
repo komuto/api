@@ -311,7 +311,7 @@ class ProductModel extends bookshelf.Model {
     let product = await this.where({ id_produk: productId }).fetch({
       withRelated: ['category', 'store', 'images', 'reviews.user.addresses', 'expeditionServices.expedition', 'likes'],
     });
-    if (!product) return {};
+    if (!product) return false;
     // Eager load other products so it doesn't block other process by not awaiting directly
     const getOtherProds = this.query((qb) => {
       qb.where('id_toko', product.get('id_toko'));

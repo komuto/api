@@ -2,13 +2,13 @@ import { Facebook } from 'fb';
 import passport from 'passport';
 import moment from 'moment';
 import _ from 'lodash';
-import { User, UserToken, TokenType, OTP, OTPStatus } from './model';
+import { User, UserToken, TokenType } from './model';
 import { UserEmail } from './email';
 import { utils } from '../core';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
 import { model } from '../store';
-import { registrationMsg, updateMsg, emailMsg, activateMsg, resetPassMsg, tokenMsg, loginMsg, fbMsg, passwordMsg, OTPMsg, phoneNumberMsg } from './message';
+import { registrationMsg, updateMsg, emailMsg, activateMsg, resetPassMsg, tokenMsg, loginMsg, fbMsg, passwordMsg } from './message';
 import { Address } from '../address/model';
 
 const fb = new Facebook(config.fb);
@@ -345,31 +345,6 @@ UserController.getPhone = (req, res, next) => {
 UserController.updatePhone = async (req, res, next) => {
   const { phone_number: nohp_users } = req.body;
   await User.update({ id_users: req.user.id }, { nohp_users });
-  return next();
-};
-
-UserController.sendSms = async (req, res, next) => {
-  if (!req.user.phone_number) throw new BadRequestError(OTPMsg.title, formatSingularErr('phone_number', phoneNumberMsg.not_available));
-  const data = { id_users: req.user.id, no_hp: req.user.phone_number, status: OTPStatus.DRAFT };
-  // check if otp is already created
-  let otp = await OTP.query(qb => qb.where(data).andWhere('date_expired', '>', moment())).fetch();
-  if (!otp) otp = await OTP.create(data);
-  await otp.sendSms();
-  await otp.save({ status: OTPStatus.SENT });
-  return next();
-};
-
-/**
- * Verify OTP code
- * wrapped on another function to give ability to decide what error message to use
- * @param errTitle {string}
- */
-UserController.verifyOTPCode = errTitle => async (req, res, next) => {
-  const data = { id_users: req.user.id, no_hp: req.user.phone_number, kode: req.body.code };
-  const status = OTPStatus.USED;
-  const otp = await OTP.query(qb => qb.where(data).andWhereNot({ status }).andWhere('date_expired', '>', moment())).fetch();
-  if (!otp) throw new BadRequestError(errTitle, formatSingularErr('code', OTPMsg.not_found));
-  await otp.save({ status });
   return next();
 };
 

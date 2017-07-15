@@ -49,7 +49,7 @@ routes.get('/accounts/banks/:id',
 routes.post('/accounts/banks',
   auth(),
   validateCreateBankAccount(),
-  wrap(UserController.verifyOTPCode(createMsg.title)),
+  // wrap(UserController.verifyOTPCode(createMsg.title)),
   wrap(BankController.createBankAccount),
   apiResponse());
 
@@ -59,14 +59,14 @@ routes.post('/accounts/banks',
 routes.put('/accounts/banks/:id',
   auth(),
   validateCreateBankAccount(),
-  wrap(UserController.verifyOTPCode(updateMsg.title)),
+  // wrap(UserController.verifyOTPCode(updateMsg.title)),
   wrap(BankController.updateBankAccount),
   apiResponse());
 
 routes.delete('/accounts/banks/:id',
   auth(),
   validateDeleteBankAccount(),
-  wrap(UserController.verifyOTPCode(deleteMsg.title)),
+  // wrap(UserController.verifyOTPCode(deleteMsg.title)),
   wrap(BankController.deleteBankAccount),
   apiResponse());
 

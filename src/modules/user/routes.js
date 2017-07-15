@@ -10,13 +10,14 @@ import {
   validateVerifyPhone,
 } from './middleware';
 import { UserController } from './controller';
+import { controller } from '../OTP';
 import core from '../core';
 import constraints from './../store/validation';
-import { OTPMsg } from './message';
 
 const routes = express.Router();
 const { apiResponse, auth, validateParam } = core.middleware;
 const { wrap } = core.utils;
+const { OTPController } = controller;
 
 /**
  * POST /login
@@ -220,18 +221,11 @@ routes.put('/accounts/phone',
   wrap(UserController.updatePhone),
   apiResponse());
 
-/**
- * Send phone verification code
- */
-routes.post('/users/otp',
-  auth(),
-  wrap(UserController.sendSms),
-  apiResponse());
-
 routes.post('/accounts/phone/verify',
   auth(),
   validateVerifyPhone(),
-  wrap(UserController.verifyOTPCode(OTPMsg.titleVerify)),
+  wrap(OTPController.verifyOTPHPCode),
+  wrap(OTPController.activatePhone),
   apiResponse());
 
 export default routes;
