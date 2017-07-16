@@ -226,7 +226,6 @@ routes.post('/accounts/phone/verify',
   auth(),
   validateVerifyPhone(),
   wrap(OTPController.verifyOTPHPCode),
-  wrap(OTPController.activatePhone),
   apiResponse());
 
 /**

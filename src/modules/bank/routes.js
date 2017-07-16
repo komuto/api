@@ -1,13 +1,13 @@
 import express from 'express';
 import { BankController } from './controller';
 import core from '../core';
-import { controller } from '../user';
+import { controller } from '../OTP';
 import { createMsg, updateMsg, deleteMsg } from './message';
 import { validateCreateBankAccount, validateDeleteBankAccount } from './middleware';
 
 const routes = express.Router();
 const { wrap } = core.utils;
-const { UserController } = controller;
+const { OTPController } = controller;
 const { apiResponse, auth } = core.middleware;
 
 /**
@@ -49,7 +49,7 @@ routes.get('/accounts/banks/:id',
 routes.post('/accounts/banks',
   auth(),
   validateCreateBankAccount(),
-  // wrap(UserController.verifyOTPCode(createMsg.title)),
+  wrap(OTPController.verifyOTPBankCode(createMsg.title)),
   wrap(BankController.createBankAccount),
   apiResponse());
 
@@ -59,14 +59,17 @@ routes.post('/accounts/banks',
 routes.put('/accounts/banks/:id',
   auth(),
   validateCreateBankAccount(),
-  // wrap(UserController.verifyOTPCode(updateMsg.title)),
+  wrap(OTPController.verifyOTPBankCode(updateMsg.title)),
   wrap(BankController.updateBankAccount),
   apiResponse());
 
+/**
+ * Delete bank account
+ */
 routes.delete('/accounts/banks/:id',
   auth(),
   validateDeleteBankAccount(),
-  // wrap(UserController.verifyOTPCode(deleteMsg.title)),
+  wrap(OTPController.verifyOTPBankCode(deleteMsg.title)),
   wrap(BankController.deleteBankAccount),
   apiResponse());
 

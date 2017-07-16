@@ -42,17 +42,18 @@ OTPController.verifyOTPHPCode = async (req, res, next) => {
   const data = { id_users: req.user.id,
     kode_otphp: req.body.code,
     status_otphp: OTPHPStatus.CREATED };
-  req.otp = await OTPHP.query(qb => qb.where(data).andWhere('expdate_otphp', '>', moment())).fetch();
-  if (!req.otp) throw new BadRequestError(OTPMsg.titleVerify, formatSingularErr('code', OTPMsg.not_found));
+  const otp = await OTPHP.query(qb => qb.where(data).andWhere('expdate_otphp', '>', moment())).fetch();
+  if (!otp) throw new BadRequestError(OTPMsg.titleVerify, formatSingularErr('code', OTPMsg.not_found));
+  await otp.save({ status_otphp: OTPHPStatus.VERIFIED }, { patch: true });
   return next();
 };
 
-/**
- * Change phone status to active
- */
-OTPController.activatePhone = async (req, res, next) => {
-  const otp = req.otp;
-  await otp.save({ status_otphp: OTPHPStatus.VERIFIED }, { patch: true });
+OTPController.verifyOTPBankCode = errTitle => async (req, res, next) => {
+  const data = { id_users: req.user.id, kode: req.body.code };
+  const status = OTPStatus.USED;
+  const otp = await OTP.query(qb => qb.where(data).andWhereNot({ status }).andWhere('date_expired', '>', moment())).fetch();
+  if (!otp) throw new BadRequestError(errTitle, formatSingularErr('code', OTPMsg.not_found));
+  await otp.save({ status }, { patch: true });
   return next();
 };
 
