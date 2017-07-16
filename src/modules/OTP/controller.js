@@ -1,7 +1,7 @@
 import moment from 'moment';
 import _ from 'lodash';
 import { utils } from '../core';
-import { OTPMsg, phoneNumberMsg } from './message';
+import { OTPMsg, phoneNumberMsg, createBankMsg } from './message';
 import { BadRequestError } from '../../../common/errors';
 import { OTP, OTPStatus, OTPHP, OTPHPStatus } from './model';
 
@@ -18,10 +18,20 @@ OTPController.createOTPHP = async (req, res, next) => {
   return next();
 };
 
+/**
+ * For OTP bank
+ */
+OTPController.createOTPBank = async (req, res, next) => {
+  if (!req.user.is_phone_verified) throw new BadRequestError(createBankMsg.title, formatSingularErr('phone_number', phoneNumberMsg.not_verified));
+  const data = { id_users: req.user.id, status: OTPStatus.DRAFT, no_hp: req.user.phone_number };
+  req.otp = await OTP.checkOTP(data) || new OTP();
+  if (_.isEmpty(req.otp.attributes)) req.otp = await req.otp.create(data);
+  return next();
+};
+
 OTPController.sendSms = async (req, res, next) => {
   const otp = req.otp;
   await otp.sendSms(req.user.phone_number);
-  // if (type === 'bank') await otp.save({ status: OTPStatus.SENT });
   return next();
 };
 

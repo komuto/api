@@ -8,9 +8,9 @@ const jwtParams = {
 };
 export default new JwtStrategy(jwtParams, async (jwtPayload, done) => {
   try {
-    const user = await new User({ id_users: jwtPayload.id_users }).fetch();
+    const user = await User.getWithPhone({ id_users: jwtPayload.id_users });
     if (!user) return done(null, false);
-    return done(null, user.serialize({ pass: true }));
+    return done(null, user.serialize({ pass: true, phone: true }));
   } catch (e) {
     return done(e, false);
   }

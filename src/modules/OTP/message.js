@@ -10,6 +10,10 @@ const Message = {
     presence: 'harus diisi',
     not_valid: 'harus angka',
     not_available: 'Belum punya no hp',
+    not_verified: 'Belum punya no hp yg telah terverifikasi',
+  },
+  createBankMsg: {
+    title: 'Tambah rekening gagal',
   },
 };
 

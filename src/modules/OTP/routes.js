@@ -10,9 +10,18 @@ const { wrap } = core.utils;
 /**
  * Send phone verification code
  */
-routes.post('/users/otp',
+routes.post('/accounts/otp/phone',
   auth(),
   wrap(OTPController.createOTPHP),
+  wrap(OTPController.sendSms),
+  apiResponse());
+
+/**
+ * Send bank verification code
+ */
+routes.post('/accounts/otp/bank',
+  auth(),
+  wrap(OTPController.createOTPBank),
   wrap(OTPController.sendSms),
   apiResponse());
 

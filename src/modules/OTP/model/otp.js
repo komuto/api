@@ -19,7 +19,11 @@ class OTPModel extends bookshelf.Model {
     return 'otp';
   }
 
-  static async create(data) {
+  static async checkOTP(data) {
+    return await this.query(qb => qb.where(data).andWhere('date_expired', '>', moment())).fetch();
+  }
+
+  async create(data) {
     const created = moment();
     data = {
       ...data,
@@ -27,7 +31,7 @@ class OTPModel extends bookshelf.Model {
       date_created: created,
       date_expired: created.clone().add(1, 'hour'),
     };
-    return await this.forge().save(data, { method: 'insert' });
+    return await this.save(data, { method: 'insert' });
   }
 
   /**
@@ -51,6 +55,8 @@ class OTPModel extends bookshelf.Model {
       body,
       json: true,
     });
+    // Update status to sent
+    await this.save({ status: OTPStatus.SENT }, { patch: true });
   }
 }
 
