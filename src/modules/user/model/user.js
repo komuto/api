@@ -4,11 +4,13 @@ import toTitleCase from 'to-title-case';
 import rp from 'request-promise-native';
 import config from '../../../../config';
 import core from '../../core';
-import { model } from '../../address';
+import { model as addressModel } from '../../address';
+import { model as OTPModel } from '../../OTP';
 
 const { defaultNull, checkNull, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
-const { District } = model;
+const { District } = addressModel;
+const { OTPHPStatus } = OTPModel;
 
 // used by bcrypt to generate new salt
 // 8 rounds will produce about 40 hashes per second on a 2GHz core
@@ -44,7 +46,7 @@ class UserModel extends bookshelf.Model {
    * @param birth {bool} true = get name of the district id
    * @param account {bool} true = minimal for account collection
    */
-  serialize({ pass = false, birth = false, account = false } = {}) {
+  serialize({ pass = false, birth = false, account = false, phone = false } = {}) {
     let user = {
       id: this.get('id_users'),
       name: this.get('namalengkap_users'),
@@ -79,6 +81,9 @@ class UserModel extends bookshelf.Model {
       const name = this.related('birthPlace').get('nama_kotakab');
       if (name) user.place_of_birth = toTitleCase(name.split(' ')[1]);
     }
+    if (phone) {
+      user.is_phone_verified = !!(this.related('verifyPhone').length !== 0);
+    }
     return user;
   }
 
@@ -112,6 +117,13 @@ class UserModel extends bookshelf.Model {
    */
   bankAccounts() {
     return this.hasMany('BankAccount', 'id_users');
+  }
+
+  /**
+   * Add relation to OTPHP
+   */
+  verifyPhone() {
+    return this.hasMany('OTPHP', 'id_users');
   }
 
   /**
@@ -168,6 +180,14 @@ class UserModel extends bookshelf.Model {
   static async getByEmail(email) {
     const user = await new this({ email_users: email }).fetch();
     return user ? user.serialize() : user;
+  }
+
+  static async getWithPhone(data) {
+    return await new this(data).fetch({
+      withRelated: [{
+        verifyPhone: qb => qb.where('status_otphp', OTPHPStatus.VERIFIED),
+      }],
+    });
   }
 
   static async getBySocial(name, uid) {

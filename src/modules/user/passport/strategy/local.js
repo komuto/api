@@ -11,11 +11,11 @@ export default new LocalStrategy({
   passwordField: 'password',
   passReqToCallback: false,
 }, async (email, password, done) => {
-  const user = await new User({ email_users: email }).fetch();
+  const user = await User.getWithPhone({ email_users: email });
   if (!user) return done(new BadRequestError(loginMsg.title, formatSingularErr('email', emailMsg.not_found)), false);
   const check = await User.checkPasswordFromApi(password, user.get('password_users'));
   if (!check) {
     return done(new BadRequestError(loginMsg.title, formatSingularErr('password', loginMsg.wrong_password)), false);
   }
-  return done(null, user.serialize());
+  return done(null, user.serialize({ phone: true }));
 });
