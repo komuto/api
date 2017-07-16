@@ -109,22 +109,18 @@ class AddressModel extends bookshelf.Model {
    * @param {Object} data
    */
   static async create(data) {
-    try {
-      const address = await new this(data).save();
-      await address.load(['province', 'district', 'subDistrict', 'village']);
-      const province = address.related('province');
-      const district = address.related('district');
-      const subDistrict = address.related('subDistrict');
-      const village = address.related('village');
-      return {
-        ...address.serialize(),
-        province,
-        district,
-        subDistrict,
-        village };
-    } catch (err) {
-      throw new BadRequestError('Gagal membuat alamat');
-    }
+    const address = await new this(data).save();
+    await address.load(['province', 'district', 'subDistrict', 'village']);
+    const province = address.related('province');
+    const district = address.related('district');
+    const subDistrict = address.related('subDistrict');
+    const village = address.related('village');
+    return {
+      ...address.serialize(),
+      province,
+      district,
+      subDistrict,
+      village };
   }
 
   /**

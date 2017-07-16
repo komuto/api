@@ -1,9 +1,5 @@
 import { Address, Province, District, SubDistrict, Village } from './model';
-import { getMsg, addressMsg, deleteMsg } from './message';
-import { BadRequestError } from '../../../common/errors';
-import { utils } from '../core';
-
-const { formatSingularErr } = utils;
+import { getAddressError, deleteAddressError } from './error';
 
 export const AddressController = {};
 export default { AddressController };
@@ -20,7 +16,7 @@ AddressController.getPrimaryAddress = async (req, res, next) => {
 
 AddressController.getAddress = async (req, res, next) => {
   const address = await Address.getFullAddress(req.user.id, false, req.params.id);
-  if (!address) throw new BadRequestError(getMsg.title, formatSingularErr('address', addressMsg.not_found));
+  if (!address) throw getAddressError('address', 'not_found');
   req.resData = {
     message: 'Address Information',
     data: address,
@@ -112,7 +108,7 @@ AddressController.updateAddress = async (req, res, next) => {
 AddressController.deleteAddress = async (req, res, next) => {
   const address = await Address.where({ id_alamatuser: req.params.id,
     id_users: req.user.id }).fetch();
-  if (!address) throw new BadRequestError(deleteMsg.title, formatSingularErr('address', deleteMsg.not_valid));
+  if (!address) throw deleteAddressError('address', 'address_not_found');
   await Address.destroy(req.params.id);
   return next();
 };

@@ -1,7 +1,8 @@
 import constraints from './validation';
-import { createMsg, updateMsg } from './message';
+import { errMsg } from './error';
 import { middleware } from '../core';
 
+const { createMsg, updateMsg } = errMsg;
 const { formatValidation } = middleware;
 
 /**

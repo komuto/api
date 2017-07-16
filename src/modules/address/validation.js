@@ -1,55 +1,56 @@
-import { emailMsg, postalCodeMsg, provinceMsg, districtMsg, subDistrictMsg, villageMsg, aliasAddressMsg, addressMsg, isPrimaryMsg, nameMsg } from './message';
+import { errMsg } from './error';
 
+const { createMsg, updateMsg } = errMsg;
 const constraints = {};
 
 constraints.createAddress = {
   province_id: {
-    presence: { message: provinceMsg.presence },
-    numericality: { noStrings: true, onlyInteger: true, message: provinceMsg.not_number },
+    presence: { message: createMsg.province_presence },
+    numericality: { noStrings: true, onlyInteger: true, message: createMsg.province_not_valid },
   },
   district_id: {
-    presence: { message: districtMsg.presence },
-    numericality: { noStrings: true, onlyInteger: true, message: districtMsg.not_number },
+    presence: { message: createMsg.district_presence },
+    numericality: { noStrings: true, onlyInteger: true, message: createMsg.district_not_valid },
   },
   sub_district_id: {
-    presence: { message: subDistrictMsg.presence },
-    numericality: { noStrings: true, onlyInteger: true, message: subDistrictMsg.not_number },
+    presence: { message: createMsg.subdistrict_presence },
+    numericality: { noStrings: true, onlyInteger: true, message: createMsg.subdistrict_not_valid },
   },
   village_id: {
-    presence: { message: villageMsg.presence },
-    numericality: { noStrings: true, onlyInteger: true, message: villageMsg.not_number },
+    presence: { message: createMsg.village_presence },
+    numericality: { noStrings: true, onlyInteger: true, message: createMsg.village_not_valid },
   },
   email: {
-    presence: { message: emailMsg.presence },
-    email: { message: emailMsg.not_valid },
+    presence: { message: createMsg.email_presence },
+    email: { message: createMsg.email_not_valid },
   },
   postal_code: {
-    presence: { message: postalCodeMsg.presence },
-    format: { pattern: /\d{5}(-\d{4})?/, message: postalCodeMsg.not_valid },
+    presence: { message: createMsg.postal_code_presence },
+    format: { pattern: /\d{5}(-\d{4})?/, message: createMsg.postal_code_not_valid },
   },
-  name: { presence: { message: nameMsg.presence } },
-  address: { presence: { message: addressMsg.presence } },
-  alias_address: { presence: { message: aliasAddressMsg.presence } },
+  name: { presence: { message: createMsg.name_presence } },
+  address: { presence: { message: createMsg.address_presence } },
+  alias_address: { presence: { message: createMsg.alias_address_presence } },
 };
 
 constraints.updateAddress = {
   province_id: {
-    numericality: { noStrings: true, onlyInteger: true, message: provinceMsg.not_number },
+    numericality: { noStrings: true, onlyInteger: true, message: updateMsg.province_not_valid },
   },
   district_id: {
-    numericality: { noStrings: true, onlyInteger: true, message: districtMsg.not_number },
+    numericality: { noStrings: true, onlyInteger: true, message: updateMsg.district_not_valid },
   },
   sub_district_id: {
-    numericality: { noStrings: true, onlyInteger: true, message: subDistrictMsg.not_number },
+    numericality: { noStrings: true, onlyInteger: true, message: updateMsg.subdistrict_not_valid },
   },
   village_id: {
-    numericality: { noStrings: true, onlyInteger: true, message: villageMsg.not_number },
+    numericality: { noStrings: true, onlyInteger: true, message: updateMsg.village_not_valid },
   },
   email: {
-    email: { message: emailMsg.not_valid },
+    email: { message: updateMsg.email_not_valid },
   },
   postal_code: {
-    format: { pattern: /\d{5}(-\d{4})?/, message: postalCodeMsg.not_valid },
+    format: { pattern: /\d{5}(-\d{4})?/, message: updateMsg.postal_code_not_valid },
   },
 };
 

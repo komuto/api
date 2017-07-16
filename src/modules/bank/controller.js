@@ -1,9 +1,5 @@
-import { utils } from '../core';
 import { Bank, BankAccount, BankAccountStatus } from './model';
-import { createMsg, updateMsg, getAccountMsg, deleteMsg } from './message';
-import { BadRequestError } from '../../../common/errors';
-
-const { formatSingularErr } = utils;
+import { getAccountError, createAccountError, updateAccountError, deleteAccountError } from './error';
 
 export const BankController = {};
 export default { BankController };
@@ -41,7 +37,7 @@ BankController.getBankAccounts = async (req, res, next) => {
 BankController.getBankAccount = async (req, res, next) => {
   const bankAccount = await BankAccount.where({ id_rekeninguser: req.params.id,
     id_users: req.user.id }).fetch({ withRelated: 'bank' });
-  if (!bankAccount) throw new BadRequestError(getAccountMsg.title, formatSingularErr('account', getAccountMsg.not_found));
+  if (!bankAccount) throw getAccountError('account', 'not_found');
   req.resData = {
     message: 'Bank Account Data',
     data: bankAccount,
@@ -52,7 +48,7 @@ BankController.getBankAccount = async (req, res, next) => {
 BankController.createBankAccount = async (req, res, next) => {
   let bankAccount = await BankAccount.where({ id_users: req.user.id,
     nomor_rekening: req.body.holder_account_number }).fetch();
-  if (bankAccount) throw new BadRequestError(createMsg.title, formatSingularErr('holder_account_number', createMsg.duplicate_account));
+  if (bankAccount) throw createAccountError('holder_account_number', 'duplicate_account');
   req.body.is_primary = BankAccountStatus.NOT_PRIMARY;
   req.body.user_id = req.user.id;
   bankAccount = await new BankAccount(BankAccount.matchDBColumn(req.body)).save();
@@ -69,13 +65,13 @@ BankController.updateBankAccount = async (req, res, next) => {
   // Check rekening id
   const bankAccount = await BankAccount.where({ id_rekeninguser: req.params.id,
     id_users: req.user.id }).fetch();
-  if (!bankAccount) throw new BadRequestError(updateMsg.title, formatSingularErr('account', updateMsg.not_found));
+  if (!bankAccount) throw updateAccountError('account', 'account_not_found');
   // Check whether no rekening is already used or not
   const check = await BankAccount.query((qb) => {
     qb.where({ id_users: req.user.id, nomor_rekening: req.body.holder_account_number });
     qb.whereNot({ id_rekeninguser: req.params.id });
   }).fetch();
-  if (check) throw new BadRequestError(updateMsg.title, formatSingularErr('holder_account_number', createMsg.duplicate_account));
+  if (check) throw updateAccountError('holder_account_number', 'duplicate_account');
 
   await bankAccount.save(BankAccount.matchDBColumn(req.body), { patch: true });
   await bankAccount.load('bank');
@@ -90,6 +86,6 @@ BankController.deleteBankAccount = async (req, res, next) => {
   const err = await BankAccount.where({ id_rekeninguser: req.params.id, id_users: req.user.id })
     .destroy({ require: true })
     .catch(() => true);
-  if (err === true) throw new BadRequestError(deleteMsg.title, formatSingularErr('account', deleteMsg.not_found));
+  if (err === true) throw deleteAccountError('account', 'account_not_found');
   return next();
 };

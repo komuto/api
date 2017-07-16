@@ -1,10 +1,6 @@
 import { Product, Discussion, Comment } from './model';
 import { Wishlist } from './../user/model';
-import { BadRequestError } from '../../../common/errors';
-import { utils } from '../core';
-import { getMsg } from './message';
-
-const { formatSingularErr } = utils;
+import { getProductError } from './error';
 
 export const ProductController = {};
 export default { ProductController };
@@ -63,7 +59,7 @@ ProductController.search = async (req, res, next) => {
 
 ProductController.getProduct = async (req, res, next) => {
   const product = await Product.getFullProduct(req.params.id, req.user.id);
-  if (!product) throw new BadRequestError(getMsg.title, formatSingularErr('product', getMsg.not_found));
+  if (!product) throw getProductError('product', 'not_found');
   req.resData = {
     message: 'Product Detail Data',
     data: product,

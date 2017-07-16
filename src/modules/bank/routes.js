@@ -2,7 +2,7 @@ import express from 'express';
 import { BankController } from './controller';
 import core from '../core';
 import { controller } from '../OTP';
-import { createMsg, updateMsg, deleteMsg } from './message';
+import { createAccountError, updateAccountError, deleteAccountError } from './error';
 import { validateCreateBankAccount, validateDeleteBankAccount } from './middleware';
 
 const routes = express.Router();
@@ -49,7 +49,7 @@ routes.get('/accounts/banks/:id',
 routes.post('/accounts/banks',
   auth(),
   validateCreateBankAccount(),
-  wrap(OTPController.verifyOTPBankCode(createMsg.title)),
+  wrap(OTPController.verifyOTPBankCode(createAccountError('code', 'code_not_found'))),
   wrap(BankController.createBankAccount),
   apiResponse());
 
@@ -59,7 +59,7 @@ routes.post('/accounts/banks',
 routes.put('/accounts/banks/:id',
   auth(),
   validateCreateBankAccount(),
-  wrap(OTPController.verifyOTPBankCode(updateMsg.title)),
+  wrap(OTPController.verifyOTPBankCode(updateAccountError('code', 'code_not_found'))),
   wrap(BankController.updateBankAccount),
   apiResponse());
 
@@ -69,7 +69,7 @@ routes.put('/accounts/banks/:id',
 routes.delete('/accounts/banks/:id',
   auth(),
   validateDeleteBankAccount(),
-  wrap(OTPController.verifyOTPBankCode(deleteMsg.title)),
+  wrap(OTPController.verifyOTPBankCode(deleteAccountError('code', 'code_not_found'))),
   wrap(BankController.deleteBankAccount),
   apiResponse());
 

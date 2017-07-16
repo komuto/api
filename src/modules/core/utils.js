@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import cfg from '../../../config';
+import { BadRequestError } from '../../../common/errors';
 
 /**
  * Wrap controller function
@@ -76,4 +77,14 @@ export function defaultUndenfined(key) {
  */
 export function formatSingularErr(obj, message) {
   return { [obj]: [message] };
+}
+
+/**
+ * Format bad request error
+ * @param field {string} field that causes error
+ * @param msg {string} message of the error
+ */
+export function formatError(field, msg) {
+  const data = formatSingularErr(field, this[msg]);
+  return new BadRequestError(this.title, data);
 }

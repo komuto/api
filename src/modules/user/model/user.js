@@ -45,6 +45,7 @@ class UserModel extends bookshelf.Model {
    * @param pass {bool} true = include password
    * @param birth {bool} true = get name of the district id
    * @param account {bool} true = minimal for account collection
+   * @param phone {bool} true = check if the phone is verified
    */
   serialize({ pass = false, birth = false, account = false, phone = false } = {}) {
     let user = {
@@ -178,8 +179,7 @@ class UserModel extends bookshelf.Model {
   }
 
   static async getByEmail(email) {
-    const user = await new this({ email_users: email }).fetch();
-    return user ? user.serialize() : user;
+    return await new this({ email_users: email }).fetch();
   }
 
   static async getWithPhone(data) {

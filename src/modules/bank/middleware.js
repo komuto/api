@@ -1,13 +1,12 @@
 import constraints from './validation';
-import utils from '../../../common/utils';
-import { BadRequestError } from '../../../common/errors';
-import { createMsg, deleteMsg } from './message';
+import { errMsg } from './error';
 import { middleware } from '../core';
 
+const { createMsg, deleteMsg } = errMsg;
 const { formatValidation } = middleware;
 
 export function validateCreateBankAccount() {
-  return formatValidation(constraints.create, createMsg.title);
+  return formatValidation(constraints.createUpdate, createMsg.title);
 }
 
 export function validateDeleteBankAccount() {

@@ -1,9 +1,5 @@
 import { Store, FavoriteStore } from './model';
-import { utils } from '../core';
-import { BadRequestError } from '../../../common/errors';
-import { favoriteMsg } from './message';
-
-const { formatSingularErr } = utils;
+import { makeFavoriteError } from './error';
 
 export const StoreController = {};
 export default { StoreController };
@@ -24,7 +20,7 @@ StoreController.makeFavorite = async (req, res, next) => {
     referred_marketplace: await Store.getMarketplaceId(req.params.id) || 0,
   };
   const favorite = await FavoriteStore.where({ status_tokofavorit: '1', ...data }).fetch({ columns: 'id_tokofavorit' });
-  if (favorite) throw new BadRequestError(favoriteMsg.title, formatSingularErr('repeat_favorite', favoriteMsg.repeat_favorite));
+  if (favorite) throw makeFavoriteError('store', 'repeat_favorite');
   await FavoriteStore.create(data);
   return next();
 };

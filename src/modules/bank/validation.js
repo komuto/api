@@ -1,29 +1,30 @@
-import { OTPMsg, masterBankMsg, holderNameMsg, holderAccountMsg, bankBranchMsg } from './message';
+import { errMsg } from './error';
 
+const { createMsg, deleteMsg } = errMsg;
 const constraints = {};
 
-constraints.create = {
+constraints.createUpdate = {
   code: {
-    presence: { message: OTPMsg.presence },
+    presence: { message: createMsg.code_presence },
     numericality: {
       greaterThanOrEqualTo: 10000,
       lessThanOrEqualTo: 99999,
-      message: OTPMsg.not_valid } },
-  master_bank_id: { presence: { message: masterBankMsg.presence } },
-  holder_name: { presence: { message: holderNameMsg.presence } },
+      message: createMsg.code_not_valid } },
+  master_bank_id: { presence: { message: createMsg.master_bank_presence } },
+  holder_name: { presence: { message: createMsg.holder_name_presence } },
   holder_account_number: {
-    presence: { message: holderAccountMsg.presence },
-    format: { pattern: /^[0-9]+$/, message: holderAccountMsg.not_valid } },
-  bank_branch_office_name: { presence: { message: bankBranchMsg.presence } },
+    presence: { message: createMsg.account_number_presence },
+    format: { pattern: /^[0-9]+$/, message: createMsg.account_number_not_valid } },
+  bank_branch_office_name: { presence: { message: createMsg.bank_brach_name_presence } },
 };
 
 constraints.delete = {
   code: {
-    presence: { message: OTPMsg.presence },
+    presence: { message: deleteMsg.code_presence },
     numericality: {
       greaterThanOrEqualTo: 10000,
       lessThanOrEqualTo: 99999,
-      message: OTPMsg.not_valid,
+      message: deleteMsg.code_not_valid,
     },
   },
 };

@@ -1,7 +1,6 @@
 import express from 'express';
 import { OTPController } from './controller';
 import core from '../core';
-import { OTPMsg } from './message';
 
 const routes = express.Router();
 const { apiResponse, auth } = core.middleware;

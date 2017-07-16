@@ -2,44 +2,20 @@ import { Facebook } from 'fb';
 import passport from 'passport';
 import moment from 'moment';
 import _ from 'lodash';
-import { User, UserToken, TokenType } from './model';
+import { User, UserToken, TokenType, UserStatus } from './model';
 import { UserEmail } from './email';
-import { utils } from '../core';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
 import { model } from '../store';
-import { registrationMsg, updateMsg, emailMsg, activateMsg, resetPassMsg, tokenMsg, loginMsg, fbMsg, passwordMsg } from './message';
+import { userUpdateError, resetPassError, registrationError, activateUserError, fbError } from './error';
 import { Address } from '../address/model';
 import { Discussion, Product } from '../product/model';
 
 const fb = new Facebook(config.fb);
-const { formatSingularErr } = utils;
 const { Store, Catalog, StoreExpedition } = model;
 
 export const UserController = {};
 export default { UserController };
-
-function formatFbError(code, e) {
-  const session = [102, 190, 458, 459, 460, 463, 464, 467];
-  const down = [1, 2, 4, 17, 341, 368];
-  if (session.includes(code) || code === 'OAuthException') return formatSingularErr('session', fbMsg.session_expired);
-  else if (down.includes(code)) return fbMsg.api_down;
-  // code 10 and 200-299 for not granted permission
-  else if (code === 10 || (code >= 200 && code < 300)) return formatSingularErr('permission', fbMsg.permission_denied);
-  // Code outside above range, use original fb message
-  return e.message;
-}
-
-async function getFbData(uid) {
-  try {
-    return await fb.api(uid, { fields: 'id,name,email,gender,picture.type(large)' });
-  } catch (e) {
-    const error = e.response.error;
-    throw new BadRequestError(
-      loginMsg.title,
-      formatFbError(error.code ? error.code : error.type, error));
-  }
-}
 
 /**
  * View user
@@ -67,31 +43,32 @@ UserController.login = (req, res, next) => {
  */
 UserController.getUserSocial = async (req, res, next) => {
   // Case where provider name and uid found on db
-  const { provider_name: providerName, provider_uid: uid, access_token } = req.body;
-  req.user = await User.getBySocial(providerName, uid);
+  const { provider_name, provider_uid, access_token } = req.body;
+  req.user = await User.getBySocial(provider_name, provider_uid);
   // Case where provider name and uid not found on db
   if (!req.user) {
     fb.setAccessToken(access_token);
-    const response = await getFbData(uid);
+    let response = await fb.api(provider_uid, { fields: 'id,name,email,gender,picture.type(large)' })
+      .catch(e => fbError(e.response.error));
+    if (response instanceof BadRequestError) throw response;
     const user = await User.getByEmail(response.email);
     // Case where user already created but provider name and uid do not match
     if (user) {
-      await User.update(
-        { id_users: user.id },
-        {
-          hybridauth_provider_name: providerName,
-          hybridauth_provider_uid: uid,
-        });
-      user.provider_name = providerName;
-      user.provider_uid = uid;
-      req.user = user;
+      await user.save({
+        hybridauth_provider_name: provider_name,
+        hybridauth_provider_uid: provider_uid,
+      }, { patch: true });
+      req.user = user.serialize();
     } else { // Case where user has not been created
-      response.provider_name = providerName;
-      response.provider_uid = response.id;
-      response.gender = (response.gender === 'male') ? 'L' : 'P';
-      response.password = User.hashPasswordSync('komuto');
-      response.photo = response.picture.data.url;
-      response.status = '1';
+      response = {
+        ...response,
+        provider_name,
+        provider_uid,
+        gender: (response.gender === 'male') ? 'L' : 'P',
+        password: User.hashPasswordSync('komuto'),
+        photo: response.picture.data.url,
+        status: UserStatus.ACTIVE,
+      };
       req.user = await User.create(User.matchDBColumn(response));
     }
   }
@@ -118,9 +95,7 @@ UserController.updateUser = async (req, res, next) => {
   // eslint-disable-next-line
   const check = { name, cooperative_member_number, photo, gender, place_of_birth, date_of_birth };
   const data = User.matchDBColumn(check);
-  if (_.isEmpty(data)) {
-    throw new BadRequestError(updateMsg.title, formatSingularErr('field', updateMsg.not_valid));
-  }
+  if (_.isEmpty(data)) throw userUpdateError('fields', 'not_valid');
   await User.update({ id_users: req.user.id }, data);
   return next();
 };
@@ -131,9 +106,7 @@ UserController.updateAccount = async (req, res, next) => {
   const { name, photo, gender, place_of_birth, date_of_birth } = req.body;
   const check = { name, photo, gender, place_of_birth, date_of_birth };
   const data = User.matchDBColumn(check);
-  if (_.isEmpty(data)) {
-    throw new BadRequestError(updateMsg.title, formatSingularErr('field', updateMsg.not_valid));
-  }
+  if (_.isEmpty(data)) throw userUpdateError('fields', 'not_valid');
   await User.update({ id_users: req.user.id }, data);
   return next();
 };
@@ -146,9 +119,7 @@ UserController.updatePassword = async (req, res, next) => {
   if (check) {
     const password = User.hashPasswordSync(req.body.password);
     await User.update({ id_users: req.user.id }, { password_users: password });
-  } else {
-    throw new BadRequestError(resetPassMsg.title, formatSingularErr('password', passwordMsg.not_match));
-  }
+  } else throw resetPassError('password', 'not_match');
   return next();
 };
 
@@ -157,9 +128,7 @@ UserController.updatePassword = async (req, res, next) => {
  */
 UserController.createUser = async (req, res, next) => {
   let user = await User.getByEmail(req.body.email);
-  if (user) {
-    throw new BadRequestError(registrationMsg.title, formatSingularErr('email', emailMsg.duplicate));
-  }
+  if (user) throw registrationError('email', 'duplicate_email');
   const password = req.body.password;
   req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
   req.body.password = User.hashPasswordSync(req.body.password);
@@ -194,9 +163,7 @@ UserController.getAccountProfile = async (req, res, next) => {
 
 UserController.forgotPassword = async (req, res, next) => {
   const user = await User.getByEmail(req.body.email);
-  if (!user) {
-    throw new BadRequestError(updateMsg.title, formatSingularErr('email', emailMsg.not_found));
-  }
+  if (!user) throw resetPassError('email', 'email_not_found');
   const token = await UserToken.generateToken(user.id, TokenType.FORGOT_PASSWORD);
   UserEmail.sendForgotPassword(req.body.email, token);
   return next();
@@ -204,16 +171,14 @@ UserController.forgotPassword = async (req, res, next) => {
 
 UserController.checkEmail = async (req, res, next) => {
   const user = await User.getByEmail(req.body.email);
-  if (user) {
-    throw new BadRequestError(registrationMsg.title, formatSingularErr('email', emailMsg.not_available));
-  }
+  if (user) throw registrationError('email', 'duplicate_email');
   req.resData = { message: 'Email Available' };
   return next();
 };
 
 UserController.activateUser = async (req, res, next) => {
   const id = await UserToken.getId(req.query.token, TokenType.EMAIL_ACTIVATION);
-  if (!id) throw new BadRequestError(activateMsg.title, formatSingularErr('token', tokenMsg.not_valid));
+  if (!id) throw activateUserError('token', 'token_not_valid');
   await User.activate(id);
   await UserToken.expire(req.query.token);
   return next();
@@ -225,7 +190,7 @@ UserController.activateUser = async (req, res, next) => {
 UserController.checkToken = async (req, res, next) => {
   const token = req.query.token || req.body.token;
   req.id = await UserToken.getId(token, TokenType.FORGOT_PASSWORD);
-  if (!req.id) throw new BadRequestError(resetPassMsg.title, formatSingularErr('token', tokenMsg.not_valid));
+  if (!req.id) throw resetPassError('token', 'token_not_valid');
   req.token = token;
   return next();
 };

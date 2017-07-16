@@ -2,12 +2,12 @@ import _ from 'lodash';
 import jwt from 'jsonwebtoken';
 import constraints from './validation';
 import utils from '../../../common/utils';
-import { BadRequestError } from '../../../common/errors';
 import { jwt as jwtOptions } from '../../../config';
-import { loginMsg, registrationMsg, updateMsg, userMsg, OTPMsg } from './message';
+import { getUserError, errMsg } from './error';
 import { middleware } from '../core';
 
 export const ROLE_ALL = '*';
+const { loginMsg, registrationMsg, updateMsg, OTPMsg } = errMsg;
 const { formatValidation } = middleware;
 
 /**
@@ -74,7 +74,7 @@ export function addToken(req, res, next) {
  */
 export function userData(req, res, next) {
   if (!req.user) {
-    return next(new BadRequestError(userMsg.not_found));
+    return next(getUserError('user', 'not_found'));
   }
 
   req.resData = {
