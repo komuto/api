@@ -219,6 +219,7 @@ routes.put('/accounts/phone',
   auth(),
   validateUpdatePhone(),
   wrap(UserController.updatePhone),
+  wrap(OTPController.deleteOTPHP),
   apiResponse());
 
 routes.post('/accounts/phone/verify',

@@ -27,8 +27,6 @@ OTPController.sendSms = async (req, res, next) => {
 
 /**
  * Verify OTP code
- * wrapped on another function to give ability to decide what error message to use
- * @param errTitle {string}
  */
 OTPController.verifyOTPHPCode = async (req, res, next) => {
   const data = { id_users: req.user.id,
@@ -45,6 +43,11 @@ OTPController.verifyOTPHPCode = async (req, res, next) => {
 OTPController.activatePhone = async (req, res, next) => {
   const otp = req.otp;
   await otp.save({ status_otphp: OTPHPStatus.VERIFIED }, { patch: true });
+  return next();
+};
+
+OTPController.deleteOTPHP = async (req, res, next) => {
+  await OTPHP.where({ id_users: req.user.id }).destroy();
   return next();
 };
 
