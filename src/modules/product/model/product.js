@@ -342,6 +342,7 @@ class ProductModel extends bookshelf.Model {
     product.is_liked = !!isLiked;
     const address = await getAddress;
     store.province = address.related('province').serialize();
+    store.district = address.related('district').serialize();
     let otherProds = await getOtherProds;
     otherProds = otherProds.map((otherProduct) => {
       const { likes: like, isLiked: liked } = this.loadLikes(otherProduct, userId);

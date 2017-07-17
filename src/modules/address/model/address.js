@@ -205,7 +205,7 @@ class AddressModel extends bookshelf.Model {
       alamat_originjual: 1,
     };
     if (districtId) param.id_kotakab = districtId;
-    return await this.where(param).fetch({ withRelated: ['province'] });
+    return await this.where(param).fetch({ withRelated: ['province', 'district'] });
   }
 
   /**
