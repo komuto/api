@@ -107,3 +107,17 @@ StoreController.getCatalog = async (req, res, next) => {
   };
   return next();
 };
+
+/**
+ * Update catalog
+ */
+StoreController.updateCatalog = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const data = Catalog.matchDBColumn({ name: req.body.name });
+  const catalog = await Catalog.update(req.params.id, storeId, data);
+  req.resData = {
+    message: 'Catalog Data',
+    data: catalog,
+  };
+  return next();
+};

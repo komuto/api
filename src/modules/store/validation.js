@@ -29,7 +29,7 @@ constraints.createMessage = {
   content: { presence: true },
 };
 
-constraints.createCatalog = {
+constraints.catalog = {
   name: { presence: true },
 };
 

@@ -59,7 +59,7 @@ routes.post('/stores/:id/message',
  */
 routes.post('/users/store/catalogs',
   auth(),
-  validateParam(constraints.createCatalog, true),
+  validateParam(constraints.catalog, true),
   wrap(StoreController.createCatalog),
   apiResponse());
 
@@ -70,6 +70,16 @@ routes.post('/users/store/catalogs',
 routes.get('/users/store/catalogs/:id',
   auth(),
   wrap(StoreController.getCatalog),
+  apiResponse());
+
+/**
+ * PUT /users/store/catalogs/id
+ * Update catalog
+ */
+routes.put('/users/store/catalogs/:id',
+  auth(),
+  validateParam(constraints.catalog, true),
+  wrap(StoreController.updateCatalog),
   apiResponse());
 
 export default routes;

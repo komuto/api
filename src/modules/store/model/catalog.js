@@ -1,5 +1,5 @@
 import core from '../../core';
-import { createCatalogError, getCatalogError } from './../messages';
+import { createCatalogError, getCatalogError, updateCatalogError } from './../messages';
 
 const bookshelf = core.postgres.db;
 const { parseDate, defaultNull } = core.utils;
@@ -42,12 +42,14 @@ class CatalogModel extends bookshelf.Model {
   }
 
   static async create(data) {
-    const catalog = await this.query((qb) => {
-      qb.whereRaw('LOWER(nama_katalog) LIKE ?', `%${data.name.toLowerCase()}%`);
-    }).fetch();
-    if (catalog) {
-      throw createCatalogError('catalog', 'duplicate');
-    }
+    const catalog = await this.where({ id_toko: data.store_id })
+      .query((qb) => {
+        qb.whereRaw('LOWER(nama_katalog) LIKE ?', `%${data.name.toLowerCase()}%`);
+      }).fetch().catch(() => {
+        throw createCatalogError('catalog', 'error');
+      });
+    if (catalog) throw createCatalogError('catalog', 'duplicate');
+
     return await new this(this.matchDBColumn(data)).save().catch(() => {
       throw createCatalogError('catalog', 'error');
     });
@@ -57,11 +59,33 @@ class CatalogModel extends bookshelf.Model {
    * Find by catalog id and store id
    */
   static async findByIdAndStoreId(id, storeId) {
-    const catalog = await this.where({ id_katalog: id, id_toko: storeId }).fetch().catch(() => {
-      throw getCatalogError('catalog', 'error');
-    });
+    const catalog = await this.where({ id_katalog: id, id_toko: storeId }).fetch()
+      .catch(() => {
+        throw getCatalogError('catalog', 'error');
+      });
     if (!catalog) throw getCatalogError('catalog', 'not_found');
     return catalog.serialize();
+  }
+
+  /**
+   * Update catalog
+   */
+  static async update(id, storeId, data) {
+    let catalog = await this.where({ id_toko: storeId })
+      .query((qb) => {
+        qb.whereNotIn('id_katalog', [id]);
+        qb.whereRaw('LOWER(nama_katalog) LIKE ?', `%${data.nama_katalog.toLowerCase()}%`);
+      }).fetch().catch(() => {
+        throw updateCatalogError('catalog', 'error');
+      });
+    if (catalog) throw updateCatalogError('catalog', 'duplicate');
+
+    catalog = await this.where({ id_katalog: id, id_toko: storeId })
+      .save(data, { method: 'update' })
+      .catch(() => {
+        throw updateCatalogError('catalog', 'error');
+      });
+    return await catalog.fetch();
   }
 
   static matchDBColumn(data) {
