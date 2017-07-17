@@ -309,7 +309,15 @@ class ProductModel extends bookshelf.Model {
    */
   static async getFullProduct(productId, userId) {
     let product = await this.where({ id_produk: productId }).fetch({
-      withRelated: ['category', 'store', 'images', 'reviews.user.addresses', 'expeditionServices.expedition', 'likes'],
+      withRelated: [
+        'category',
+        'store',
+        'images',
+        'reviews.user.addresses',
+        'expeditionServices.expedition',
+        'likes',
+        'discussions',
+      ],
     });
     if (!product) return false;
     // Eager load other products so it doesn't block other process by not awaiting directly
@@ -333,6 +341,7 @@ class ProductModel extends bookshelf.Model {
     const expeditions = this.loadExpeditions(product);
     const { reviews, rating } = this.loadReviewsRatings(product);
     const { likes, isLiked } = this.loadLikes(product, userId);
+    const discussions = product.related('discussions');
 
     rating.quality = parseFloat(this.ratingAvg(rating.quality));
     rating.accuracy = parseFloat(this.ratingAvg(rating.accuracy));
@@ -340,6 +349,7 @@ class ProductModel extends bookshelf.Model {
     product.count_review = reviews.length;
     product.count_like = likes.length;
     product.is_liked = !!isLiked;
+    product.count_discussion = discussions.length;
     const address = await getAddress;
     store.province = address.related('province').serialize();
     store.district = address.related('district').serialize();
