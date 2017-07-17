@@ -90,4 +90,14 @@ routes.put('/users/store/catalogs/:id',
   wrap(StoreController.updateCatalog),
   apiResponse());
 
+/**
+ * POST /users/store/verify
+ * Verify store
+ */
+routes.post('/users/store/verify',
+  auth(),
+  validateParam(constraints.verify, true),
+  wrap(StoreController.verify),
+  apiResponse());
+
 export default routes;

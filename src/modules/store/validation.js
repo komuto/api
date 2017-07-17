@@ -32,4 +32,8 @@ constraints.catalog = {
   name: { presence: true },
 };
 
+constraints.verify = {
+  code: { presence: true },
+};
+
 export default constraints;

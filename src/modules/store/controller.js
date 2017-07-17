@@ -1,5 +1,6 @@
 import { Store, Catalog, FavoriteStore, Message, DetailMessage } from './model';
 import { makeFavoriteError, deleteCatalogError } from './error';
+import { OTPAddress } from './../OTP/model';
 
 export const StoreController = {};
 export default { StoreController };
@@ -132,5 +133,15 @@ StoreController.updateCatalog = async (req, res, next) => {
     message: 'Catalog Data',
     data: catalog,
   };
+  return next();
+};
+
+/**
+ * Verify Store
+ */
+StoreController.verify = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  await OTPAddress.verify(req.user.id, storeId, req.body.code);
+  req.resData = { message: 'Success' };
   return next();
 };

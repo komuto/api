@@ -36,6 +36,14 @@ class OTPAddressModel extends bookshelf.Model {
   }
 
   /**
+   * Verify store
+   */
+  static async verify(userId, storeId, code) {
+
+    return true;
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData
