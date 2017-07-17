@@ -21,13 +21,15 @@ class WishlistModel extends bookshelf.Model {
    * Add to wishlist
    */
   static async addWishlist(id, userId) {
+    const wishlist = await this.where({ id_produk: id, id_users: userId }).fetch();
+    if (wishlist) return wishlist.destroy();
     const attach = {
       id_produk: id,
       id_users: userId,
       status_wishlist: 1,
       tglstatus_wishlist: new Date(),
     };
-    return new this().save(attach).catch(() => {});
+    return await new this().save(attach).catch(() => {});
   }
 }
 
