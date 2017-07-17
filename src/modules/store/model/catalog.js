@@ -1,5 +1,5 @@
 import core from '../../core';
-import { createCatalogError } from './../messages';
+import { createCatalogError, getCatalogError } from './../messages';
 
 const bookshelf = core.postgres.db;
 const { parseDate, defaultNull } = core.utils;
@@ -51,6 +51,17 @@ class CatalogModel extends bookshelf.Model {
     return await new this(this.matchDBColumn(data)).save().catch(() => {
       throw createCatalogError('catalog', 'error');
     });
+  }
+
+  /**
+   * Find by catalog id and store id
+   */
+  static async findByIdAndStoreId(id, storeId) {
+    const catalog = await this.where({ id_katalog: id, id_toko: storeId }).fetch().catch(() => {
+      throw getCatalogError('catalog', 'error');
+    });
+    if (!catalog) throw getCatalogError('catalog', 'not_found');
+    return catalog.serialize();
   }
 
   static matchDBColumn(data) {

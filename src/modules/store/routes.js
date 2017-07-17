@@ -63,4 +63,13 @@ routes.post('/users/store/catalogs',
   wrap(StoreController.createCatalog),
   apiResponse());
 
+/**
+ * GET /users/store/catalogs/id
+ * Get catalog
+ */
+routes.get('/users/store/catalogs/:id',
+  auth(),
+  wrap(StoreController.getCatalog),
+  apiResponse());
+
 export default routes;

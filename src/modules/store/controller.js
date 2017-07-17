@@ -94,3 +94,16 @@ StoreController.createCatalog = async (req, res, next) => {
   };
   return next();
 };
+
+/**
+ * Get catalog
+ */
+StoreController.getCatalog = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const catalog = await Catalog.findByIdAndStoreId(req.params.id, storeId);
+  req.resData = {
+    message: 'Catalog Data',
+    data: catalog,
+  };
+  return next();
+};
