@@ -110,15 +110,6 @@ routes.get('/users/wishlist',
   apiResponse());
 
 /**
- * GET /users/store/catalogs
- * Get the user's store catalogs
- */
-routes.get('/users/store/catalogs',
-  auth(),
-  wrap(UserController.getUserCatalog),
-  apiResponse());
-
-/**
 * PUT /users/store/expeditions
 * Create/update expedition status
 */

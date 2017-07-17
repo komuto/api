@@ -12,7 +12,7 @@ import { Address } from '../address/model';
 import { Discussion, Product } from '../product/model';
 
 const fb = new Facebook(config.fb);
-const { Store, Catalog, StoreExpedition } = model;
+const { Store, StoreExpedition } = model;
 
 export const UserController = {};
 export default { UserController };
@@ -213,18 +213,6 @@ UserController.getWishlist = async (req, res, next) => {
   req.resData = {
     message: 'Products Wishlist Data',
     data: products,
-  };
-  return next();
-};
-
-/**
- * Get store catalog
- */
-UserController.getUserCatalog = async (req, res, next) => {
-  const catalogs = await Catalog.getUserCatalog(req.user.id);
-  req.resData = {
-    message: 'Store Catalog Data',
-    data: catalogs,
   };
   return next();
 };
