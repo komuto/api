@@ -1,6 +1,6 @@
 import moment from 'moment';
 import _ from 'lodash';
-import { createOTPError, createBankError, verifyOTPError } from './error';
+import { createOTPError, createBankError, verifyOTPError } from './messages';
 import { OTP, OTPStatus, OTPHP, OTPHPStatus } from './model';
 
 export const OTPController = {};
