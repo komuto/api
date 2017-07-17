@@ -6,6 +6,7 @@ export const errMsg = {
   makeFavoriteMsg: {
     title: 'Favoritkan toko gagal',
     repeat_favorite: 'Anda telah memfavoritkan toko ini',
+    not_valid: 'Tidak bisa memfavoritkan toko sendiri',
   },
   deleteCatalogMsg: {
     title: 'Hapus katalog gagal',
