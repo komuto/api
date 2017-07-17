@@ -12,9 +12,15 @@ constraints.create = {
   'address.district_id': { presence: true },
   'address.sub_district_id': { presence: true },
   'address.village_id': { presence: true },
-  'address.postal_code': { presence: true },
+  'address.postal_code': {
+    presence: true,
+    length: { is: 5 },
+  },
   'address.email': { presence: true },
-  'address.address': { presence: true },
+  'address.address': {
+    presence: true,
+    length: { maximum: 200 },
+  },
 };
 
 constraints.createMessage = {
