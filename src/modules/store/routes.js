@@ -36,6 +36,14 @@ routes.get('/users/store/catalogs',
   apiResponse());
 
 /**
+ * Get favorite store list
+ */
+routes.get('/users/store/favorites',
+  auth(),
+  wrap(StoreController.listFavorites),
+  apiResponse());
+
+/**
  * Delete catalog store
  */
 routes.delete('/users/store/catalogs/:id',

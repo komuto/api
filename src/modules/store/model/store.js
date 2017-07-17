@@ -18,14 +18,18 @@ class StoreModel extends bookshelf.Model {
     return 'id_toko';
   }
 
-  serialize() {
-    return {
+  serialize({ favorite = false } = {}) {
+    const store = {
       id: this.get('id_toko'),
-      user_id: this.get('id_users'),
       name: this.get('nama_toko'),
+      logo: core.imagePath(IMAGE_PATH, this.get('logo_toko')),
+    }
+    if (favorite) return store;
+    return {
+      ...store,
+      user_id: this.get('id_users'),
       slogan: this.get('slogan_toko'),
       description: this.get('deskripsi_toko'),
-      logo: core.imagePath(IMAGE_PATH, this.get('logo_toko')),
       custom_domain: this.get('custom_domain'),
       status: parseInt(this.get('status_toko'), 10),
       remarks_status: this.get('remarks_status_toko'),
