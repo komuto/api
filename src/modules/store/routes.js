@@ -25,4 +25,13 @@ routes.post('/stores/:id/favorite',
   wrap(StoreController.makeFavorite),
   apiResponse());
 
+/**
+ * POST /stores/id/message
+ * Message store
+ */
+routes.post('/stores/:id/message',
+  auth(),
+  wrap(StoreController.createMessage),
+  apiResponse());
+
 export default routes;

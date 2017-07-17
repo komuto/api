@@ -24,3 +24,15 @@ StoreController.makeFavorite = async (req, res, next) => {
   await FavoriteStore.create(data);
   return next();
 };
+
+StoreController.createMessage = async (req, res, next) => {
+  const data = {
+
+  };
+  const message = await Store.createMessage(data);
+  req.resData = {
+    message: '',
+    data: message,
+  };
+  return next();
+};
