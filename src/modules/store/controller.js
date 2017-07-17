@@ -30,6 +30,19 @@ StoreController.makeFavorite = async (req, res, next) => {
   return next();
 };
 
+StoreController.listFavorites = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const favorites = await FavoriteStore.getListFavoriteStore(req.user.id, pageSize, page);
+
+  req.resData = {
+    message: 'Favorite store',
+    meta: { page, limit: pageSize },
+    data: favorites,
+  };
+  return next();
+};
+
 StoreController.createMessage = async (req, res, next) => {
   const messageObj = Message.matchDBColumn({
     user_id: req.user.id,
