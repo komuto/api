@@ -1,11 +1,7 @@
 import moment from 'moment';
 import _ from 'lodash';
-import { utils } from '../core';
 import { createOTPError, createBankError, verifyOTPError } from './error';
-import { BadRequestError } from '../../../common/errors';
 import { OTP, OTPStatus, OTPHP, OTPHPStatus } from './model';
-
-const { formatSingularErr } = utils;
 
 export const OTPController = {};
 export default { OTPController };

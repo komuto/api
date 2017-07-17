@@ -10,6 +10,7 @@ import { model } from '../store';
 import { userUpdateError, resetPassError, registrationError, activateUserError, fbError } from './error';
 import { Address } from '../address/model';
 import { Discussion, Product } from '../product/model';
+import { OTPAddress } from '../OTP/model';
 
 const fb = new Facebook(config.fb);
 const { Store, StoreExpedition } = model;
@@ -255,7 +256,7 @@ UserController.getUserExpeditionsManage = async (req, res, next) => {
 };
 
 /**
- * Get store expedition manage
+ * Create store
  */
 UserController.createStore = async (req, res, next) => {
   const expeditionServices = req.body.expedition_services;
@@ -269,6 +270,7 @@ UserController.createStore = async (req, res, next) => {
   });
   const store = await Store.create(Store.matchDBColumn(storeData));
   const user = await User.update({ id_users: req.user.id }, User.matchDBColumn(req.body.user));
+
   const addressData = _.assign(req.body.address, {
     is_sale_address: 1,
     is_primary: 0,
@@ -277,8 +279,10 @@ UserController.createStore = async (req, res, next) => {
     alias_address: req.body.address.address,
   });
   const address = await Address.create(Address.matchDBColumn(addressData));
+
   const services = expeditionServices.map(data => (StoreExpedition.matchDBColumn(data, true)));
   await Store.createExpeditionServices(store, services);
+  await OTPAddress.create(req.user.id);
 
   req.resData = {
     message: 'Store Data',
