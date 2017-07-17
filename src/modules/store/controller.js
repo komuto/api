@@ -1,4 +1,4 @@
-import { Store, FavoriteStore } from './model';
+import { Store, FavoriteStore, Message, DetailMessage } from './model';
 import { makeFavoriteError } from './error';
 
 export const StoreController = {};
@@ -26,13 +26,27 @@ StoreController.makeFavorite = async (req, res, next) => {
 };
 
 StoreController.createMessage = async (req, res, next) => {
-  const data = {
+  const messageObj = Message.matchDBColumn({
+    user_id: req.user.id,
+    store_id: req.params.id,
+    subject: req.body.subject,
+    flag_sender: 2,
+    flag_receiver: 2,
+    flag_sender_at: new Date(),
+    flag_receiver_at: new Date(),
+  });
+  const message = await Message.create(messageObj);
 
-  };
-  const message = await Store.createMessage(data);
+  const detailMessageObj = DetailMessage.matchDBColumn({
+    message_id: message.toJSON().id,
+    user_id: req.user.id,
+    content: req.body.content,
+    created_at: new Date(),
+  });
+  const detailMessage = await DetailMessage.create(detailMessageObj);
   req.resData = {
-    message: '',
-    data: message,
+    message: 'Message Data',
+    data: { message, detailMessage },
   };
   return next();
 };

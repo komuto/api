@@ -1,4 +1,5 @@
 import core from '../../core';
+import { BadRequestError } from '../../../../common/errors';
 
 const bookshelf = core.postgres.db;
 const { parseDate, parseNum } = core.utils;
@@ -27,6 +28,21 @@ class MessageModel extends bookshelf.Model {
     };
   }
 
+  /**
+   * Create message
+   * @param data
+   */
+  static async create(data) {
+    return await new this(data).save().catch(() => {
+      throw new BadRequestError('Gagal membuat pesan');
+    });
+  }
+
+  /**
+   * Transform supplied data properties to match with db column
+   * @param {object} data
+   * @return {object} newData
+   */
   static matchDBColumn(data) {
     const column = {
       store_id: 'id_toko',

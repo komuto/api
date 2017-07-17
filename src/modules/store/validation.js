@@ -24,4 +24,9 @@ constraints.create = {
   },
 };
 
+constraints.createMessage = {
+  subject: { presence: true },
+  content: { presence: true },
+};
+
 export default constraints;

@@ -1,10 +1,11 @@
 import express from 'express';
 import { StoreController } from './controller';
 import core from '../core';
+import constraints from './validation';
 
 const routes = express.Router();
 const { wrap } = core.utils;
-const { apiResponse, auth } = core.middleware;
+const { apiResponse, auth, validateParam } = core.middleware;
 const cache = core.cache;
 
 /**
@@ -31,6 +32,7 @@ routes.post('/stores/:id/favorite',
  */
 routes.post('/stores/:id/message',
   auth(),
+  validateParam(constraints.createMessage, true),
   wrap(StoreController.createMessage),
   apiResponse());
 
