@@ -71,3 +71,21 @@ StoreController.deleteCatalog = async (req, res, next) => {
   await catalog.destroy();
   return next();
 };
+
+/**
+ * Create store catalog
+ */
+StoreController.createCatalog = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const data = {
+    store_id: storeId,
+    name: req.body.name,
+    created_at: new Date(),
+  };
+  const catalog = await Catalog.create(data);
+  req.resData = {
+    message: 'Success',
+    data: catalog,
+  };
+  return next();
+};

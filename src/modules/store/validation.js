@@ -29,4 +29,8 @@ constraints.createMessage = {
   content: { presence: true },
 };
 
+constraints.createCatalog = {
+  name: { presence: true },
+};
+
 export default constraints;

@@ -53,4 +53,14 @@ routes.post('/stores/:id/message',
   wrap(StoreController.createMessage),
   apiResponse());
 
+/**
+ * POST /users/store/catalogs
+ * Create catalog
+ */
+routes.post('/users/store/catalogs',
+  auth(),
+  validateParam(constraints.createCatalog, true),
+  wrap(StoreController.createCatalog),
+  apiResponse());
+
 export default routes;

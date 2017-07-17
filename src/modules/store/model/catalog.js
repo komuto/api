@@ -1,4 +1,5 @@
 import core from '../../core';
+import { createCatalogError } from './../messages';
 
 const bookshelf = core.postgres.db;
 const { parseDate, defaultNull } = core.utils;
@@ -40,11 +41,24 @@ class CatalogModel extends bookshelf.Model {
     }).fetchAll();
   }
 
+  static async create(data) {
+    const catalog = await this.query((qb) => {
+      qb.whereRaw('LOWER(nama_katalog) LIKE ?', `%${data.name.toLowerCase()}%`);
+    }).fetch();
+    if (catalog) {
+      throw createCatalogError('catalog', 'duplicate');
+    }
+    return await new this(this.matchDBColumn(data)).save().catch(() => {
+      throw createCatalogError('catalog', 'error');
+    });
+  }
+
   static matchDBColumn(data) {
     const column = {
       catalog_id: 'id_katalog',
       store_id: 'id_toko',
       name: 'nama_katalog',
+      created_at: 'datecreate_katalog',
     };
     const newData = {};
     Object.keys(data).forEach((prop) => {
