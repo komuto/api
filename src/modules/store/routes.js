@@ -27,6 +27,23 @@ routes.post('/stores/:id/favorite',
   apiResponse());
 
 /**
+* GET /users/store/catalogs
+* Get the user's store catalogs
+*/
+routes.get('/users/store/catalogs',
+  auth(),
+  wrap(StoreController.getUserCatalog),
+  apiResponse());
+
+/**
+ * Delete catalog store
+ */
+routes.delete('/users/store/catalogs/:id',
+  auth(),
+  wrap(StoreController.deleteCatalog),
+  apiResponse());
+
+/**
  * POST /stores/id/message
  * Message store
  */

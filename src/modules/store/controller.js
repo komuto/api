@@ -1,5 +1,5 @@
-import { Store, FavoriteStore, Message, DetailMessage } from './model';
-import { makeFavoriteError } from './error';
+import { Store, Catalog, FavoriteStore, Message, DetailMessage } from './model';
+import { makeFavoriteError, deleteCatalogError } from './error';
 
 export const StoreController = {};
 export default { StoreController };
@@ -48,5 +48,26 @@ StoreController.createMessage = async (req, res, next) => {
     message: 'Message Data',
     data: { message, detailMessage },
   };
+  return next();
+};
+
+/**
+ * Get store catalog
+ */
+StoreController.getUserCatalog = async (req, res, next) => {
+  const catalogs = await Catalog.getUserCatalog(req.user.id);
+  req.resData = {
+    message: 'Store Catalog Data',
+    data: catalogs,
+  };
+  return next();
+};
+
+StoreController.deleteCatalog = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const catalog = await Catalog.where({ id_toko: storeId, id_katalog: req.params.id }).fetch();
+  if (!catalog) throw deleteCatalogError('catalog', 'not_found');
+  if (await Catalog.checkProduct(req.params.id)) throw deleteCatalogError('catalog', 'has_product');
+  await catalog.destroy();
   return next();
 };
