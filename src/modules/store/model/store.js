@@ -102,6 +102,7 @@ class StoreModel extends bookshelf.Model {
    */
   static async getMarketplaceId(id) {
     const store = await new this({ id_toko: id }).fetch({ withRelated: ['user'] });
+    if (!store) return false; // Store not found
     const user = store.related('user');
     return user.get('id_marketplaceuser');
   }
