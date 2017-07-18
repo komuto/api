@@ -1,5 +1,5 @@
 import moment from 'moment';
-import randomString from 'randomstring';
+import randomInt from 'random-int';
 import core from '../../core';
 import { verifyOTPAddressError } from './../messages';
 import { Preference } from './../../preference/model';
@@ -30,7 +30,7 @@ class OTPAddressModel extends bookshelf.Model {
     const limit = await Preference.get('otp_address');
     const data = this.matchDBColumn({
       user_id: userId,
-      code: randomString.generate(10),
+      code: randomInt(100000, 999999),
       status: OTPAddressStatus.CREATED,
       created_at: moment(),
       expired_at: moment().add(limit.value, 'd'),

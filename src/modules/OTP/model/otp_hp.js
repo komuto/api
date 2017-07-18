@@ -2,6 +2,7 @@ import moment from 'moment';
 import rp from 'request-promise-native';
 import sha1 from 'sha1';
 import md5 from 'md5';
+import randomInt from 'random-int';
 import core from '../../core';
 import { otp } from '../../../../config';
 import { Preference } from './../../preference/model';
@@ -42,7 +43,7 @@ class OTPHPModel extends bookshelf.Model {
     const created = moment();
     data = {
       ...data,
-      kode_otphp: Math.floor((Math.random() * (99999 - 10000)) + 10000),
+      kode_otphp: randomInt(10000, 99999),
       datecreated_otphp: created,
       expdate_otphp: created.clone().add(limit.value, 'd'),
     };
