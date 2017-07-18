@@ -1,4 +1,4 @@
-import { Product, Discussion, Comment } from './model';
+import { Product, Discussion, Comment, Report } from './model';
 import { Wishlist } from './../user/model';
 import { getProductError } from './error';
 
@@ -143,6 +143,24 @@ ProductController.createComment = async (req, res, next) => {
   req.resData = {
     message: 'Comment Data',
     data: comment,
+  };
+  return next();
+};
+
+/**
+ * Report product
+ */
+ProductController.report = async (req, res, next) => {
+  const data = Report.matchDBColumn({
+    product_id: req.params.id,
+    user_id: req.user.id,
+    type: req.body.type,
+    description: req.body.description,
+  });
+  const report = await Report.create(data);
+  req.resData = {
+    message: 'Report Data',
+    data: report,
   };
   return next();
 };

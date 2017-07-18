@@ -37,4 +37,5 @@ class WishlistModel extends bookshelf.Model {
   }
 }
 
-export default bookshelf.model('Wishlist', WishlistModel);
+export const Wishlist = bookshelf.model('Wishlist', WishlistModel);
+export default { Wishlist };

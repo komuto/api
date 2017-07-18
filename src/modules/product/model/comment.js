@@ -56,7 +56,7 @@ class CommentModel extends bookshelf.Model {
   }
 
   /**
-   * Create discussion
+   * Create comment
    */
   static async create(data) {
     return await new this(data).save().catch(() => {
