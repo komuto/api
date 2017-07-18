@@ -13,6 +13,10 @@ export const errMsg = {
     title: 'Verifikasi hp gagal',
     not_found: 'Kode tidak ditemukan atau expired atau sudah terpakai',
   },
+  verifyOTPAddress: {
+    title: 'Verifikasi address gagal',
+    not_found: 'Kode tidak ditemukan atau expired',
+  },
   createBankMsg: {
     title: 'Tambah rekening gagal',
     phone_not_verified: 'Belum punya no hp yg telah terverifikasi',
@@ -24,3 +28,5 @@ export const createOTPError = formatError.bind(errMsg.OTPMsg);
 export const createBankError = formatError.bind(errMsg.createBankMsg);
 
 export const verifyOTPError = formatError.bind(errMsg.verifyOTPMsg);
+
+export const verifyOTPAddressError = formatError.bind(errMsg.verifyOTPAddress);

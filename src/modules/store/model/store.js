@@ -23,7 +23,7 @@ class StoreModel extends bookshelf.Model {
       id: this.get('id_toko'),
       name: this.get('nama_toko'),
       logo: core.imagePath(IMAGE_PATH, this.get('logo_toko')),
-    }
+    };
     if (favorite) return store;
     return {
       ...store,

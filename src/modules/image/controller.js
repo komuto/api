@@ -24,7 +24,6 @@ ImageController.upload = async (req, res, next) => {
   });
 
   req.resData = {
-    message: 'success',
     data: req.body.is_single ? names[0] : names,
   };
   return next();

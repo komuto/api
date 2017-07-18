@@ -61,8 +61,5 @@ BucketController.addToCart = async (req, res, next) => {
     + body.additional_cost + insuranceCost,
   });
   await Item.create(itemObj);
-  req.resData = {
-    message: 'Success',
-  };
   return next();
 };

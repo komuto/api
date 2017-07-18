@@ -101,10 +101,8 @@ StoreController.createCatalog = async (req, res, next) => {
     name: req.body.name,
     created_at: new Date(),
   };
-  const catalog = await Catalog.create(data);
   req.resData = {
-    message: 'Success',
-    data: catalog,
+    data: await Catalog.create(data),
   };
   return next();
 };
@@ -140,8 +138,7 @@ StoreController.updateCatalog = async (req, res, next) => {
  * Verify Store
  */
 StoreController.verify = async (req, res, next) => {
-  const storeId = await Store.getStoreId(req.user.id);
-  await OTPAddress.verify(req.user.id, storeId, req.body.code);
-  req.resData = { message: 'Success' };
+  // const storeId = await Store.getStoreId(req.user.id);
+  await OTPAddress.verify(req.user.id, req.body.code);
   return next();
 };
