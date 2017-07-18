@@ -123,4 +123,14 @@ routes.post('/products/:id/report',
   wrap(ProductController.report),
   apiResponse());
 
+/**
+ * POST /products/id/dropship
+ * Dropship product
+ */
+routes.post('/products/:id/dropship',
+  auth(),
+  validateParam(constraints.dropship, true),
+  wrap(ProductController.dropship),
+  apiResponse());
+
 export default routes;

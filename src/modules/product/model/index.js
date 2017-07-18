@@ -5,6 +5,7 @@ import { Wholesale } from './wholesale';
 import { Discussion } from './discussion';
 import { Comment } from './comment';
 import { Report } from './report';
+import { Dropship, DropshipStatus } from './dropship';
 
 export default {
   ExpeditionProduct,
@@ -16,4 +17,6 @@ export default {
   Discussion,
   Comment,
   Report,
+  Dropship,
+  DropshipStatus,
 };

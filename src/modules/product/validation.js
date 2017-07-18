@@ -114,4 +114,8 @@ constraints.createImages = {
   image: { presence: true },
 };
 
+constraints.dropship = {
+  catalog_id: { presence: true, numericality: true },
+};
+
 export default constraints;

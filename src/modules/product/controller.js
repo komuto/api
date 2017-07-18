@@ -1,5 +1,16 @@
 import moment from 'moment';
-import { Product, Discussion, Comment, Report, Wholesale, ImageProduct, ExpeditionProduct, ProductStatus } from './model';
+import {
+  Product,
+  Discussion,
+  Comment,
+  Report,
+  Wholesale,
+  ImageProduct,
+  ExpeditionProduct,
+  ProductStatus,
+  Dropship,
+  DropshipStatus,
+} from './model';
 import { Wishlist } from './../user/model';
 import { model as storeModel } from '../store';
 import { getProductError, createProductError } from './error';
@@ -147,7 +158,7 @@ ProductController.createDiscussion = async (req, res, next) => {
     product_id: req.params.id,
     question: req.body.question,
     is_deleted: 0,
-    created_at: new Date(),
+    created_at: moment(),
   });
   const discussion = await Discussion.create(data);
   req.resData = {
@@ -165,7 +176,7 @@ ProductController.createComment = async (req, res, next) => {
     user_id: req.user.id,
     discussion_id: req.params.discussion_id,
     content: req.body.content,
-    created_at: new Date(),
+    created_at: moment(),
     is_deleted: 0,
   });
   const comment = await Comment.create(data);
@@ -190,6 +201,27 @@ ProductController.report = async (req, res, next) => {
   req.resData = {
     message: 'Report Data',
     data: report,
+  };
+  return next();
+};
+
+/**
+ * Dropship product
+ */
+ProductController.dropship = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const data = Dropship.matchDBColumn({
+    product_id: req.params.id,
+    catalog_id: req.body.catalog_id,
+    store_id: storeId,
+    status: DropshipStatus.SELECTED,
+    status_at: moment(),
+    created_at: moment(),
+  });
+  const dropship = await Dropship.create(data);
+  req.resData = {
+    message: 'Dropship Data',
+    data: dropship,
   };
   return next();
 };
