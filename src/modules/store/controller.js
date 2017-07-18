@@ -18,13 +18,18 @@ StoreController.getStore = async (req, res, next) => {
  * Favorite a store
  */
 StoreController.makeFavorite = async (req, res, next) => {
+  const [marketplace, storeId] = await Promise.all([
+    Store.getMarketplaceId(req.params.id),
+    Store.getStoreId(req.user.id),
+  ]);
+  if (marketplace === false) throw makeFavoriteError('store', 'not_found');
+  if (parseInt(req.params.id, 10) === storeId) throw makeFavoriteError('store', 'not_valid');
+
   const data = {
     id_users: req.user.id,
     referred_toko: req.params.id,
-    referred_marketplace: await Store.getMarketplaceId(req.params.id) || 0,
+    referred_marketplace: marketplace || 0,
   };
-  const storeId = await Store.getStoreId(req.user.id);
-  if (parseInt(req.params.id, 10) === storeId) throw makeFavoriteError('store', 'not_valid');
   const favorite = await FavoriteStore.where({ status_tokofavorit: '1', ...data }).fetch({ columns: 'id_tokofavorit' });
   if (favorite) throw makeFavoriteError('store', 'repeat_favorite');
   await FavoriteStore.create(data);
