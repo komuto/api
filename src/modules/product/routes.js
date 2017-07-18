@@ -100,4 +100,14 @@ routes.post('/products/:id/discussions/:discussion_id/comments',
   wrap(ProductController.createComment),
   apiResponse());
 
+/**
+ * POST /products/id/report
+ * Report product
+ */
+routes.post('/products/:id/report',
+  auth(),
+  validateParam(constraints.report, true),
+  wrap(ProductController.report),
+  apiResponse());
+
 export default routes;

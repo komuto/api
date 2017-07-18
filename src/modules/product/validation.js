@@ -58,4 +58,9 @@ constraints.discussion = { question: { presence: true } };
 
 constraints.comment = { content: { presence: true } };
 
+constraints.report = {
+  type: { presence: true },
+  report: { presence: true },
+};
+
 export default constraints;
