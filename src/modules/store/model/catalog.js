@@ -105,11 +105,22 @@ class CatalogModel extends bookshelf.Model {
   /**
    * Check whether the catalog has products or not
    * @param id {integer} catalog id
+   * @return boolean
    */
   static async checkProduct(id) {
     const catalog = await this.where({ id_katalog: id }).fetch({ withRelated: {
       products: qb => qb.column('identifier_katalog') } });
     return !!catalog.related('products').length;
+  }
+
+  /**
+   * Check whether store has the catalog or not
+   * @param storeId {integer}
+   * @param catalogId {integer}
+   */
+  static async checkCatalog(storeId, catalogId) {
+    const catalog = await this.where({ id_toko: storeId, id_katalog: catalogId }).fetch();
+    return !!catalog;
   }
 }
 

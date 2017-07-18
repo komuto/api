@@ -1,6 +1,10 @@
-import { Product, Discussion, Comment } from './model';
+import moment from 'moment';
+import { Product, Discussion, Comment, Wholesale, ImageProduct, ExpeditionProduct, ProductStatus } from './model';
 import { Wishlist } from './../user/model';
-import { getProductError } from './error';
+import { model as storeModel } from '../store';
+import { getProductError, createProductError } from './error';
+
+const { Store, Catalog } = storeModel;
 
 export const ProductController = {};
 export default { ProductController };
@@ -62,6 +66,31 @@ ProductController.getProduct = async (req, res, next) => {
   if (!product) throw getProductError('product', 'not_found');
   req.resData = {
     message: 'Product Detail Data',
+    data: product,
+  };
+  return next();
+};
+
+ProductController.createProduct = async (req, res, next) => {
+  req.body.store_id = await Store.getStoreId(req.user.id);
+  req.body.other_attr = '0';
+  req.body.date_created = moment();
+  req.body.date_status = req.body.date_created;
+  req.body.status = ProductStatus.SHOW;
+  if (req.body.catalog_id) {
+    if ((await Catalog.checkCatalog(req.body.store_id, req.body.catalog_id)) === false) {
+      throw createProductError('catalog_id', 'catalog_not_found');
+    }
+  }
+  const product = await new Product().save(Product.matchDBColumn(req.body), { method: 'insert' });
+  const productId = product.get('id_produk');
+  const expeditions = ExpeditionProduct.createBulk(productId, req.body.expeditions);
+  const images = ImageProduct.createBulk(productId, req.body.images);
+  const wholesales = (Array.isArray(req.body.wholesales) && req.body.wholesales.length > 0)
+    ? Wholesale.createBulk(productId, req.body.wholesales) : [];
+  await Promise.all([expeditions, images, wholesales]);
+  req.resData = {
+    message: 'Product Data',
     data: product,
   };
   return next();
