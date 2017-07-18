@@ -2,6 +2,7 @@ import express from 'express';
 import { ProductController } from './controller';
 import core from '../core';
 import constraints from './validation';
+import { errMsg } from './error';
 import { ReviewController } from '../review';
 
 const routes = express.Router();
@@ -45,6 +46,18 @@ routes.post('/products/:id/reviews',
 routes.get('/products/:id',
   auth(false),
   wrap(ProductController.getProduct),
+  apiResponse());
+
+/**
+ * Create product
+ */
+routes.post('/products',
+  auth(),
+  validateParam(constraints.createProduct, true),
+  validateParam(constraints.createWholesale, false, 'wholesales', false, errMsg.createProduct),
+  validateParam(constraints.createExpeditions, false, 'expeditions', true, errMsg.createProduct),
+  validateParam(constraints.createImages, false, 'images', true, errMsg.createProduct),
+  wrap(ProductController.createProduct),
   apiResponse());
 
 /**

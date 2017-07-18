@@ -8,6 +8,11 @@ const { parseNum, parseDec, parseDate } = core.utils;
 const { Address } = model;
 const bookshelf = core.postgres.db;
 
+export const ProductStatus = {
+  SHOW: 1,
+  HIDE: 0, // Gudangkan
+};
+
 export const ProductType = {
   USED: 0,
   NEW: 1,
@@ -384,6 +389,37 @@ class ProductModel extends bookshelf.Model {
   static async getIdsByStoreId(storeId) {
     const products = await this.where({ id_toko: storeId }).fetchAll();
     return products.map(product => (product.get('id_produk')));
+  }
+
+  /**
+   * Transform supplied data properties to match with db column
+   * @param {object} data
+   * @return {object} newData
+   */
+  static matchDBColumn(data) {
+    const column = {
+      name: 'nama_produk',
+      store_id: 'id_toko',
+      category_id: 'id_kategoriproduk',
+      brand_id: 'identifier_brand',
+      description: 'deskripsi_produk',
+      price: 'harga_produk',
+      weight: 'berat_produk',
+      stock: 'stock_produk',
+      condition: 'jenis_produk',
+      insurance: 'asuransi_produk',
+      is_dropship: 'is_dropshiper',
+      catalog_id: 'identifier_katalog',
+      other_attr: 'attrval_produk',
+      date_created: 'date_created_produk',
+      date_status: 'tglstatus_produk',
+      status: 'status_produk',
+    };
+    const newData = {};
+    Object.keys(data).forEach((prop) => {
+      if (column[prop] && data[prop] !== undefined) newData[column[prop]] = data[prop];
+    });
+    return newData;
   }
 }
 

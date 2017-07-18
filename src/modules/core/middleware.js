@@ -93,13 +93,33 @@ export function formatValidation(rules, msg) {
   };
 }
 
-export function validateParam(constraints, isBody = false) {
+/**
+ * Validate parameters
+ * @param constraints {object}
+ * @param isBody {boolean} true evaluate req.body else req.query
+ * @param prop {string} name of the array to check
+ * @param strict {boolean} need to be available
+ * @param msg {string} title for error
+ */
+export function validateParam(constraints, isBody = false, prop, strict = false, msg) {
   return (req, res, next) => {
-    const hasError = validate(isBody ? req.body : req.query, constraints);
-    if (hasError) {
-      const err = new BadRequestError('Invalid parameter');
-      err.data = hasError;
-      return next(err);
+    if (Array.isArray(req.body[prop])) {
+      const params = req.body[prop];
+      // Can the param be empty array or not
+      const evaluate = strict ? true : params.length > 0;
+      if (evaluate) {
+        params.forEach((param) => {
+          const hasError = validate(param, constraints);
+          return hasError ? next(formatError(msg, hasError)) : undefined;
+        });
+      }
+    } else {
+      const hasError = validate(isBody ? req.body : req.query, constraints);
+      if (hasError) {
+        const err = new BadRequestError('Invalid parameter');
+        err.data = hasError;
+        return next(err);
+      }
     }
     return next();
   };

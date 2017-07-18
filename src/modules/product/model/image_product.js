@@ -31,6 +31,21 @@ class ImageProductModel extends bookshelf.Model {
   product() {
     return this.belongsTo('Product', 'id_produk', 'id_produk');
   }
+
+  /**
+   * @param id {integer} product id
+   * @param data {array}
+   */
+  static async createBulk(id, data) {
+    const date = moment();
+    const images = data.map(file => new this().save({
+      id_produk: id,
+      file_gambarproduk: file.image,
+      created_gambarproduk: date,
+      updated_gambarproduk: date,
+    }, { method: 'insert' }));
+    return await Promise.all(images);
+  }
 }
 
 export const ImageProduct = bookshelf.model('ImageProduct', ImageProductModel);
