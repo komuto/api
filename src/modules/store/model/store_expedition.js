@@ -4,6 +4,11 @@ import core from '../../core';
 const bookshelf = core.postgres.db;
 const { parseDate } = core.utils;
 
+export const StoreExpeditionStatus = {
+  SELECTED: 1,
+  UNSELECTED: 2,
+};
+
 class StoreExpeditionModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -69,4 +74,4 @@ class StoreExpeditionModel extends bookshelf.Model {
 }
 
 export const StoreExpedition = bookshelf.model('StoreExpedition', StoreExpeditionModel);
-export default { StoreExpedition };
+export default { StoreExpedition, StoreExpeditionStatus };

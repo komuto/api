@@ -1,13 +1,13 @@
-import { User, UserStatus, UserRoles } from './user';
+import { User, UserStatus } from './user';
 import { UserToken, TokenStatus, TokenType } from './user_token';
-import { Wishlist } from './wishlist';
+import { Wishlist, WishlistStatus } from './wishlist';
 
 export default { User,
   UserStatus,
-  UserRoles,
   UserToken,
   TokenType,
   TokenStatus,
   Wishlist,
+  WishlistStatus,
 };
 

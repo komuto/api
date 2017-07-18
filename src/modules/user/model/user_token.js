@@ -5,13 +5,13 @@ import core from '../../core';
 const bookshelf = core.postgres.db;
 
 export const TokenStatus = {
-  INACTIVE: '0',
-  ACTIVE: '1',
+  INACTIVE: 0,
+  ACTIVE: 1,
 };
 
 export const TokenType = {
-  FORGOT_PASSWORD: '2',
-  EMAIL_ACTIVATION: '1',
+  EMAIL_ACTIVATION: 1,
+  FORGOT_PASSWORD: 2,
 };
 
 class UserTokenModel extends bookshelf.Model {
@@ -28,7 +28,7 @@ class UserTokenModel extends bookshelf.Model {
   /**
    * Generate token if not found in db
    * @param {integer} id
-   * @param {string} token type
+   * @param {string} type
    * @return {string} token
    */
   static async generateToken(id, type) {
@@ -52,8 +52,8 @@ class UserTokenModel extends bookshelf.Model {
   }
 
   /**
-   * @param {string} token
-   * @param {string} token type
+   * @param {string} tokenValue
+   * @param {string} type
    * @return {number} user id
    */
   static async getId(tokenValue, type) {

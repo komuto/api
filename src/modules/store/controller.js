@@ -1,4 +1,12 @@
-import { Store, Catalog, FavoriteStore, Message, DetailMessage } from './model';
+import {
+  Store,
+  Catalog,
+  FavoriteStore,
+  FavoriteStoreStatus,
+  Message,
+  DetailMessage,
+  MessageFlagStatus,
+} from './model';
 import { makeFavoriteError, deleteCatalogError } from './error';
 import { OTPAddress } from './../OTP/model';
 
@@ -30,7 +38,10 @@ StoreController.makeFavorite = async (req, res, next) => {
     referred_toko: req.params.id,
     referred_marketplace: marketplace || 0,
   };
-  const favorite = await FavoriteStore.where({ status_tokofavorit: '1', ...data }).fetch({ columns: 'id_tokofavorit' });
+  const favorite = await FavoriteStore.where({
+    status_tokofavorit: FavoriteStoreStatus.ON,
+    ...data,
+  }).fetch({ columns: 'id_tokofavorit' });
   if (favorite) throw makeFavoriteError('store', 'repeat_favorite');
   await FavoriteStore.create(data);
   return next();
@@ -54,8 +65,8 @@ StoreController.createMessage = async (req, res, next) => {
     user_id: req.user.id,
     store_id: req.params.id,
     subject: req.body.subject,
-    flag_sender: 2,
-    flag_receiver: 2,
+    flag_sender: MessageFlagStatus.UNREAD,
+    flag_receiver: MessageFlagStatus.UNREAD,
     flag_sender_at: new Date(),
     flag_receiver_at: new Date(),
   });

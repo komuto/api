@@ -5,6 +5,11 @@ import { model } from '../../address';
 const { Address } = model;
 const bookshelf = core.postgres.db;
 
+export const FavoriteStoreStatus = {
+  OFF: 0,
+  ON: 1,
+};
+
 class FavoriteStoreModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -57,12 +62,11 @@ class FavoriteStoreModel extends bookshelf.Model {
     // Get province name
     addresses = await Promise.all(addresses);
     return Object.keys(addresses).map((key) => {
-      const province = addresses[key].related('province').serialize();
-      stores[key].store.province = province;
+      stores[key].store.province = addresses[key].related('province').serialize();
       return stores[key];
     });
   }
 }
 
 export const FavoriteStore = bookshelf.model('FavoriteStore', FavoriteStoreModel);
-export default { FavoriteStore };
+export default { FavoriteStore, FavoriteStoreStatus };

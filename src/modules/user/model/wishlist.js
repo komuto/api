@@ -2,6 +2,10 @@ import core from '../../core';
 
 const bookshelf = core.postgres.db;
 
+export const WishlistStatus = {
+  ACTIVE: 1,
+};
+
 class WishlistModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -29,7 +33,7 @@ class WishlistModel extends bookshelf.Model {
     const attach = {
       id_produk: id,
       id_users: userId,
-      status_wishlist: 1,
+      status_wishlist: WishlistStatus.ACTIVE,
       tglstatus_wishlist: new Date(),
     };
     new this().save(attach).catch(() => {});
@@ -38,4 +42,4 @@ class WishlistModel extends bookshelf.Model {
 }
 
 export const Wishlist = bookshelf.model('Wishlist', WishlistModel);
-export default { Wishlist };
+export default { Wishlist, WishlistStatus };

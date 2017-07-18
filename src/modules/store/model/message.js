@@ -4,6 +4,14 @@ import { BadRequestError } from '../../../../common/errors';
 const bookshelf = core.postgres.db;
 const { parseDate, parseNum } = core.utils;
 
+export const MessageFlagStatus = {
+  READ: 1,
+  UNREAD: 2,
+  DELETED: 3,
+  ARCHIVE: 4,
+  PERMANENT_DELETED: 5,
+};
+
 class MessageModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -62,4 +70,4 @@ class MessageModel extends bookshelf.Model {
 }
 
 export const Message = bookshelf.model('Message', MessageModel);
-export default { Message };
+export default { Message, MessageFlagStatus };

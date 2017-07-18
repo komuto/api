@@ -6,14 +6,13 @@ import { User, UserToken, TokenType, UserStatus } from './model';
 import { UserEmail } from './email';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
-import { model } from '../store';
+import { Store, StoreExpedition, StoreStatus } from './../store/model';
 import { userUpdateError, resetPassError, registrationError, activateUserError, fbError } from './error';
 import { Address } from '../address/model';
 import { Discussion, Product } from '../product/model';
 import { OTPAddress } from '../OTP/model';
 
 const fb = new Facebook(config.fb);
-const { Store, StoreExpedition } = model;
 
 export const UserController = {};
 export default { UserController };
@@ -262,7 +261,7 @@ UserController.createStore = async (req, res, next) => {
   const expeditionServices = req.body.expedition_services;
   const storeData = _.assign(req.body.store, {
     user_id: req.user.id,
-    status: 1,
+    status: StoreStatus.ACTIVE,
     seller_theme_id: 0,
     store_id_number: req.body.user.id_number,
     created_at: moment(),

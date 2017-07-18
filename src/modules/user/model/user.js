@@ -18,16 +18,19 @@ const { OTPHPStatus } = OTPModel;
 const SALT_ROUND = 8;
 const IMAGE_PATH = 'user';
 
-export const UserRoles = {
-  ROLE_ADMIN: 'admin',
-  ROLE_USER: 'user',
+export const UserStatus = {
+  INACTIVE: 0,
+  ACTIVE: 1,
+  TEMP_BANNED: 2,
+  PERMANENT_BANNED: 3,
 };
 
-export const UserStatus = {
-  INACTIVE: '0',
-  ACTIVE: '1',
-  TEMPBANNED: '2',
-  PERMABANNED: '3',
+export const UserCooperativeStatus = {
+  NULL: 0,
+  PENDING: 1,
+  VALID: 2,
+  INVALID: 3,
+  NOT_MEMBER: 4,
 };
 
 class UserModel extends bookshelf.Model {
@@ -148,9 +151,9 @@ class UserModel extends bookshelf.Model {
    * @param {Object} data
    */
   static async create(data) {
-    data.approval_koperasi_users = 0;
+    data.approval_koperasi_users = UserCooperativeStatus.NULL;
     data.tgl_create_users = moment();
-    data.status_users = 0;
+    data.status_users = UserStatus.INACTIVE;
     data.tglstatus_users = moment();
     const user = await new this(data).save();
     return user.serialize();
@@ -171,7 +174,7 @@ class UserModel extends bookshelf.Model {
    * @param {number} id
    */
   static async activate(id) {
-    await this.where({ id_users: id }).save({ status_users: '1' }, { patch: true });
+    await this.where({ id_users: id }).save({ status_users: UserStatus.ACTIVE }, { patch: true });
   }
 
   static async getById(id) {
@@ -287,4 +290,4 @@ class UserModel extends bookshelf.Model {
 }
 
 export const User = bookshelf.model('User', UserModel);
-export default { User, UserStatus, UserRoles };
+export default { User, UserStatus };

@@ -1,8 +1,19 @@
-import { Store } from './store';
-import { StoreExpedition } from './store_expedition';
+import { Store, StoreStatus } from './store';
+import { StoreExpedition, StoreExpeditionStatus } from './store_expedition';
 import { Catalog } from './catalog';
-import { FavoriteStore } from './favorite';
-import { Message } from './message';
+import { FavoriteStore, FavoriteStoreStatus } from './favorite';
+import { Message, MessageFlagStatus } from './message';
 import { DetailMessage } from './detail_message';
 
-export default { Store, StoreExpedition, Catalog, FavoriteStore, Message, DetailMessage };
+export default {
+  Store,
+  StoreExpedition,
+  Catalog,
+  FavoriteStore,
+  Message,
+  DetailMessage,
+  StoreStatus,
+  StoreExpeditionStatus,
+  FavoriteStoreStatus,
+  MessageFlagStatus,
+};

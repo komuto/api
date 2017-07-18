@@ -7,6 +7,11 @@ const { parseDate } = core.utils;
 const bookshelf = core.postgres.db;
 const IMAGE_PATH = config.imageFolder.store;
 
+export const StoreStatus = {
+  INACTIVE: 0,
+  ACTIVE: 1,
+};
+
 class StoreModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -295,4 +300,4 @@ class StoreModel extends bookshelf.Model {
 }
 
 export const Store = bookshelf.model('Store', StoreModel);
-export default { Store };
+export default { Store, StoreStatus };

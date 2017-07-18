@@ -10,8 +10,10 @@ ReviewController.createReview = async (req, res, next) => {
   if (!await Review.getByOtherId(req.user.id, req.params.id)) {
     await Review.create(Review.matchDBColumn(req.body));
   } else {
-    return next(new BadRequestError('Create review failed',
-      { id: ['You have already submitted your review for this product'] }));
+    return next(
+      new BadRequestError('Create review failed',
+      { id: ['You have already submitted your review for this product'] }),
+    );
   }
   return next();
 };
