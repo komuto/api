@@ -4,13 +4,14 @@ import sha1 from 'sha1';
 import md5 from 'md5';
 import core from '../../core';
 import { otp } from '../../../../config';
+import { Preference } from './../../preference/model';
 
 const bookshelf = core.postgres.db;
 
 export const OTPHPStatus = {
-  CREATED: '0',
-  VERIFIED: '1',
-  DESTROY: '2',
+  CREATED: 0,
+  VERIFIED: 1,
+  DESTROY: 2,
 };
 
 class OTPHPModel extends bookshelf.Model {
@@ -37,12 +38,13 @@ class OTPHPModel extends bookshelf.Model {
   }
 
   async create(data) {
+    const limit = await Preference.get('otp_hp');
     const created = moment();
     data = {
       ...data,
       kode_otphp: Math.floor((Math.random() * (99999 - 10000)) + 10000),
       datecreated_otphp: created,
-      expdate_otphp: created.clone().add(1, 'hour'),
+      expdate_otphp: created.clone().add(limit.value, 'd'),
     };
     return await this.save(data, { method: 'insert' });
   }

@@ -38,6 +38,7 @@ class PreferenceModel extends bookshelf.Model {
   static matchKey(key) {
     const variable = {
       otp_address: 'masa_aktif_kode_otpaddress',
+      otp_hp: 'masa_aktif_kode_otphp',
     };
     return variable[key];
   }
