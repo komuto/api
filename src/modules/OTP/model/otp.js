@@ -5,6 +5,7 @@ import md5 from 'md5';
 import randomInt from 'random-int';
 import core from '../../core';
 import { otp } from '../../../../config';
+import { Preference } from './../../preference/model';
 
 const bookshelf = core.postgres.db;
 
@@ -25,12 +26,13 @@ class OTPModel extends bookshelf.Model {
   }
 
   async create(data) {
+    const limit = await Preference.get('otp_hp');
     const created = moment();
     data = {
       ...data,
       kode: randomInt(10000, 99999),
       date_created: created,
-      date_expired: created.clone().add(1, 'hour'),
+      date_expired: created.clone().add(limit.value, 'd'),
     };
     return await this.save(data, { method: 'insert' });
   }
