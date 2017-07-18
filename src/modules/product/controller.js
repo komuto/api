@@ -72,7 +72,7 @@ ProductController.getProduct = async (req, res, next) => {
  */
 ProductController.addWishlist = async (req, res, next) => {
   const product = await Product.findById(req.params.id);
-  Wishlist.addWishlist(req.params.id, req.user.id);
+  product.is_liked = await Wishlist.addWishlist(req.params.id, req.user.id);
   req.resData = {
     message: 'Success',
     data: product,
