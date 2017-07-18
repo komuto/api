@@ -138,7 +138,7 @@ StoreController.updateCatalog = async (req, res, next) => {
  * Verify Store
  */
 StoreController.verify = async (req, res, next) => {
-  // const storeId = await Store.getStoreId(req.user.id);
   await OTPAddress.verify(req.user.id, req.body.code);
+  await Store.updateVerification(req.user.id);
   return next();
 };

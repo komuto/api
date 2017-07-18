@@ -261,6 +261,12 @@ class StoreModel extends bookshelf.Model {
     return store.get('id_toko');
   }
 
+  static async updateVerification(id) {
+    const store = await new this({ id_users: id }).fetch();
+    if (!store) throw new BadRequestError('Tidak ada toko');
+    return await store.save({ tanggal_verifikasi: new Date() }, { patch: true });
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data

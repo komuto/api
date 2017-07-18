@@ -2,6 +2,7 @@ import moment from 'moment';
 import randomString from 'randomstring';
 import core from '../../core';
 import { verifyOTPAddressError } from './../messages';
+import { Preference } from './../../preference/model';
 
 const bookshelf = core.postgres.db;
 
@@ -26,13 +27,13 @@ class OTPAddressModel extends bookshelf.Model {
    * Create OTP address
    */
   static async create(userId) {
+    const limit = await Preference.get('otp_address');
     const data = this.matchDBColumn({
       user_id: userId,
       code: randomString.generate(10),
       status: OTPAddressStatus.CREATED,
       created_at: moment(),
-      // TODO: Get limit expired_at from global_parameters table.
-      expired_at: moment().add(7, 'd'),
+      expired_at: moment().add(limit.value, 'd'),
     });
     return await new this(data).save();
   }
@@ -41,10 +42,13 @@ class OTPAddressModel extends bookshelf.Model {
    * Verify store
    */
   static async verify(userId, code) {
-    const otp = await this.where({ id_users: userId, kode_otpaddress: code })
-      .query((qb) => {
-        qb.where('expdate_otpaddress', '>', moment());
-      }).fetch();
+    const otp = await this.where({
+      id_users: userId,
+      kode_otpaddress: code,
+      status_otpaddress: OTPAddressStatus.CREATED,
+    }).query((qb) => {
+      qb.where('expdate_otpaddress', '>', moment());
+    }).fetch();
     if (!otp) throw verifyOTPAddressError('OTPAddress', 'not_found');
     return await otp.save({ status_otpaddress: OTPAddressStatus.VERIFIED }, { patch: true });
   }
