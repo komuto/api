@@ -18,7 +18,7 @@ class ReportModel extends bookshelf.Model {
   serialize() {
     return {
       id: this.get('id_pelaporanproduk'),
-      product_id: this.get('id_produk'),
+      product_id: parseNum(this.get('id_produk')),
       user_id: this.get('identifier_pelapor'),
       type: parseNum(this.get('jenis_pelaporanproduk')),
       description: this.get('deskripsi_pelaporanproduk'),
