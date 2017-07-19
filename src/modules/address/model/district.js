@@ -56,10 +56,17 @@ class DistrictModel extends bookshelf.Model {
   /**
    * Get a line item by condition
    * @param {Object} condition
+   * @param {String} query
    */
-  static async get(condition = null) {
+  static async get(condition = null, query = null) {
     condition = _.pickBy(condition, _.identity);
-    return await this.where(condition).fetchAll();
+    return await this.where(condition)
+      .query((qb) => {
+        if (query) {
+          qb.whereRaw('LOWER(nama_kotakab) LIKE ?', `%${query.toLowerCase()}%`).limit(9);
+        }
+      })
+      .fetchAll();
   }
 }
 

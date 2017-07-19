@@ -46,7 +46,7 @@ AddressController.getProvinces = async (req, res, next) => {
 AddressController.getDistricts = async (req, res, next) => {
   const condition = typeof req.param('province_id') === 'undefined'
     ? {} : { id_provinsi: req.param('province_id') };
-  const districts = await District.get(condition);
+  const districts = await District.get(condition, req.param('q'));
   req.resData = {
     message: 'Districts Data',
     data: districts,
