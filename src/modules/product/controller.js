@@ -14,6 +14,8 @@ import {
 import { Wishlist } from './../user/model';
 import { model as storeModel } from '../store';
 import { getProductError, createProductError } from './error';
+import { ReportEmail } from './email';
+import config from './../../../config';
 
 const { Store, Catalog } = storeModel;
 
@@ -191,6 +193,7 @@ ProductController.createComment = async (req, res, next) => {
  * Report product
  */
 ProductController.report = async (req, res, next) => {
+  const product = await Product.findById(req.params.id);
   const data = Report.matchDBColumn({
     product_id: req.params.id,
     user_id: req.user.id,
@@ -198,6 +201,7 @@ ProductController.report = async (req, res, next) => {
     description: req.body.description,
   });
   const report = await Report.create(data);
+  ReportEmail.sendReportProduct(config.komutoEmail, report.serialize(), product);
   req.resData = {
     message: 'Report Data',
     data: report,

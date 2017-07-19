@@ -12,6 +12,30 @@ export const ReportType = {
   OTHER: 5,
 };
 
+export const ReportTypeWord = (type) => {
+  let word = null;
+  switch (type) {
+    case ReportType.WRONG_CATEGORY:
+      word = 'Salah Kategori';
+      break;
+    case ReportType.ADVERTISEMENT:
+      word = 'Iklan Situs Luar';
+      break;
+    case ReportType.PORNOGRAPHY:
+      word = 'Pornografi';
+      break;
+    case ReportType.BRAND:
+      word = 'Pelanggaran Merk Dagang';
+      break;
+    case ReportType.OTHER:
+      word = 'Lainnya';
+      break;
+    default:
+      break;
+  }
+  return word;
+};
+
 class ReportModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -63,4 +87,4 @@ class ReportModel extends bookshelf.Model {
 }
 
 export const Report = bookshelf.model('Report', ReportModel);
-export default { Report, ReportType };
+export default { Report, ReportType, ReportTypeWord };

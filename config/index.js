@@ -66,10 +66,11 @@ def.url = (dir = '/') => {
   return `http${def.https ? 's' : ''}://${def.host}${port}${dir}`;
 };
 
-// komuto url
+// komuto url & email
 def.komutoUrl = 'http://api.komutodev.aptmi.com/komuto-api/';
 def.frontendKomuto = 'https://komuto.skyshi.com';
 def.assetUrl = 'http://188.166.246.46';
+def.komutoEmail = 'developer@skyshi.com';
 
 // OTP sms
 def.otp = {};
