@@ -36,6 +36,7 @@ class ProductModel extends bookshelf.Model {
       price: parseDec(this.get('harga_produk')),
       discount: this.get('disc_produk'),
       is_discount: !!this.get('disc_produk'),
+      is_wholesaler: this.get('is_grosir'),
     };
     if (wishlist) {
       product.is_liked = true;
