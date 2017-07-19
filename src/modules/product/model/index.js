@@ -6,6 +6,7 @@ import { Discussion } from './discussion';
 import { Comment } from './comment';
 import { Report, ReportType, ReportTypeWord } from './report';
 import { Dropship, DropshipStatus } from './dropship';
+import { View } from './view';
 
 export default {
   ExpeditionProduct,
@@ -21,4 +22,5 @@ export default {
   ReportTypeWord,
   Dropship,
   DropshipStatus,
+  View,
 };

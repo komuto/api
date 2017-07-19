@@ -1,4 +1,5 @@
 import moment from 'moment';
+import requestIp from 'request-ip';
 import {
   Product,
   Discussion,
@@ -10,6 +11,7 @@ import {
   ProductStatus,
   Dropship,
   DropshipStatus,
+  View,
 } from './model';
 import { Wishlist } from './../user/model';
 import { model as storeModel } from '../store';
@@ -77,6 +79,7 @@ ProductController.search = async (req, res, next) => {
 ProductController.getProduct = async (req, res, next) => {
   const product = await Product.getFullProduct(req.params.id, req.user.id);
   if (!product) throw getProductError('product', 'not_found');
+  View.store(req.params.id, requestIp.getClientIp(req));
   req.resData = {
     message: 'Product Detail Data',
     data: product,
