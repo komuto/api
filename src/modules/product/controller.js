@@ -197,7 +197,7 @@ ProductController.report = async (req, res, next) => {
   const data = Report.matchDBColumn({
     product_id: req.params.id,
     user_id: req.user.id,
-    type: req.body.type,
+    type: req.body.report_type,
     description: req.body.description,
   });
   const report = await Report.create(data);

@@ -59,7 +59,7 @@ constraints.discussion = { question: { presence: true } };
 constraints.comment = { content: { presence: true } };
 
 constraints.report = {
-  type: {
+  report_type: {
     presence: true,
     numericality: {
       greaterThan: 0,
