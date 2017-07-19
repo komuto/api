@@ -13,7 +13,8 @@ const cache = core.cache;
  * Get full detailed store
  */
 routes.get('/stores/:id',
-  cache('5 minutes'),
+  // cache('5 minutes'),
+  auth(false),
   wrap(StoreController.getStore),
   apiResponse());
 

@@ -84,14 +84,19 @@ class StoreModel extends bookshelf.Model {
 
   /**
    * Get detail catalogs
+   * @param store
+   * @param userId
    */
-  static getCatalogs(store) {
+  static getCatalogs(store, userId) {
     return store.related('catalogs').map((catalog) => {
       const catalogProducts = catalog.related('products').map((product) => {
         const images = product.related('images').serialize();
+        const { likes, isLiked } = this.getLikes(product, userId);
         return {
           ...product.serialize({ minimal: true }),
           image: images.length ? images[0].file : null,
+          count_like: likes.length,
+          is_liked: isLiked,
         };
       });
       return {
@@ -114,6 +119,8 @@ class StoreModel extends bookshelf.Model {
 
   /**
    * Get detail user
+   * @param store
+   * @returns {{origin: *, district: *}}
    */
   static getOriginAndDistrict(store) {
     let origin = null;
@@ -131,6 +138,8 @@ class StoreModel extends bookshelf.Model {
 
   /**
    * Get reviews
+   * @param store
+   * @returns {{reviews: Array, totalSold: number, quality: number, accuracy: number}}
    */
   static getReviews(store) {
     let quality = 0;
@@ -161,15 +170,29 @@ class StoreModel extends bookshelf.Model {
   }
 
   /**
+   * Get likes
+   * @param product
+   * @param id
+   * @returns {{likes: (Model|Collection|undefined|*), isLiked: *}}
+   */
+  static getLikes(product, id) {
+    const likes = product.related('likes');
+    const isLiked = id ? _.find(likes.models, o => o.attributes.id_users === id) : false;
+    return { likes, isLiked };
+  }
+
+  /**
    * Get store with its relation
    * @param id {integer} store id
+   * @param userId {integer} user id
    */
-  static async getFullStore(id) {
+  static async getFullStore(id, userId) {
     let store = await this.where({ id_toko: id }).fetch({
       withRelated: [
         'user.addresses.district',
         'user.addresses.province',
         'products.reviews.user',
+        'catalogs.products.likes',
         {
           'products.reviews.product.images': (qb) => {
             qb.limit(1);
@@ -187,7 +210,7 @@ class StoreModel extends bookshelf.Model {
         },
       ],
     });
-    const catalogs = this.getCatalogs(store);
+    const catalogs = this.getCatalogs(store, userId);
     const { origin, district } = this.getOriginAndDistrict(store);
     const { reviews, totalSold, quality, accuracy } = this.getReviews(store);
     store = store.serialize();
@@ -261,6 +284,10 @@ class StoreModel extends bookshelf.Model {
     });
   }
 
+  /**
+   * Get store id
+   * @param id {integer} user id
+   */
   static async getStoreId(id) {
     const store = await new this({ id_users: id }).fetch();
     if (!store) throw new BadRequestError('Tidak ada toko');
