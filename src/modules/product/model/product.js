@@ -61,7 +61,7 @@ class ProductModel extends bookshelf.Model {
       is_wholesaler: this.get('is_grosir'),
       count_sold: parseNum(this.get('count_sold'), 0),
       count_popular: parseNum(this.get('count_populer'), 0),
-      count_view: 0,
+      count_view: this.relations.view ? this.related('view').serialize().ip.length : 0,
       identifier_brand: this.get('identifier_brand'),
       identifier_catalog: this.get('identifier_katalog'),
       status_at: parseDate(this.get('tglstatus_produk')),
@@ -120,6 +120,13 @@ class ProductModel extends bookshelf.Model {
    */
   discussions() {
     return this.hasMany('Discussion', 'id_produk');
+  }
+
+  /**
+   * Add relation to View
+   */
+  view() {
+    return this.hasOne('View', 'id_produk');
   }
 
   /**
@@ -202,6 +209,8 @@ class ProductModel extends bookshelf.Model {
         pageSize,
         withRelated: [
           'images',
+          'likes',
+          'view',
           {
             store: (qb) => {
               if (other && other.verified) {
@@ -210,7 +219,6 @@ class ProductModel extends bookshelf.Model {
             },
           },
           relatedServices,
-          'likes',
         ],
       });
 
@@ -322,6 +330,7 @@ class ProductModel extends bookshelf.Model {
         'expeditionServices.expedition',
         'likes',
         'discussions',
+        'view',
       ],
     });
     if (!product) return false;
