@@ -2,7 +2,6 @@ import express from 'express';
 import { BrandController } from './controller';
 import core from '../core';
 import { apiResponse } from '../core/middleware';
-import config from '../../../config';
 
 const routes = express.Router();
 const { wrap } = core.utils;

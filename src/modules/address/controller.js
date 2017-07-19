@@ -44,7 +44,8 @@ AddressController.getProvinces = async (req, res, next) => {
 };
 
 AddressController.getDistricts = async (req, res, next) => {
-  const condition = typeof req.param('province_id') === 'undefined' ? {} : { id_provinsi: req.param('province_id') };
+  const condition = typeof req.param('province_id') === 'undefined'
+    ? {} : { id_provinsi: req.param('province_id') };
   const districts = await District.get(condition);
   req.resData = {
     message: 'Districts Data',
@@ -54,7 +55,8 @@ AddressController.getDistricts = async (req, res, next) => {
 };
 
 AddressController.getSubDistricts = async (req, res, next) => {
-  const condition = typeof req.param('district_id') === 'undefined' ? {} : { id_kotakab: req.param('district_id') };
+  const condition = typeof req.param('district_id') === 'undefined'
+    ? {} : { id_kotakab: req.param('district_id') };
   const subDistricts = await SubDistrict.get(condition);
   req.resData = {
     message: 'Sub Districts Data',
@@ -64,7 +66,8 @@ AddressController.getSubDistricts = async (req, res, next) => {
 };
 
 AddressController.getVillages = async (req, res, next) => {
-  const condition = typeof req.param('sub_district_id') === 'undefined' ? {} : { id_kecamatan: req.param('sub_district_id') };
+  const condition = typeof req.param('sub_district_id') === 'undefined' ?
+    {} : { id_kecamatan: req.param('sub_district_id') };
   const villages = await Village.get(condition);
   req.resData = {
     message: 'Villages Data',

@@ -1,6 +1,6 @@
-import { Bucket } from './bucket';
+import { Bucket, BucketStatus } from './bucket';
 import { Item } from './item';
-import { Promo } from './promo';
+import { Promo, PromoStatus } from './promo';
 import { Shipping } from './shipping';
 
-export default { Bucket, Item, Promo, Shipping };
+export default { Bucket, Item, Promo, Shipping, BucketStatus, PromoStatus };

@@ -116,4 +116,5 @@ class ExpeditionModel extends bookshelf.Model {
   }
 }
 
-export default bookshelf.model('Expedition', ExpeditionModel);
+export const Expedition = bookshelf.model('Expedition', ExpeditionModel);
+export default { Expedition };

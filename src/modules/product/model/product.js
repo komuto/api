@@ -1,11 +1,10 @@
 import _ from 'lodash';
 import slug from 'slug';
 import core from '../../core';
-import { model } from '../../address';
+import { Address } from '../../address/model';
 import { BadRequestError } from '../../../../common/errors';
 
 const { parseNum, parseDec, parseDate } = core.utils;
-const { Address } = model;
 const bookshelf = core.postgres.db;
 
 export const ProductStatus = {

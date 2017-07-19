@@ -4,6 +4,14 @@ import { BadRequestError } from '../../../../common/errors';
 const bookshelf = core.postgres.db;
 const { parseNum } = core.utils;
 
+export const ReportType = {
+  WRONG_CATEGORY: 1,
+  ADVERTISEMENT: 2,
+  PORNOGRAPHY: 3,
+  BRAND: 4,
+  OTHER: 5,
+};
+
 class ReportModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -55,4 +63,4 @@ class ReportModel extends bookshelf.Model {
 }
 
 export const Report = bookshelf.model('Report', ReportModel);
-export default { Report };
+export default { Report, ReportType };

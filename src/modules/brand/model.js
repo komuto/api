@@ -39,4 +39,5 @@ class BrandModel extends bookshelf.Model {
   }
 }
 
-export default bookshelf.model('Brand', BrandModel);
+export const Brand = bookshelf.model('Brand', BrandModel);
+export default { Brand };

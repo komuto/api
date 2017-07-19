@@ -55,5 +55,6 @@ class ServiceModel extends bookshelf.Model {
   }
 }
 
-export default bookshelf.model('ExpeditionService', ServiceModel);
+export const ExpeditionService = bookshelf.model('ExpeditionService', ServiceModel);
+export default { ExpeditionService };
 

@@ -1,10 +1,11 @@
 import core from '../../core';
 
+const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
 
 export const BankAccountStatus = {
-  PRIMARY: '1',
-  NOT_PRIMARY: '0',
+  PRIMARY: 1,
+  NOT_PRIMARY: 0,
 };
 
 class BankAccountModel extends bookshelf.Model {
@@ -26,7 +27,7 @@ class BankAccountModel extends bookshelf.Model {
       holder_name: this.get('nama_pemilikrekening'),
       holder_account_name: this.get('nomor_rekening'),
       bank_branch_office_name: this.get('cabang_bankrekeninguser'),
-      is_primary: this.get('primary_rekening') === '1',
+      is_primary: parseNum(this.get('primary_rekening')) === BankAccountStatus.PRIMARY,
     };
   }
 

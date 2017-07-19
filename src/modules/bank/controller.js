@@ -1,5 +1,10 @@
 import { Bank, BankAccount, BankAccountStatus } from './model';
-import { getAccountError, createAccountError, updateAccountError, deleteAccountError } from './error';
+import {
+  getAccountError,
+  createAccountError,
+  updateAccountError,
+  deleteAccountError,
+} from './error';
 
 export const BankController = {};
 export default { BankController };

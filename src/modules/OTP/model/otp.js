@@ -10,9 +10,9 @@ import { Preference } from './../../preference/model';
 const bookshelf = core.postgres.db;
 
 export const OTPStatus = {
-  DRAFT: '0',
-  SENT: '1',
-  USED: '2',
+  DRAFT: 0,
+  SENT: 1,
+  USED: 2,
 };
 
 class OTPModel extends bookshelf.Model {

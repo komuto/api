@@ -4,8 +4,8 @@ import core from '../../core';
 const bookshelf = core.postgres.db;
 
 const ExpeditionProductStatus = {
-  USED: '1',
-  UNUSED: '2',
+  USED: 1,
+  UNUSED: 2,
 };
 
 class ExpeditionProductModel extends bookshelf.Model {

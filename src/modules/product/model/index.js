@@ -4,7 +4,7 @@ import { ImageProduct } from './image_product';
 import { Wholesale } from './wholesale';
 import { Discussion } from './discussion';
 import { Comment } from './comment';
-import { Report } from './report';
+import { Report, ReportType } from './report';
 import { Dropship, DropshipStatus } from './dropship';
 
 export default {
@@ -17,6 +17,7 @@ export default {
   Discussion,
   Comment,
   Report,
+  ReportType,
   Dropship,
   DropshipStatus,
 };

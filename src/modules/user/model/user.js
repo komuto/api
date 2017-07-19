@@ -215,7 +215,13 @@ class UserModel extends bookshelf.Model {
   }
 
   static async getWishlist(id) {
-    const user = await this.where('id_users', id).fetch({ withRelated: ['wishlistProducts.store', 'wishlistProducts.images', 'wishlistProducts.likes'] });
+    const user = await this.where('id_users', id).fetch({
+      withRelated: [
+        'wishlistProducts.store',
+        'wishlistProducts.images',
+        'wishlistProducts.likes',
+      ],
+    });
     const products = user.related('wishlistProducts');
     return products.map((product) => {
       const store = product.related('store');

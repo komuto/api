@@ -8,6 +8,12 @@ const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
 bookshelf.plugin(ModelBase.pluggable);
 
+export const BucketStatus = {
+  ADDED: 0,
+  CHECKOUT: 1,
+  DELETED: 2,
+};
+
 class BucketModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -60,7 +66,7 @@ class BucketModel extends bookshelf.Model {
   static async getCount(userId) {
     const bucket = await this.where({
       id_users: userId,
-      status_bucket: 0,
+      status_bucket: BucketStatus.ADDED,
     }).fetch({ withRelated: ['items'] });
     return bucket ? bucket.related('items').length : 0;
   }
@@ -69,7 +75,7 @@ class BucketModel extends bookshelf.Model {
    * Get bucket
    */
   static async get(userId) {
-    const bucket = await this.where({ id_users: userId, status_bucket: 0 }).fetch({
+    const bucket = await this.where({ id_users: userId, status_bucket: BucketStatus.ADDED }).fetch({
       withRelated: [
         'promo',
         'items.product.store',
@@ -106,7 +112,7 @@ class BucketModel extends bookshelf.Model {
   static async findBucket(userId) {
     return await this.findOrCreate({
       id_users: userId,
-      status_bucket: 0,
+      status_bucket: BucketStatus.ADDED,
     }, {
       defaults: this.matchDBColumn({
         wallet: 0,
