@@ -61,7 +61,8 @@ class ProductModel extends bookshelf.Model {
       is_wholesaler: this.get('is_grosir'),
       count_sold: parseNum(this.get('count_sold'), 0),
       count_popular: parseNum(this.get('count_populer'), 0),
-      count_view: this.relations.view ? this.related('view').serialize().ip.length : 0,
+      count_view: this.relations.view && this.related('view').serialize().ip
+        ? this.related('view').serialize().ip.length : 0,
       identifier_brand: this.get('identifier_brand'),
       identifier_catalog: this.get('identifier_katalog'),
       status_at: parseDate(this.get('tglstatus_produk')),
