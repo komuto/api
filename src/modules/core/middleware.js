@@ -97,11 +97,17 @@ export function formatValidation(rules, msg) {
  * Validate parameters
  * @param constraints {object}
  * @param isBody {boolean} true evaluate req.body else req.query
- * @param prop {string} name of the array to check
+ * @param prop {object} name of the array to check
  * @param strict {boolean} need to be available
- * @param msg {string} title for error
+ * @param msg {object} title for error
  */
-export function validateParam(constraints, isBody = false, prop, strict = false, msg) {
+export function validateParam(
+  constraints,
+  isBody = false,
+  prop = null,
+  strict = false,
+  msg = null,
+) {
   return (req, res, next) => {
     if (Array.isArray(req.body[prop])) {
       const params = req.body[prop];

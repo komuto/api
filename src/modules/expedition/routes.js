@@ -45,4 +45,14 @@ routes.get('/expeditions/:id/cost',
   wrap(ExpeditionController.getExpeditionCost),
   apiResponse());
 
+/**
+ * GET /expeditions/cost
+ * View expedition cost by product id
+ */
+routes.get('/expeditions/cost',
+  validateParam(constraints.costByProduct),
+  cache(),
+  wrap(ExpeditionController.getExpeditionCostByProduct),
+  apiResponse());
+
 export default routes;

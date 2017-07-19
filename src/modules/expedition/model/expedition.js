@@ -111,7 +111,6 @@ class ExpeditionModel extends bookshelf.Model {
         });
       }
     });
-    if (results.length === 0) throw new BadRequestError('No expedition found');
     return results;
   }
 }

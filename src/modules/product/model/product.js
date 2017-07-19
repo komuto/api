@@ -400,6 +400,14 @@ class ProductModel extends bookshelf.Model {
     return products.map(product => (product.get('id_produk')));
   }
 
+  static async getExpeditionsById(id) {
+    const product = await this.where({ id_produk: id }).fetch({ withRelated: ['expeditionServices'] });
+    const services = product.related('expeditionServices');
+    return _.map(_.uniqBy(services.serialize({ minimal: false }), 'expedition_id'),
+      item => (item.expedition_id),
+    );
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data
