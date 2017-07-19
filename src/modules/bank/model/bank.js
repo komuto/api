@@ -5,6 +5,11 @@ import { BadRequestError } from '../../../../common/errors';
 
 const bookshelf = core.postgres.db;
 
+export const BankStatus = {
+  INACTIVE: 0,
+  ACTIVE: 1,
+};
+
 class BankModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -43,5 +48,5 @@ class BankModel extends bookshelf.Model {
 }
 
 export const Bank = bookshelf.model('Bank', BankModel);
-export default { Bank };
+export default { Bank, BankStatus };
 
