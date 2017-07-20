@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import slug from 'slug';
 import core from '../core';
-import { BadRequestError } from '../../../common/errors';
+import { getCategoryError } from './messages';
 
 const bookshelf = core.postgres.db;
 
@@ -61,7 +61,7 @@ class CategoryModel extends bookshelf.Model {
    */
   static async getDetailCategories(id) {
     const category = await this.where({ id_kategoriproduk: id }).fetch({ withRelated: ['subcategories'] });
-    if (!category) throw new BadRequestError('No category found');
+    if (!category) throw getCategoryError('category', 'not_found');
     const subCategories = category.related('subcategories');
     return {
       ...category.serialize(),
@@ -74,7 +74,7 @@ class CategoryModel extends bookshelf.Model {
    */
   static async getFullCategories() {
     const categories = await this.where({ parentid_kategoriproduk: 0 }).fetchAll({ withRelated: ['subcategories'] });
-    if (!categories) throw new BadRequestError('No category found');
+    if (!categories) throw getCategoryError('category', 'not_found');
     return categories.map((category) => {
       const subCategories = category.related('subcategories');
       return {

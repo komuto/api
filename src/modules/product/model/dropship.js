@@ -1,5 +1,5 @@
 import core from '../../core';
-import { BadRequestError } from '../../../../common/errors';
+import { createDropshipError } from './../messages';
 
 const bookshelf = core.postgres.db;
 const { parseDate, parseNum } = core.utils;
@@ -37,7 +37,7 @@ class DropshipModel extends bookshelf.Model {
    */
   static async create(data) {
     return await new this(data).save().catch(() => {
-      throw new BadRequestError('Gagal menambah dropship');
+      throw createDropshipError('dropship', 'error');
     });
   }
 

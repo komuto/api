@@ -7,7 +7,7 @@ import {
   DetailMessage,
   MessageFlagStatus,
 } from './model';
-import { makeFavoriteError, deleteCatalogError } from './error';
+import { makeFavoriteError, deleteCatalogError } from './messages';
 import { OTPAddress } from './../OTP/model';
 
 export const StoreController = {};

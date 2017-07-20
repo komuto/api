@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import constraints from './validation';
 import utils from '../../../common/utils';
 import { jwt as jwtOptions } from '../../../config';
-import { getUserError, errMsg } from './error';
+import { getUserError, errMsg } from './messages';
 import { middleware } from '../core';
 
 export const ROLE_ALL = '*';

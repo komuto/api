@@ -2,7 +2,7 @@ import express from 'express';
 import { BankController } from './controller';
 import core from '../core';
 import { controller } from '../OTP';
-import { createAccountError, updateAccountError, deleteAccountError } from './error';
+import { createAccountError, updateAccountError, deleteAccountError } from './messages';
 import { validateCreateBankAccount, validateDeleteBankAccount } from './middleware';
 
 const routes = express.Router();
@@ -22,7 +22,7 @@ routes.get('/banks',
  * GET /banks/:id
  * View bank detail
  */
-routes.get('/banks/:id',
+routes.get('/banks/:id([0-9]{1,10})',
   wrap(BankController.getBank),
   apiResponse());
 
@@ -38,7 +38,7 @@ routes.get('/accounts/banks',
 /**
  * Get bank account
  */
-routes.get('/accounts/banks/:id',
+routes.get('/accounts/banks/:id([0-9]{1,10})',
   auth(),
   wrap(BankController.getBankAccount),
   apiResponse());
@@ -56,7 +56,7 @@ routes.post('/accounts/banks',
 /**
  * Update bank account
  */
-routes.put('/accounts/banks/:id',
+routes.put('/accounts/banks/:id([0-9]{1,10})',
   auth(),
   validateCreateBankAccount(),
   wrap(OTPController.verifyOTPBankCode(updateAccountError('code', 'code_not_found'))),
@@ -66,7 +66,7 @@ routes.put('/accounts/banks/:id',
 /**
  * Delete bank account
  */
-routes.delete('/accounts/banks/:id',
+routes.delete('/accounts/banks/:id([0-9]{1,10})',
   auth(),
   validateDeleteBankAccount(),
   wrap(OTPController.verifyOTPBankCode(deleteAccountError('code', 'code_not_found'))),

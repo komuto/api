@@ -2,7 +2,7 @@ import express from 'express';
 import { ProductController } from './controller';
 import core from '../core';
 import constraints from './validation';
-import { errMsg } from './error';
+import { errMsg } from './messages';
 import { ReviewController } from '../review';
 
 const routes = express.Router();
@@ -34,7 +34,7 @@ routes.get('/products/search',
  * POST /products/id/reviews
  * Create a product review
  */
-routes.post('/products/:id/reviews',
+routes.post('/products/:id([0-9]{1,10})/reviews',
   auth(),
   wrap(ReviewController.createReview),
   apiResponse());
@@ -43,7 +43,7 @@ routes.post('/products/:id/reviews',
  * GET /products/id
  * Get full detailed product
  */
-routes.get('/products/:id',
+routes.get('/products/:id([0-9]{1,10})',
   auth(false),
   wrap(ProductController.getProduct),
   apiResponse());
@@ -64,7 +64,7 @@ routes.post('/products',
  * GET /products/id/reviews
  * Get all reviews of a product
  */
-routes.get('/products/:id/reviews',
+routes.get('/products/:id([0-9]{1,10})/reviews',
   wrap(ReviewController.getReviews),
   apiResponse());
 
@@ -72,7 +72,7 @@ routes.get('/products/:id/reviews',
  * GET /products/id/wishlist
  * Add to wishlist
  */
-routes.get('/products/:id/wishlist',
+routes.get('/products/:id([0-9]{1,10})/wishlist',
   auth(),
   wrap(ProductController.addWishlist),
   apiResponse());
@@ -81,7 +81,7 @@ routes.get('/products/:id/wishlist',
  * GET /products/id/discussions
  * Get all discussions of a product
  */
-routes.get('/products/:id/discussions',
+routes.get('/products/:id([0-9]{1,10})/discussions',
   wrap(ProductController.getDiscussions),
   apiResponse());
 
@@ -89,7 +89,7 @@ routes.get('/products/:id/discussions',
  * POST /products/id/discussions
  * Create discussion
  */
-routes.post('/products/:id/discussions',
+routes.post('/products/:id([0-9]{1,10})/discussions',
   auth(),
   validateParam(constraints.discussion, true),
   wrap(ProductController.createDiscussion),
@@ -99,7 +99,7 @@ routes.post('/products/:id/discussions',
  * GET /products/id/discussions/id/comments
  * Get all comments of a discussion
  */
-routes.get('/products/:id/discussions/:discussion_id/comments',
+routes.get('/products/:id([0-9]{1,10})/discussions/:discussion_id([0-9]{1,10})/comments',
   wrap(ProductController.getComments),
   apiResponse());
 
@@ -107,7 +107,7 @@ routes.get('/products/:id/discussions/:discussion_id/comments',
  * POST /products/id/discussions/id/comments
  * Create comment
  */
-routes.post('/products/:id/discussions/:discussion_id/comments',
+routes.post('/products/:id([0-9]{1,10})/discussions/:discussion_id([0-9]{1,10})/comments',
   auth(),
   validateParam(constraints.comment, true),
   wrap(ProductController.createComment),
@@ -117,7 +117,7 @@ routes.post('/products/:id/discussions/:discussion_id/comments',
  * POST /products/id/report
  * Report product
  */
-routes.post('/products/:id/report',
+routes.post('/products/:id([0-9]{1,10})/report',
   auth(),
   validateParam(constraints.report, true),
   wrap(ProductController.report),
@@ -127,7 +127,7 @@ routes.post('/products/:id/report',
  * POST /products/id/dropship
  * Dropship product
  */
-routes.post('/products/:id/dropship',
+routes.post('/products/:id([0-9]{1,10})/dropship',
   auth(),
   validateParam(constraints.dropship, true),
   wrap(ProductController.dropship),

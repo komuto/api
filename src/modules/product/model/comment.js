@@ -1,5 +1,6 @@
 import core from '../../core';
-import { BadRequestError } from '../../../../common/errors';
+import { getDiscussionError } from './../messages';
+import { createCommentError } from './../../store/messages';
 
 const bookshelf = core.postgres.db;
 const { parseDate, parseNum } = core.utils;
@@ -51,7 +52,7 @@ class CommentModel extends bookshelf.Model {
       .orderBy('tgl_subdiskusi', 'DESC')
       .fetchPage({ page, pageSize, withRelated: ['user'] })
       .catch(() => {
-        throw new BadRequestError('No Discussion Found');
+        throw getDiscussionError('discussion', 'not_found');
       });
   }
 
@@ -60,7 +61,7 @@ class CommentModel extends bookshelf.Model {
    */
   static async create(data) {
     return await new this(data).save().catch(() => {
-      throw new BadRequestError('Gagal menambah komentar.');
+      throw createCommentError('comment', 'error');
     });
   }
 

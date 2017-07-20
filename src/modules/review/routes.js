@@ -18,7 +18,7 @@ routes.get('/reviews/search',
  * GET /reviews/id
  * Get individual review
  */
-routes.get('/reviews/:id',
+routes.get('/reviews/:id([0-9]{1,10})',
   wrap(ReviewController.getReview),
   apiResponse());
 

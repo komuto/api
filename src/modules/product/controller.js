@@ -15,7 +15,7 @@ import {
 } from './model';
 import { Wishlist } from './../user/model';
 import { model as storeModel } from '../store';
-import { getProductError, createProductError } from './error';
+import { getProductError, createProductError } from './messages';
 import { ReportEmail } from './email';
 import config from './../../../config';
 

@@ -1,5 +1,5 @@
 import core from '../../core';
-import { BadRequestError } from '../../../../common/errors';
+import { createCommentError } from './../messages';
 
 const bookshelf = core.postgres.db;
 const { parseDate } = core.utils;
@@ -31,7 +31,7 @@ class DetailMessageModel extends bookshelf.Model {
    */
   static async create(data) {
     return await new this(data).save().catch(() => {
-      throw new BadRequestError('Gagal membuat pesan');
+      throw createCommentError('comment', 'error');
     });
   }
 

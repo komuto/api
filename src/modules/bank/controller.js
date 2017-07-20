@@ -4,7 +4,7 @@ import {
   createAccountError,
   updateAccountError,
   deleteAccountError,
-} from './error';
+} from './messages';
 
 export const BankController = {};
 export default { BankController };

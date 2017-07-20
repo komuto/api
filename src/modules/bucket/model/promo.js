@@ -1,6 +1,6 @@
 import moment from 'moment';
 import core from '../../core';
-import { BadRequestError } from '../../../../common/errors';
+import { getPromoError, invalidPromoError } from './../messages';
 
 const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -40,10 +40,10 @@ class PromoModel extends bookshelf.Model {
    */
   static async get(code) {
     let promo = await this.where({ kode_promo: code }).fetch();
-    if (!promo) throw new BadRequestError('Code promo tidak ditemukan');
+    if (!promo) throw getPromoError('promo', 'not_found');
     promo = promo.serialize();
     const isValid = moment().isBetween(moment.unix(promo.start_at), moment.unix(promo.expired_at));
-    if (!isValid) throw new BadRequestError('Code promo sudah tidak valid');
+    if (!isValid) throw invalidPromoError('promo', 'error');
     return promo;
   }
 }

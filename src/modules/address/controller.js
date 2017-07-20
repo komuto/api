@@ -1,5 +1,5 @@
 import { Address, Province, District, SubDistrict, Village } from './model';
-import { getAddressError, deleteAddressError } from './error';
+import { getAddressError, deleteAddressError } from './messages';
 
 export const AddressController = {};
 export default { AddressController };

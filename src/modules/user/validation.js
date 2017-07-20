@@ -1,4 +1,4 @@
-import { errMsg } from './error';
+import { errMsg } from './messages';
 
 const { loginMsg, registrationMsg, updateMsg, OTPMsg } = errMsg;
 const constraints = {};

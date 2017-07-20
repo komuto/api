@@ -1,7 +1,6 @@
 import express from 'express';
 import { CategoryController } from './controller';
 import core from '../core';
-import config from '../../../config';
 
 const routes = express.Router();
 const { wrap } = core.utils;
@@ -30,7 +29,7 @@ routes.get('/categories/sub',
  * GET /categories/:id
  * View list of sub categories
  */
-routes.get('/categories/:id',
+routes.get('/categories/:id([0-9]{1,10})',
   cache(),
   wrap(CategoryController.getDetailCategories),
   apiResponse());
@@ -39,7 +38,7 @@ routes.get('/categories/:id',
  * GET /categories/id/brands
  * Get brand by category
  */
-routes.get('/categories/:id/brands',
+routes.get('/categories/:id([0-9]{1,10})/brands',
   wrap(CategoryController.getBrands),
   apiResponse());
 

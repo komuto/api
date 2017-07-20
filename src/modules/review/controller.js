@@ -1,5 +1,5 @@
 import { Review } from './model';
-import { BadRequestError } from '../../../common/errors';
+import { createReviewError } from './messages';
 
 export const ReviewController = {};
 export default { ReviewController };
@@ -7,14 +7,8 @@ export default { ReviewController };
 ReviewController.createReview = async (req, res, next) => {
   req.body.user_id = req.user.id;
   req.body.product_id = req.params.id;
-  if (!await Review.getByOtherId(req.user.id, req.params.id)) {
-    await Review.create(Review.matchDBColumn(req.body));
-  } else {
-    return next(
-      new BadRequestError('Create review failed',
-      { id: ['You have already submitted your review for this product'] }),
-    );
-  }
+  if (await Review.getByOtherId(req.user.id, req.params.id)) throw createReviewError('review', 'error');
+  await Review.create(Review.matchDBColumn(req.body));
   return next();
 };
 

@@ -7,7 +7,7 @@ import { UserEmail } from './email';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
 import { Store, StoreExpedition, StoreStatus } from './../store/model';
-import { userUpdateError, resetPassError, registrationError, activateUserError, fbError } from './error';
+import { userUpdateError, resetPassError, registrationError, activateUserError, fbError } from './messages';
 import { Address } from '../address/model';
 import { Discussion, Product } from '../product/model';
 import { OTPAddress } from '../OTP/model';

@@ -12,7 +12,7 @@ const cache = core.cache;
  * GET /stores/id
  * Get full detailed store
  */
-routes.get('/stores/:id',
+routes.get('/stores/:id([0-9]{1,10})',
   // cache('5 minutes'),
   auth(false),
   wrap(StoreController.getStore),
@@ -22,7 +22,7 @@ routes.get('/stores/:id',
  * POST /stores/id/favorite
  * Make a store favorite
  */
-routes.post('/stores/:id/favorite',
+routes.post('/stores/:id([0-9]{1,10})/favorite',
   auth(),
   wrap(StoreController.makeFavorite),
   apiResponse());
@@ -47,7 +47,7 @@ routes.get('/users/store/favorites',
 /**
  * Delete catalog store
  */
-routes.delete('/users/store/catalogs/:id',
+routes.delete('/users/store/catalogs/:id([0-9]{1,10})',
   auth(),
   wrap(StoreController.deleteCatalog),
   apiResponse());
@@ -56,7 +56,7 @@ routes.delete('/users/store/catalogs/:id',
  * POST /stores/id/message
  * Message store
  */
-routes.post('/stores/:id/message',
+routes.post('/stores/:id([0-9]{1,10})/message',
   auth(),
   validateParam(constraints.createMessage, true),
   wrap(StoreController.createMessage),
@@ -76,7 +76,7 @@ routes.post('/users/store/catalogs',
  * GET /users/store/catalogs/id
  * Get catalog
  */
-routes.get('/users/store/catalogs/:id',
+routes.get('/users/store/catalogs/:id([0-9]{1,10})',
   auth(),
   wrap(StoreController.getCatalog),
   apiResponse());
@@ -85,7 +85,7 @@ routes.get('/users/store/catalogs/:id',
  * PUT /users/store/catalogs/id
  * Update catalog
  */
-routes.put('/users/store/catalogs/:id',
+routes.put('/users/store/catalogs/:id([0-9]{1,10})',
   auth(),
   validateParam(constraints.catalog, true),
   wrap(StoreController.updateCatalog),

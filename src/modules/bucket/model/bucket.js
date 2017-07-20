@@ -1,6 +1,6 @@
 import ModelBase from 'bookshelf-modelbase';
 import core from '../../core';
-import { BadRequestError } from '../../../../common/errors';
+import { getBucketError } from './../messages';
 import './item';
 import './shipping';
 
@@ -88,7 +88,7 @@ class BucketModel extends bookshelf.Model {
         'items.shipping.expeditionService.expedition',
       ],
     });
-    if (!bucket) throw new BadRequestError('No bucket found');
+    if (!bucket) throw getBucketError('bucket', 'not_found');
     const items = bucket.related('items').map((item) => {
       let product = item.related('product');
       const shipping = item.related('shipping');

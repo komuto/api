@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import core from '../../core';
-import { BadRequestError } from '../../../../common/errors';
 import config from '../../../../config';
+import { getStoreError, createStoreError } from './../messages';
 
 const { parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -210,6 +210,7 @@ class StoreModel extends bookshelf.Model {
         },
       ],
     });
+    if (!store) throw getStoreError('store', 'not_found');
     const catalogs = this.getCatalogs(store, userId);
     const { origin, district } = this.getOriginAndDistrict(store);
     const { reviews, totalSold, quality, accuracy } = this.getReviews(store);
@@ -269,7 +270,7 @@ class StoreModel extends bookshelf.Model {
    */
   static async create(data) {
     const store = await this.where({ id_users: data.id_users }).fetch();
-    if (store) throw new BadRequestError('Toko sudah ada');
+    if (store) throw createStoreError('store', 'duplicate');
     return await new this(data).save();
   }
 
@@ -290,13 +291,13 @@ class StoreModel extends bookshelf.Model {
    */
   static async getStoreId(id) {
     const store = await new this({ id_users: id }).fetch();
-    if (!store) throw new BadRequestError('Tidak ada toko');
+    if (!store) throw getStoreError('store', 'not_found');
     return store.get('id_toko');
   }
 
   static async updateVerification(id) {
     const store = await new this({ id_users: id }).fetch();
-    if (!store) throw new BadRequestError('Tidak ada toko');
+    if (!store) throw getStoreError('store', 'not_found');
     return await store.save({ tanggal_verifikasi: new Date() }, { patch: true });
   }
 

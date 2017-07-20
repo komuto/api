@@ -30,7 +30,7 @@ routes.get('/expeditions/services',
  * GET /expeditions/:id/services
  * View expedition service
  */
-routes.get('/expeditions/:id/services',
+routes.get('/expeditions/:id([0-9]{1,10})/services',
   cache(),
   wrap(ExpeditionController.getExpeditionService),
   apiResponse());
@@ -39,7 +39,7 @@ routes.get('/expeditions/:id/services',
  * GET /expeditions/:id/cost
  * View expedition cost
  */
-routes.get('/expeditions/:id/cost',
+routes.get('/expeditions/:id([0-9]{1,10})/cost',
   validateParam(constraints.cost),
   cache(),
   wrap(ExpeditionController.getExpeditionCost),

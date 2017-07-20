@@ -2,7 +2,7 @@ import _ from 'lodash';
 import slug from 'slug';
 import core from '../../core';
 import { Address } from '../../address/model';
-import { BadRequestError } from '../../../../common/errors';
+import { getProductError } from './../messages';
 
 const { parseNum, parseDec, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -135,8 +135,8 @@ class ProductModel extends bookshelf.Model {
    */
   static async findById(id) {
     const product = await this.where({ id_produk: id }).fetch();
-    if (product) return product.toJSON();
-    throw new BadRequestError('No product found');
+    if (!product) throw getProductError('product', 'not_found');
+    return product.toJSON();
   }
 
   /**

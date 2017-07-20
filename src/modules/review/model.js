@@ -1,5 +1,6 @@
 import moment from 'moment';
 import core from '../core';
+import { getReviewError } from './messages';
 
 const bookshelf = core.postgres.db;
 const { parseNum, parseDate } = core.utils;
@@ -58,6 +59,7 @@ class ReviewModel extends bookshelf.Model {
    */
   static async getById(id) {
     const review = await this.where({ id_ulasanproduk: id }).fetch({ withRelated: ['user'] });
+    if (!review) throw getReviewError('review', 'not_found');
     const { id: userId, name, photo } = review.related('user').serialize();
     return {
       ...review.serialize({ minimal: false }),

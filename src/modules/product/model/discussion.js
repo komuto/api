@@ -1,6 +1,6 @@
 import core from '../../core';
 import './comment';
-import { BadRequestError } from '../../../../common/errors';
+import { getDiscussionError, createDiscussionError } from './../messages';
 
 const bookshelf = core.postgres.db;
 const { parseDate, parseNum } = core.utils;
@@ -66,7 +66,7 @@ class DiscussionModel extends bookshelf.Model {
         withRelated: ['comments', 'user'],
       })
       .catch(() => {
-        throw new BadRequestError('No Product Found');
+        throw getDiscussionError('discussion', 'not_found');
       });
     return discussions.map((discussion) => {
       const comments = discussion.related('comments');
@@ -82,7 +82,7 @@ class DiscussionModel extends bookshelf.Model {
    */
   static async create(data) {
     return await new this(data).save().catch(() => {
-      throw new BadRequestError('Gagal menambah diskusi.');
+      throw createDiscussionError('discussion', 'error');
     });
   }
 
@@ -105,7 +105,7 @@ class DiscussionModel extends bookshelf.Model {
         ],
       })
       .catch(() => {
-        throw new BadRequestError('No Discussion Found');
+        throw getDiscussionError('discussion', 'not_found');
       });
 
     return discussions.map((discussion) => {

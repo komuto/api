@@ -1,6 +1,6 @@
 import { Strategy as LocalStrategy } from 'passport-local';
 import { User } from '../../model';
-import { loginError } from '../../error';
+import { loginError } from '../../messages';
 
 export default new LocalStrategy({
   usernameField: 'email',

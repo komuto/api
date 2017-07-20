@@ -1,7 +1,7 @@
 import fs from 'fs';
 import _ from 'lodash';
 import Promise from 'bluebird';
-import { BadRequestError } from '../../../common/errors';
+import { uploadError } from './messages';
 
 export const ImageController = {};
 export default { ImageController };
@@ -20,7 +20,7 @@ ImageController.upload = async (req, res, next) => {
   });
 
   await Promise.all(promises).catch(() => {
-    throw new BadRequestError('Gagal upload image');
+    throw uploadError('image', 'error');
   });
 
   req.resData = {

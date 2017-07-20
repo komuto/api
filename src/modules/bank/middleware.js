@@ -1,5 +1,5 @@
 import constraints from './validation';
-import { errMsg } from './error';
+import { errMsg } from './messages';
 import { middleware } from '../core';
 
 const { createMsg, deleteMsg } = errMsg;

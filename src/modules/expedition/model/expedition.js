@@ -2,7 +2,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import rp from 'request-promise-native';
 import core from '../../core';
-import { BadRequestError } from '../../../../common/errors';
+import { getExpeditionError } from './../messages';
 
 const bookshelf = core.postgres.db;
 
@@ -53,7 +53,7 @@ class ExpeditionModel extends bookshelf.Model {
   static async findById(id) {
     const expedition = await this.where({ id_ekspedisi: id }).fetch();
     if (expedition) return expedition.toJSON();
-    throw new BadRequestError('No expedition found');
+    throw getExpeditionError('expedition', 'not_found');
   }
 
   static async getAllServices() {
@@ -76,7 +76,7 @@ class ExpeditionModel extends bookshelf.Model {
    */
   static async getExpeditionNameAndServices(id) {
     const expedition = await this.where({ id_ekspedisi: id }).fetch({ withRelated: ['services'] });
-    if (!expedition) throw new BadRequestError('No expedition found');
+    if (!expedition) throw getExpeditionError('expedition', 'not_found');
     return {
       expedition: expedition.toJSON().name,
       services: expedition.related('services').toJSON(),
