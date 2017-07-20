@@ -7,8 +7,9 @@ export default { ReviewController };
 ReviewController.createReview = async (req, res, next) => {
   req.body.user_id = req.user.id;
   req.body.product_id = req.params.id;
-  if (await Review.getByOtherId(req.user.id, req.params.id)) throw createReviewError('review', 'error');
-  await Review.create(Review.matchDBColumn(req.body));
+  if (await Review.getByOtherId(req.user.id, req.params.id)) throw createReviewError('review', 'duplicate');
+  const review = await Review.create(Review.matchDBColumn(req.body));
+  req.resData = { data: review };
   return next();
 };
 

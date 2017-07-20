@@ -1,6 +1,6 @@
 import moment from 'moment';
 import core from '../core';
-import { getReviewError } from './messages';
+import { getReviewError, createReviewError } from './messages';
 
 const bookshelf = core.postgres.db;
 const { parseNum, parseDate } = core.utils;
@@ -41,7 +41,9 @@ class ReviewModel extends bookshelf.Model {
    */
   static async create(data) {
     data.tgl_ulasanproduk = moment();
-    return await new this(data).save();
+    return await new this(data).save().catch(() => {
+      throw createReviewError('review', 'error');
+    });
   }
 
   /**

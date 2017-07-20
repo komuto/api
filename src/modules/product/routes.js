@@ -36,6 +36,7 @@ routes.get('/products/search',
  */
 routes.post('/products/:id([0-9]{1,10})/reviews',
   auth(),
+  validateParam(constraints.createReview, true),
   wrap(ReviewController.createReview),
   apiResponse());
 
