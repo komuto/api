@@ -18,7 +18,6 @@ OTPController.createOTPHP = async (req, res, next) => {
  * For OTP bank
  */
 OTPController.createOTPBank = async (req, res, next) => {
-  if (!req.user.is_phone_verified) throw createBankError('phone_number', 'phone_not_verified');
   const data = { id_users: req.user.id, status: OTPStatus.DRAFT, no_hp: req.user.phone_number };
   req.otp = await OTP.checkOTP(data) || new OTP();
   if (_.isEmpty(req.otp.attributes)) req.otp = await req.otp.create(data);
@@ -27,7 +26,13 @@ OTPController.createOTPBank = async (req, res, next) => {
 
 OTPController.sendSms = async (req, res, next) => {
   const otp = req.otp;
-  await otp.sendSms(req.user.phone_number);
+  await otp.sendSms();
+  return next();
+};
+
+OTPController.sendEmail = async (req, res, next) => {
+  const otp = req.otp;
+  await otp.sendEmail(req.user.email);
   return next();
 };
 
@@ -35,9 +40,11 @@ OTPController.sendSms = async (req, res, next) => {
  * Verify OTP code
  */
 OTPController.verifyOTPHPCode = async (req, res, next) => {
-  const data = { id_users: req.user.id,
+  const data = {
+    id_users: req.user.id,
     kode_otphp: req.body.code,
-    status_otphp: OTPHPStatus.CREATED };
+    status_otphp: OTPHPStatus.CREATED,
+  };
   const otp = await OTPHP.query(qb => qb.where(data).andWhere('expdate_otphp', '>', moment())).fetch();
   if (!otp) throw verifyOTPError('code', 'not_found');
   await otp.save({ status_otphp: OTPHPStatus.VERIFIED }, { patch: true });
@@ -49,7 +56,7 @@ OTPController.verifyOTPBankCode = error => async (req, res, next) => {
   const status = OTPStatus.USED;
   const otp = await OTP.query(qb => qb.where(data).andWhereNot({ status }).andWhere('date_expired', '>', moment())).fetch();
   if (!otp) throw error;
-  await otp.save({ status }, { patch: true });
+  req.otp = otp;
   return next();
 };
 

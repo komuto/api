@@ -1,4 +1,5 @@
 import { Bank, BankAccount, BankAccountStatus } from './model';
+import { OTPStatus } from './../OTP/model';
 import {
   getAccountError,
   createAccountError,
@@ -51,14 +52,16 @@ BankController.getBankAccount = async (req, res, next) => {
 };
 
 BankController.createBankAccount = async (req, res, next) => {
-  let bankAccount = await BankAccount.where({ id_users: req.user.id,
-    nomor_rekening: req.body.holder_account_number }).fetch();
+  let bankAccount = await BankAccount.where({
+    id_users: req.user.id,
+    nomor_rekening: req.body.holder_account_number,
+  }).fetch();
   if (bankAccount) throw createAccountError('holder_account_number', 'duplicate_account');
   req.body.is_primary = BankAccountStatus.NOT_PRIMARY;
   req.body.user_id = req.user.id;
   bankAccount = await new BankAccount(BankAccount.matchDBColumn(req.body)).save();
   await bankAccount.load('bank');
-
+  await req.otp.save({ status: OTPStatus.USED }, { patch: true });
   req.resData = {
     message: 'Bank Account Data',
     data: bankAccount,
@@ -80,6 +83,7 @@ BankController.updateBankAccount = async (req, res, next) => {
 
   await bankAccount.save(BankAccount.matchDBColumn(req.body), { patch: true });
   await bankAccount.load('bank');
+  await req.otp.save({ status: OTPStatus.USED }, { patch: true });
   req.resData = {
     message: 'Bank Account Data',
     data: bankAccount,
@@ -92,5 +96,6 @@ BankController.deleteBankAccount = async (req, res, next) => {
     .destroy({ require: true })
     .catch(() => true);
   if (err === true) throw deleteAccountError('account', 'account_not_found');
+  await req.otp.save({ status: OTPStatus.USED }, { patch: true });
   return next();
 };
