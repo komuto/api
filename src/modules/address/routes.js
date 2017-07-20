@@ -59,7 +59,7 @@ routes.get('/users/address',
   wrap(AddressController.getPrimaryAddress),
   apiResponse());
 
-routes.get('/users/addresses/:id',
+routes.get('/users/addresses/:id([0-9]{1,10})',
   auth(),
   wrap(AddressController.getAddress),
   apiResponse());
@@ -73,7 +73,7 @@ routes.get('/users/addresses',
  * PUT /users/addresses/id
  * Change address
  */
-routes.put('/users/addresses/:id',
+routes.put('/users/addresses/:id([0-9]{1,10})',
   auth(),
   validateUpdate(),
   wrap(AddressController.updateAddress),
@@ -83,7 +83,7 @@ routes.put('/users/addresses/:id',
  * DELETE /users/addresses/id
  * Delete address
  */
-routes.delete('/users/addresses/:id',
+routes.delete('/users/addresses/:id([0-9]{1,10})',
   auth(),
   wrap(AddressController.deleteAddress),
   apiResponse());
