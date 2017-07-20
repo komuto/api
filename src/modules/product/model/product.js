@@ -402,11 +402,20 @@ class ProductModel extends bookshelf.Model {
   }
 
   static async getExpeditionsById(id) {
-    const product = await this.where({ id_produk: id }).fetch({ withRelated: ['expeditionServices'] });
-    const services = product.related('expeditionServices');
-    return _.map(_.uniqBy(services.serialize({ minimal: false }), 'expedition_id'),
-      item => (item.expedition_id),
-    );
+    const product = await this.where({ id_produk: id }).fetch({ withRelated: ['expeditionServices.expedition'] });
+    let services = product.related('expeditionServices');
+    services = services.map((val) => {
+      const service = val.serialize();
+      return {
+        ...service,
+        expedition: service.expedition.serialize(),
+      };
+    });
+    return _.chain(services)
+      .groupBy('expedition.name')
+      .toPairs()
+      .map(currentItem => (_.zipObject(['expedition', 'services'], currentItem)))
+      .value();
   }
 
   /**

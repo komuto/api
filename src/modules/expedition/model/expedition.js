@@ -56,7 +56,7 @@ class ExpeditionModel extends bookshelf.Model {
     throw new BadRequestError('No expedition found');
   }
 
-  static async getServices() {
+  static async getAllServices() {
     const expeditions = await this.where({}).fetchAll({ withRelated: ['services'] });
     return expeditions.map((expedition) => {
       const services = expedition.related('services').map((service) => {
@@ -72,32 +72,38 @@ class ExpeditionModel extends bookshelf.Model {
   }
 
   /**
-   * Get expedition cost
+   * Get services
    */
-  static async getCost(id, body) {
+  static async getExpeditionNameAndServices(id) {
     const expedition = await this.where({ id_ekspedisi: id }).fetch({ withRelated: ['services'] });
     if (!expedition) throw new BadRequestError('No expedition found');
-    const services = expedition.related('services').toJSON();
+    return {
+      expedition: expedition.toJSON().name,
+      services: expedition.related('services').toJSON(),
+    };
+  }
 
+  /**
+   * Get expedition cost
+   */
+  static async getCost(expeditionName, services, query) {
     const res = await rp.post({
       url: 'http://pro.rajaongkir.com/api/cost',
       form: {
-        origin: body.origin_ro_id,
+        origin: query.origin_ro_id,
         originType: 'city',
-        destination: body.destination_ro_id,
+        destination: query.destination_ro_id,
         destinationType: 'city',
-        weight: body.weight,
-        courier: expedition.toJSON().name.toLowerCase(),
+        weight: query.weight,
+        courier: expeditionName.toLowerCase(),
       },
       headers: {
         key: '78b9624fc632fd9923625b297a3f7035',
       },
-    }).catch(() => {
-      throw new BadRequestError('No expedition found');
-    });
+    }).catch(() => ([]));
+
     const result = JSON.parse(res).rajaongkir.results[0];
     const results = [];
-
     _.forEach(result.costs.reverse(), (cost) => {
       const found = _.find(services, { name: cost.service });
       if (found !== undefined) {

@@ -1,4 +1,5 @@
 import 'babel-polyfill';
+import 'log-full';
 import express from 'express';
 import bodyParser from 'body-parser';
 import compression from 'compression';

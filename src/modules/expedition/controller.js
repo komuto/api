@@ -10,7 +10,7 @@ export default { ExpeditionController };
  * Get expeditions
  */
 ExpeditionController.getExpeditions = async (req, res, next) => {
-  const expeditions = await Expedition.getServices();
+  const expeditions = await Expedition.getAllServices();
   req.resData = {
     message: 'Expeditions Data',
     data: expeditions,
@@ -22,7 +22,7 @@ ExpeditionController.getExpeditions = async (req, res, next) => {
  * Get expedition services
  */
 ExpeditionController.getListExpeditionServices = async (req, res, next) => {
-  const expeditions = await Expedition.getServices();
+  const expeditions = await Expedition.getAllServices();
   const services = [];
 
   _.forEach(expeditions, (expedition) => {
@@ -52,7 +52,8 @@ ExpeditionController.getExpeditionService = async (req, res, next) => {
  * Get expedition cost
  */
 ExpeditionController.getExpeditionCost = async (req, res, next) => {
-  const cost = await Expedition.getCost(req.params.id, req.query);
+  const { expedition, services } = await Expedition.getExpeditionNameAndServices(req.params.id);
+  const cost = await Expedition.getCost(expedition, services, req.query);
   if (cost.length === 0) throw new BadRequestError('No expedition found');
   req.resData = {
     message: 'Expedition Cost Data',
@@ -66,10 +67,12 @@ ExpeditionController.getExpeditionCost = async (req, res, next) => {
  */
 ExpeditionController.getExpeditionCostByProduct = async (req, res, next) => {
   const costs = [];
-  const expeditionIds = await Product.getExpeditionsById(req.query.product_id);
-  _.forEach(expeditionIds, async (id) => {
-    costs.push(await Expedition.getCost(id, req.query));
-  });
+  const expeditions = await Product.getExpeditionsById(req.query.product_id);
+  // eslint-disable-next-line no-restricted-syntax
+  for (const val of expeditions) {
+    const cost = await Expedition.getCost(val.expedition, val.services, req.query);
+    costs.push(...cost);
+  }
   if (costs.length === 0) throw new BadRequestError('No expedition found');
   req.resData = {
     message: 'Expedition Cost Data',
