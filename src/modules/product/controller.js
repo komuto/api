@@ -149,7 +149,7 @@ ProductController.getComments = async (req, res, next) => {
   req.resData = {
     message: 'Discussion Comments Data',
     meta: { page, limit: pageSize },
-    data: comments,
+    data: comments.serialize({ minimal: true }),
   };
   return next();
 };
