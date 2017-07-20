@@ -18,7 +18,6 @@ constraints.cart = {
       message: 'accept only `true` or `false` value',
     },
   },
-  additional_cost: { presence: true },
   delivery_cost: { presence: true },
 };
 
