@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { Address, Province, District, SubDistrict, Village } from './model';
 import { getAddressError, deleteAddressError } from './messages';
 
@@ -77,9 +78,12 @@ AddressController.getVillages = async (req, res, next) => {
 };
 
 AddressController.createAddress = async (req, res, next) => {
-  req.body.user_id = req.user.id;
-  req.body.is_primary = '0';
-  req.body.is_sale_address = '0';
+  _.assign(req.body, {
+    user_id: req.user.id,
+    is_primary: 0,
+    is_sale_address: 0,
+    email: req.user.email,
+  });
   const address = await Address.create(Address.matchDBColumn(req.body));
   req.resData = {
     message: 'Address Data',

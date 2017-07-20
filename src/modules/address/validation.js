@@ -20,10 +20,6 @@ constraints.createAddress = {
     presence: { message: createMsg.village_presence },
     numericality: { noStrings: true, onlyInteger: true, message: createMsg.village_not_valid },
   },
-  email: {
-    presence: { message: createMsg.email_presence },
-    email: { message: createMsg.email_not_valid },
-  },
   postal_code: {
     presence: { message: createMsg.postal_code_presence },
     format: { pattern: /\d{5}(-\d{4})?/, message: createMsg.postal_code_not_valid },

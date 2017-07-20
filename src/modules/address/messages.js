@@ -17,8 +17,6 @@ export const errMsg = {
     subdistrict_not_valid: 'Kecamatan harus angka',
     village_presence: 'Kelurahan harus diisi',
     village_not_valid: 'Kelurahan harus angka',
-    email_presence: 'Email harus diisi',
-    email_not_valid: 'Email tidak valid',
     postal_code_presence: 'Kode pos harus diisi',
     postal_code_not_valid: 'Kode pos tidak valid',
     name_presence: 'Nama penerima harus diisi',
