@@ -60,9 +60,11 @@ class CommentModel extends bookshelf.Model {
    * Create comment
    */
   static async create(data) {
-    return await new this(data).save().catch(() => {
-      throw createCommentError('comment', 'error');
-    });
+    return await new this(data).save()
+      .then(model => (model.fetch({ withRelated: ['user'] })))
+      .catch(() => {
+        throw createCommentError('comment', 'error');
+      });
   }
 
   /**

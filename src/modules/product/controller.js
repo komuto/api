@@ -187,7 +187,7 @@ ProductController.createComment = async (req, res, next) => {
   const comment = await Comment.create(data);
   req.resData = {
     message: 'Comment Data',
-    data: comment,
+    data: comment.serialize({ minimal: true }),
   };
   return next();
 };
