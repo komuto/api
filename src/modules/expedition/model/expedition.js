@@ -23,6 +23,7 @@ class ExpeditionModel extends bookshelf.Model {
       name: this.get('nama_ekspedisi'),
       logo: core.expeditionPath(this.get('logo_path')),
       insurance_fee: parseFloat(this.get('asurasi_fee')),
+      is_checked: false,
     };
     if (minimal) return expedition;
     return {
