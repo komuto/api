@@ -1,6 +1,7 @@
 const constraints = {};
 
 constraints.list = {
+  q: { presence: false },
   sort: {
     presence: false,
     inclusion: {
@@ -122,6 +123,17 @@ constraints.createReview = {
   review: { presence: true },
   quality: { presence: true, numericality: true },
   accuracy: { presence: true, numericality: true },
+};
+
+constraints.listStoreProduct = {
+  q: { presence: false },
+  hidden: {
+    presence: false,
+    inclusion: {
+      within: ['true', 'false'],
+      message: 'accept only `true` or `false` value',
+    },
+  },
 };
 
 export default constraints;

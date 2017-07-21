@@ -36,8 +36,7 @@ const getPrice = (price) => {
  * Get products
  */
 ProductController.index = async (req, res, next) => {
-  let page = req.query.page ? parseInt(req.query.page, 10) : 1;
-  if (!page) page = 1;
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const price = req.query.price ? getPrice(req.query.price) : null;
   const params = {
@@ -233,3 +232,20 @@ ProductController.dropship = async (req, res, next) => {
   return next();
 };
 
+/**
+ * Get store products
+ */
+ProductController.storeProducts = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const storeId = await Store.getStoreId(req.user.id);
+  const hidden = req.query.hidden ? JSON.parse(req.query.hidden) : false;
+  const params = { page, pageSize, query: req.query.q, storeId, hidden };
+  const products = await Product.getByStore(params);
+  req.resData = {
+    message: 'Store Products Data',
+    meta: { page, limit: pageSize },
+    data: products,
+  };
+  return next();
+};
