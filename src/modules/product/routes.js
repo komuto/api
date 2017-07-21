@@ -145,4 +145,14 @@ routes.post('/products/:id([0-9]{1,10})/dropship',
   wrap(ProductController.dropship),
   apiResponse());
 
+/**
+ * POST /users/store/products
+ * Hide products
+ */
+routes.post('/users/store/products/hides',
+  auth(),
+  validateParam(constraints.hideProducts, true),
+  wrap(ProductController.hides),
+  apiResponse());
+
 export default routes;

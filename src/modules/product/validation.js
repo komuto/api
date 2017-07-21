@@ -136,4 +136,10 @@ constraints.listStoreProduct = {
   },
 };
 
+constraints.hideProducts = {
+  product_ids: {
+    presence: true,
+  },
+};
+
 export default constraints;

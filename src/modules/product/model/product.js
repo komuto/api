@@ -214,7 +214,7 @@ class ProductModel extends bookshelf.Model {
       });
 
     const results = [];
-    products.each(async (product) => {
+    products.each(async(product) => {
       const store = product.related('store');
       const images = product.related('images');
       const likes = product.related('likes');
@@ -439,6 +439,16 @@ class ProductModel extends bookshelf.Model {
       .toPairs()
       .map(currentItem => (_.zipObject(['expedition', 'services'], currentItem)))
       .value();
+  }
+
+  static async hides(storeId, ids) {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const id of ids) {
+      await this.where({ id_toko: storeId, id_produk: id })
+        .save({ status_produk: ProductStatus.HIDE }, { patch: true })
+        .catch(() => {});
+    }
+    return true;
   }
 
   /**

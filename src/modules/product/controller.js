@@ -249,3 +249,12 @@ ProductController.storeProducts = async (req, res, next) => {
   };
   return next();
 };
+
+/**
+ * Hide products
+ */
+ProductController.hides = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  await Product.hides(storeId, req.body.product_ids);
+  return next();
+};
