@@ -21,7 +21,7 @@ routes.post('/accounts/otp/phone',
 routes.post('/accounts/otp/bank',
   auth(),
   wrap(OTPController.createOTPBank),
-  wrap(OTPController.sendEmail),
+  wrap(OTPController.sendSms),
   apiResponse());
 
 export default routes;

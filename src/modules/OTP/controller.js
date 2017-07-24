@@ -18,6 +18,7 @@ OTPController.createOTPHP = async (req, res, next) => {
  * For OTP bank
  */
 OTPController.createOTPBank = async (req, res, next) => {
+  if (!req.user.phone_number) throw createBankError('phone_number', 'phone_not_verified');
   const data = { id_users: req.user.id, status: OTPStatus.DRAFT, no_hp: req.user.phone_number };
   req.otp = await OTP.checkOTP(data) || new OTP();
   if (_.isEmpty(req.otp.attributes)) req.otp = await req.otp.create(data);
@@ -27,12 +28,6 @@ OTPController.createOTPBank = async (req, res, next) => {
 OTPController.sendSms = async (req, res, next) => {
   const otp = req.otp;
   await otp.sendSms();
-  return next();
-};
-
-OTPController.sendEmail = async (req, res, next) => {
-  const otp = req.otp;
-  await otp.sendEmail(req.user.email);
   return next();
 };
 

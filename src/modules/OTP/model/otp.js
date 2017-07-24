@@ -6,7 +6,6 @@ import randomInt from 'random-int';
 import core from '../../core';
 import { otp } from '../../../../config';
 import { Preference } from './../../preference/model';
-import { OTPEmail } from './../email';
 
 const bookshelf = core.postgres.db;
 
@@ -60,16 +59,6 @@ class OTPModel extends bookshelf.Model {
       json: true,
     });
     // Update status to sent
-    await this.save({ status: OTPStatus.SENT }, { patch: true });
-  }
-
-  /**
-   * Send otp code through email
-   */
-  async sendEmail(email) {
-    const { date_expired: expired, kode: code } = this.attributes;
-    const expiredSend = moment(expired).format('HH:mm');
-    await OTPEmail.send({ expired, code, expiredSend, email });
     await this.save({ status: OTPStatus.SENT }, { patch: true });
   }
 }
