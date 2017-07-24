@@ -15,6 +15,7 @@ class PromoModel extends bookshelf.Model {
   get tableName() {
     return 'promo';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_promo';
@@ -39,11 +40,10 @@ class PromoModel extends bookshelf.Model {
    * Get promo
    */
   static async get(code) {
-    const promo = await this.where({ kode_promo: code })
-      .query((qb) => {
-        qb.where('expdate_promo', '>=', moment());
-      })
-      .fetch();
+    const promo = await this.query((qb) => {
+      qb.whereRaw('LOWER(kode_promo) LIKE ?', `%${code.toLowerCase()}%`);
+      qb.where('expdate_promo', '>=', moment());
+    }).fetch();
     if (!promo) throw getPromoError('promo', 'not_found');
     return promo;
   }
