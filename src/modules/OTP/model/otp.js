@@ -43,12 +43,13 @@ class OTPModel extends bookshelf.Model {
   async sendSms() {
     const { no_hp: phone, date_created: created, date_expired: expired, kode } = this.attributes;
     const createdSend = moment(created).format('YYYY-MM-DD HH:mm:ss');
-    const expiredSend = moment(expired).format('HH:mm');
+    const dateExpiredSend = moment(expired).format('DD-MM-YYYY');
+    const timeExpiredSend = moment(expired).format('HH:mm');
     const body = {
       jenis: 'kirimsms',
       tujuan: phone,
       isi: `Berikut adalah kode OTP anda : ${kode} . Jangan membagikannya karena kode ini\
-      bersifat rahasia. Berlaku sampai jam ${expiredSend} WIB`,
+      bersifat rahasia. Berlaku sampai ${dateExpiredSend} jam ${timeExpiredSend} WIB`,
       tanggal: createdSend,
       sign: sha1(`kirimsms${md5(`${otp.apiKey}${createdSend}`)}`),
     };
