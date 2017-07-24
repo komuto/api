@@ -2,7 +2,7 @@ import _ from 'lodash';
 import slug from 'slug';
 import core from '../../core';
 import { Address } from '../../address/model';
-import { getProductError } from './../messages';
+import { getProductError, errMsg } from './../messages';
 
 const { parseNum, parseDec, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -424,6 +424,9 @@ class ProductModel extends bookshelf.Model {
     return products.map(product => (product.get('id_produk')));
   }
 
+  /**
+   * Get expedition and service
+   */
   static async getExpeditionsById(id) {
     const product = await this.where({ id_produk: id }).fetch({ withRelated: ['expeditionServices.expedition'] });
     let services = product.related('expeditionServices');
@@ -441,6 +444,11 @@ class ProductModel extends bookshelf.Model {
       .value();
   }
 
+  /**
+   * Hide products
+   * @param storeId
+   * @param ids
+   */
   static async hides(storeId, ids) {
     // eslint-disable-next-line no-restricted-syntax
     for (const id of ids) {
@@ -454,12 +462,34 @@ class ProductModel extends bookshelf.Model {
     }
   }
 
+  /**
+   * Move catalog products
+   * @param storeId
+   * @param ids
+   * @param catalogId
+   */
   static async moveCatalog(storeId, ids, catalogId) {
     // eslint-disable-next-line no-restricted-syntax
     for (const id of ids) {
       await this.where({ id_toko: storeId, id_produk: id })
         .save({ identifier_katalog: catalogId }, { patch: true }).catch(() => {});
     }
+  }
+
+  /**
+   * Delete products
+   * @param storeId
+   * @param ids
+   */
+  static async bulkDelete(storeId, ids) {
+    const errors = [];
+    // eslint-disable-next-line no-restricted-syntax
+    for (const id of ids) {
+      await this.where({ id_toko: storeId, id_produk: id }).destroy().catch((err) => {
+        if (err) errors.push({ product_id: id, error: errMsg.bulkDeleteProduct.error });
+      });
+    }
+    return errors;
   }
 
   /**

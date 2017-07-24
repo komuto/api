@@ -136,7 +136,7 @@ constraints.listStoreProduct = {
   },
 };
 
-constraints.hideProducts = {
+constraints.productIds = {
   product_ids: { presence: true },
 };
 

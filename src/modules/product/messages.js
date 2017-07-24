@@ -27,6 +27,10 @@ export const errMsg = {
     title: 'Create laporan gagal',
     error: 'Gagal menambah laporan',
   },
+  bulkDeleteProduct: {
+    title: 'Gagal menghapus produk',
+    error: 'Tidak bisa menghapus produk',
+  },
 };
 
 export const getProductError = formatError.bind(errMsg.getProduct);

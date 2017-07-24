@@ -15,9 +15,10 @@ import {
 } from './model';
 import { Wishlist } from './../user/model';
 import { model as storeModel } from '../store';
-import { getProductError, createProductError } from './messages';
+import { getProductError, createProductError, errMsg } from './messages';
 import { ReportEmail } from './email';
 import config from './../../../config';
+import { BadRequestError } from './../../../common/errors';
 
 const { Store, Catalog } = storeModel;
 
@@ -266,5 +267,15 @@ ProductController.moveCatalog = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   await Catalog.findByIdAndStoreId(req.body.catalog_id, storeId);
   await Product.moveCatalog(storeId, req.body.product_ids, req.body.catalog_id);
+  return next();
+};
+
+/**
+ * Delete products
+ */
+ProductController.bulkDelete = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const errors = await Product.bulkDelete(storeId, req.body.product_ids);
+  if (errors) throw new BadRequestError(errMsg.bulkDeleteProduct.title, errors);
   return next();
 };

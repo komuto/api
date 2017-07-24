@@ -152,7 +152,7 @@ routes.post('/products/:id([0-9]{1,10})/dropship',
  */
 routes.post('/users/store/products/hides',
   auth(),
-  validateManageProductsParam(constraints.hideProducts),
+  validateManageProductsParam(constraints.productIds),
   wrap(ProductController.hides),
   apiResponse());
 
@@ -164,6 +164,16 @@ routes.post('/users/store/products/move-catalog',
   auth(),
   validateManageProductsParam(constraints.moveCatalog),
   wrap(ProductController.moveCatalog),
+  apiResponse());
+
+/**
+ * POST /users/store/products
+ * Delete products
+ */
+routes.post('/users/store/products',
+  auth(),
+  validateManageProductsParam(constraints.productIds),
+  wrap(ProductController.bulkDelete),
   apiResponse());
 
 export default routes;
