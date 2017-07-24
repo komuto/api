@@ -16,6 +16,8 @@ BucketController.getCount = async (req, res, next) => {
 
 BucketController.getPromo = async (req, res, next) => {
   const promo = await Promo.get(req.query.code);
+  const bucket = await Bucket.findBucket(req.user.id);
+  await Bucket.addPromo(bucket.toJSON().id, promo.toJSON().id);
   req.resData = {
     message: 'Promo Data',
     data: promo,

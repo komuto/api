@@ -123,6 +123,15 @@ class BucketModel extends bookshelf.Model {
   }
 
   /**
+   * Add promo
+   * @param bucketId
+   * @param promoId
+   */
+  static async addPromo(bucketId, promoId) {
+    //
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData
