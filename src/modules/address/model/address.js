@@ -24,6 +24,7 @@ class AddressModel extends bookshelf.Model {
       is_primary_address: this.get('alamat_primary') === '1',
       is_sale_address: this.get('alamat_originjual') === '1',
       is_tender_address: this.get('alamat_originlelang') === '1',
+      is_checked: false,
     };
   }
 
