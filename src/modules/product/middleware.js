@@ -5,7 +5,7 @@ import { BadRequestError } from '../../../common/errors';
  * Validate parameters
  * @param constraints {object}
  */
-export function validateHideProductsParam(constraints) {
+export function validateManageProductsParam(constraints) {
   return (req, res, next) => {
     const hasError = validate(req.body, constraints);
     if (hasError || !validate.isArray(req.body.product_ids)) {
@@ -21,4 +21,4 @@ export function validateHideProductsParam(constraints) {
   };
 }
 
-export default { validateHideProductsParam };
+export default { validateManageProductsParam };

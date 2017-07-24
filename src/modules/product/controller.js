@@ -258,3 +258,13 @@ ProductController.hides = async (req, res, next) => {
   await Product.hides(storeId, req.body.product_ids);
   return next();
 };
+
+/**
+ * Move catalog products
+ */
+ProductController.moveCatalog = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  await Catalog.findByIdAndStoreId(req.body.catalog_id, storeId);
+  await Product.moveCatalog(storeId, req.body.product_ids, req.body.catalog_id);
+  return next();
+};

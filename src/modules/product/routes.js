@@ -4,7 +4,7 @@ import core from '../core';
 import constraints from './validation';
 import { errMsg } from './messages';
 import { ReviewController } from '../review';
-import { validateHideProductsParam } from './middleware';
+import { validateManageProductsParam } from './middleware';
 
 const routes = express.Router();
 const { wrap } = core.utils;
@@ -147,13 +147,23 @@ routes.post('/products/:id([0-9]{1,10})/dropship',
   apiResponse());
 
 /**
- * POST /users/store/products
+ * POST /users/store/products/hides
  * Hide products
  */
 routes.post('/users/store/products/hides',
   auth(),
-  validateHideProductsParam(constraints.hideProducts),
+  validateManageProductsParam(constraints.hideProducts),
   wrap(ProductController.hides),
+  apiResponse());
+
+/**
+ * POST /users/store/products/move-catalog
+ * Hide products
+ */
+routes.post('/users/store/products/move-catalog',
+  auth(),
+  validateManageProductsParam(constraints.moveCatalog),
+  wrap(ProductController.moveCatalog),
   apiResponse());
 
 export default routes;

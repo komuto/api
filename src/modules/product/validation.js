@@ -137,9 +137,12 @@ constraints.listStoreProduct = {
 };
 
 constraints.hideProducts = {
-  product_ids: {
-    presence: true,
-  },
+  product_ids: { presence: true },
+};
+
+constraints.moveCatalog = {
+  catalog_id: { presence: true, numericality: true },
+  product_ids: { presence: true },
 };
 
 export default constraints;
