@@ -1,6 +1,6 @@
 import moment from 'moment';
 import core from '../../core';
-import { getPromoError, invalidPromoError } from './../messages';
+import { getPromoError } from './../messages';
 
 const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -39,11 +39,12 @@ class PromoModel extends bookshelf.Model {
    * Get promo
    */
   static async get(code) {
-    let promo = await this.where({ kode_promo: code }).fetch();
+    const promo = await this.where({ kode_promo: code })
+      .query((qb) => {
+        qb.where('expdate_promo', '>=', moment());
+      })
+      .fetch();
     if (!promo) throw getPromoError('promo', 'not_found');
-    promo = promo.serialize();
-    const isValid = moment().isBetween(moment.unix(promo.start_at), moment.unix(promo.expired_at));
-    if (!isValid) throw invalidPromoError('promo', 'error');
     return promo;
   }
 }
