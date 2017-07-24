@@ -29,16 +29,15 @@ class CatalogModel extends bookshelf.Model {
     return this.hasMany('Product', 'identifier_katalog');
   }
 
-  static async getUserCatalog(id) {
-    return await this.query((qb) => {
-      qb.select('id_katalog', 'nama_katalog');
-      qb.count('produk.* as count_product');
-      qb.innerJoin('produk', 'katalog.id_katalog', 'produk.identifier_katalog');
-      qb.innerJoin('toko', 'produk.id_toko', 'toko.id_toko');
-      qb.where('id_users', id);
-      qb.groupBy('id_katalog');
-      qb.orderBy('id_katalog');
-    }).fetchAll();
+  static async getStoreCatalog(storeId) {
+    const catalogs = await this.where({ id_toko: storeId }).fetchAll({ withRelated: 'products' });
+    return catalogs.map((catalog) => {
+      const count = catalog.related('products');
+      return {
+        ...catalog.serialize(),
+        count_product: count.length,
+      };
+    });
   }
 
   static async create(data) {

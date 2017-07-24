@@ -90,7 +90,8 @@ StoreController.createMessage = async (req, res, next) => {
  * Get store catalog
  */
 StoreController.getUserCatalog = async (req, res, next) => {
-  const catalogs = await Catalog.getUserCatalog(req.user.id);
+  const storeId = await Store.getStoreId(req.user.id);
+  const catalogs = await Catalog.getStoreCatalog(storeId);
   req.resData = {
     message: 'Store Catalog Data',
     data: catalogs,
