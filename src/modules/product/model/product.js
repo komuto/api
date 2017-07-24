@@ -444,9 +444,13 @@ class ProductModel extends bookshelf.Model {
   static async hides(storeId, ids) {
     // eslint-disable-next-line no-restricted-syntax
     for (const id of ids) {
+      const product = await this.where({ id_toko: storeId, id_produk: id }).fetch().catch(() => {});
+      // eslint-disable-next-line no-continue
+      if (!product) continue;
+      const status = parseNum(product.toJSON().status) === ProductStatus.HIDE
+        ? ProductStatus.SHOW : ProductStatus.HIDE;
       await this.where({ id_toko: storeId, id_produk: id })
-        .save({ status_produk: ProductStatus.HIDE }, { patch: true })
-        .catch(() => {});
+        .save({ status_produk: status }, { patch: true }).catch(() => {});
     }
     return true;
   }

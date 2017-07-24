@@ -4,6 +4,7 @@ import core from '../core';
 import constraints from './validation';
 import { errMsg } from './messages';
 import { ReviewController } from '../review';
+import { validateHideProductsParam } from './middleware';
 
 const routes = express.Router();
 const { wrap } = core.utils;
@@ -151,7 +152,7 @@ routes.post('/products/:id([0-9]{1,10})/dropship',
  */
 routes.post('/users/store/products/hides',
   auth(),
-  validateParam(constraints.hideProducts, true),
+  validateHideProductsParam(constraints.hideProducts),
   wrap(ProductController.hides),
   apiResponse());
 
