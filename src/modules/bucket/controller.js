@@ -17,7 +17,7 @@ BucketController.getCount = async (req, res, next) => {
 BucketController.getPromo = async (req, res, next) => {
   const promo = await Promo.get(req.query.code);
   req.resData = {
-    message: 'Count Bucket',
+    message: 'Promo Data',
     data: promo,
   };
   return next();
