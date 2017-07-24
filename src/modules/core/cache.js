@@ -5,12 +5,12 @@ import config from '../../../config';
 
 const cacheConfig = config.cache;
 const redisClient = redis.createClient({
-  prefix: config.cache.prefix
+  prefix: config.cache.prefix,
 });
 export const cache = apicache
   .options({
+    redisClient,
     debug: cacheConfig.debug,
-    redisClient: redisClient,
     enabled: cacheConfig.enable,
     defaultDuration: cacheConfig.duration,
   })
@@ -22,7 +22,7 @@ export const cacheClear = async (key = null) => {
   const redisKeys = [];
   if (!key) {
     redisClient.keys('komuto-api*', async (err, rows) => {
-      for(let i = 0, j = rows.length; i < j; ++i) {
+      for (let i = 0, j = rows.length; i < j; ++i) {
         redisKeys.push(rows[i]);
       }
       await Promise.all(redisKeys.map(async (key) => {

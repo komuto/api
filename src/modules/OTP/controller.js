@@ -27,7 +27,7 @@ OTPController.createOTPBank = async (req, res, next) => {
 
 OTPController.sendSms = async (req, res, next) => {
   const otp = req.otp;
-  await otp.sendSms();
+  await otp.sendSms(req.user.phone_number);
   return next();
 };
 

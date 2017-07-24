@@ -11,7 +11,7 @@ export function validateManageProductsParam(constraints) {
     if (hasError || !validate.isArray(req.body.product_ids)) {
       const err = new BadRequestError('Invalid parameter');
       if (!hasError) {
-        err.data = { product_ids: ['Product ids must array'] };
+        err.data = { product_ids: 'Product ids must array' };
       } else {
         err.data = hasError;
       }
