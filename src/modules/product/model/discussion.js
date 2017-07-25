@@ -1,6 +1,7 @@
 import core from '../../core';
 import './comment';
 import { getDiscussionError, createDiscussionError } from './../messages';
+import config from './../../../../config';
 
 const bookshelf = core.postgres.db;
 const { parseDate, parseNum } = core.utils;
@@ -114,7 +115,7 @@ class DiscussionModel extends bookshelf.Model {
       let product = discussion.related('product');
       const images = product.related('images');
       product = product.serialize({ minimal: true });
-      product.image = images.length ? images[0].file : null;
+      product.image = images.length ? images[0].file : config.defaultImage.product;
       return {
         ...discussion.serialize({ minimal: true }),
         product,

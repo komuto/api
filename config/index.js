@@ -24,6 +24,9 @@ def.imagePath = path.join(rootDir, 'public/image');
 def.imageFolder = {};
 def.imageFolder.store = 'toko';
 def.imageFolder.product = 'produk';
+def.defaultImage = {};
+def.defaultImage.user = 'https://www.juptr.io/images/default-user.png';
+def.defaultImage.product = 'http://demo.makitweb.com/broken_image/images/noimage.png';
 
 def.cdnPath = 'http://cdn.localhost.com';
 

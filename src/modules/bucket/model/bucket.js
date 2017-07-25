@@ -3,6 +3,7 @@ import core from '../../core';
 import { getBucketError } from './../messages';
 import './item';
 import './shipping';
+import config from './../../../../config';
 
 const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -95,7 +96,7 @@ class BucketModel extends bookshelf.Model {
       const store = product.related('store');
       const images = product.related('images').serialize();
       product = product.serialize({ minimal: true });
-      product.image = images.length ? images[0].file : null;
+      product.image = images.length ? images[0].file : config.defaultImage.product;
       product.store = store.serialize();
       return {
         ...item.serialize(),
@@ -128,7 +129,7 @@ class BucketModel extends bookshelf.Model {
    * @param promoId
    */
   static async addPromo(bucketId, promoId) {
-    //
+    // TODO: add promo to bucket
   }
 
   /**

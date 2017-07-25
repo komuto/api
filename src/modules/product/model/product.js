@@ -4,6 +4,7 @@ import core from '../../core';
 import { Address } from '../../address/model';
 import { getProductError, errMsg } from './../messages';
 import { OTPAddressStatus } from './../../OTP/model';
+import config from './../../../../config';
 
 const { parseNum, parseDec, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -202,11 +203,11 @@ class ProductModel extends bookshelf.Model {
         page,
         pageSize,
         withRelated: [
-          'images',
           'likes',
           'view',
           'store.verifyAddress',
           relatedServices,
+          { images: qb => qb.limit(1) },
         ],
       });
 
@@ -214,31 +215,32 @@ class ProductModel extends bookshelf.Model {
     // eslint-disable-next-line no-restricted-syntax
     for (let product of products.models) {
       let store = product.related('store');
-      const images = product.related('images');
+      const images = product.related('images').serialize();
       const likes = product.related('likes');
       const isLiked = userId ? _.find(likes.models, o => o.attributes.id_users === userId) : false;
       store = store.serialize({ verified: true });
       product = product.toJSON();
+      product.image = images.length ? images[0].file : config.defaultImage.product;
       product.count_like = likes.length;
       product.is_liked = !!isLiked;
       let addressStore = null;
       if (address) addressStore = await Address.getStoreAddress(store.user_id, address);
       if (address && other && other.verified) {
-        if (addressStore && store.is_verified) results.push({ product, store, images });
+        if (addressStore && store.is_verified) results.push({ product, store });
         // eslint-disable-next-line no-continue
         continue;
       }
       if (address) {
-        if (addressStore) results.push({ product, store, images });
+        if (addressStore) results.push({ product, store });
         // eslint-disable-next-line no-continue
         continue;
       }
       if (other && other.verified) {
-        if (store.is_verified) results.push({ product, store, images });
+        if (store.is_verified) results.push({ product, store });
         // eslint-disable-next-line no-continue
         continue;
       }
-      results.push({ product, store, images });
+      results.push({ product, store });
     }
     return results;
   }
@@ -266,7 +268,7 @@ class ProductModel extends bookshelf.Model {
       images = images.serialize();
       // TODO: Add dropshipper
       product = product.serialize();
-      product.image = images.length ? images[0].file : null;
+      product.image = images.length ? images[0].file : config.defaultImage.product;
       data.push(product);
     }
     return data;
@@ -373,7 +375,7 @@ class ProductModel extends bookshelf.Model {
       qb.whereNot('id_produk', productId);
       qb.orderBy('id_produk', 'desc');
       qb.limit(3);
-    }).fetchAll({ withRelated: ['images', 'likes'] });
+    }).fetchAll({ withRelated: ['likes', { images: qb => qb.limit(1) }] });
 
     let wholesaler;
     if (product.get('is_grosir')) {
@@ -406,7 +408,8 @@ class ProductModel extends bookshelf.Model {
     let otherProds = await getOtherProds;
     otherProds = otherProds.map((otherProduct) => {
       const { likes: like, isLiked: liked } = this.loadLikes(otherProduct, userId);
-      const image = otherProduct.related('images').models[0].serialize().file;
+      const otherImages = otherProduct.related('images').serialize();
+      const image = otherImages.length ? otherImages[0].file : config.defaultImage.product;
       return {
         ...otherProduct.serialize({ minimal: true }),
         count_like: like.length,

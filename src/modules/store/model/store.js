@@ -106,7 +106,7 @@ class StoreModel extends bookshelf.Model {
         const { likes, isLiked } = this.getLikes(product, userId);
         return {
           ...product.serialize({ minimal: true }),
-          image: images.length ? images[0].file : null,
+          image: images.length ? images[0].file : config.defaultImage.product,
           count_like: likes.length,
           is_liked: isLiked,
         };
@@ -172,7 +172,7 @@ class StoreModel extends bookshelf.Model {
           user: { id: userId, name, photo },
           product: {
             ...reviewProduct.serialize(),
-            image: images.length ? images[0].file : null,
+            image: images.length ? images[0].file : config.defaultImage.product,
           },
         };
       });

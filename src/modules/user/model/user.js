@@ -56,7 +56,7 @@ class UserModel extends bookshelf.Model {
       name: this.get('namalengkap_users'),
       photo: this.get('pathfoto_users')
         ? core.imagePath(IMAGE_PATH, this.get('pathfoto_users'))
-        : 'https://www.juptr.io/images/default-user.png',
+        : config.defaultImage.user,
       gender: this.get('jeniskelamin_users') === 'L' ? 'male' : 'female',
       place_of_birth: defaultNull(this.get('kota_lahir')),
       date_of_birth: parseDate(this.get('tgl_lahir'), null),
