@@ -31,9 +31,7 @@ class StoreModel extends bookshelf.Model {
       logo: core.imagePath(IMAGE_PATH, this.get('logo_toko')),
     };
     if (favorite) return store;
-    if (verified) {
-      store.is_verified = this.related('verifyAddress').length !== 0;
-    }
+    if (verified) store.is_verified = this.related('verifyAddress').length !== 0;
     return {
       ...store,
       user_id: this.get('id_users'),
@@ -90,6 +88,10 @@ class StoreModel extends bookshelf.Model {
    */
   verifyAddress() {
     return this.hasMany('OTPAddress', 'id_users');
+  }
+
+  favoriteStores() {
+    return this.hasMany('FavoriteStore', 'referred_toko', 'id_toko');
   }
 
   /**
@@ -199,6 +201,7 @@ class StoreModel extends bookshelf.Model {
   static async getFullStore(id, userId) {
     let store = await this.where({ id_toko: id }).fetch({
       withRelated: [
+        // TODO: add is_favorite
         'user.addresses.district',
         'user.addresses.province',
         'products.reviews.user',

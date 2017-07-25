@@ -317,8 +317,13 @@ class ProductModel extends bookshelf.Model {
 
   static loadLikes(product, id) {
     const likes = product.related('likes');
-    const isLiked = id ? _.find(likes.models, o => o.attributes.id_users === id) : false;
+    const isLiked = !!_.find(likes.models, o => o.get('id_users') === id);
     return { likes, isLiked };
+  }
+
+  static loadFavorites(store, id) {
+    const favorites = store.related('favoriteStores');
+    return !!_.find(favorites.models, o => o.get('id_users') === id);
   }
 
   /**
@@ -349,18 +354,18 @@ class ProductModel extends bookshelf.Model {
    * @param userId {integer} user id
    */
   static async getFullProduct(productId, userId) {
-    let product = await this.where({ id_produk: productId }).fetch({
-      withRelated: [
-        'category',
-        'images',
-        'reviews.user.addresses',
-        'expeditionServices.expedition',
-        'likes',
-        'discussions',
-        'view',
-        { 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) },
-      ],
-    });
+    const related = [
+      'category',
+      'images',
+      'reviews.user.addresses',
+      'expeditionServices.expedition',
+      'likes',
+      'discussions',
+      'view',
+      { 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) },
+    ];
+    if (userId) related.push('store.favoriteStores');
+    let product = await this.where({ id_produk: productId }).fetch({ withRelated: related });
     if (!product) return false;
     // Eager load other products so it doesn't block other process by not awaiting directly
     const getOtherProds = this.query((qb) => {
@@ -377,7 +382,9 @@ class ProductModel extends bookshelf.Model {
     } else wholesaler = [];
 
     const category = product.related('category').serialize();
-    const store = product.related('store').serialize({ verified: true });
+    let store = product.related('store');
+    const isFavorite = userId ? this.loadFavorites(store, userId) : false;
+    store = store.serialize({ verified: true });
     const images = product.related('images');
     const getAddress = Address.getStoreAddress(store.user_id);
     const expeditions = this.loadExpeditions(product);
@@ -390,9 +397,10 @@ class ProductModel extends bookshelf.Model {
     product = product.serialize();
     product.count_review = reviews.length;
     product.count_like = likes.length;
-    product.is_liked = !!isLiked;
+    product.is_liked = isLiked;
     product.count_discussion = discussions.length;
     const address = await getAddress;
+    store.is_favorite = isFavorite;
     store.province = address.related('province').serialize();
     store.district = address.related('district').serialize();
     let otherProds = await getOtherProds;
@@ -402,7 +410,7 @@ class ProductModel extends bookshelf.Model {
       return {
         ...otherProduct.serialize({ minimal: true }),
         count_like: like.length,
-        is_liked: !!liked,
+        is_liked: liked,
         image,
       };
     });
