@@ -1,5 +1,7 @@
 import core from '../../core';
 import { createCatalogError, getCatalogError, updateCatalogError } from './../messages';
+import config from './../../../../config';
+import { ProductStatus } from './../../product/model';
 
 const bookshelf = core.postgres.db;
 const { parseDate, defaultNull } = core.utils;
@@ -120,6 +122,37 @@ class CatalogModel extends bookshelf.Model {
   static async checkCatalog(storeId, catalogId) {
     const catalog = await this.where({ id_toko: storeId, id_katalog: catalogId }).fetch();
     return !!catalog;
+  }
+
+  /**
+   * Get catalog with products
+   */
+  static async getCatalogWithProducts(params) {
+    const { query, storeId, hidden } = params;
+    const status = hidden === true ? ProductStatus.HIDE : ProductStatus.SHOW;
+
+    const catalogs = await this.where({ id_toko: storeId })
+      .fetchAll({
+        withRelated: [
+          { products: qb => qb.where('status_produk', status).limit(3) },
+          { 'products.images': qb => qb.limit(1) },
+        ],
+      });
+    const data = [];
+    // eslint-disable-next-line no-restricted-syntax
+    for (const catalog of catalogs.models) {
+      const products = catalog.related('products').map((product) => {
+        const images = product.related('images').serialize();
+        // TODO: Add dropshipper
+        return {
+          ...product.serialize(),
+          image: images.length ? images[0].file : config.defaultImage.product,
+        };
+      });
+      catalog.products = products;
+      data.push({ catalog, products });
+    }
+    return data;
   }
 }
 

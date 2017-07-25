@@ -246,35 +246,6 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
-   * Get store products
-   */
-  static async getByStore(params) {
-    const { page, pageSize, query, storeId, hidden } = params;
-    const status = hidden === true ? ProductStatus.HIDE : ProductStatus.SHOW;
-    const products = await this.where({ id_toko: storeId, status_produk: status })
-      .query((qb) => {
-        if (query) qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
-      })
-      .orderBy('id_produk')
-      .fetchPage({
-        page,
-        pageSize,
-        withRelated: [{ images: qb => qb.limit(1) }],
-      });
-    const data = [];
-    // eslint-disable-next-line no-restricted-syntax
-    for (let product of products.models) {
-      let images = product.related('images');
-      images = images.serialize();
-      // TODO: Add dropshipper
-      product = product.serialize();
-      product.image = images.length ? images[0].file : config.defaultImage.product;
-      data.push(product);
-    }
-    return data;
-  }
-
-  /**
    * Get search result
    */
   static async search(query = null) {

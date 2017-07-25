@@ -237,15 +237,12 @@ ProductController.dropship = async (req, res, next) => {
  * Get store products
  */
 ProductController.storeProducts = async (req, res, next) => {
-  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
-  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const storeId = await Store.getStoreId(req.user.id);
   const hidden = req.query.hidden ? JSON.parse(req.query.hidden) : false;
-  const params = { page, pageSize, query: req.query.q, storeId, hidden };
-  const products = await Product.getByStore(params);
+  const params = { query: req.query.q, storeId, hidden };
+  const products = await Catalog.getCatalogWithProducts(params);
   req.resData = {
     message: 'Store Products Data',
-    meta: { page, limit: pageSize },
     data: products,
   };
   return next();
