@@ -133,6 +133,14 @@ class BucketModel extends bookshelf.Model {
   }
 
   /**
+   * Cancel promo
+   * @param bucketId
+   */
+  static async cancelPromo(bucketId) {
+    return await this.where({ id_bucket: bucketId }).save({ id_promo: null }, { patch: true });
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData

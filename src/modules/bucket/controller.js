@@ -25,6 +25,12 @@ BucketController.getPromo = async (req, res, next) => {
   return next();
 };
 
+BucketController.cancelPromo = async (req, res, next) => {
+  const bucket = await Bucket.findBucket(req.user.id);
+  await Bucket.cancelPromo(bucket.toJSON().id);
+  return next();
+};
+
 BucketController.getBucket = async (req, res, next) => {
   const bucket = await Bucket.get(req.user.id);
   req.resData = {
