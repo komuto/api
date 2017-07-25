@@ -33,7 +33,7 @@ class BucketModel extends bookshelf.Model {
 
   serialize() {
     const bucket = {
-      id: this.get('id_ulasanproduk'),
+      id: this.get('id_bucket'),
       user_id: this.get('id_users'),
       promo_id: this.get('id_promo'),
       promo: this.relations.promo ? this.related('promo') : undefined,
@@ -129,7 +129,7 @@ class BucketModel extends bookshelf.Model {
    * @param promoId
    */
   static async addPromo(bucketId, promoId) {
-    // TODO: add promo to bucket
+    return await this.where({ id_bucket: bucketId }).save({ id_promo: promoId }, { patch: true });
   }
 
   /**
