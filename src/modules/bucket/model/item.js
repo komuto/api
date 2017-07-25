@@ -22,7 +22,7 @@ class ItemModel extends bookshelf.Model {
 
   serialize() {
     return {
-      id: this.get('id_ulasanproduk'),
+      id: this.get('id_listbucket'),
       bucket_id: this.get('id_bucket'),
       product_id: this.get('id_produk'),
       invoice_id: this.get('id_invoice'),
