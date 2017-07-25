@@ -2,6 +2,7 @@ import _ from 'lodash';
 import core from '../../core';
 import config from '../../../../config';
 import { getStoreError, createStoreError } from './../messages';
+import { OTPAddressStatus } from './../../OTP/model';
 
 const { parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -23,13 +24,16 @@ class StoreModel extends bookshelf.Model {
     return 'id_toko';
   }
 
-  serialize({ favorite = false } = {}) {
+  serialize({ favorite = false, verified = false } = {}) {
     const store = {
       id: this.get('id_toko'),
       name: this.get('nama_toko'),
       logo: core.imagePath(IMAGE_PATH, this.get('logo_toko')),
     };
     if (favorite) return store;
+    if (verified) {
+      store.is_verified = this.related('verifyAddress').length !== 0;
+    }
     return {
       ...store,
       user_id: this.get('id_users'),
@@ -47,7 +51,6 @@ class StoreModel extends bookshelf.Model {
       created_at: parseDate(this.get('tgl_create_toko')),
       status_at: parseDate(this.get('tglstatus_toko')),
       verification_at: parseDate(this.get('tanggal_verifikasi')),
-      is_verified: !!this.get('sampai_tanggal'),
       start_at: parseDate(this.get('mulai_tanggal')),
       end_at: parseDate(this.get('sampai_tanggal')),
     };
@@ -80,6 +83,13 @@ class StoreModel extends bookshelf.Model {
   expeditionServices() {
     return this.belongsToMany('ExpeditionService', 'detil_ekspedisitoko', 'id_toko', 'id_ekspedisiservice')
       .withPivot(['status_ekspedisitoko']);
+  }
+
+  /**
+   * Add relation to OTPAddress
+   */
+  verifyAddress() {
+    return this.hasMany('OTPAddress', 'id_users');
   }
 
   /**
@@ -193,28 +203,17 @@ class StoreModel extends bookshelf.Model {
         'user.addresses.province',
         'products.reviews.user',
         'catalogs.products.likes',
-        {
-          'products.reviews.product.images': (qb) => {
-            qb.limit(1);
-          },
-        },
-        {
-          'catalogs.products': (qb) => {
-            qb.limit(3);
-          },
-        },
-        {
-          'catalogs.products.images': (qb) => {
-            qb.limit(1);
-          },
-        },
+        { 'products.reviews.product.images': qb => qb.limit(1) },
+        { 'catalogs.products': qb => qb.limit(3) },
+        { 'catalogs.products.images': qb => qb.limit(1) },
+        { verifyAddress: qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) },
       ],
     });
     if (!store) throw getStoreError('store', 'not_found');
     const catalogs = this.getCatalogs(store, userId);
     const { origin, district } = this.getOriginAndDistrict(store);
     const { reviews, totalSold, quality, accuracy } = this.getReviews(store);
-    store = store.serialize();
+    store = store.serialize({ verified: true });
     store.total_product_sold = totalSold;
     store.origin = origin;
     return {

@@ -3,6 +3,7 @@ import slug from 'slug';
 import core from '../../core';
 import { Address } from '../../address/model';
 import { getProductError, errMsg } from './../messages';
+import { OTPAddressStatus } from './../../OTP/model';
 
 const { parseNum, parseDec, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -204,32 +205,41 @@ class ProductModel extends bookshelf.Model {
           'images',
           'likes',
           'view',
-          {
-            store: (qb) => {
-              if (other && other.verified) qb.whereRaw('mulai_tanggal IS NOT NULL');
-            },
-          },
+          'store.verifyAddress',
           relatedServices,
         ],
       });
 
     const results = [];
-    products.each(async(product) => {
-      const store = product.related('store');
+    // eslint-disable-next-line no-restricted-syntax
+    for (let product of products.models) {
+      let store = product.related('store');
       const images = product.related('images');
       const likes = product.related('likes');
       const isLiked = userId ? _.find(likes.models, o => o.attributes.id_users === userId) : false;
+      store = store.serialize({ verified: true });
       product = product.toJSON();
       product.count_like = likes.length;
       product.is_liked = !!isLiked;
-      if (address) {
-        const addressStore = await Address.getStoreAddress(store.toJSON().user_id, address);
-        if (addressStore) results.push({ product, store, images });
-      } else {
-        results.push({ product, store, images });
+      let addressStore = null;
+      if (address) addressStore = await Address.getStoreAddress(store.user_id, address);
+      if (address && other && other.verified) {
+        if (addressStore && store.is_verified) results.push({ product, store, images });
+        // eslint-disable-next-line no-continue
+        continue;
       }
-    });
-
+      if (address) {
+        if (addressStore) results.push({ product, store, images });
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+      if (other && other.verified) {
+        if (store.is_verified) results.push({ product, store, images });
+        // eslint-disable-next-line no-continue
+        continue;
+      }
+      results.push({ product, store, images });
+    }
     return results;
   }
 
@@ -247,13 +257,7 @@ class ProductModel extends bookshelf.Model {
       .fetchPage({
         page,
         pageSize,
-        withRelated: [
-          {
-            images: (qb) => {
-              qb.limit(1);
-            },
-          },
-        ],
+        withRelated: [{ images: qb => qb.limit(1) }],
       });
     const data = [];
     // eslint-disable-next-line no-restricted-syntax
@@ -348,13 +352,13 @@ class ProductModel extends bookshelf.Model {
     let product = await this.where({ id_produk: productId }).fetch({
       withRelated: [
         'category',
-        'store',
         'images',
         'reviews.user.addresses',
         'expeditionServices.expedition',
         'likes',
         'discussions',
         'view',
+        { 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) },
       ],
     });
     if (!product) return false;
@@ -373,7 +377,7 @@ class ProductModel extends bookshelf.Model {
     } else wholesaler = [];
 
     const category = product.related('category').serialize();
-    const store = product.related('store').serialize();
+    const store = product.related('store').serialize({ verified: true });
     const images = product.related('images');
     const getAddress = Address.getStoreAddress(store.user_id);
     const expeditions = this.loadExpeditions(product);
