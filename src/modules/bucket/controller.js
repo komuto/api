@@ -67,6 +67,7 @@ BucketController.addToCart = async (req, res, next) => {
     weight: product.weight * body.qty,
     total_price: (product.price * body.qty) + body.delivery_cost + insuranceCost,
   });
-  await Item.create(itemObj);
+  const select = Item.matchDBColumn({ bucket_id: bucket.id, product_id: product.id });
+  await Item.updateInsert(select, itemObj);
   return next();
 };

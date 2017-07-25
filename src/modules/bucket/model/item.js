@@ -1,8 +1,9 @@
+import ModelBase from 'bookshelf-modelbase';
 import core from '../../core';
-import { createItemError } from './../messages';
 
 const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
+bookshelf.plugin(ModelBase.pluggable);
 
 class ItemModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -12,6 +13,11 @@ class ItemModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_listbucket';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
   }
 
   serialize() {
@@ -45,12 +51,10 @@ class ItemModel extends bookshelf.Model {
   }
 
   /**
-   * Create item
+   * Update or insert item
    */
-  static async create(data) {
-    return await new this(data).save().catch(() => {
-      throw createItemError('item', 'error');
-    });
+  static async updateInsert(select, data) {
+    return await this.upsert(select, data);
   }
 
   /**

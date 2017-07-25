@@ -14,6 +14,11 @@ class ShippingModel extends bookshelf.Model {
     return 'id_pengiriman_produk';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize() {
     const shipping = {
       id: parseNum(this.get('id_pengiriman_produk')),
@@ -49,7 +54,8 @@ class ShippingModel extends bookshelf.Model {
    * Create shipping
    */
   static async create(data) {
-    return await new this(data).save().catch(() => {
+    return await new this(data).save().catch((e) => {
+      console.log(e);
       throw createShippingError('shipping', 'error');
     });
   }
