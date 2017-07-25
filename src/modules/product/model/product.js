@@ -479,6 +479,33 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
+   * Get product with no catalog
+   */
+  static async getProductWithNoCatalog(params) {
+    const { storeId, hidden } = params;
+    const status = hidden === true ? ProductStatus.HIDE : ProductStatus.SHOW;
+    const products = await this.where({ id_toko: storeId, status_produk: status })
+      .query((qb) => {
+        qb.where('identifier_katalog', null);
+        qb.limit(3);
+      })
+      .fetchAll([{ images: qb => qb.limit(1) }]);
+    return {
+      catalog: {
+        name: 'Tanpa Katalog',
+        count_product: products.length,
+      },
+      products: products.models.map((product) => {
+        const images = product.related('images').serialize();
+        return {
+          ...product.serialize({ minimal: true }),
+          image: images.length ? images[0].file : config.defaultImage.product,
+        };
+      }),
+    };
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData

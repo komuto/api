@@ -1,10 +1,11 @@
+import _ from 'lodash';
 import core from '../../core';
 import { createCatalogError, getCatalogError, updateCatalogError } from './../messages';
 import config from './../../../../config';
 import { ProductStatus } from './../../product/model';
 
 const bookshelf = core.postgres.db;
-const { parseDate, defaultNull } = core.utils;
+const { parseDate, defaultNull, parseNum } = core.utils;
 
 class CatalogModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -124,32 +125,52 @@ class CatalogModel extends bookshelf.Model {
     return !!catalog;
   }
 
-  /**
-   * Get catalog with products
-   */
-  static async getCatalogWithProducts(params) {
-    const { query, storeId, hidden } = params;
-    const status = hidden === true ? ProductStatus.HIDE : ProductStatus.SHOW;
-
-    const catalogs = await this.where({ id_toko: storeId })
+  static async loadCatalog(storeId, status) {
+    return await this.where({ id_toko: storeId })
       .fetchAll({
         withRelated: [
           { products: qb => qb.where('status_produk', status).limit(3) },
           { 'products.images': qb => qb.limit(1) },
         ],
       });
+  }
+
+  static async loadCountProducts(storeId) {
+    return await this.query((qb) => {
+      qb.select('katalog.id_katalog');
+      qb.where('katalog.id_toko', storeId);
+      qb.innerJoin('produk', 'katalog.id_katalog', 'produk.identifier_katalog');
+      qb.count('produk.* as count_product');
+      qb.groupBy('id_katalog');
+    }).fetchAll();
+  }
+
+  /**
+   * Get catalog with products
+   */
+  static async getCatalogWithProducts(params) {
+    const { storeId, hidden } = params;
+    const status = hidden === true ? ProductStatus.HIDE : ProductStatus.SHOW;
+
+    const [catalogs, countProducts] = await Promise.all([
+      this.loadCatalog(storeId, status),
+      this.loadCountProducts(storeId),
+    ]);
+
     const data = [];
     // eslint-disable-next-line no-restricted-syntax
-    for (const catalog of catalogs.models) {
+    for (let catalog of catalogs.models) {
       const products = catalog.related('products').map((product) => {
         const images = product.related('images').serialize();
         // TODO: Add dropshipper
         return {
-          ...product.serialize(),
+          ...product.serialize({ minimal: true }),
           image: images.length ? images[0].file : config.defaultImage.product,
         };
       });
-      catalog.products = products;
+      const found = _.find(countProducts.models, o => o.get('id_katalog') === catalog.get('id_katalog'));
+      catalog = catalog.serialize();
+      catalog.count_product = found ? parseNum(found.get('count_product')) : 0;
       data.push({ catalog, products });
     }
     return data;
