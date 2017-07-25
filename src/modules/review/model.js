@@ -56,20 +56,6 @@ class ReviewModel extends bookshelf.Model {
   }
 
   /**
-   * Get a line item by id
-   * @param id {integer}
-   */
-  static async getById(id) {
-    const review = await this.where({ id_ulasanproduk: id }).fetch({ withRelated: ['user'] });
-    if (!review) throw getReviewError('review', 'not_found');
-    const { id: userId, name, photo } = review.related('user').serialize();
-    return {
-      ...review.serialize({ minimal: false }),
-      user: { id: userId, name, photo },
-    };
-  }
-
-  /**
    * Get a line item by condition
    * @param data {Object}
    * @param {integer} pageSize limit

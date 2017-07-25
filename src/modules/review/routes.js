@@ -14,12 +14,4 @@ routes.get('/reviews/search',
   wrap(ReviewController.getReviews),
   apiResponse());
 
-/**
- * GET /reviews/id
- * Get individual review
- */
-routes.get('/reviews/:id([0-9]{1,10})',
-  wrap(ReviewController.getReview),
-  apiResponse());
-
 export default routes;

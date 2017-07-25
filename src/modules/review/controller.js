@@ -14,18 +14,6 @@ ReviewController.createReview = async (req, res, next) => {
 };
 
 /**
- * Get individual review
- */
-ReviewController.getReview = async (req, res, next) => {
-  const review = await Review.getById(req.params.id);
-  req.resData = {
-    message: 'Review Data',
-    data: review,
-  };
-  next();
-};
-
-/**
  * Gel all reviews
  */
 ReviewController.getReviews = async (req, res, next) => {
