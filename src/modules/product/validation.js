@@ -46,9 +46,24 @@ constraints.list = {
   },
   address: {
     presence: false,
-    format: {
-      pattern: /^[\d]+/,
-      message: 'accept only number (district_id)',
+    numericality: {
+      onlyInteger: true,
+      greaterThan: 0,
+    },
+    length: {
+      minimum: 1,
+      maximum: 10,
+    },
+  },
+  category_id: {
+    presence: false,
+    numericality: {
+      onlyInteger: true,
+      greaterThan: 0,
+    },
+    length: {
+      minimum: 1,
+      maximum: 10,
     },
   },
 };
