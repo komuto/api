@@ -127,7 +127,7 @@ constraints.createExpeditions = {
 };
 
 constraints.createImages = {
-  image: { presence: true },
+  name: { presence: true },
 };
 
 constraints.dropship = {

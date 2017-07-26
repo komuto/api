@@ -40,7 +40,7 @@ class ImageProductModel extends bookshelf.Model {
     const date = moment();
     const images = data.map(file => new this().save({
       id_produk: id,
-      file_gambarproduk: file.image,
+      file_gambarproduk: file.name,
       created_gambarproduk: date,
       updated_gambarproduk: date,
     }, { method: 'insert' }));
