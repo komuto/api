@@ -15,6 +15,10 @@ export const errMsg = {
     title: 'Create shipping gagal',
     error: 'Gagal menambah shipping',
   },
+  updateShipping: {
+    title: 'Update shipping gagal',
+    error: 'Gagal mengubah shipping',
+  },
 };
 
 export const getBucketError = formatError.bind(errMsg.getBucket);
@@ -22,3 +26,5 @@ export const getBucketError = formatError.bind(errMsg.getBucket);
 export const getPromoError = formatError.bind(errMsg.getPromo);
 
 export const createShippingError = formatError.bind(errMsg.createShipping);
+
+export const updateShippingError = formatError.bind(errMsg.updateShipping);

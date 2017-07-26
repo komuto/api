@@ -51,6 +51,13 @@ class ItemModel extends bookshelf.Model {
   }
 
   /**
+   * Get item by bucket_id and product_id
+   */
+  static async get(where) {
+    return await this.where(where).fetch();
+  }
+
+  /**
    * Update or insert item
    */
   static async updateInsert(select, data) {

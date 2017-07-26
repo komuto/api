@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { Bucket, Promo, Item, Shipping } from './model';
 import { Product } from '../product/model';
 import { Expedition } from '../expedition/model';
@@ -44,6 +45,10 @@ BucketController.addToCart = async (req, res, next) => {
   const body = req.body;
   const bucket = await Bucket.findBucket(req.user.id);
   const product = await Product.findById(body.product_id);
+
+  const where = Item.matchDBColumn({ bucket_id: bucket.id, product_id: product.id });
+  const item = await Item.get(where);
+
   let insuranceCost = 0;
   if (body.is_insurance) {
     const expedition = await Expedition.findById(body.expedition_id);
@@ -56,18 +61,24 @@ BucketController.addToCart = async (req, res, next) => {
     insurance_fee: insuranceCost,
     note: body.note,
   });
-  const shipping = await Shipping.create(shippingObj);
+
+  let shippingId;
+  if (item) {
+    shippingId = item.serialize().shipping_id;
+    await Shipping.update(shippingId, shippingObj);
+  } else {
+    const shipping = await Shipping.create(shippingObj);
+    shippingId = shipping.id;
+  }
+
   const itemObj = Item.matchDBColumn({
-    bucket_id: bucket.id,
-    product_id: product.id,
-    shipping_id: shipping.id,
+    shipping_id: shippingId,
     qty: body.qty,
     note: body.note,
-    additional_cost: 0,
+    additional_cost: 0, // admin cost
     weight: product.weight * body.qty,
     total_price: (product.price * body.qty) + body.delivery_cost + insuranceCost,
   });
-  const select = Item.matchDBColumn({ bucket_id: bucket.id, product_id: product.id });
-  await Item.updateInsert(select, itemObj);
+  await Item.updateInsert(where, _.assign(where, itemObj));
   return next();
 };

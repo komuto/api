@@ -1,5 +1,5 @@
 import core from '../../core';
-import { createShippingError } from './../messages';
+import { createShippingError, updateShippingError } from './../messages';
 
 const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -54,10 +54,19 @@ class ShippingModel extends bookshelf.Model {
    * Create shipping
    */
   static async create(data) {
-    return await new this(data).save().catch((e) => {
-      console.log(e);
-      throw createShippingError('shipping', 'error');
+    return await new this(data).save().catch(() => {
+      throw updateShippingError('shipping', 'error');
     });
+  }
+
+  /**
+   * Update shipping
+   */
+  static async update(id, data) {
+    return await this.where({ id_pengiriman_produk: id }).save(data, { patch: true })
+      .catch(() => {
+        throw createShippingError('shipping', 'error');
+      });
   }
 
   /**
