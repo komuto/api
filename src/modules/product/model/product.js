@@ -147,7 +147,6 @@ class ProductModel extends bookshelf.Model {
   static async get(params) {
     const { page, pageSize, query, price, condition, address, userId } = params;
     let { where, sort, other, brands, services } = params;
-    let relatedServices = null;
 
     switch (sort) {
       case 'newest':
@@ -179,14 +178,6 @@ class ProductModel extends bookshelf.Model {
         other[val] = true;
       });
     }
-    if (services) {
-      services = services.split(',');
-      relatedServices = {
-        expeditionServices: (qb) => {
-          qb.whereIn('detil_ekspedisiproduk.id_ekspedisiservice', services);
-        },
-      };
-    }
     const products = await this.where(where)
       .query((qb) => {
         if (query) qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
@@ -195,6 +186,11 @@ class ProductModel extends bookshelf.Model {
         if (brands) {
           brands = brands.split(',');
           qb.whereIn('identifier_brand', brands);
+        }
+        if (services) {
+          services = services.split(',');
+          qb.innerJoin('detil_ekspedisiproduk', 'detil_ekspedisiproduk.id_produk', 'produk.id_produk');
+          qb.whereIn('detil_ekspedisiproduk.id_ekspedisiservice', services);
         }
       })
       .orderBy(sort)
@@ -206,7 +202,6 @@ class ProductModel extends bookshelf.Model {
           'likes',
           'view',
           'store.verifyAddress',
-          relatedServices,
           { images: qb => qb.limit(1) },
         ],
       });
