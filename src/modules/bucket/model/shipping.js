@@ -55,7 +55,7 @@ class ShippingModel extends bookshelf.Model {
    */
   static async create(data) {
     return await new this(data).save().catch(() => {
-      throw updateShippingError('shipping', 'error');
+      throw createShippingError('shipping', 'error');
     });
   }
 
@@ -65,7 +65,7 @@ class ShippingModel extends bookshelf.Model {
   static async update(id, data) {
     return await this.where({ id_pengiriman_produk: id }).save(data, { patch: true })
       .catch(() => {
-        throw createShippingError('shipping', 'error');
+        throw updateShippingError('shipping', 'error');
       });
   }
 

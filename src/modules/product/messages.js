@@ -6,6 +6,7 @@ export const errMsg = {
   getProduct: {
     title: 'Get barang gagal',
     not_found: 'Barang tidak ditemukan',
+    error: 'Error get barang',
   },
   createProduct: {
     title: 'Daftar produk gagal',

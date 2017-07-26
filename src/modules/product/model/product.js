@@ -345,7 +345,9 @@ class ProductModel extends bookshelf.Model {
 
     let wholesaler;
     if (product.get('is_grosir')) {
-      await product.load('wholesale');
+      await product.load('wholesale').catch(() => {
+        throw getProductError('product', 'error');
+      });
       wholesaler = product.related('wholesale').serialize();
     } else wholesaler = [];
 
