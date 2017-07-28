@@ -67,9 +67,9 @@ routes.get('/products/:id([0-9]{1,10})',
 routes.post('/products',
   auth(),
   validateParam(constraints.createProduct, true),
-  validateParam(constraints.createWholesale, false, 'wholesales', false, errMsg.createProduct),
-  validateParam(constraints.createExpeditions, false, 'expeditions', true, errMsg.createProduct),
-  validateParam(constraints.createImages, false, 'images', true, errMsg.createProduct),
+  validateParam(constraints.createWholesale, false, 'wholesales', false),
+  validateParam(constraints.createExpeditions, false, 'expeditions', true),
+  validateParam(constraints.createImages, false, 'images', true),
   wrap(ProductController.createProduct),
   apiResponse());
 

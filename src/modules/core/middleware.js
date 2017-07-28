@@ -99,14 +99,12 @@ export function formatValidation(rules, msg) {
  * @param isBody {boolean} true evaluate req.body else req.query
  * @param prop {object} name of the array to check
  * @param strict {boolean} need to be available
- * @param msg {object} title for error
  */
 export function validateParam(
   constraints,
   isBody = false,
   prop = null,
   strict = false,
-  msg = null,
 ) {
   return (req, res, next) => {
     if (Array.isArray(req.body[prop])) {
@@ -116,7 +114,7 @@ export function validateParam(
       if (evaluate) {
         params.forEach((param) => {
           const hasError = validate(param, constraints);
-          return hasError ? next(formatError(msg, hasError)) : undefined;
+          return hasError ? next(formatError(`Invalid parameter ${prop}`, hasError)) : undefined;
         });
       }
     } else {
