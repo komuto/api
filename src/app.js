@@ -27,6 +27,7 @@ import store from './modules/store';
 import image from './modules/image';
 import bucket from './modules/bucket';
 import otp from './modules/OTP';
+import payment from './modules/payment';
 
 const app = express();
 
@@ -106,6 +107,7 @@ app.use(review.routes);
 app.use(store.routes);
 app.use(bucket.routes);
 app.use(otp.routes);
+app.use(payment.routes);
 
 app.use((req, res, next) => {
   const err = new Error('Path Not Found');
