@@ -26,7 +26,7 @@ def.imageFolder.store = 'toko';
 def.imageFolder.product = 'produk';
 def.defaultImage = {};
 def.defaultImage.user = 'https://www.juptr.io/images/default-user.png';
-def.defaultImage.product = 'http://demo.makitweb.com/broken_image/images/noimage.png';
+def.defaultImage.product = 'http://188.166.246.46/uploads/produk/noimage.png';
 
 def.cdnPath = 'http://cdn.localhost.com';
 
