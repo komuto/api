@@ -41,9 +41,7 @@ BucketController.getBucket = async (req, res, next) => {
   return next();
 };
 
-BucketController.addToCart = async (req, res, next) => {
-  const body = req.body;
-  const bucket = await Bucket.findBucket(req.user.id);
+BucketController.saveCart = async (bucket, body) => {
   const product = await Product.findById(body.product_id);
 
   const where = Item.matchDBColumn({ bucket_id: bucket.id, product_id: product.id });
@@ -80,5 +78,21 @@ BucketController.addToCart = async (req, res, next) => {
     total_price: (product.price * body.qty) + body.delivery_cost + insuranceCost,
   });
   await Item.updateInsert(where, _.assign(where, itemObj));
+};
+
+BucketController.addToCart = async (req, res, next) => {
+  const bucket = await Bucket.findBucket(req.user.id);
+  this.saveCart(bucket, req.body);
+  return next();
+};
+
+BucketController.checkout = async (req, res, next) => {
+  const buckets = req.body.buckets;
+  const bucket = await Bucket.findBucket(req.user.id);
+
+  await Promise.all(buckets.forEach(async (val) => {
+    await this.saveCart(bucket, val);
+  }));
+
   return next();
 };

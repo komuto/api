@@ -52,4 +52,13 @@ routes.post('/buckets',
   wrap(BucketController.addToCart),
   apiResponse());
 
+/**
+ * Checkout
+ */
+routes.post('/checkout',
+  auth(),
+  // validateParam(constraints.cart, true),
+  wrap(BucketController.checkout),
+  apiResponse());
+
 export default routes;
