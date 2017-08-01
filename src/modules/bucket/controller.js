@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { Bucket, Promo, Item, Shipping } from './model';
 import { Product } from '../product/model';
 import { Expedition } from '../expedition/model';
+import { Invoice } from '../invoice/model';
 
 export const BucketController = {};
 export default { BucketController };
@@ -77,12 +78,12 @@ BucketController.saveCart = async (bucket, body) => {
     weight: product.weight * body.qty,
     total_price: (product.price * body.qty) + body.delivery_cost + insuranceCost,
   });
-  await Item.updateInsert(where, _.assign(where, itemObj));
+  return await Item.updateInsert(where, _.assign(itemObj, where));
 };
 
 BucketController.addToCart = async (req, res, next) => {
   const bucket = await Bucket.findBucket(req.user.id);
-  this.saveCart(bucket, req.body);
+  await BucketController.saveCart(bucket, req.body);
   return next();
 };
 
@@ -90,9 +91,47 @@ BucketController.checkout = async (req, res, next) => {
   const buckets = req.body.buckets;
   const bucket = await Bucket.findBucket(req.user.id);
 
-  await Promise.all(buckets.forEach(async (val) => {
-    await this.saveCart(bucket, val);
+  const items = await Promise.all(buckets.map(async val => (
+    await BucketController.saveCart(bucket, val)
+  )));
+
+  let data = await Promise.all(items.map(async (item) => {
+    item = await item.load('product');
+    return item.serialize();
   }));
 
+  data = _.chain(data)
+    .groupBy('product.store_id')
+    .toPairs()
+    .map(currentItem => (_.zipObject(['store_id', 'items'], currentItem)))
+    .value();
+
+  await Promise.all(data.map(async (val) => {
+    
+  }));
+  //
+  // const invoiceObj = Invoice.matchDBColumn({
+  //   user_id: req.user.id,
+  //   store_id: 'id_toko',
+  //   bucket_id: 'id_bucket',
+  //   bid_id: 'id_bidlelang',
+  //   shipping_id: 'id_pengiriman_produk',
+  //   invoice_number: 'no_invoice',
+  //   payment_method_id: 'id_paymentmethod',
+  //   remark_cancel: 'remark_pembatalan',
+  //   bill: 'total_tagihan',
+  //   total_price: 'total_harga',
+  //   delivery_cost: 'biaya_ongkir',
+  //   insurance_fee: 'biaya_asuransi',
+  //   admin_cost: 'biaya_admin',
+  //   wallet: 'bayar_wallet',
+  //   promo: 'promo',
+  //   status: 'status_invoice',
+  //   created_at: 'createdate_invoice',
+  //   confirmed_at: 'confirmation_date',
+  //   updated_at: 'confirmation_date',
+  // });
+  // const invoice = await Invoice.create(invoiceObj);
+  // req.resData = { data: invoice };
   return next();
 };
