@@ -32,6 +32,10 @@ export const errMsg = {
     title: 'Gagal menghapus produk',
     error: 'Tidak bisa menghapus produk',
   },
+  getCatalogProducts: {
+    title: 'Get catalog products gagal',
+    not_found: 'Katalog tidak ditemukan',
+  },
 };
 
 export const getProductError = formatError.bind(errMsg.getProduct);
@@ -45,3 +49,6 @@ export const createDiscussionError = formatError.bind(errMsg.createDiscussion);
 export const createDropshipError = formatError.bind(errMsg.createDropship);
 
 export const createReportError = formatError.bind(errMsg.createReport);
+
+export const getCatalogProductsError = formatError.bind(errMsg.getCatalogProducts);
+

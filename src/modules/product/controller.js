@@ -15,7 +15,7 @@ import {
 } from './model';
 import { Wishlist } from './../user/model';
 import { model as storeModel } from '../store';
-import { getProductError, createProductError, errMsg } from './messages';
+import { getProductError, createProductError, getCatalogProductsError, errMsg } from './messages';
 import { ReportEmail } from './email';
 import config from './../../../config';
 import { BadRequestError } from './../../../common/errors';
@@ -248,6 +248,21 @@ ProductController.storeProducts = async (req, res, next) => {
   req.resData = {
     message: 'Store Products Data',
     data: catalogs,
+  };
+  return next();
+};
+
+/**
+ * Get store products based on catalog id
+ */
+ProductController.storeCatalogProducts = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const catalogId = req.params.id;
+  const products = await Catalog.getCatalogWithProducts({ storeId, catalogId });
+  if (!products.length) throw getCatalogProductsError('catalog_id', 'not_found');
+  req.resData = {
+    message: 'Store Catalog Products Data',
+    data: products[0],
   };
   return next();
 };
