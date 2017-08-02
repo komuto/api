@@ -12,7 +12,7 @@ constraints.list = {
   price: {
     presence: false,
     format: {
-      pattern: /^[1-9][\d]+-[1-9][\d]+/,
+      pattern: /^[\d]+-[\d]+/,
       message: 'only number with one `-` symbol between number. First char can\'t be 0. e.g. `500-1000`',
     },
   },
