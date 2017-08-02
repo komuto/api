@@ -181,7 +181,7 @@ class ProductModel extends bookshelf.Model {
     const products = await this.where(where)
       .query((qb) => {
         if (query) qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
-        if (price) qb.whereBetween('harga_produk', [price.min, price.max]);
+        if (price && price.min !== 0 && price.max !== 0) qb.whereBetween('harga_produk', [price.min, price.max]);
         if (other && other.discount) qb.where('disc_produk', '>', 0);
         if (brands) {
           brands = brands.split(',');
