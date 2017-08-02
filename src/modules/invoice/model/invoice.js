@@ -1,3 +1,5 @@
+import moment from 'moment';
+import randomInt from 'random-int';
 import core from '../../core';
 
 const { parseDate } = core.utils;
@@ -20,6 +22,11 @@ class InvoiceModel extends bookshelf.Model {
     return 'id_invoice';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize() {
     return {
       id: this.get('id_invoice'),
@@ -28,8 +35,8 @@ class InvoiceModel extends bookshelf.Model {
       bucket_id: this.get('id_bucket'),
       bid_id: this.get('id_bidlelang'),
       shipping_id: this.get('id_pengiriman_produk'),
-      invoice_number: this.get('no_invoice'),
       payment_method_id: this.get('id_paymentmethod'),
+      invoice_number: this.get('no_invoice'),
       remark_cancel: this.get('remark_pembatalan'),
       bill: this.get('total_tagihan'),
       total_price: this.get('total_harga'),
@@ -41,7 +48,7 @@ class InvoiceModel extends bookshelf.Model {
       status: this.get('status_invoice'),
       created_at: parseDate(this.get('createdate_invoice')),
       confirmed_at: parseDate(this.get('confirmation_date')),
-      updated_at: parseDate(this.get('confirmation_date')),
+      updated_at: parseDate(this.get('updated_at')),
     };
   }
 
@@ -50,9 +57,14 @@ class InvoiceModel extends bookshelf.Model {
    */
   static async create(data) {
     return await new this(data).save().catch((e) => {
-      console.log(e);
+      throw e;
+      // TODO: Create invoice error
       // throw createShippingError('shipping', 'error');
     });
+  }
+
+  static generateNumber() {
+    return `Invoice-${randomInt(1, moment().unix())}/${moment().format('MM')}/${moment().format('Y')}`;
   }
 
   /**
@@ -67,8 +79,8 @@ class InvoiceModel extends bookshelf.Model {
       bucket_id: 'id_bucket',
       bid_id: 'id_bidlelang',
       shipping_id: 'id_pengiriman_produk',
-      invoice_number: 'no_invoice',
       payment_method_id: 'id_paymentmethod',
+      invoice_number: 'no_invoice',
       remark_cancel: 'remark_pembatalan',
       bill: 'total_tagihan',
       total_price: 'total_harga',
@@ -80,7 +92,7 @@ class InvoiceModel extends bookshelf.Model {
       status: 'status_invoice',
       created_at: 'createdate_invoice',
       confirmed_at: 'confirmation_date',
-      updated_at: 'confirmation_date',
+      updated_at: 'updated_at',
     };
     const newData = {};
     Object.keys(data).forEach((prop) => {

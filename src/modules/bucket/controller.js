@@ -1,8 +1,9 @@
 import _ from 'lodash';
-import { Bucket, Promo, Item, Shipping } from './model';
+import { Bucket, Promo, Item, Shipping, BucketStatus } from './model';
 import { Product } from '../product/model';
 import { Expedition } from '../expedition/model';
-import { Invoice } from '../invoice/model';
+import { Invoice, InvoiceStatus } from '../invoice/model';
+import { PromoType } from "./model/promo";
 
 export const BucketController = {};
 export default { BucketController };
@@ -58,7 +59,7 @@ BucketController.saveCart = async (bucket, body) => {
     address_id: body.address_id,
     delivery_cost: body.delivery_cost,
     insurance_fee: insuranceCost,
-    note: body.note,
+    note: null,
   });
 
   let shippingId;
@@ -90,48 +91,85 @@ BucketController.addToCart = async (req, res, next) => {
 BucketController.checkout = async (req, res, next) => {
   const buckets = req.body.buckets;
   const bucket = await Bucket.findBucket(req.user.id);
+  await bucket.load('promo');
 
   const items = await Promise.all(buckets.map(async val => (
     await BucketController.saveCart(bucket, val)
   )));
 
   let data = await Promise.all(items.map(async (item) => {
-    item = await item.load('product');
-    return item.serialize();
+    await item.load('product');
+    await item.load('shipping');
+    return item;
   }));
 
-  data = _.chain(data)
-    .groupBy('product.store_id')
-    .toPairs()
-    .map(currentItem => (_.zipObject(['store_id', 'items'], currentItem)))
-    .value();
+  const groups = _.groupBy(data, (val) => {
+    val = val.serialize();
+    return `${val.product.store_id}#${val.shipping.address_id}#${val.shipping.expedition_service_id}`;
+  });
+
+  data = _.map(groups, group => ({
+    shipping_id: group[0].serialize().shipping.id,
+    store_id: group[0].serialize().product.store_id,
+    items: group,
+  }));
 
   await Promise.all(data.map(async (val) => {
-    
+    const bucketObj = bucket.serialize();
+    const weight = val.items[0].serialize().weight;
+    const deliveryCost = val.items[0].serialize().shipping.delivery_cost / Math.ceil(weight / 1000);
+
+    let totalPrice = 0;
+    let adminCost = 0;
+    let insuranceFee = 0;
+    let totalWeight = 0;
+    _.forEach(val.items, (o) => {
+      o = o.serialize();
+      totalPrice += o.product.price * o.qty;
+      adminCost += o.additional_cost;
+      insuranceFee += o.shipping.insurance_fee;
+      totalWeight += o.weight;
+    });
+
+    let promo = 0;
+    if (bucketObj.promo !== undefined) {
+      if (bucketObj.promo.type === PromoType.NOMINAL) promo = bucketObj.promo.nominal / data.length;
+      else promo = (totalPrice * bucketObj.promo.percentage) / 100;
+    }
+
+    const totalDeliveryCost = deliveryCost * Math.ceil(totalWeight / 1000);
+    totalPrice += adminCost + insuranceFee + totalDeliveryCost;
+
+    const invoiceObj = Invoice.matchDBColumn({
+      user_id: req.user.id,
+      store_id: val.store_id,
+      bucket_id: bucketObj.id,
+      bid_id: null,
+      shipping_id: val.shipping_id,
+      payment_method_id: bucketObj.payment_method,
+      invoice_number: Invoice.generateNumber(),
+      remark_cancel: null,
+      bill: totalPrice,
+      total_price: totalPrice,
+      delivery_cost: totalDeliveryCost,
+      insurance_fee: insuranceFee,
+      admin_cost: adminCost,
+      wallet: bucketObj.wallet, // need confirmation
+      promo,
+      status: InvoiceStatus.UNPAID,
+      confirmed_at: null,
+      created_at: new Date(),
+      updated_at: new Date(),
+    });
+
+    const invoice = await Invoice.create(invoiceObj);
+
+    await Promise.all(val.items.map(async item => (
+      await item.save({ id_invoice: invoice.serialize().id }, { patch: true })
+    )));
+
+    return await bucket.save({ status_bucket: BucketStatus.CHECKOUT }, { patch: true });
   }));
-  //
-  // const invoiceObj = Invoice.matchDBColumn({
-  //   user_id: req.user.id,
-  //   store_id: 'id_toko',
-  //   bucket_id: 'id_bucket',
-  //   bid_id: 'id_bidlelang',
-  //   shipping_id: 'id_pengiriman_produk',
-  //   invoice_number: 'no_invoice',
-  //   payment_method_id: 'id_paymentmethod',
-  //   remark_cancel: 'remark_pembatalan',
-  //   bill: 'total_tagihan',
-  //   total_price: 'total_harga',
-  //   delivery_cost: 'biaya_ongkir',
-  //   insurance_fee: 'biaya_asuransi',
-  //   admin_cost: 'biaya_admin',
-  //   wallet: 'bayar_wallet',
-  //   promo: 'promo',
-  //   status: 'status_invoice',
-  //   created_at: 'createdate_invoice',
-  //   confirmed_at: 'confirmation_date',
-  //   updated_at: 'confirmation_date',
-  // });
-  // const invoice = await Invoice.create(invoiceObj);
-  // req.resData = { data: invoice };
+
   return next();
 };

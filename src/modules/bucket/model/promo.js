@@ -10,6 +10,11 @@ export const PromoStatus = {
   HIDE: 2,
 };
 
+export const PromoType = {
+  PERCENTAGE: 0,
+  NOMINAL: 1,
+};
+
 class PromoModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -50,4 +55,4 @@ class PromoModel extends bookshelf.Model {
 }
 
 export const Promo = bookshelf.model('Promo', PromoModel);
-export default { Promo, PromoStatus };
+export default { Promo, PromoStatus, PromoType };

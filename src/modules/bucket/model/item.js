@@ -28,6 +28,7 @@ class ItemModel extends bookshelf.Model {
       product: this.relations.product ? this.related('product').serialize() : undefined,
       invoice_id: this.get('id_invoice'),
       shipping_id: parseNum(this.get('id_pengiriman_produk')),
+      shipping: this.relations.shipping ? this.related('shipping').serialize() : undefined,
       dropshipper_id: parseNum(this.get('id_dropshipper')),
       qty: this.get('qty_listbucket'),
       weight: this.get('beratproduk_listbucket'),
@@ -36,6 +37,7 @@ class ItemModel extends bookshelf.Model {
       total_price: parseNum(this.get('hargatotal_listbucket')),
     };
     if (this.relations.product) delete item.product_id;
+    if (this.relations.shipping) delete item.shipping_id;
     return item;
   }
 
