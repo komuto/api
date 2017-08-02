@@ -1,9 +1,8 @@
 import _ from 'lodash';
-import { Bucket, Promo, Item, Shipping, BucketStatus } from './model';
+import { Bucket, Promo, Item, Shipping, BucketStatus, PromoType } from './model';
 import { Product } from '../product/model';
 import { Expedition } from '../expedition/model';
 import { Invoice, InvoiceStatus } from '../invoice/model';
-import { PromoType } from "./model/promo";
 
 export const BucketController = {};
 export default { BucketController };
