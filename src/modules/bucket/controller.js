@@ -137,7 +137,7 @@ BucketController.checkout = async (req, res, next) => {
     }
 
     const totalDeliveryCost = deliveryCost * Math.ceil(totalWeight / 1000);
-    totalPrice += adminCost + insuranceFee + totalDeliveryCost;
+    totalPrice += (adminCost + insuranceFee + totalDeliveryCost) - promo;
 
     const invoiceObj = Invoice.matchDBColumn({
       user_id: req.user.id,
