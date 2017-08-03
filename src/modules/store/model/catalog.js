@@ -135,7 +135,11 @@ class CatalogModel extends bookshelf.Model {
     return await this.where(query)
       .fetchAll({
         withRelated: [
-          { products: qb => qb.where({ status_produk: status }).limit(limit) },
+          {
+            products: qb => qb.where({ status_produk: status })
+              .limit(limit)
+              .orderBy('id_produk', 'DESC'),
+          },
           { 'products.images': qb => qb.limit(1) },
         ],
       });
