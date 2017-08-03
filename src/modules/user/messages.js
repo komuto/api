@@ -7,6 +7,7 @@ export const errMsg = {
   loginMsg: {
     title: 'Login gagal',
     wrong_password: 'Password salah',
+    bad_request: 'Bad request',
     password_presence: '^Password harus diisi',
     email_presence: '^Email harus diisi',
     email_not_valid: '^Email tidak valid',
