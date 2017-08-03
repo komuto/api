@@ -73,9 +73,9 @@ class BucketModel extends bookshelf.Model {
   }
 
   /**
-   * Get bucket
+   * Get detail bucket
    */
-  static async get(userId) {
+  static async getDetail(userId) {
     const bucket = await this.where({ id_users: userId, status_bucket: BucketStatus.ADDED }).fetch({
       withRelated: [
         'promo',
@@ -108,9 +108,32 @@ class BucketModel extends bookshelf.Model {
   }
 
   /**
+   * Get bucket
+   */
+  static async get(userId) {
+    const bucket = await this.where({
+      id_users: userId,
+      status_bucket: BucketStatus.ADDED,
+    }).fetch();
+    if (!bucket) throw getBucketError('bucket', 'not_found');
+    return bucket;
+  }
+
+  /**
+   * Get bucket with relation for checkout
+   */
+  static async getForCheckout(userId) {
+    const bucket = await this.where({ id_users: userId, status_bucket: BucketStatus.ADDED }).fetch({
+      withRelated: ['promo', 'items.product', 'items.shipping'],
+    });
+    if (!bucket) throw getBucketError('bucket', 'not_found');
+    return bucket;
+  }
+
+  /**
    * Find bucket
    */
-  static async findBucket(userId) {
+  static async findOrCreateBucket(userId) {
     return await this.findOrCreate({
       id_users: userId,
       status_bucket: BucketStatus.ADDED,

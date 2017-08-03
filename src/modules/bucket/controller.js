@@ -3,7 +3,7 @@ import { Bucket, Promo, Item, Shipping, BucketStatus, PromoType } from './model'
 import { Product } from '../product/model';
 import { Expedition } from '../expedition/model';
 import { Invoice, InvoiceStatus } from '../invoice/model';
-import { getItemError } from './messages';
+import { getBucketError, getItemError } from './messages';
 
 export const BucketController = {};
 export default { BucketController };
@@ -18,9 +18,9 @@ BucketController.getCount = async (req, res, next) => {
 };
 
 BucketController.getPromo = async (req, res, next) => {
+  const bucket = await Bucket.get(req.user.id);
   const promo = await Promo.get(req.query.code);
-  const bucket = await Bucket.findBucket(req.user.id);
-  await Bucket.addPromo(bucket.toJSON().id, promo.toJSON().id);
+  await Bucket.addPromo(bucket.serialize().id, promo.serialize().id);
   req.resData = {
     message: 'Promo Data',
     data: promo,
@@ -29,13 +29,13 @@ BucketController.getPromo = async (req, res, next) => {
 };
 
 BucketController.cancelPromo = async (req, res, next) => {
-  const bucket = await Bucket.findBucket(req.user.id);
-  await Bucket.cancelPromo(bucket.toJSON().id);
+  const bucket = await Bucket.get(req.user.id);
+  await Bucket.cancelPromo(bucket.serialize().id);
   return next();
 };
 
 BucketController.getBucket = async (req, res, next) => {
-  const bucket = await Bucket.get(req.user.id);
+  const bucket = await Bucket.getDetail(req.user.id);
   req.resData = {
     message: 'Bucket Data',
     data: bucket,
@@ -79,7 +79,7 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
 };
 
 BucketController.addToCart = async (req, res, next) => {
-  const bucket = await Bucket.findBucket(req.user.id);
+  const bucket = await Bucket.findOrCreateBucket(req.user.id);
   const product = await Product.findById(req.body.product_id);
   const where = Item.matchDBColumn({ bucket_id: bucket.id, product_id: product.id });
   const item = await Item.get(where);
@@ -90,7 +90,7 @@ BucketController.addToCart = async (req, res, next) => {
 };
 
 BucketController.deleteCart = async (req, res, next) => {
-  const bucket = await Bucket.findBucket(req.user.id);
+  const bucket = await Bucket.get(req.user.id);
   const item = await Item.get({ id_bucket: bucket.serialize().id, id_listbucket: req.params.id });
   if (!item) throw getItemError('item', 'not_found');
   const shippingId = item.serialize().shipping_id;
@@ -100,35 +100,30 @@ BucketController.deleteCart = async (req, res, next) => {
 };
 
 BucketController.checkout = async (req, res, next) => {
-  const bucket = await Bucket.findBucket(req.user.id);
-  await bucket.load('promo');
+  const bucket = await Bucket.getForCheckout(req.user.id);
+  let items = bucket.related('items');
+  if (items.length === 0) throw getBucketError('bucket', 'not_found_items');
 
-  const items = await Promise.all(req.body.items.map(async (val) => {
+  await Promise.all(req.body.items.map(async (val) => {
     const where = { id_listbucket: val.id };
     const item = await Item.get(where);
     if (!item) throw getItemError('item', 'not_found');
     await item.load('product');
     await BucketController.saveCart(bucket, val, item.serialize().product, item, where);
-    return item;
   }));
 
-  let data = await Promise.all(items.map(async (item) => {
-    await item.load('shipping');
-    return item;
-  }));
-
-  const groups = _.groupBy(data, (val) => {
+  const groups = _.groupBy(items.models, (val) => {
     val = val.serialize();
     return `${val.product.store_id}#${val.shipping.address_id}#${val.shipping.expedition_service_id}`;
   });
 
-  data = _.map(groups, group => ({
+  items = _.map(groups, group => ({
     shipping_id: group[0].serialize().shipping.id,
     store_id: group[0].serialize().product.store_id,
     items: group,
   }));
 
-  await Promise.all(data.map(async (val) => {
+  await Promise.all(items.map(async (val) => {
     const bucketObj = bucket.serialize();
     const weight = val.items[0].serialize().weight;
     const deliveryCost = val.items[0].serialize().shipping.delivery_cost / Math.ceil(weight / 1000);
@@ -147,8 +142,9 @@ BucketController.checkout = async (req, res, next) => {
 
     let promo = 0;
     if (bucketObj.promo !== undefined) {
-      if (bucketObj.promo.type === PromoType.NOMINAL) promo = bucketObj.promo.nominal / data.length;
-      else promo = (totalPrice * bucketObj.promo.percentage) / 100;
+      if (bucketObj.promo.type === PromoType.NOMINAL) {
+        promo = bucketObj.promo.nominal / items.length;
+      } else promo = (totalPrice * bucketObj.promo.percentage) / 100;
     }
 
     const totalDeliveryCost = deliveryCost * Math.ceil(totalWeight / 1000);
@@ -181,10 +177,9 @@ BucketController.checkout = async (req, res, next) => {
     await Promise.all(val.items.map(async item => (
       await item.save({ id_invoice: invoice.serialize().id }, { patch: true })
     )));
-
-    return await bucket.save({ status_bucket: BucketStatus.CHECKOUT }, { patch: true });
   }));
 
+  await bucket.save({ status_bucket: BucketStatus.CHECKOUT }, { patch: true });
   req.resData = { data: bucket };
   return next();
 };

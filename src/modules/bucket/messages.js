@@ -6,6 +6,7 @@ export const errMsg = {
   getBucket: {
     title: 'Get keranjang gagal',
     not_found: 'Keranjang tidak ditemukan',
+    not_found_items: 'Tidak menemukan items',
   },
   getItem: {
     title: 'Get item gagal',

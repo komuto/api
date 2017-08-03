@@ -68,7 +68,7 @@ routes.delete('/buckets/items/:id([0-9]{1,10})',
  */
 routes.post('/checkout',
   auth(),
-  validateParam(constraints.checkout, false, 'items', true),
+  validateParam(constraints.checkout, false, 'items', false),
   wrap(BucketController.checkout),
   apiResponse());
 
