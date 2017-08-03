@@ -89,6 +89,16 @@ BucketController.addToCart = async (req, res, next) => {
   return next();
 };
 
+BucketController.deleteCart = async (req, res, next) => {
+  const bucket = await Bucket.findBucket(req.user.id);
+  const item = await Item.get({ id_bucket: bucket.serialize().id, id_listbucket: req.params.id });
+  if (!item) throw getItemError('item', 'not_found');
+  const shippingId = item.serialize().shipping_id;
+  await item.destroy();
+  Shipping.where({ id_pengiriman_produk: shippingId }).destroy();
+  return next();
+};
+
 BucketController.checkout = async (req, res, next) => {
   const bucket = await Bucket.findBucket(req.user.id);
   await bucket.load('promo');

@@ -117,7 +117,7 @@ routes.post('/products/:id([0-9]{1,10})/discussions',
   apiResponse());
 
 /**
- * GET /products/id/discussions/id/comments
+ * GET /products/id/discussions/discussion_id/comments
  * Get all comments of a discussion
  */
 routes.get('/products/:id([0-9]{1,10})/discussions/:discussion_id([0-9]{1,10})/comments',
@@ -125,7 +125,7 @@ routes.get('/products/:id([0-9]{1,10})/discussions/:discussion_id([0-9]{1,10})/c
   apiResponse());
 
 /**
- * POST /products/id/discussions/id/comments
+ * POST /products/id/discussions/discussion_id/comments
  * Create comment
  */
 routes.post('/products/:id([0-9]{1,10})/discussions/:discussion_id([0-9]{1,10})/comments',
