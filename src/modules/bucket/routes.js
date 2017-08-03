@@ -57,7 +57,7 @@ routes.post('/buckets',
  */
 routes.post('/checkout',
   auth(),
-  validateParam(constraints.cart, false, 'buckets', true),
+  validateParam(constraints.checkout, false, 'items', true),
   wrap(BucketController.checkout),
   apiResponse());
 

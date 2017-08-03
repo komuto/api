@@ -7,6 +7,10 @@ export const errMsg = {
     title: 'Get keranjang gagal',
     not_found: 'Keranjang tidak ditemukan',
   },
+  getItem: {
+    title: 'Get item gagal',
+    not_found: 'Item tidak ditemukan',
+  },
   getPromo: {
     title: 'Get promo gagal',
     not_found: 'Promo tidak ditemukan atau sudah tidak valid',
@@ -22,6 +26,8 @@ export const errMsg = {
 };
 
 export const getBucketError = formatError.bind(errMsg.getBucket);
+
+export const getItemError = formatError.bind(errMsg.getItem);
 
 export const getPromoError = formatError.bind(errMsg.getPromo);
 

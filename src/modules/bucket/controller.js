@@ -3,6 +3,7 @@ import { Bucket, Promo, Item, Shipping, BucketStatus, PromoType } from './model'
 import { Product } from '../product/model';
 import { Expedition } from '../expedition/model';
 import { Invoice, InvoiceStatus } from '../invoice/model';
+import { getItemError } from './messages';
 
 export const BucketController = {};
 export default { BucketController };
@@ -42,12 +43,7 @@ BucketController.getBucket = async (req, res, next) => {
   return next();
 };
 
-BucketController.saveCart = async (bucket, body) => {
-  const product = await Product.findById(body.product_id);
-
-  const where = Item.matchDBColumn({ bucket_id: bucket.id, product_id: product.id });
-  const item = await Item.get(where);
-
+BucketController.saveCart = async (bucket, body, product, item, where) => {
   let insuranceCost = 0;
   if (body.is_insurance) {
     const expedition = await Expedition.findById(body.expedition_id);
@@ -61,6 +57,7 @@ BucketController.saveCart = async (bucket, body) => {
     note: null,
   });
 
+  // TODO: validation user's address_id
   let shippingId;
   if (item) {
     shippingId = item.serialize().shipping_id;
@@ -83,21 +80,29 @@ BucketController.saveCart = async (bucket, body) => {
 
 BucketController.addToCart = async (req, res, next) => {
   const bucket = await Bucket.findBucket(req.user.id);
-  await BucketController.saveCart(bucket, req.body);
+  const product = await Product.findById(req.body.product_id);
+  const where = Item.matchDBColumn({ bucket_id: bucket.id, product_id: product.id });
+  const item = await Item.get(where);
+  req.resData = {
+    data: await BucketController.saveCart(bucket, req.body, product, item, where),
+  };
   return next();
 };
 
 BucketController.checkout = async (req, res, next) => {
-  const buckets = req.body.buckets;
   const bucket = await Bucket.findBucket(req.user.id);
   await bucket.load('promo');
 
-  const items = await Promise.all(buckets.map(async val => (
-    await BucketController.saveCart(bucket, val)
-  )));
+  const items = await Promise.all(req.body.items.map(async (val) => {
+    const where = { id_listbucket: val.id };
+    const item = await Item.get(where);
+    if (!item) throw getItemError('item', 'not_found');
+    await item.load('product');
+    await BucketController.saveCart(bucket, val, item.serialize().product, item, where);
+    return item;
+  }));
 
   let data = await Promise.all(items.map(async (item) => {
-    await item.load('product');
     await item.load('shipping');
     return item;
   }));
@@ -170,5 +175,6 @@ BucketController.checkout = async (req, res, next) => {
     return await bucket.save({ status_bucket: BucketStatus.CHECKOUT }, { patch: true });
   }));
 
+  req.resData = { data: bucket };
   return next();
 };
