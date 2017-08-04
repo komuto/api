@@ -113,14 +113,14 @@ constraints.createProduct = {
     presence: true,
     inclusion: {
       within: [0, 1],
-      message: 'must be char of 0 or 1',
+      message: 'must be number of 0 or 1',
     },
   },
   insurance: {
     presence: true,
     inclusion: {
       within: [0, 1],
-      message: 'must be char of 0 or 1',
+      message: 'must be number of 0 or 1',
     },
   },
   is_dropship: {
