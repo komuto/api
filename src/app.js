@@ -7,11 +7,6 @@ import cors from 'cors';
 import helmet from 'helmet';
 import statusMonitor from 'express-status-monitor';
 import responseTime from 'response-time';
-import moment from 'moment';
-import ch from 'chalk';
-import morgan from 'morgan';
-import winston from 'winston';
-import 'winston-daily-rotate-file';
 import config from '../config';
 import c from './constants';
 import core from './modules/core';
@@ -31,30 +26,9 @@ import payment from './modules/payment';
 
 const app = express();
 
-const logger = new (winston.Logger)({
-  transports: [
-    new winston.transports.DailyRotateFile({
-      filename: config.logPath,
-      datePattern: 'yyyy-MM-dd.',
-      prepend: true,
-      level: 'debug',
-      timestamp: () => moment().format('YYYY-MM-DD HH:mm:ss'),
-      json: false,
-    }),
-  ],
-});
-
-logger.stream = {
-  write: (message) => {
-    logger.info(message);
-  },
-};
-
 core.cacheClear();
 
-morgan.token('body', req => `\n${JSON.stringify(req.body, null, 2)}`);
-
-app.use(morgan(`${ch.red(':method')} ${ch.green(':url')} ${ch.yellow(':response-time ms')} :body`, { stream: logger.stream }));
+app.use(core.middleware.winstonLogger());
 
 process.on('unhandledRejection', (err) => {
   // eslint-disable-next-line no-console
@@ -109,21 +83,7 @@ app.use(bucket.routes);
 app.use(otp.routes);
 app.use(payment.routes);
 
-app.use((req, res, next) => {
-  const err = new Error('Path Not Found');
-  err.httpStatus = 404;
-  next(err);
-});
-
-// eslint-disable-next-line no-unused-vars
-app.use((err, req, res, next) => {
-  const statusCode = err.httpStatus || 406;
-  res.status(statusCode).json({
-    status: false,
-    code: err.httpStatus || 406,
-    message: err.message,
-    data: err.data || {},
-  });
-});
+app.use(core.middleware.pathNotFound());
+app.use(core.middleware.errResponse());
 
 export default app;
