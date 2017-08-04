@@ -1,5 +1,9 @@
 import _ from 'lodash';
-import logger from 'morgan';
+import moment from 'moment';
+import ch from 'chalk';
+import morgan from 'morgan';
+import winston from 'winston';
+import 'winston-daily-rotate-file';
 import passport from 'passport';
 import validate from 'validate.js';
 import c from '../../constants';
@@ -14,7 +18,7 @@ import { AuthorizationError, BadRequestError } from '../../../common/errors';
 export function requestLoggerMiddleware(env) {
   env = (env === undefined) ? [c.DEVELOPMENT, c.STAGING, c.PRODUCTION] : env;
   env = Array.isArray(env) ? env : [env];
-  return _.includes(env, config.env) ? logger(config.logFormat) : (req, res, next) => next();
+  return _.includes(env, config.env) ? morgan(config.logFormat) : (req, res, next) => next();
 }
 
 /**
@@ -70,6 +74,50 @@ export function checkContentType() {
   };
 }
 
+export function pathNotFound() {
+  return (req, res, next) => {
+    const err = new Error('Path Not Found');
+    err.httpStatus = 404;
+    next(err);
+  };
+}
+
+export function errResponse() {
+  // eslint-disable-next-line no-unused-vars
+  return (err, req, res, next) => {
+    const statusCode = err.httpStatus || 406;
+    res.status(statusCode).json({
+      status: false,
+      code: err.httpStatus || 406,
+      message: err.message,
+      data: err.data || {},
+    });
+  };
+}
+
+export function winstonLogger() {
+  const logger = new (winston.Logger)({
+    transports: [
+      new winston.transports.DailyRotateFile({
+        filename: config.logPath,
+        datePattern: 'yyyy-MM-dd.',
+        prepend: true,
+        level: 'debug',
+        timestamp: () => moment().format('YYYY-MM-DD HH:mm:ss'),
+        json: false,
+      }),
+    ],
+  });
+
+  logger.stream = {
+    write: (message) => {
+      logger.info(message);
+    },
+  };
+
+  morgan.token('body', req => `\n${JSON.stringify(req.body, null, 2)}`);
+  return morgan(`${ch.red(':method')} ${ch.green(':url')} ${ch.yellow(':response-time ms')} :body`, { stream: logger.stream });
+}
 
 /**
  * Format the error response
