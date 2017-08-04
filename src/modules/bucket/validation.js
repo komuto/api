@@ -21,4 +21,21 @@ constraints.cart = {
   delivery_cost: { presence: true },
 };
 
+constraints.checkout = {
+  id: { presence: true },
+  expedition_id: { presence: false },
+  expedition_service_id: { presence: false },
+  qty: { presence: false },
+  note: { presence: false },
+  address_id: { presence: false },
+  is_insurance: {
+    presence: false,
+    inclusion: {
+      within: [true, false],
+      message: 'accept only `true` or `false` value',
+    },
+  },
+  delivery_cost: { presence: false },
+};
+
 export default constraints;

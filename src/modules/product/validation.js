@@ -12,7 +12,7 @@ constraints.list = {
   price: {
     presence: false,
     format: {
-      pattern: /^[1-9][\d]+-[1-9][\d]+/,
+      pattern: /^[\d]+-[\d]+/,
       message: 'only number with one `-` symbol between number. First char can\'t be 0. e.g. `500-1000`',
     },
   },
@@ -66,6 +66,13 @@ constraints.list = {
       maximum: 10,
     },
   },
+  is_dropship: {
+    presence: false,
+    inclusion: {
+      within: ['true', 'false'],
+      message: 'Only accepts boolean',
+    },
+  },
 };
 
 constraints.search = { q: { presence: true } };
@@ -89,28 +96,40 @@ constraints.createProduct = {
   name: { presence: true },
   category_id: {
     presence: true,
-    numericality: { onlyInteger: true } },
+    numericality: { onlyInteger: true },
+  },
   brand_id: { numericality: { onlyInteger: true } },
   description: { presence: true },
   price: { presence: true, numericality: true },
   weight: {
     presence: true,
-    numericality: { onlyInteger: true } },
+    numericality: { onlyInteger: true },
+  },
   stock: {
     presence: true,
-    numericality: { onlyInteger: true } },
+    numericality: { onlyInteger: true },
+  },
   condition: {
     presence: true,
-    format: { pattern: /^[0-1]$/, message: 'must be char of 0 or 1' } },
+    inclusion: {
+      within: [0, 1],
+      message: 'must be char of 0 or 1',
+    },
+  },
   insurance: {
     presence: true,
-    format: { pattern: /^[0-1]$/, message: 'must be char of 0 or 1' } },
+    inclusion: {
+      within: [0, 1],
+      message: 'must be char of 0 or 1',
+    },
+  },
   is_dropship: {
     presence: true,
     inclusion: {
       within: [true, false],
       message: 'Only accepts boolean',
-    } },
+    },
+  },
   catalog_id: { numericality: { onlyInteger: true } },
   expeditions: { presence: true },
   images: { presence: true },

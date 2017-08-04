@@ -28,3 +28,5 @@ __MACOSX
 /config/*.local.js
 
 yarn.lock
+
+ecosystem.json

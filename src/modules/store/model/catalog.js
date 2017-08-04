@@ -125,11 +125,21 @@ class CatalogModel extends bookshelf.Model {
     return !!catalog;
   }
 
-  static async loadCatalog(storeId, status) {
-    return await this.where({ id_toko: storeId })
+  static async loadCatalog(storeId, status, catalogId) {
+    const query = { id_toko: storeId };
+    let limit = 3;
+    if (catalogId) {
+      query.id_katalog = catalogId;
+      limit = 'ALL';
+    }
+    return await this.where(query)
       .fetchAll({
         withRelated: [
-          { products: qb => qb.where('status_produk', status).limit(3) },
+          {
+            products: qb => qb.where({ status_produk: status })
+              .limit(limit)
+              .orderBy('id_produk', 'DESC'),
+          },
           { 'products.images': qb => qb.limit(1) },
         ],
       });
@@ -149,13 +159,15 @@ class CatalogModel extends bookshelf.Model {
    * Get catalog with products
    */
   static async getCatalogWithProducts(params) {
-    const { storeId, hidden } = params;
+    const { storeId, hidden, catalogId } = params;
     const status = hidden === true ? ProductStatus.HIDE : ProductStatus.SHOW;
 
     const [catalogs, countProducts] = await Promise.all([
-      this.loadCatalog(storeId, status),
+      this.loadCatalog(storeId, status, catalogId),
       this.loadCountProducts(storeId),
     ]);
+
+    if (!catalogs.models.length && catalogId) return [];
 
     const data = [];
     // eslint-disable-next-line no-restricted-syntax

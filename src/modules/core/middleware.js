@@ -110,6 +110,7 @@ export function validateParam(
     if (Array.isArray(req.body[prop])) {
       const params = req.body[prop];
       // Can the param be empty array or not
+      // TODO: Refactoring
       const evaluate = strict ? true : params.length > 0;
       if (evaluate) {
         params.forEach((param) => {

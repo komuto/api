@@ -2,7 +2,6 @@ import express from 'express';
 import { ProductController } from './controller';
 import core from '../core';
 import constraints from './validation';
-import { errMsg } from './messages';
 import { ReviewController } from '../review';
 import { validateManageProductsParam } from './middleware';
 
@@ -31,6 +30,15 @@ routes.get('/users/store/products',
   cache('5 minutes'),
   validateParam(constraints.listStoreProduct),
   wrap(ProductController.storeProducts),
+  apiResponse());
+
+/**
+ * GET /users/store/products/catalogs/id
+ * View own products based on catalog id
+ */
+routes.get('/users/store/products/catalogs/:id([0-9]{1,10})',
+  auth(),
+  wrap(ProductController.storeCatalogProducts),
   apiResponse());
 
 /**
@@ -109,7 +117,7 @@ routes.post('/products/:id([0-9]{1,10})/discussions',
   apiResponse());
 
 /**
- * GET /products/id/discussions/id/comments
+ * GET /products/id/discussions/discussion_id/comments
  * Get all comments of a discussion
  */
 routes.get('/products/:id([0-9]{1,10})/discussions/:discussion_id([0-9]{1,10})/comments',
@@ -117,7 +125,7 @@ routes.get('/products/:id([0-9]{1,10})/discussions/:discussion_id([0-9]{1,10})/c
   apiResponse());
 
 /**
- * POST /products/id/discussions/id/comments
+ * POST /products/id/discussions/discussion_id/comments
  * Create comment
  */
 routes.post('/products/:id([0-9]{1,10})/discussions/:discussion_id([0-9]{1,10})/comments',

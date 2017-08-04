@@ -9,9 +9,13 @@ export default new LocalStrategy({
 }, async (email, password, done) => {
   const user = await User.getWithPhone({ email_users: email });
   if (!user) return done(loginError('email', 'email_not_found'), false);
-  const check = await User.checkPasswordFromApi(password, user.get('password_users'));
-  if (!check) {
-    return done(loginError('password', 'wrong_password'), false);
+  try {
+    const check = await User.checkPasswordFromApi(password, user.get('password_users'));
+    if (!check) {
+      return done(loginError('password', 'wrong_password'), false);
+    }
+    return done(null, user.serialize({ phone: true }));
+  } catch (e) {
+    return done(loginError('api', 'bad_request'), false);
   }
-  return done(null, user.serialize({ phone: true }));
 });

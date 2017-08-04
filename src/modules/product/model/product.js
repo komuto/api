@@ -145,7 +145,16 @@ class ProductModel extends bookshelf.Model {
    * Get products
    */
   static async get(params) {
-    const { page, pageSize, query, price, condition, address, userId } = params;
+    const {
+      page,
+      pageSize,
+      query,
+      price,
+      condition,
+      address,
+      userId,
+      is_dropship: isDropship,
+    } = params;
     let { where, sort, other, brands, services } = params;
 
     switch (sort) {
@@ -181,7 +190,7 @@ class ProductModel extends bookshelf.Model {
     const products = await this.where(where)
       .query((qb) => {
         if (query) qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
-        if (price) qb.whereBetween('harga_produk', [price.min, price.max]);
+        if (price && price.min !== 0 && price.max !== 0) qb.whereBetween('harga_produk', [price.min, price.max]);
         if (other && other.discount) qb.where('disc_produk', '>', 0);
         if (brands) {
           brands = brands.split(',');
@@ -192,6 +201,7 @@ class ProductModel extends bookshelf.Model {
           qb.innerJoin('detil_ekspedisiproduk', 'detil_ekspedisiproduk.id_produk', 'produk.id_produk');
           qb.whereIn('detil_ekspedisiproduk.id_ekspedisiservice', services);
         }
+        if (isDropship) qb.where('is_dropshiper', JSON.parse(isDropship));
       })
       .orderBy(sort)
       .orderBy('id_produk')

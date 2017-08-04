@@ -36,7 +36,7 @@ class BucketModel extends bookshelf.Model {
       id: this.get('id_bucket'),
       user_id: this.get('id_users'),
       promo_id: this.get('id_promo'),
-      promo: this.relations.promo ? this.related('promo') : undefined,
+      promo: this.relations.promo ? this.related('promo').serialize() : undefined,
       order_at: parseDate(this.get('tgl_orderbucket')),
       wallet: parseNum(this.get('bayar_wallet')),
       payment_method: this.get('method_paymentbucket'),
@@ -73,9 +73,9 @@ class BucketModel extends bookshelf.Model {
   }
 
   /**
-   * Get bucket
+   * Get detail bucket
    */
-  static async get(userId) {
+  static async getDetail(userId) {
     const bucket = await this.where({ id_users: userId, status_bucket: BucketStatus.ADDED }).fetch({
       withRelated: [
         'promo',
@@ -108,9 +108,32 @@ class BucketModel extends bookshelf.Model {
   }
 
   /**
+   * Get bucket
+   */
+  static async get(userId) {
+    const bucket = await this.where({
+      id_users: userId,
+      status_bucket: BucketStatus.ADDED,
+    }).fetch();
+    if (!bucket) throw getBucketError('bucket', 'not_found');
+    return bucket;
+  }
+
+  /**
+   * Get bucket with relation for checkout
+   */
+  static async getForCheckout(userId) {
+    const bucket = await this.where({ id_users: userId, status_bucket: BucketStatus.ADDED }).fetch({
+      withRelated: ['promo', 'items.product', 'items.shipping'],
+    });
+    if (!bucket) throw getBucketError('bucket', 'not_found');
+    return bucket;
+  }
+
+  /**
    * Find bucket
    */
-  static async findBucket(userId) {
+  static async findOrCreateBucket(userId) {
     return await this.findOrCreate({
       id_users: userId,
       status_bucket: BucketStatus.ADDED,

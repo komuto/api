@@ -36,6 +36,7 @@ routes.get('/buckets/promo/cancel',
   apiResponse());
 
 /**
+ * GET /users/bucket
  * Get bucket
  */
 routes.get('/users/bucket',
@@ -44,12 +45,31 @@ routes.get('/users/bucket',
   apiResponse());
 
 /**
+ * POST /buckets
  * Add to cart
  */
 routes.post('/buckets',
   auth(),
   validateParam(constraints.cart, true),
   wrap(BucketController.addToCart),
+  apiResponse());
+
+/**
+ * DELETE /buckets/items/id
+ * Delete cart
+ */
+routes.delete('/buckets/items/:id([0-9]{1,10})',
+  auth(),
+  wrap(BucketController.deleteCart),
+  apiResponse());
+
+/**
+ * Checkout
+ */
+routes.post('/checkout',
+  auth(),
+  validateParam(constraints.checkout, false, 'items', false),
+  wrap(BucketController.checkout),
   apiResponse());
 
 export default routes;
