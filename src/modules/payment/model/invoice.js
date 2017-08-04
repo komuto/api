@@ -103,4 +103,4 @@ class InvoiceModel extends bookshelf.Model {
 }
 
 export const Invoice = bookshelf.model('Invoice', InvoiceModel);
-export default { Invoice };
+export default { Invoice, InvoiceStatus };

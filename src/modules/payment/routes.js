@@ -10,4 +10,12 @@ routes.post('/payments',
   wrap(PaymentController.store),
   apiResponse());
 
+/**
+ * GET /payment-methods
+ * Get payment methods
+ */
+routes.get('/payment-methods',
+  wrap(PaymentController.getMethods),
+  apiResponse());
+
 export default routes;

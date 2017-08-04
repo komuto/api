@@ -1,5 +1,6 @@
 import doku from 'doku_library';
 import sha1 from 'sha1';
+import { PaymentMethod } from './model';
 
 const helper = doku.helper();
 const library = doku.library();
@@ -8,6 +9,14 @@ const api = doku.api();
 
 export const PaymentController = {};
 export default { PaymentController };
+
+PaymentController.getMethods = async (req, res, next) => {
+  req.resData = {
+    message: 'Payment Methods Data',
+    data: await PaymentMethod.getAll(),
+  };
+  return next();
+};
 
 PaymentController.store = async (req, res, next) => {
   // const sessionId = helper.sha1(helper.getTimes14Character());

@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { Bucket, Promo, Item, Shipping, BucketStatus, PromoType } from './model';
 import { Product } from '../product/model';
 import { Expedition } from '../expedition/model';
-import { Invoice, InvoiceStatus } from '../invoice/model';
+import { Invoice, InvoiceStatus } from '../payment/model';
 import { getBucketError, getItemError } from './messages';
 
 export const BucketController = {};
