@@ -48,5 +48,4 @@ class BankModel extends bookshelf.Model {
 }
 
 export const Bank = bookshelf.model('Bank', BankModel);
-export default { Bank, BankStatus };
 

@@ -7,9 +7,9 @@ import * as apiCache from './cache';
 import config from '../../../config';
 import { email } from './email';
 
-const imagePath = (path, file) => {
+const imagePath = (path, file, parent = 'uploads') => {
   if (!file) return null;
-  return `${config.assetUrl}/uploads/${path}/${file}`;
+  return `${config.assetUrl}/${parent}/${path}/${file}`;
 };
 const categoryPath = file => `${config.assetUrl}/images/img-kategori/${file}`;
 const expeditionPath = file => `${config.assetUrl}/img/pengiriman/${file}`;

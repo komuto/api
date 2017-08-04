@@ -4,8 +4,8 @@ const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
 
 export const BankAccountStatus = {
-  PRIMARY: 1,
   NOT_PRIMARY: 0,
+  PRIMARY: 1,
 };
 
 class BankAccountModel extends bookshelf.Model {
@@ -68,5 +68,4 @@ class BankAccountModel extends bookshelf.Model {
 }
 
 export const BankAccount = bookshelf.model('BankAccount', BankAccountModel);
-export default { BankAccount };
 

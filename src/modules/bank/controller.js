@@ -1,4 +1,4 @@
-import { Bank, BankAccount, BankAccountStatus } from './model';
+import { Bank, BankAccount, BankAccountStatus, BankAccountMarketplace } from './model';
 import { OTPStatus } from './../OTP/model';
 import {
   getAccountError,
@@ -97,5 +97,14 @@ BankController.deleteBankAccount = async (req, res, next) => {
     .catch(() => true);
   if (err === true) throw deleteAccountError('account', 'account_not_found');
   await req.otp.save({ status: OTPStatus.USED }, { patch: true });
+  return next();
+};
+
+BankController.getMarketplaceBankAccounts = async (req, res, next) => {
+  const bankAccounts = await BankAccountMarketplace.fetchAll();
+  req.resData = {
+    message: 'Marketplace Bank Account Data',
+    data: bankAccounts,
+  };
   return next();
 };

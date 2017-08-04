@@ -73,4 +73,13 @@ routes.delete('/accounts/banks/:id([0-9]{1,10})',
   wrap(BankController.deleteBankAccount),
   apiResponse());
 
+/**
+ * GET /banks/marketplace
+ * View list of marketplace's bank account
+ */
+routes.get('/banks/marketplace',
+  auth(),
+  wrap(BankController.getMarketplaceBankAccounts),
+  apiResponse());
+
 export default routes;
