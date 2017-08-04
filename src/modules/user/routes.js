@@ -172,14 +172,6 @@ routes.put('/passwords/new',
   apiResponse());
 
 /**
- * POST /accounts/email/check
- * Check whether email already used or not
- */
-routes.post('/accounts/email/check',
-  wrap(UserController.checkEmail),
-  apiResponse());
-
-/**
  * GET /signup-verification?token
  * Activate user account
  */

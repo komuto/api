@@ -169,13 +169,6 @@ UserController.forgotPassword = async (req, res, next) => {
   return next();
 };
 
-UserController.checkEmail = async (req, res, next) => {
-  const user = await User.getByEmail(req.body.email);
-  if (user) throw registrationError('email', 'duplicate_email');
-  req.resData = { message: 'Email Available' };
-  return next();
-};
-
 UserController.activateUser = async (req, res, next) => {
   const id = await UserToken.getId(req.query.token, TokenType.EMAIL_ACTIVATION);
   if (!id) throw activateUserError('token', 'token_not_valid');
