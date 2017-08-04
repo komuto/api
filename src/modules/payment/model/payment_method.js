@@ -1,6 +1,7 @@
 import core from '../../core';
 import config from '../../../../config';
 
+const { parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
 const IMAGE_PATH = config.imageFolder.payment;
 
@@ -32,10 +33,10 @@ class PaymentMethodModel extends bookshelf.Model {
       name: this.get('nama_paymentmethod'),
       remarks: this.get('remarks_paymentmethod'),
       logo: core.imagePath(IMAGE_PATH, this.get('logo_paymentmethod')),
-      type: this.get('type_paymentmethod'),
+      type: parseNum(this.get('type_paymentmethod')),
       type_text: this.get('type_text'),
-      status: this.get('status_paymentmethod'),
-      status_at: this.get('tglstatus_paymentmethod'),
+      status: parseNum(this.get('status_paymentmethod')),
+      status_at: parseDate(this.get('tglstatus_paymentmethod')),
     };
   }
 
