@@ -1,4 +1,5 @@
 import ModelBase from 'bookshelf-modelbase';
+import randomInt from 'random-int';
 import core from '../../core';
 import { getBucketError } from './../messages';
 import './item';
@@ -37,9 +38,10 @@ class BucketModel extends bookshelf.Model {
       user_id: this.get('id_users'),
       promo_id: this.get('id_promo'),
       promo: this.relations.promo ? this.related('promo').serialize() : undefined,
+      payment_method_id: this.get('method_paymentbucket'),
+      unique_code: this.get('kode_unik'),
       order_at: parseDate(this.get('tgl_orderbucket')),
       wallet: parseNum(this.get('bayar_wallet')),
-      payment_method: this.get('method_paymentbucket'),
       status: parseNum(this.get('status_bucket')),
       status_at: parseDate(this.get('tglstatus_bucket')),
     };
@@ -140,6 +142,7 @@ class BucketModel extends bookshelf.Model {
     }, {
       defaults: this.matchDBColumn({
         wallet: 0,
+        unique_code: randomInt(100, 999),
         order_at: new Date(),
         status_at: new Date(),
       }),
@@ -174,7 +177,8 @@ class BucketModel extends bookshelf.Model {
       promo_id: 'id_promo',
       order_at: 'tgl_orderbucket',
       wallet: 'bayar_wallet',
-      payment_method: 'method_paymentbucket',
+      unique_code: 'kode_unik',
+      payment_method_id: 'method_paymentbucket',
       status: 'status_bucket',
       status_at: 'tglstatus_bucket',
     };
