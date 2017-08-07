@@ -4,7 +4,7 @@ import core from '../core';
 
 const routes = express.Router();
 const { wrap } = core.utils;
-const { apiResponse } = core.middleware;
+const { apiResponse, auth } = core.middleware;
 
 routes.post('/payments',
   wrap(PaymentController.store),
@@ -16,6 +16,11 @@ routes.post('/payments',
  */
 routes.get('/payment-methods',
   wrap(PaymentController.getMethods),
+  apiResponse());
+
+routes.get('/transactions',
+  auth(),
+  wrap(PaymentController.listTransactions),
   apiResponse());
 
 export default routes;

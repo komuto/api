@@ -2,7 +2,7 @@ import moment from 'moment';
 import randomInt from 'random-int';
 import core from '../../core';
 
-const { parseDate } = core.utils;
+const { parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
 
 export const InvoiceStatus = {
@@ -27,29 +27,37 @@ class InvoiceModel extends bookshelf.Model {
     return false;
   }
 
-  serialize() {
-    return {
+  serialize({ minimal = false } = {}) {
+    const invoice = {
       id: this.get('id_invoice'),
+      payment_method_id: this.get('id_paymentmethod'),
+      invoice_number: this.get('no_invoice'),
+      total_bill: parseNum(this.get('total_tagihan')),
+      total_price: parseNum(this.get('total_harga')),
+      status: parseNum(this.get('status_invoice')),
+    };
+    if (minimal) return invoice;
+    return {
+      ...invoice,
       user_id: this.get('id_user'),
       store_id: this.get('id_toko'),
       bucket_id: this.get('id_bucket'),
       bid_id: this.get('id_bidlelang'),
       shipping_id: this.get('id_pengiriman_produk'),
-      payment_method_id: this.get('id_paymentmethod'),
-      invoice_number: this.get('no_invoice'),
       remark_cancel: this.get('remark_pembatalan'),
-      bill: this.get('total_tagihan'),
-      total_price: this.get('total_harga'),
       delivery_cost: this.get('biaya_ongkir'),
       insurance_fee: this.get('biaya_asuransi'),
       admin_cost: this.get('biaya_admin'),
       wallet: this.get('bayar_wallet'),
       promo: this.get('promo'),
-      status: this.get('status_invoice'),
       created_at: parseDate(this.get('createdate_invoice')),
       confirmed_at: parseDate(this.get('confirmation_date')),
       updated_at: parseDate(this.get('updated_at')),
     };
+  }
+
+  items() {
+    return this.hasMany('Item', 'id_invoice');
   }
 
   /**

@@ -1,7 +1,9 @@
 import ModelBase from 'bookshelf-modelbase';
 import randomInt from 'random-int';
+import moment from 'moment';
+import 'moment-precise-range-plugin';
 import core from '../../core';
-import { getBucketError } from './../messages';
+import { getBucketError } from '../messages';
 import './item';
 import './shipping';
 import config from './../../../../config';
@@ -54,6 +56,10 @@ class BucketModel extends bookshelf.Model {
    */
   items() {
     return this.hasMany('Item', 'id_bucket');
+  }
+
+  invoices() {
+    return this.hasMany('Invoice', 'id_bucket');
   }
 
   /**
@@ -112,10 +118,10 @@ class BucketModel extends bookshelf.Model {
   /**
    * Get bucket
    */
-  static async get(userId) {
+  static async get(userId, status = BucketStatus.ADDED) {
     const bucket = await this.where({
       id_users: userId,
-      status_bucket: BucketStatus.ADDED,
+      status_bucket: status,
     }).fetch();
     if (!bucket) throw getBucketError('bucket', 'not_found');
     return bucket;
@@ -146,6 +152,50 @@ class BucketModel extends bookshelf.Model {
         order_at: new Date(),
         status_at: new Date(),
       }),
+    });
+  }
+
+  static getTimeLeft(maxTime) {
+    const maxPaymentDate = moment(maxTime).add(2, 'days');
+    if (moment().isAfter(maxPaymentDate)) {
+      console.log('getit');
+      return 0;
+    }
+    const { days, hours, minutes, seconds } = moment.preciseDiff(maxPaymentDate, moment(), true);
+    return { days, hours, minutes, seconds };
+  }
+
+  static async listTransactions(userId) {
+    const buckets = await this.where({ id_users: userId, status_bucket: BucketStatus.CHECKOUT })
+      .fetchAll({ withRelated: ['invoices.items.product.images'] });
+    if (!buckets) throw getBucketError('bucket', 'not_found');
+
+    return buckets.map((bucket) => {
+      const { invoices, total_price, time_left } = bucket.related('invoices').reduce((accu, invoice, index) => {
+        const items = invoice.related('items').map((item) => {
+          const product = item.related('product');
+          return {
+            ...item.serialize({ minimal: true }),
+            product: {
+              ...product.serialize({ minimal: true }),
+              image: product.related('images').models[0].serialize().file,
+            },
+          };
+        });
+        accu.total_price += parseInt(invoice.get('total_harga'), 10);
+        accu.invoices.push({ ...invoice.serialize({ minimal: true }), items });
+        if (index === 0) accu.time_left = this.getTimeLeft(invoice.get('updated_at'));
+        return accu;
+      }, { total_price: 0, invoices: [], time_left: 0 });
+      return {
+        bucket: bucket.serialize(),
+        summary_invoice: {
+          total_price,
+          status: 1,
+          time_left,
+        },
+        invoices,
+      };
     });
   }
 

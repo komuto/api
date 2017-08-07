@@ -20,9 +20,17 @@ class ItemModel extends bookshelf.Model {
     return false;
   }
 
-  serialize() {
-    const item = {
+  serialize({ minimal = false } = {}) {
+    let item = {
       id: this.get('id_listbucket'),
+      qty: this.get('qty_listbucket'),
+      weight: this.get('beratproduk_listbucket'),
+      additional_cost: parseNum(this.get('biayatambahan_listbucket')),
+      total_price: parseNum(this.get('hargatotal_listbucket')),
+    };
+    if (minimal) return item;
+    item = {
+      ...item,
       bucket_id: this.get('id_bucket'),
       product_id: this.get('id_produk'),
       product: this.relations.product ? this.related('product').serialize() : undefined,
@@ -30,11 +38,7 @@ class ItemModel extends bookshelf.Model {
       shipping_id: parseNum(this.get('id_pengiriman_produk')),
       shipping: this.relations.shipping ? this.related('shipping').serialize() : undefined,
       dropshipper_id: parseNum(this.get('id_dropshipper')),
-      qty: this.get('qty_listbucket'),
-      weight: this.get('beratproduk_listbucket'),
       note: this.get('keteranganopsi_listbucket'),
-      additional_cost: parseNum(this.get('biayatambahan_listbucket')),
-      total_price: parseNum(this.get('hargatotal_listbucket')),
     };
     if (this.relations.product) delete item.product_id;
     if (this.relations.shipping) delete item.shipping_id;
