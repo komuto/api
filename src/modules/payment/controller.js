@@ -26,6 +26,7 @@ PaymentController.getMethods = async (req, res, next) => {
   return next();
 };
 
+// TODO: update bucket payment method
 PaymentController.choosePaymentMethod = async (req, res, next) => {
   const bucket = await Bucket.findByIdAndStatus(
     req.params.id,

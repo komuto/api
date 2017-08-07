@@ -64,6 +64,15 @@ routes.delete('/buckets/items/:id([0-9]{1,10})',
   apiResponse());
 
 /**
+ * GET /users/bucket/items/id
+ * Get detail item
+ */
+routes.get('/users/bucket/items/:id([0-9]{1,10})',
+  auth(),
+  wrap(BucketController.getItem),
+  apiResponse());
+
+/**
  * Checkout
  */
 routes.post('/checkout',

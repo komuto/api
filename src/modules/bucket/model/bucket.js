@@ -38,7 +38,7 @@ class BucketModel extends bookshelf.Model {
       user_id: this.get('id_users'),
       promo_id: this.get('id_promo'),
       promo: this.relations.promo ? this.related('promo').serialize() : undefined,
-      payment_method_id: this.get('method_paymentbucket'),
+      payment_method_id: this.get('id_paymentmethod'),
       unique_code: this.get('kode_unik'),
       order_at: parseDate(this.get('tgl_orderbucket')),
       wallet: parseNum(this.get('bayar_wallet')),
@@ -87,14 +87,11 @@ class BucketModel extends bookshelf.Model {
             qb.limit(1);
           },
         },
-        'items.shipping.address',
-        'items.shipping.expeditionService.expedition',
       ],
     });
     if (!bucket) throw getBucketError('bucket', 'not_found');
     const items = bucket.related('items').map((item) => {
       let product = item.related('product');
-      const shipping = item.related('shipping');
       const store = product.related('store');
       const images = product.related('images').serialize();
       product = product.serialize({ minimal: true });
@@ -103,7 +100,6 @@ class BucketModel extends bookshelf.Model {
       return {
         ...item.serialize(),
         product,
-        shipping,
       };
     });
     return { ...bucket.serialize(), items };
@@ -191,7 +187,7 @@ class BucketModel extends bookshelf.Model {
       order_at: 'tgl_orderbucket',
       wallet: 'bayar_wallet',
       unique_code: 'kode_unik',
-      payment_method_id: 'method_paymentbucket',
+      payment_method_id: 'id_paymentmethod',
       status: 'status_bucket',
       status_at: 'tglstatus_bucket',
     };

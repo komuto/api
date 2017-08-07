@@ -99,6 +99,19 @@ BucketController.deleteCart = async (req, res, next) => {
   return next();
 };
 
+BucketController.getItem = async (req, res, next) => {
+  const bucket = await Bucket.get(req.user.id);
+  const item = await Item.getDetail({
+    id_bucket: bucket.serialize().id,
+    id_listbucket: req.params.id,
+  });
+  req.resData = {
+    message: 'Item data',
+    data: item,
+  };
+  return next();
+};
+
 BucketController.checkout = async (req, res, next) => {
   const bucket = await Bucket.getForCheckout(req.user.id);
   let items = bucket.related('items');
