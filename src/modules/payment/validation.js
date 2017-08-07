@@ -1,10 +1,6 @@
 const constraints = {};
 
 constraints.choose_payment = {
-  invoice_id: {
-    presence: true,
-    numericality: { onlyInteger: true },
-  },
   payment_method_id: {
     presence: true,
     numericality: { onlyInteger: true },

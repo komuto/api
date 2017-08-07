@@ -72,8 +72,8 @@ class InvoiceModel extends bookshelf.Model {
     return invoice;
   }
 
-  static async updatePaymentMethod(invoice, paymentMethodId) {
-    return await invoice.save({
+  static async updatePaymentMethod(bucketId, paymentMethodId) {
+    return await this.where({ id_bucket: bucketId }).save({
       id_paymentmethod: paymentMethodId,
       updated_at: new Date(),
     }, { patch: true }).catch(() => {

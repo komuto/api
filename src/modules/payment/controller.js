@@ -26,10 +26,14 @@ PaymentController.getMethods = async (req, res, next) => {
   return next();
 };
 
-// TODO: by bucket id
 PaymentController.choosePaymentMethod = async (req, res, next) => {
-  const invoice = await Invoice.getById(req.body.invoice_id, req.user.id);
-  await Invoice.updatePaymentMethod(invoice, req.body.payment_method_id);
+  const bucket = await Bucket.findByIdAndStatus(
+    req.params.id,
+    req.user.id,
+    BucketStatus.CHECKOUT,
+  );
+  await Invoice.updatePaymentMethod(bucket.serialize().id, req.body.payment_method_id);
+  req.resData = { data: bucket };
   return next();
 };
 
