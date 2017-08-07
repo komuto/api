@@ -60,7 +60,7 @@ PaymentController.viaBank = async (req, res, next) => {
 
 PaymentController.store = async (req, res, next) => {
   // const sessionId = helper.sha1(helper.getTimes14Character());
-  const shareKey = '3iVKd220tSAz';
+  // const shareKey = '3iVKd220tSAz';
   // const generateWords = library.doCreateWords(req, req.body.MALLID, shareKey);
   // const basket = {
   //   name: 'Powerbank Xiaomi',
@@ -142,5 +142,14 @@ PaymentController.store = async (req, res, next) => {
     console.log(obj);
   });
 
+  return next();
+};
+
+PaymentController.listTransactions = async (req, res, next) => {
+  const buckets = await Bucket.listTransactions(req.user.id);
+  req.resData = {
+    message: 'Transactions Data',
+    data: buckets,
+  };
   return next();
 };

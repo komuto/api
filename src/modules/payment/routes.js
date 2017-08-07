@@ -39,4 +39,12 @@ routes.get('/payment-methods',
   wrap(PaymentController.getMethods),
   apiResponse());
 
+/**
+ * GET list transactions
+ */
+routes.get('/transactions',
+  auth(),
+  wrap(PaymentController.listTransactions),
+  apiResponse());
+
 export default routes;
