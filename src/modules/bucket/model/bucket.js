@@ -122,6 +122,19 @@ class BucketModel extends bookshelf.Model {
   }
 
   /**
+   * Find by id
+   */
+  static async findByIdAndStatus(id, userId, status) {
+    const bucket = await this.where({
+      id_bucket: id,
+      id_users: userId,
+      status_bucket: status,
+    }).fetch();
+    if (!bucket) throw getBucketError('bucket', 'not_found');
+    return bucket;
+  }
+
+  /**
    * Get bucket with relation for checkout
    */
   static async getForCheckout(userId) {

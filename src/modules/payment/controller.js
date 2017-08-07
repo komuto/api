@@ -1,6 +1,14 @@
+import _ from 'lodash';
+import moment from 'moment';
 import doku from 'doku_library';
 import sha1 from 'sha1';
-import { PaymentMethod, Invoice } from './model';
+import {
+  PaymentMethod,
+  Invoice,
+  PaymentConfirmation,
+  PaymentConfirmationStatus,
+} from './model';
+import { Bucket, BucketStatus } from './../bucket/model';
 
 const helper = doku.helper();
 const library = doku.library();
@@ -18,9 +26,30 @@ PaymentController.getMethods = async (req, res, next) => {
   return next();
 };
 
+// TODO: by bucket id
 PaymentController.choosePaymentMethod = async (req, res, next) => {
   const invoice = await Invoice.getById(req.body.invoice_id, req.user.id);
   await Invoice.updatePaymentMethod(invoice, req.body.payment_method_id);
+  return next();
+};
+
+PaymentController.viaBank = async (req, res, next) => {
+  const bucket = await Bucket.findByIdAndStatus(
+    req.params.id,
+    req.user.id,
+    BucketStatus.CHECKOUT,
+    );
+  const data = PaymentConfirmation.matchDBColumn(_.assign(req.body, {
+    bucket_id: bucket.serialize().id,
+    user_id: req.user.id,
+    status: PaymentConfirmationStatus.DRAFT,
+    date: moment.unix(req.body.date),
+  }));
+  const paymentConfirmation = await PaymentConfirmation.create(data);
+  req.resData = {
+    message: 'success',
+    data: paymentConfirmation,
+  };
   return next();
 };
 

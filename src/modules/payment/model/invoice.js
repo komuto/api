@@ -73,7 +73,10 @@ class InvoiceModel extends bookshelf.Model {
   }
 
   static async updatePaymentMethod(invoice, paymentMethodId) {
-    return await invoice.save({ id_paymentmethod: paymentMethodId }, { patch: true }).catch(() => {
+    return await invoice.save({
+      id_paymentmethod: paymentMethodId,
+      updated_at: new Date(),
+    }, { patch: true }).catch(() => {
       throw getPaymentError('payment', 'not_found');
     });
   }
@@ -114,4 +117,3 @@ class InvoiceModel extends bookshelf.Model {
 }
 
 export const Invoice = bookshelf.model('Invoice', InvoiceModel);
-export default { Invoice, InvoiceStatus };
