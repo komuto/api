@@ -179,7 +179,10 @@ BucketController.checkout = async (req, res, next) => {
     )));
   }));
 
-  await bucket.save({ status_bucket: BucketStatus.CHECKOUT }, { patch: true });
+  await bucket.save({
+    status_bucket: BucketStatus.CHECKOUT,
+    tglstatus_bucket: new Date(),
+  }, { patch: true });
   req.resData = { data: bucket };
   return next();
 };
