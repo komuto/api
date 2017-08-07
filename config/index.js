@@ -25,6 +25,7 @@ def.imageFolder = {};
 def.imageFolder.store = 'toko';
 def.imageFolder.product = 'produk';
 def.imageFolder.payment = 'payment';
+def.imageFolder.payment_confirmation = 'payment_confirmation';
 def.imageFolder.bank = 'bank';
 def.defaultImage = {};
 def.defaultImage.user = 'https://www.juptr.io/images/default-user.png';

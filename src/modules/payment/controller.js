@@ -1,6 +1,6 @@
 import doku from 'doku_library';
 import sha1 from 'sha1';
-import { PaymentMethod } from './model';
+import { PaymentMethod, Invoice } from './model';
 
 const helper = doku.helper();
 const library = doku.library();
@@ -15,6 +15,12 @@ PaymentController.getMethods = async (req, res, next) => {
     message: 'Payment Methods Data',
     data: await PaymentMethod.getAll(),
   };
+  return next();
+};
+
+PaymentController.choosePaymentMethod = async (req, res, next) => {
+  const invoice = await Invoice.getById(req.body.invoice_id, req.user.id);
+  await Invoice.updatePaymentMethod(invoice, req.body.payment_method_id);
   return next();
 };
 

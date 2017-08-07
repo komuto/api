@@ -1,6 +1,7 @@
 import moment from 'moment';
 import randomInt from 'random-int';
 import core from '../../core';
+import { getInvoiceError, getPaymentError, createInvoiceError } from './../messages';
 
 const { parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -56,15 +57,25 @@ class InvoiceModel extends bookshelf.Model {
    * Create shipping
    */
   static async create(data) {
-    return await new this(data).save().catch((e) => {
-      throw e;
-      // TODO: Create invoice error
-      // throw createShippingError('shipping', 'error');
+    return await new this(data).save().catch(() => {
+      throw createInvoiceError('invoice', 'error');
     });
   }
 
   static generateNumber() {
     return `Invoice-${randomInt(1, moment().unix())}/${moment().format('MM')}/${moment().format('Y')}`;
+  }
+
+  static async getById(id, userId) {
+    const invoice = await this.where({ id_invoice: id, id_user: userId }).fetch();
+    if (!invoice) throw getInvoiceError('invoice', 'not_found');
+    return invoice;
+  }
+
+  static async updatePaymentMethod(invoice, paymentMethodId) {
+    return await invoice.save({ id_paymentmethod: paymentMethodId }, { patch: true }).catch(() => {
+      throw getPaymentError('payment', 'not_found');
+    });
   }
 
   /**

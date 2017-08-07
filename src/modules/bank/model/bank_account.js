@@ -25,7 +25,7 @@ class BankAccountModel extends bookshelf.Model {
       bank_id: !this.relations.bank ? this.get('id_masterbank') : undefined,
       bank: this.relations.bank ? this.related('bank') : undefined,
       holder_name: this.get('nama_pemilikrekening'),
-      holder_account_name: this.get('nomor_rekening'),
+      holder_account_number: this.get('nomor_rekening'),
       bank_branch_office_name: this.get('cabang_bankrekeninguser'),
       is_primary: parseNum(this.get('primary_rekening')) === BankAccountStatus.PRIMARY,
     };

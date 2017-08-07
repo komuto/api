@@ -1,13 +1,24 @@
 import express from 'express';
 import { PaymentController } from './controller';
 import core from '../core';
+import constraints from './validation';
 
 const routes = express.Router();
 const { wrap } = core.utils;
-const { apiResponse } = core.middleware;
+const { apiResponse, auth, validateParam } = core.middleware;
 
 routes.post('/payments',
   wrap(PaymentController.store),
+  apiResponse());
+
+/**
+ * POST /payment
+ * Choose payment methods
+ */
+routes.post('/payment',
+  auth(),
+  validateParam(constraints.choose_payment, true),
+  wrap(PaymentController.choosePaymentMethod),
   apiResponse());
 
 /**
