@@ -128,6 +128,19 @@ class BucketModel extends bookshelf.Model {
   }
 
   /**
+   * Find by id
+   */
+  static async findByIdAndStatus(id, userId, status) {
+    const bucket = await this.where({
+      id_bucket: id,
+      id_users: userId,
+      status_bucket: status,
+    }).fetch();
+    if (!bucket) throw getBucketError('bucket', 'not_found');
+    return bucket;
+  }
+
+  /**
    * Get bucket with relation for checkout
    */
   static async getForCheckout(userId) {
@@ -157,10 +170,7 @@ class BucketModel extends bookshelf.Model {
 
   static getTimeLeft(maxTime) {
     const maxPaymentDate = moment(maxTime).add(2, 'days');
-    if (moment().isAfter(maxPaymentDate)) {
-      console.log('getit');
-      return 0;
-    }
+    if (moment().isAfter(maxPaymentDate)) return 0;
     const { days, hours, minutes, seconds } = moment.preciseDiff(maxPaymentDate, moment(), true);
     return { days, hours, minutes, seconds };
   }
