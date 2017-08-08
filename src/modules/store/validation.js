@@ -30,17 +30,15 @@ constraints.update = {
   logo: { presence: false },
 };
 
-constraints.createMessage = {
+constraints.update_term = { term_condition: { presence: true } };
+
+constraints.create_message = {
   subject: { presence: true },
   content: { presence: true },
 };
 
-constraints.catalog = {
-  name: { presence: true },
-};
+constraints.catalog = { name: { presence: true } };
 
-constraints.verify = {
-  code: { presence: true },
-};
+constraints.verify = { code: { presence: true } };
 
 export default constraints;

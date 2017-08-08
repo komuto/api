@@ -329,6 +329,7 @@ class StoreModel extends bookshelf.Model {
       status_at: 'tglstatus_toko',
       seller_theme_id: 'identifier_themesseller',
       store_id_number: 'no_ktp_toko',
+      term_condition: 'note',
     };
     const newData = {};
     Object.keys(data).forEach((prop) => {

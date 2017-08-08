@@ -58,7 +58,7 @@ routes.delete('/users/store/catalogs/:id([0-9]{1,10})',
  */
 routes.post('/stores/:id([0-9]{1,10})/message',
   auth(),
-  validateParam(constraints.createMessage, true),
+  validateParam(constraints.create_message, true),
   wrap(StoreController.createMessage),
   apiResponse());
 
@@ -118,6 +118,16 @@ routes.post('/users/store',
 routes.put('/users/store',
   auth(),
   validateParam(constraints.update, true),
+  wrap(StoreController.updateStore),
+  apiResponse());
+
+/**
+ * PUT /users/store/term-condition
+ * Update term condition
+ */
+routes.put('/users/store/term-condition',
+  auth(),
+  validateParam(constraints.update_term, true),
   wrap(StoreController.updateStore),
   apiResponse());
 
