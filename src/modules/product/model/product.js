@@ -479,7 +479,6 @@ class ProductModel extends bookshelf.Model {
     // eslint-disable-next-line no-restricted-syntax
     for (const id of ids) {
       await this.where({ id_toko: storeId, id_produk: id }).destroy().catch((err) => {
-        console.log(err);
         if (err) errors.push({ product_id: id, error: errMsg.bulkDeleteProduct.error });
       });
     }
