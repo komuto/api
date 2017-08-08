@@ -154,7 +154,7 @@ BucketController.checkout = async (req, res, next) => {
     });
 
     let promo = 0;
-    if (bucketObj.promo !== undefined) {
+    if (bucketObj.promo) {
       if (bucketObj.promo.type === PromoType.NOMINAL) {
         promo = bucketObj.promo.nominal / items.length;
       } else promo = (totalPrice * bucketObj.promo.percentage) / 100;
