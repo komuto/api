@@ -156,3 +156,12 @@ PaymentController.listTransactions = async (req, res, next) => {
   };
   return next();
 };
+
+PaymentController.detailTransaction = async (req, res, next) => {
+  const bucket = await Bucket.detailTransaction(req.user.id, req.params.id);
+  req.resData = {
+    message: 'Transactions Data',
+    data: bucket,
+  };
+  return next();
+};

@@ -174,8 +174,9 @@ class BucketModel extends bookshelf.Model {
 
   static async listTransactions(userId) {
     const buckets = await this.where({ id_users: userId, status_bucket: BucketStatus.CHECKOUT })
+      .query(qb => (qb.whereNotNull('id_paymentmethod')))
       .fetchAll({ withRelated: ['invoices.items.product.images'] });
-    if (!buckets) throw getBucketError('bucket', 'not_found');
+    if (!buckets.length) throw getBucketError('bucket', 'not_found');
 
     return buckets.map((bucket) => {
       const { invoices, total_price, time_left } = bucket.related('invoices').reduce((accu, invoice, index) => {
@@ -204,6 +205,42 @@ class BucketModel extends bookshelf.Model {
         invoices,
       };
     });
+  }
+
+  static async detailTransaction(userId, bucketId) {
+    const bucket = await this.where({
+      id_users: userId,
+      id_bucket: bucketId,
+      status_bucket: BucketStatus.CHECKOUT,
+    }).query(qb => (qb.whereNotNull('id_paymentmethod')))
+      .fetch({ withRelated: ['invoices.items.product.images', 'promo'] });
+    if (!bucket) throw getBucketError('bucket', 'not_found');
+
+    const { invoices, total_price, time_left } = bucket.related('invoices').reduce((accu, invoice, index) => {
+      const items = invoice.related('items').map((item) => {
+        const product = item.related('product');
+        return {
+          ...item.serialize({ minimal: true }),
+          product: {
+            ...product.serialize({ minimal: true }),
+            image: product.related('images').models[0].serialize().file,
+          },
+        };
+      });
+      accu.total_price += parseInt(invoice.get('total_harga'), 10);
+      accu.invoices.push({ ...invoice.serialize({ minimal: true }), items });
+      if (index === 0) accu.time_left = this.getTimeLeft(invoice.get('updated_at'));
+      return accu;
+    }, { total_price: 0, invoices: [], time_left: 0 });
+    return {
+      bucket: bucket.serialize(),
+      summary_invoice: {
+        total_price,
+        status: 1,
+        time_left,
+      },
+      invoices,
+    };
   }
 
   /**

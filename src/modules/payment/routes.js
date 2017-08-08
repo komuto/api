@@ -47,4 +47,12 @@ routes.get('/transactions',
   wrap(PaymentController.listTransactions),
   apiResponse());
 
+/**
+ * GET detail transactions
+ */
+routes.get('/transactions/:id([0-9]{1,10})',
+  auth(),
+  wrap(PaymentController.detailTransaction),
+  apiResponse());
+
 export default routes;
