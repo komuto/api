@@ -30,3 +30,6 @@ __MACOSX
 yarn.lock
 
 ecosystem.json
+
+# Ignore redis binary dump (dump.rdb) files
+*.rdb
