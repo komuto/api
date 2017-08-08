@@ -59,6 +59,11 @@ routes.get('/users/address',
   wrap(AddressController.getPrimaryAddress),
   apiResponse());
 
+routes.get('/users/store/address',
+  auth(),
+  wrap(AddressController.getStoreAddress),
+  apiResponse());
+
 routes.get('/users/addresses/:id([0-9]{1,10})',
   auth(),
   wrap(AddressController.getAddress),

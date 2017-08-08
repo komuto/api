@@ -56,10 +56,12 @@ class AddressModel extends bookshelf.Model {
    * @param idUser {integer} user id
    * @param isPrimary {boolean} fetch only primary address
    * @param idAddress {integer} address id
+   * @param isSale {boolean} sale address
    */
-  static async getFullAddress(idUser, isPrimary = false, idAddress) {
+  static async getFullAddress(idUser, isPrimary = false, idAddress, isSale = false) {
     const query = { id_users: idUser };
-    if (isPrimary === true) query.alamat_primary = '1';
+    if (isPrimary === true) query.alamat_primary = 1;
+    if (isSale === true) query.alamat_originjual = 1;
     if (idAddress) query.id_alamatuser = idAddress;
     const address = await this.where(query).fetch({
       withRelated: ['province', 'district', 'subDistrict', 'village'],
@@ -84,7 +86,7 @@ class AddressModel extends bookshelf.Model {
    * @param idUser {integer} user id
    */
   static async getFullAddressAll(idUser) {
-    const addresses = await this.where({ id_users: idUser }).fetchAll({
+    const addresses = await this.where({ id_users: idUser, alamat_originjual: 0 }).fetchAll({
       withRelated: ['province', 'district', 'subDistrict', 'village'],
     });
     if (!addresses) {

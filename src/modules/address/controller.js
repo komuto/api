@@ -15,6 +15,16 @@ AddressController.getPrimaryAddress = async (req, res, next) => {
   return next();
 };
 
+AddressController.getStoreAddress = async (req, res, next) => {
+  let address = await Address.getFullAddress(req.user.id, false, null, true);
+  if (!address) address = {};
+  req.resData = {
+    message: 'Address Information',
+    data: address,
+  };
+  return next();
+};
+
 AddressController.getAddress = async (req, res, next) => {
   const address = await Address.getFullAddress(req.user.id, false, req.params.id);
   if (!address) throw getAddressError('address', 'not_found');
