@@ -2,6 +2,8 @@ import fs from 'fs';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import { uploadError } from './messages';
+import core from '../core';
+import config from '../../../config';
 
 export const ImageController = {};
 export default { ImageController };
@@ -23,8 +25,9 @@ ImageController.upload = async (req, res, next) => {
     throw uploadError('image', 'error');
   });
 
-  req.resData = {
-    data: req.body.is_single ? names[0] : names,
-  };
+  const data = { path: `${config.assetUrl}/uploads/${config.imageFolder[req.body.type]}` };
+  data[req.body.is_single ? 'image' : 'images'] = req.body.is_single ? names[0] : names;
+
+  req.resData = { data };
   return next();
 };

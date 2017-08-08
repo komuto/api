@@ -3,7 +3,7 @@ import config from '../../../../config';
 
 const { parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
-const IMAGE_PATH = config.imageFolder.payment;
+const IMAGE_PATH = config.imageFolder.payment_method;
 
 export const PaymentMethodStatus = {
   INACTIVE: 0,

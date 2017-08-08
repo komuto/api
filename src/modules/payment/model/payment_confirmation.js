@@ -4,7 +4,7 @@ import { createPaymentConfirmationError, getPaymentConfirmationError } from './.
 
 const { parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
-const IMAGE_PATH = config.imageFolder.payment_confirmation;
+const IMAGE_PATH = config.imageFolder.payment;
 
 export const PaymentConfirmationStatus = {
   0: 'DRAFT',
