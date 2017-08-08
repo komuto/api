@@ -12,7 +12,6 @@ import {
 import { UserController } from './controller';
 import { controller } from '../OTP';
 import core from '../core';
-import constraints from './../store/validation';
 
 const routes = express.Router();
 const { apiResponse, auth, validateParam } = core.middleware;
@@ -134,16 +133,6 @@ routes.get('/users/store/expeditions',
 routes.get('/users/store/expeditions/manage',
   auth(),
   wrap(UserController.getUserExpeditionsManage),
-  apiResponse());
-
-/**
- * POST /users/store
- * Create store
- */
-routes.post('/users/store',
-  auth(),
-  validateParam(constraints.create, true),
-  wrap(UserController.createStore),
   apiResponse());
 
 /**

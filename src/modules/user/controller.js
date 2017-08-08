@@ -6,11 +6,9 @@ import { User, UserToken, TokenType, UserStatus } from './model';
 import { UserEmail } from './email';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
-import { Store, StoreExpedition, StoreStatus } from './../store/model';
+import { Store, StoreExpedition } from './../store/model';
 import { userUpdateError, resetPassError, registrationError, activateUserError, fbError } from './messages';
-import { Address } from '../address/model';
 import { Discussion, Product } from '../product/model';
-import { OTPAddress } from '../OTP/model';
 
 const fb = new Facebook(config.fb);
 
@@ -243,42 +241,6 @@ UserController.getUserExpeditionsManage = async (req, res, next) => {
   req.resData = {
     message: 'Store Expeditions Manage Data',
     data: expeditions,
-  };
-  return next();
-};
-
-/**
- * Create store
- */
-UserController.createStore = async (req, res, next) => {
-  const expeditionServices = req.body.expedition_services;
-  const storeData = _.assign(req.body.store, {
-    user_id: req.user.id,
-    status: StoreStatus.ACTIVE,
-    seller_theme_id: 0,
-    store_id_number: req.body.user.id_number,
-    created_at: moment(),
-    status_at: moment(),
-  });
-  const store = await Store.create(Store.matchDBColumn(storeData));
-  const user = await User.update({ id_users: req.user.id }, User.matchDBColumn(req.body.user));
-
-  const addressData = _.assign(req.body.address, {
-    is_sale_address: 1,
-    is_primary: 0,
-    is_tender_address: 0,
-    user_id: req.user.id,
-    alias_address: req.body.address.address,
-  });
-  const address = await Address.create(Address.matchDBColumn(addressData));
-
-  const services = expeditionServices.map(data => (StoreExpedition.matchDBColumn(data, true)));
-  await Store.createExpeditionServices(store, services);
-  await OTPAddress.create(req.user.id);
-
-  req.resData = {
-    message: 'Store Data',
-    data: { store, user, address, expedition_services: expeditionServices },
   };
   return next();
 };

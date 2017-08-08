@@ -1,3 +1,5 @@
+import moment from 'moment';
+import _ from 'lodash';
 import {
   Store,
   Catalog,
@@ -6,9 +8,13 @@ import {
   Message,
   DetailMessage,
   MessageFlagStatus,
+  StoreExpedition,
+  StoreStatus,
 } from './model';
 import { makeFavoriteError, deleteCatalogError } from './messages';
 import { OTPAddress } from './../OTP/model';
+import { Address } from './../address/model';
+import { User } from './../user/model';
 
 export const StoreController = {};
 export default { StoreController };
@@ -157,5 +163,50 @@ StoreController.updateCatalog = async (req, res, next) => {
 StoreController.verify = async (req, res, next) => {
   await OTPAddress.verify(req.user.id, req.body.code);
   await Store.updateVerification(req.user.id);
+  return next();
+};
+
+/**
+ * Create store
+ */
+StoreController.createStore = async (req, res, next) => {
+  const expeditionServices = req.body.expedition_services;
+  const storeData = _.assign(req.body.store, {
+    user_id: req.user.id,
+    status: StoreStatus.ACTIVE,
+    seller_theme_id: 0,
+    store_id_number: req.body.user.id_number,
+    created_at: moment(),
+    status_at: moment(),
+  });
+  const store = await Store.create(Store.matchDBColumn(storeData));
+  const user = await User.update({ id_users: req.user.id }, User.matchDBColumn(req.body.user));
+
+  const addressData = _.assign(req.body.address, {
+    is_sale_address: 1,
+    is_primary: 0,
+    is_tender_address: 0,
+    user_id: req.user.id,
+    alias_address: req.body.address.address,
+  });
+  const address = await Address.create(Address.matchDBColumn(addressData));
+
+  const services = expeditionServices.map(data => (StoreExpedition.matchDBColumn(data, true)));
+  await Store.createExpeditionServices(store, services);
+  await OTPAddress.create(req.user.id);
+
+  req.resData = {
+    message: 'Store Data',
+    data: { store, user, address, expedition_services: expeditionServices },
+  };
+  return next();
+};
+
+/**
+ * Update Store
+ */
+StoreController.updateStore = async (req, res, next) => {
+  const store = await Store.update(Store.matchDBColumn(req.body), req.user.id);
+  req.resData = { data: store };
   return next();
 };

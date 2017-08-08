@@ -101,4 +101,24 @@ routes.post('/users/store/verify',
   wrap(StoreController.verify),
   apiResponse());
 
+/**
+ * POST /users/store
+ * Create store
+ */
+routes.post('/users/store',
+  auth(),
+  validateParam(constraints.create, true),
+  wrap(StoreController.createStore),
+  apiResponse());
+
+/**
+ * PUT /users/store
+ * Update store
+ */
+routes.put('/users/store',
+  auth(),
+  validateParam(constraints.update, true),
+  wrap(StoreController.updateStore),
+  apiResponse());
+
 export default routes;

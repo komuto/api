@@ -277,6 +277,15 @@ class StoreModel extends bookshelf.Model {
   }
 
   /**
+   * Update store
+   */
+  static async update(data, userId) {
+    const store = await this.where({ id_users: userId }).fetch();
+    if (!store) throw getStoreError('store', 'not_found');
+    return await store.save(data, { patch: true });
+  }
+
+  /**
    * Create store expeditions
    * @param store {object} store data
    * @param services {object} expedition services data
