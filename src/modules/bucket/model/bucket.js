@@ -4,6 +4,7 @@ import moment from 'moment';
 import 'moment-precise-range-plugin';
 import core from '../../core';
 import { getBucketError } from '../messages';
+import { getPaymentError } from '../../payment/messages';
 import './item';
 import './shipping';
 import config from './../../../../config';

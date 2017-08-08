@@ -26,7 +26,6 @@ PaymentController.getMethods = async (req, res, next) => {
   return next();
 };
 
-// TODO: update bucket payment method
 PaymentController.choosePaymentMethod = async (req, res, next) => {
   const bucket = await Bucket.findByIdAndStatus(
     req.params.id,
@@ -34,6 +33,7 @@ PaymentController.choosePaymentMethod = async (req, res, next) => {
     BucketStatus.CHECKOUT,
   );
   await Invoice.updatePaymentMethod(bucket.serialize().id, req.body.payment_method_id);
+  bucket.save({ id_paymentmethod: req.body.payment_method_id }, { patch: true });
   req.resData = { data: bucket };
   return next();
 };
@@ -44,6 +44,7 @@ PaymentController.viaBank = async (req, res, next) => {
     req.user.id,
     BucketStatus.CHECKOUT,
     );
+  // TODO: Check komuto bank account
   const data = PaymentConfirmation.matchDBColumn(_.assign(req.body, {
     bucket_id: bucket.serialize().id,
     user_id: req.user.id,
