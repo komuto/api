@@ -27,6 +27,13 @@ constraints.createAddress = {
   name: { presence: { message: createMsg.name_presence } },
   address: { presence: { message: createMsg.address_presence } },
   alias_address: { presence: { message: createMsg.alias_address_presence } },
+  is_primary: {
+    presence: true,
+    inclusion: {
+      within: [true, false],
+      message: 'accept only `true` or `false` value',
+    },
+  },
 };
 
 constraints.updateAddress = {
@@ -47,6 +54,12 @@ constraints.updateAddress = {
   },
   postal_code: {
     format: { pattern: /\d{5}(-\d{4})?/, message: updateMsg.postal_code_not_valid },
+  },
+  is_primary: {
+    inclusion: {
+      within: [true, false],
+      message: 'accept only `true` or `false` value',
+    },
   },
 };
 
