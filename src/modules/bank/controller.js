@@ -108,3 +108,12 @@ BankController.getMarketplaceBankAccounts = async (req, res, next) => {
   };
   return next();
 };
+
+BankController.getKomutoBankAccounts = async (req, res, next) => {
+  const bankAccounts = await BankAccount.where({ id_marketplaceuser: 0 }).fetchAll();
+  req.resData = {
+    message: 'Komuto Bank Account Data',
+    data: bankAccounts,
+  };
+  return next();
+};
