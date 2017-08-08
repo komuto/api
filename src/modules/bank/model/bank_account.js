@@ -1,4 +1,5 @@
 import core from '../../core';
+import { getAccountError } from './../messages';
 
 const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -23,6 +24,7 @@ class BankAccountModel extends bookshelf.Model {
       id: this.get('id_rekeninguser'),
       user_id: this.get('id_users'),
       bank_id: !this.relations.bank ? this.get('id_masterbank') : undefined,
+      marketplace_user_id: this.get('id_marketplaceuser'),
       bank: this.relations.bank ? this.related('bank') : undefined,
       holder_name: this.get('nama_pemilikrekening'),
       holder_account_number: this.get('nomor_rekening'),
@@ -42,7 +44,19 @@ class BankAccountModel extends bookshelf.Model {
    * Get bank accounts by user id
    */
   static async getByUserId(userId) {
-    return this.where({ id_users: userId }).fetchAll({ withRelated: ['bank'] });
+    return await this.where({ id_users: userId }).fetchAll({ withRelated: ['bank'] });
+  }
+
+  /**
+   * Check komuto bank account
+   */
+  static async checkKomutoAccount(id) {
+    const bankAccount = await this.where({ id_rekeninguser: id }).fetch();
+    if (!bankAccount) throw getAccountError('account', 'not_found');
+    if (bankAccount.serialize().marketplace_user_id !== 0) {
+      throw getAccountError('account', 'not_komuto');
+    }
+    return bankAccount;
   }
 
   /**

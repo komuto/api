@@ -25,6 +25,7 @@ export const errMsg = {
   getAccountMsg: {
     title: 'Lihat rekening gagal',
     not_found: 'Rekening tidak ditemukan',
+    not_komuto: 'Bukan rekening komuto',
   },
   deleteMsg: {
     title: 'Hapus rekening gagal',

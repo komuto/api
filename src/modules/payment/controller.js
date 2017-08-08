@@ -9,6 +9,7 @@ import {
   PaymentConfirmationStatus,
 } from './model';
 import { Bucket, BucketStatus } from './../bucket/model';
+import { BankAccount } from '../bank/model';
 
 const helper = doku.helper();
 const library = doku.library();
@@ -44,8 +45,8 @@ PaymentController.viaBank = async (req, res, next) => {
     req.user.id,
     BucketStatus.CHECKOUT,
     );
+  await BankAccount.checkKomutoAccount(req.body.bank_account_id);
   await PaymentConfirmation.checkDuplicate(bucket.serialize().id);
-  // TODO: Check komuto bank account
   const data = PaymentConfirmation.matchDBColumn(_.assign(req.body, {
     bucket_id: bucket.serialize().id,
     user_id: req.user.id,
