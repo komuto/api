@@ -38,13 +38,13 @@ PaymentController.choosePaymentMethod = async (req, res, next) => {
   return next();
 };
 
-// TODO: Handle duplicate payment confirmation
 PaymentController.viaBank = async (req, res, next) => {
   const bucket = await Bucket.findByIdAndStatus(
     req.params.id,
     req.user.id,
     BucketStatus.CHECKOUT,
     );
+  await PaymentConfirmation.checkDuplicate(bucket.serialize().id);
   // TODO: Check komuto bank account
   const data = PaymentConfirmation.matchDBColumn(_.assign(req.body, {
     bucket_id: bucket.serialize().id,

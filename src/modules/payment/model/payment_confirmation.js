@@ -1,7 +1,8 @@
 import core from '../../core';
 import config from '../../../../config';
+import { createPaymentConfirmationError, getPaymentConfirmationError } from './../messages';
 
-const { parseDate } = core.utils;
+const { parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
 const IMAGE_PATH = config.imageFolder.payment_confirmation;
 
@@ -24,7 +25,7 @@ class PaymentConfirmationModel extends bookshelf.Model {
 
   serialize() {
     return {
-      id: this.get('id'),
+      id: parseNum(this.get('id')),
       user_id: this.get('id_users'),
       bucket_id: this.get('id_bucket'),
       bank_account_id: this.get('id_rekeninguser'),
@@ -41,10 +42,17 @@ class PaymentConfirmationModel extends bookshelf.Model {
    * Create payment confirmation
    */
   static async create(data) {
-    return await new this(data).save().catch((e) => {
-      throw e;
-      // throw createInvoiceError('invoice', 'error');
+    return await new this(data).save().catch(() => {
+      throw createPaymentConfirmationError('payment_confirmation', 'error');
     });
+  }
+
+  /**
+   * Create payment confirmation
+   */
+  static async checkDuplicate(bucketId) {
+    const paymentConfirmation = await this.where({ id_bucket: bucketId }).fetch();
+    if (paymentConfirmation) throw getPaymentConfirmationError('payment_confirmation', 'duplicate');
   }
 
   /**
