@@ -11,20 +11,18 @@ const upload = multer().array('images');
 const getImageType = (body) => {
   switch (body.type) {
     case 'product':
-      body.folder = config.imageFolder.product;
       body.is_single = false;
       break;
     case 'store':
-      body.folder = config.imageFolder.store;
       body.is_single = true;
       break;
     case 'payment':
-      body.folder = config.imageFolder.payment;
       body.is_single = true;
       break;
     default:
       break;
   }
+  body.folder = config.imageFolder[body.type];
 };
 
 export function validateParam() {
@@ -49,10 +47,11 @@ export function validateParam() {
 
 export function imagePath() {
   return (req, res, next) => {
-    req.body.images = _.map(req.body.images, (image, i) => {
-      image.filename = `${req.body.type}-${Date.now()}-${i}${path.extname(image.originalname)}`;
+    const body = req.body;
+    body.images = _.map(body.images, (image, i) => {
+      image.filename = `${body.type}-${Date.now()}-${i}${path.extname(image.originalname)}`;
       image.destination = config.imagePath;
-      image.path = `${image.destination}/${req.body.folder}/${image.filename}`;
+      image.path = `${image.destination}/${body.folder}/${image.filename}`;
       return image;
     });
     return next();

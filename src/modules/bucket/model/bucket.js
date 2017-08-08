@@ -40,7 +40,7 @@ class BucketModel extends bookshelf.Model {
       id: this.get('id_bucket'),
       user_id: this.get('id_users'),
       promo_id: this.get('id_promo'),
-      promo: this.relations.promo ? this.related('promo').serialize() : undefined,
+      promo: this.relations.promo ? this.related('promo').serialize() : null,
       payment_method_id: this.get('id_paymentmethod'),
       unique_code: this.get('kode_unik'),
       order_at: parseDate(this.get('tgl_orderbucket')),
