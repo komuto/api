@@ -82,4 +82,13 @@ routes.get('/banks/marketplace',
   wrap(BankController.getMarketplaceBankAccounts),
   apiResponse());
 
+/**
+ * GET /banks/komuto
+ * View list of komuto's bank account
+ */
+routes.get('/banks/komuto',
+  auth(),
+  wrap(BankController.getKomutoBankAccounts),
+  apiResponse());
+
 export default routes;
