@@ -293,6 +293,6 @@ ProductController.moveCatalog = async (req, res, next) => {
 ProductController.bulkDelete = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const errors = await Product.bulkDelete(storeId, req.body.product_ids);
-  if (errors) throw new BadRequestError(errMsg.bulkDeleteProduct.title, errors);
+  if (errors.length) throw new BadRequestError(errMsg.bulkDeleteProduct.title, errors);
   return next();
 };
