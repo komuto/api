@@ -20,7 +20,7 @@ const getImageType = (body) => {
       break;
     case 'payment':
       body.folder = config.imageFolder.payment;
-      body.is_single = true;
+      body.is_single = false;
       break;
     default:
       break;
