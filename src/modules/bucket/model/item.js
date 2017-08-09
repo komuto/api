@@ -1,6 +1,7 @@
 import ModelBase from 'bookshelf-modelbase';
 import core from '../../core';
 import { getItemError } from './../messages';
+import config from './../../../../config';
 
 const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -71,7 +72,7 @@ class ItemModel extends bookshelf.Model {
    * Get item by bucket_id and product_id
    */
   static async getDetail(where) {
-    let item = await this.where(where).fetch({
+    const item = await this.where(where).fetch({
       withRelated: [
         'product.store',
         'product.store',
@@ -91,14 +92,13 @@ class ItemModel extends bookshelf.Model {
     const store = product.related('store');
     const images = product.related('images').serialize();
     product = product.serialize({ minimal: true });
-    // product.image = images.length ? images[0].file : config.defaultImage.product;
+    product.image = images.length ? images[0].file : config.defaultImage.product;
     product.store = store.serialize();
     return {
       ...item.serialize(),
       product,
       shipping,
     };
-    return item;
   }
 
   /**
