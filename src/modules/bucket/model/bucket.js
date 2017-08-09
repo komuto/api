@@ -205,6 +205,7 @@ class BucketModel extends bookshelf.Model {
       .query(qb => (qb.whereNotNull('id_paymentmethod')))
       .fetchAll({ withRelated: ['invoices.items.product.images'] });
     if (!buckets.length) throw getBucketError('bucket', 'not_found');
+
     return buckets.map(bucket => (this.loadDetailTransaction(bucket)));
   }
 
