@@ -63,6 +63,25 @@ constraints.updateAddress = {
   },
 };
 
+constraints.updateStoreAddress = {
+  province_id: {
+    numericality: { noStrings: true, onlyInteger: true, message: updateMsg.province_not_valid },
+  },
+  district_id: {
+    numericality: { noStrings: true, onlyInteger: true, message: updateMsg.district_not_valid },
+  },
+  sub_district_id: {
+    numericality: { noStrings: true, onlyInteger: true, message: updateMsg.subdistrict_not_valid },
+  },
+  village_id: {
+    numericality: { noStrings: true, onlyInteger: true, message: updateMsg.village_not_valid },
+  },
+  postal_code: {
+    format: { pattern: /\d{5}(-\d{4})?/, message: updateMsg.postal_code_not_valid },
+  },
+  address: { presence: false },
+};
+
 /**
  * Create order
  */

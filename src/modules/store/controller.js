@@ -182,6 +182,7 @@ StoreController.createStore = async (req, res, next) => {
   const store = await Store.create(Store.matchDBColumn(storeData));
   const user = await User.update({ id_users: req.user.id }, User.matchDBColumn(req.body.user));
 
+  // TODO: Disable name, email, phone_number, and alias
   const addressData = _.assign(req.body.address, {
     is_sale_address: 1,
     is_primary: 0,

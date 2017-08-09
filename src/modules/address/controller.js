@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { Address, Province, District, SubDistrict, Village } from './model';
 import { getAddressError, deleteAddressError } from './messages';
+import { OTPAddress } from '../OTP/model';
 
 export const AddressController = {};
 export default { AddressController };
@@ -125,6 +126,20 @@ AddressController.updateAddress = async (req, res, next) => {
   return next();
 };
 
+AddressController.updateStoreAddress = async (req, res, next) => {
+  let address = await Address.getStoreAddressModel(req.user.id);
+  if (!address) throw getAddressError('address', 'not_found');
+  address = await address.save(Address.matchDBColumn(req.body), { patch: true });
+  await OTPAddress.updateStatus(req.user.id);
+  await OTPAddress.create(req.user.id);
+  req.resData = {
+    message: 'Address Data',
+    data: address,
+  };
+  return next();
+};
+
+// TODO: Can't delete address store
 AddressController.deleteAddress = async (req, res, next) => {
   const address = await Address.where({ id_alamatuser: req.params.id,
     id_users: req.user.id }).fetch();

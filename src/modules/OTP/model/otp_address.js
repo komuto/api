@@ -54,6 +54,14 @@ class OTPAddressModel extends bookshelf.Model {
   }
 
   /**
+   * Update status OTP Address
+   */
+  static async updateStatus(userId) {
+    return await this.where({ id_users: userId })
+      .save({ status_otpaddress: OTPAddressStatus.DESTROY }, { patch: true }).catch(() => {});
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData

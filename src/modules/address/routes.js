@@ -2,11 +2,12 @@ import express from 'express';
 import { AddressController } from './controller';
 import core from '../core';
 import { validateCreate, validateUpdate } from './middleware';
+import constraints from './validation';
 
 const routes = express.Router();
 const { wrap } = core.utils;
 const cache = core.cache;
-const { apiResponse, auth } = core.middleware;
+const { apiResponse, auth, validateParam } = core.middleware;
 
 /**
  * GET /locations/provinces
@@ -54,21 +55,47 @@ routes.post('/users/addresses',
   wrap(AddressController.createAddress),
   apiResponse());
 
+/**
+ * GET /users/address
+ * Get primary address
+ */
 routes.get('/users/address',
   auth(),
   wrap(AddressController.getPrimaryAddress),
   apiResponse());
 
+/**
+ * GET /users/store/address
+ * Get store address
+ */
 routes.get('/users/store/address',
   auth(),
   wrap(AddressController.getStoreAddress),
   apiResponse());
 
+/**
+ * PUT /users/store/address
+ * Update store address
+ */
+routes.put('/users/store/address',
+  auth(),
+  validateParam(constraints.updateStoreAddress, true),
+  wrap(AddressController.updateStoreAddress),
+  apiResponse());
+
+/**
+ * GET /users/addresses/id
+ * Get detail address
+ */
 routes.get('/users/addresses/:id([0-9]{1,10})',
   auth(),
   wrap(AddressController.getAddress),
   apiResponse());
 
+/**
+ * GET /users/addresses
+ * Get list addresses
+ */
 routes.get('/users/addresses',
   auth(),
   wrap(AddressController.getListAddress),
