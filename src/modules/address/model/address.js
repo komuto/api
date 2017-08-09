@@ -155,14 +155,6 @@ class AddressModel extends bookshelf.Model {
   }
 
   /**
-   * Delete address
-   * @param id {integer} address id
-   */
-  static async destroy(id) {
-    await this.where('id_alamatuser', id).destroy();
-  }
-
-  /**
    * Get a line item by id
    * @param {integer} id
    */

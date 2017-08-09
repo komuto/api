@@ -139,11 +139,13 @@ AddressController.updateStoreAddress = async (req, res, next) => {
   return next();
 };
 
-// TODO: Can't delete address store
 AddressController.deleteAddress = async (req, res, next) => {
-  const address = await Address.where({ id_alamatuser: req.params.id,
-    id_users: req.user.id }).fetch();
+  const address = await Address.where({
+    id_alamatuser: req.params.id,
+    id_users: req.user.id,
+    alamat_originjual: 0,
+  }).fetch();
   if (!address) throw deleteAddressError('address', 'address_not_found');
-  await Address.destroy(req.params.id);
+  await address.destroy();
   return next();
 };
