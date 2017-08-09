@@ -16,7 +16,6 @@ constraints.create = {
     presence: true,
     length: { is: 5 },
   },
-  'address.email': { presence: true },
   'address.address': {
     presence: true,
     length: { maximum: 200 },
