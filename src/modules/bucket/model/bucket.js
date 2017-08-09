@@ -89,16 +89,15 @@ class BucketModel extends bookshelf.Model {
       withRelated: [
         'promo',
         'items.product.store',
-        {
-          'items.product.images': (qb) => {
-            qb.limit(1);
-          },
-        },
+        { 'items.product.images': qb => (qb.limit(1)) },
+        'items.shipping.address',
+        'items.shipping.expeditionService.expedition',
       ],
     });
     if (!bucket) throw getBucketError('bucket', 'not_found');
     const items = bucket.related('items').map((item) => {
       let product = item.related('product');
+      const shipping = item.related('shipping');
       const store = product.related('store');
       const images = product.related('images').serialize();
       product = product.serialize({ minimal: true });
@@ -107,6 +106,7 @@ class BucketModel extends bookshelf.Model {
       return {
         ...item.serialize(),
         product,
+        shipping,
       };
     });
     return { ...bucket.serialize(), items };
