@@ -110,10 +110,7 @@ AddressController.updateAddress = async (req, res, next) => {
   if (req.body.is_primary !== undefined) {
     // Change primary address status to this if there are other primary address
     if (req.body.is_primary) {
-      const address = await Address.checkOtherPrimary(req.user.id, req.params.id);
-      if (address) {
-        await Address.update({ id_alamatuser: address.id }, { alamat_primary: 0 });
-      }
+      await Address.update({ id_users: req.user.id }, { alamat_primary: 0 });
     }
     req.body.is_primary = req.body.is_primary ? 1 : 0;
   }

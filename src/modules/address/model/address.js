@@ -1,4 +1,5 @@
 import core from '../../core';
+import { getAddressError } from './../messages';
 
 const bookshelf = core.postgres.db;
 
@@ -139,7 +140,9 @@ class AddressModel extends bookshelf.Model {
    * @param {Object} newData
    */
   static async update(data, newData) {
-    const address = await this.where(data).save(newData, { method: 'update' });
+    const address = await this.where(data).save(newData, { method: 'update' }).catch(() => {
+      throw getAddressError('address', 'not_found');
+    });
     await address.refresh({ withRelated: ['province', 'district', 'subDistrict', 'village'] });
 
     const province = address.related('province');
@@ -151,7 +154,8 @@ class AddressModel extends bookshelf.Model {
       province,
       district,
       subDistrict,
-      village };
+      village,
+    };
   }
 
   /**

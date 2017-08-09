@@ -2,6 +2,7 @@ import ModelBase from 'bookshelf-modelbase';
 import core from '../../core';
 import { getItemError } from './../messages';
 import config from './../../../../config';
+import { Product } from '../../product/model';
 
 const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -75,25 +76,36 @@ class ItemModel extends bookshelf.Model {
     const item = await this.where(where).fetch({
       withRelated: [
         'product.store',
-        'product.store',
-        {
-          'product.images': (qb) => {
-            qb.limit(1);
-          },
-        },
-        'shipping.address',
+        'product.expeditionServices.expedition',
+        { 'product.images': qb => (qb.limit(1)) },
+        'shipping.address.province',
+        'shipping.address.district',
+        'shipping.address.subDistrict',
         'shipping.expeditionService.expedition',
       ],
     });
     if (!item) throw getItemError('item', 'not_found');
 
     let product = item.related('product');
-    const shipping = item.related('shipping');
+    let shipping = item.related('shipping');
     const store = product.related('store');
     const images = product.related('images').serialize();
+    const expeditions = Product.loadExpeditions(product);
     product = product.serialize({ minimal: true });
     product.image = images.length ? images[0].file : config.defaultImage.product;
     product.store = store.serialize();
+    product.expeditions = expeditions;
+    shipping = shipping.serialize();
+    const province = shipping.address.related('province');
+    const district = shipping.address.related('district');
+    const subDistrict = shipping.address.related('subDistrict');
+    shipping.address = shipping.address.serialize();
+    shipping.address = {
+      ...shipping.address,
+      province,
+      district,
+      subDistrict,
+    };
     return {
       ...item.serialize(),
       product,
