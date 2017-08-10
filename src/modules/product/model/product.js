@@ -224,14 +224,17 @@ class ProductModel extends bookshelf.Model {
     if (!other.verified) {
       // Get all otp addresses, then iterate over those
       // then check which store is verified and which don't
-      const OTPAddresses = await Promise.all(products.models.map(product => OTPAddress.where({ id_users: product.get('id_users') }).fetchAll()));
-      verified = OTPAddresses.map(otps => otps.some(otp => parseNum(otp.get('status_otpaddress')) === OTPAddressStatus.VERIFIED));
+      verified = await Promise.all(products.models.map(product => OTPAddress.where({
+        id_users: product.get('id_users'),
+        status_otpaddress: OTPAddressStatus.VERIFIED,
+      }).fetch()));
+      // verified = OTPAddresses.map(otps => otps.some(otp => parseNum(otp.get('status_otpaddress')) === OTPAddressStatus.VERIFIED));
     }
 
     return products.models.reduce((results, product, index) => {
       const store = {
         ...Store.prototype.serialize.call(product),
-        is_verified: other.verified || verified[index],
+        is_verified: other.verified || !!verified[index],
       };
       const images = product.related('images').serialize();
       const likes = product.related('likes');
