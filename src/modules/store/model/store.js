@@ -31,7 +31,9 @@ class StoreModel extends bookshelf.Model {
       logo: core.imagePath(IMAGE_PATH, this.get('logo_toko')),
     };
     if (favorite) return store;
-    if (verified) store.is_verified = this.related('verifyAddress').length !== 0;
+    if (verified) {
+      store.is_verified = this.related('verifyAddress').length !== 0;
+    }
     return {
       ...store,
       user_id: this.get('id_users'),
@@ -87,7 +89,7 @@ class StoreModel extends bookshelf.Model {
    * Add relation to OTPAddress
    */
   verifyAddress() {
-    return this.hasMany('OTPAddress', 'id_users');
+    return this.hasMany('OTPAddress', 'id_users').through('User', 'id_users', 'id_users', 'id_users', 'id_users');
   }
 
   favoriteStores() {
