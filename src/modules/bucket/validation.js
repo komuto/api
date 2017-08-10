@@ -18,7 +18,9 @@ constraints.cart = {
       message: 'accept only `true` or `false` value',
     },
   },
-  delivery_cost: { presence: true },
+  service: { presence: true },
+  origin_ro_id: { presence: true, numericality: { onlyInteger: true } },
+  destination_ro_id: { presence: true, numericality: { onlyInteger: true } },
 };
 
 constraints.checkout = {
@@ -35,7 +37,9 @@ constraints.checkout = {
       message: 'accept only `true` or `false` value',
     },
   },
-  delivery_cost: { presence: false },
+  service: { presence: true },
+  origin_ro_id: { presence: true, numericality: { onlyInteger: true } },
+  destination_ro_id: { presence: true, numericality: { onlyInteger: true } },
 };
 
 export default constraints;

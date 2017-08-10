@@ -85,6 +85,20 @@ class ExpeditionModel extends bookshelf.Model {
   }
 
   /**
+   * Get services by expedition id and service name
+   */
+  static async getServiceByServiceName(id, serviceName) {
+    const expedition = await this.where({ id_ekspedisi: id }).fetch({
+      withRelated: [{ services: qb => (qb.where('nama_ekspedisiservice', serviceName)) }],
+    });
+    if (!expedition) throw getExpeditionError('expedition', 'not_found');
+    return {
+      expedition: expedition.toJSON().name,
+      services: expedition.related('services').toJSON(),
+    };
+  }
+
+  /**
    * Get expedition cost
    */
   static async getCost(expeditionName, services, query) {

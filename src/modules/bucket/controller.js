@@ -4,6 +4,7 @@ import { Product } from '../product/model';
 import { Expedition } from '../expedition/model';
 import { Invoice, InvoiceStatus } from '../payment/model';
 import { getBucketError, getItemError } from './messages';
+import { BadRequestError } from '../../../common/errors';
 
 export const BucketController = {};
 export default { BucketController };
@@ -43,16 +44,34 @@ BucketController.getBucket = async (req, res, next) => {
   return next();
 };
 
+BucketController.getCost = async (body, product) => {
+  const {
+    expedition,
+    services,
+  } = await Expedition.getServiceByServiceName(body.expedition_id, body.service);
+  const query = {
+    origin_ro_id: body.origin_ro_id,
+    destination_ro_id: body.destination_ro_id,
+    weight: product.weight * body.qty,
+  };
+  const delivery = await Expedition.getCost(expedition, services, query);
+  if (delivery.length === 0) throw new BadRequestError('No expedition found');
+  return delivery[0];
+};
+
 BucketController.saveCart = async (bucket, body, product, item, where) => {
   let insuranceCost = 0;
   if (body.is_insurance) {
     const expedition = await Expedition.findById(body.expedition_id);
     insuranceCost = ((product.price * body.qty) * expedition.insurance_fee) / 100;
   }
+
+  const delivery = await BucketController.getCost(body, product);
+
   const shippingObj = Shipping.matchDBColumn({
     expedition_service_id: body.expedition_service_id,
     address_id: body.address_id,
-    delivery_cost: body.delivery_cost,
+    delivery_cost: delivery.cost,
     insurance_fee: insuranceCost,
     note: null,
   });
@@ -73,7 +92,7 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
     note: body.note,
     additional_cost: 0, // admin cost
     weight: product.weight * body.qty,
-    total_price: (product.price * body.qty) + body.delivery_cost + insuranceCost,
+    total_price: (product.price * body.qty) + delivery.cost + insuranceCost,
   });
   return await Item.updateInsert(where, _.assign(itemObj, where));
 };
