@@ -59,6 +59,7 @@
     "to-title-case": "^1.0.0",
     "uuid": "^3.0.1",
     "validate.js": "^0.11.1",
+    "wildcard-subdomains": "^1.1.0",
     "winston": "^2.3.1",
     "winston-daily-rotate-file": "^1.4.6"
   },

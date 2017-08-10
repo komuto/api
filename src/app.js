@@ -7,6 +7,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import statusMonitor from 'express-status-monitor';
 import responseTime from 'response-time';
+import wildcardSubdomains from 'wildcard-subdomains';
 import config from '../config';
 import c from './constants';
 import core from './modules/core';
@@ -35,6 +36,7 @@ process.on('unhandledRejection', (err) => {
   console.log('Unhandled Rejection:', err.stack);
 });
 
+app.use(wildcardSubdomains({ namespace: 's' }));
 app.use(statusMonitor());
 app.use(responseTime());
 app.use(cors());
@@ -62,7 +64,6 @@ app.set('x-powered-by', false);
 app.set('case sensitive routing', true);
 
 // configure middleware
-app.use(core.middleware.requestLoggerMiddleware());
 app.use(core.middleware.requestUtilsMiddleware());
 
 app.use(image.routes);
