@@ -2,6 +2,7 @@ import moment from 'moment';
 import requestIp from 'request-ip';
 import {
   Product,
+  ProductType,
   Discussion,
   Comment,
   Report,
@@ -39,15 +40,16 @@ const getPrice = (price) => {
 ProductController.index = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const price = req.query.price ? getPrice(req.query.price) : null;
+  const { category_id, condition: cond } = req.body;
+  const condition = cond && (cond === 'new' ? ProductType.NEW : ProductType.USED);
+  const where = Product.matchDBColumn({ condition, category_id });
   const params = {
     page,
     pageSize,
-    price,
-    where: { id_kategoriproduk: req.query.category_id },
+    where,
+    price: req.query.price ? getPrice(req.query.price) : null,
     query: req.query.q,
     sort: req.query.sort || 'newest',
-    condition: req.query.condition,
     other: req.query.other,
     brands: req.query.brands,
     services: req.query.services,
