@@ -39,6 +39,7 @@ class ProductModel extends bookshelf.Model {
       discount: this.get('disc_produk'),
       is_discount: !!this.get('disc_produk'),
       is_wholesaler: this.get('is_grosir'),
+      weight: this.get('berat_produk'),
     };
     if (wishlist) {
       product.is_liked = true;
@@ -52,7 +53,6 @@ class ProductModel extends bookshelf.Model {
       category_id: this.get('id_kategoriproduk'),
       store_id: this.get('id_toko'),
       stock: this.get('stock_produk'),
-      weight: this.get('berat_produk'),
       condition: parseNum(this.get('jenis_produk'), 0),
       description: this.get('deskripsi_produk'),
       attrval: parseNum(this.get('attrval_produk'), 0),
