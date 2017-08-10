@@ -88,7 +88,8 @@ class BucketModel extends bookshelf.Model {
     const bucket = await this.where({ id_users: userId, status_bucket: BucketStatus.ADDED }).fetch({
       withRelated: [
         'promo',
-        'items.product.store',
+        { 'items.product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
+        'items.product.store.user.addresses.district',
         { 'items.product.images': qb => (qb.limit(1)) },
         'items.shipping.address',
         'items.shipping.expeditionService.expedition',
@@ -99,10 +100,14 @@ class BucketModel extends bookshelf.Model {
       let product = item.related('product');
       const shipping = item.related('shipping');
       const store = product.related('store');
+      const districtStore = store.related('user').related('addresses').models[0].related('district');
       const images = product.related('images').serialize();
       product = product.serialize({ minimal: true });
       product.image = images.length ? images[0].file : config.defaultImage.product;
-      product.store = store.serialize();
+      product.store = {
+        ...store.serialize(),
+        district: districtStore,
+      };
       return {
         ...item.serialize(),
         product,

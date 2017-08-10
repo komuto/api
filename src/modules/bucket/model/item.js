@@ -75,7 +75,8 @@ class ItemModel extends bookshelf.Model {
   static async getDetail(where) {
     const item = await this.where(where).fetch({
       withRelated: [
-        'product.store',
+        { 'product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
+        'product.store.user.addresses.district',
         'product.expeditionServices.expedition',
         { 'product.images': qb => (qb.limit(1)) },
         'shipping.address.province',
@@ -91,9 +92,13 @@ class ItemModel extends bookshelf.Model {
     const store = product.related('store');
     const images = product.related('images').serialize();
     const expeditions = Product.loadExpeditions(product);
+    const districtStore = store.related('user').related('addresses').models[0].related('district');
     product = product.serialize({ minimal: true });
     product.image = images.length ? images[0].file : config.defaultImage.product;
-    product.store = store.serialize();
+    product.store = {
+      ...store.serialize(),
+      district: districtStore,
+    };
     product.expeditions = expeditions;
     shipping = shipping.serialize();
     const province = shipping.address.related('province');
