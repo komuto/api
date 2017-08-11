@@ -69,24 +69,7 @@ class ItemModel extends bookshelf.Model {
     return await this.where(where).fetch();
   }
 
-  /**
-   * Get item by bucket_id and product_id
-   */
-  static async getDetail(where) {
-    const item = await this.where(where).fetch({
-      withRelated: [
-        { 'product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
-        'product.store.user.addresses.district',
-        'product.expeditionServices.expedition',
-        { 'product.images': qb => (qb.limit(1)) },
-        'shipping.address.province',
-        'shipping.address.district',
-        'shipping.address.subDistrict',
-        'shipping.expeditionService.expedition',
-      ],
-    });
-    if (!item) throw getItemError('item', 'not_found');
-
+  static loadDetailItem(item) {
     let product = item.related('product');
     let shipping = item.related('shipping');
     const store = product.related('store');
@@ -116,6 +99,26 @@ class ItemModel extends bookshelf.Model {
       product,
       shipping,
     };
+  }
+
+  /**
+   * Get item by bucket_id and product_id
+   */
+  static async getDetail(where) {
+    const item = await this.where(where).fetch({
+      withRelated: [
+        { 'product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
+        'product.store.user.addresses.district',
+        'product.expeditionServices.expedition',
+        { 'product.images': qb => (qb.limit(1)) },
+        'shipping.address.province',
+        'shipping.address.district',
+        'shipping.address.subDistrict',
+        'shipping.expeditionService.expedition',
+      ],
+    });
+    if (!item) throw getItemError('item', 'not_found');
+    return this.loadDetailItem(item);
   }
 
   /**
