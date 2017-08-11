@@ -71,7 +71,7 @@ ExpeditionController.getExpeditionCostByProduct = async (req, res, next) => {
   // eslint-disable-next-line no-restricted-syntax
   for (const val of expeditions) {
     const cost = await Expedition.getCost(val.expedition, val.services, req.query);
-    costs.push(...cost);
+    costs.push(cost.map(o => ({ ...o, expedition_id: val.expedition_id })));
   }
   if (costs.length === 0) throw new BadRequestError('No expedition found');
   req.resData = {

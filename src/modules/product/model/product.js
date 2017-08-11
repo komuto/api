@@ -439,11 +439,14 @@ class ProductModel extends bookshelf.Model {
         expedition: service.expedition.serialize(),
       };
     });
-    return _.chain(services)
-      .groupBy('expedition.name')
-      .toPairs()
-      .map(currentItem => (_.zipObject(['expedition', 'services'], currentItem)))
-      .value();
+
+    const groups = _.groupBy(services, val => (val.expedition.name));
+
+    return _.map(groups, (group, key) => ({
+      expedition: key,
+      expedition_id: group[0].expedition.id,
+      services: group,
+    }));
   }
 
   /**
