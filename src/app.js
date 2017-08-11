@@ -23,6 +23,7 @@ import image from './modules/image';
 import bucket from './modules/bucket';
 import otp from './modules/OTP';
 import payment from './modules/payment';
+import marketplace from './modules/marketplace';
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.use((req, res, next) => {
   next();
 });
 app.set('trust proxy', 1);
+app.set('subdomain offset', 0);
 
 // configure passport middleware
 // this must be defined after session middleware
@@ -63,7 +65,7 @@ app.set('case sensitive routing', true);
 
 // configure middleware
 app.use(core.middleware.requestUtilsMiddleware());
-
+app.use(marketplace.middleware.verify());
 app.use(image.routes);
 
 app.use(core.middleware.checkContentType());

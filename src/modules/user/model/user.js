@@ -7,7 +7,7 @@ import core from '../../core';
 import { model as addressModel } from '../../address';
 import { model as OTPModel } from '../../OTP';
 
-const { defaultNull, checkNull, parseDate } = core.utils;
+const { defaultNull, checkNull, parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
 const { District } = addressModel;
 const { OTPHPStatus } = OTPModel;
@@ -72,7 +72,7 @@ class UserModel extends bookshelf.Model {
       status: parseInt(this.get('status_users'), 10),
       mother_name: defaultNull(this.get('ibukandung_users')),
       auth_key: defaultNull(this.get('auth_key')),
-      saldo_wallet: checkNull(this.get('saldo_wallet'), 0),
+      saldo_wallet: checkNull(parseNum(this.get('saldo_wallet')), 0),
       created_at: moment(this.get('tgl_create_users')).unix(),
       join_at: parseDate(this.get('tgl_join_koperasi')),
       status_at: moment(this.get('tglstatus_users')).unix(),
