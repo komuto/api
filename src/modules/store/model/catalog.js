@@ -140,10 +140,11 @@ class CatalogModel extends bookshelf.Model {
     ])));
   }
 
-  static async loadCountProducts(storeId) {
+  static async loadCountProducts(storeId, status) {
     return await this.query((qb) => {
       qb.select('katalog.id_katalog');
       qb.where('katalog.id_toko', storeId);
+      qb.where('produk.status_produk', status);
       qb.innerJoin('produk', 'katalog.id_katalog', 'produk.identifier_katalog');
       qb.count('produk.* as count_product');
       qb.groupBy('id_katalog');
@@ -159,7 +160,7 @@ class CatalogModel extends bookshelf.Model {
 
     const [catalogs, countProducts] = await Promise.all([
       this.loadCatalog(storeId, status, catalogId),
-      this.loadCountProducts(storeId),
+      this.loadCountProducts(storeId, status),
     ]);
 
     if (!catalogs.length && catalogId) return [];
