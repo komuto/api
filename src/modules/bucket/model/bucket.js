@@ -4,9 +4,8 @@ import moment from 'moment';
 import 'moment-precise-range-plugin';
 import core from '../../core';
 import { getBucketError } from '../messages';
-import './item';
 import './shipping';
-import config from './../../../../config';
+import { Item } from './item';
 
 const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -89,30 +88,16 @@ class BucketModel extends bookshelf.Model {
         'promo',
         { 'items.product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
         'items.product.store.user.addresses.district',
+        'items.product.expeditionServices.expedition',
         { 'items.product.images': qb => (qb.limit(1)) },
-        'items.shipping.address',
+        'items.shipping.address.province',
+        'items.shipping.address.district',
+        'items.shipping.address.subDistrict',
         'items.shipping.expeditionService.expedition',
       ],
     });
     if (!bucket) throw getBucketError('bucket', 'not_found');
-    const items = bucket.related('items').map((item) => {
-      let product = item.related('product');
-      const shipping = item.related('shipping');
-      const store = product.related('store');
-      const districtStore = store.related('user').related('addresses').models[0].related('district');
-      const images = product.related('images').serialize();
-      product = product.serialize({ minimal: true });
-      product.image = images.length ? images[0].file : config.defaultImage.product;
-      product.store = {
-        ...store.serialize(),
-        district: districtStore,
-      };
-      return {
-        ...item.serialize(),
-        product,
-        shipping,
-      };
-    });
+    const items = bucket.related('items').map(item => (Item.loadDetailItem(item)));
     return { ...bucket.serialize(), items };
   }
 

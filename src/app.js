@@ -36,7 +36,7 @@ process.on('unhandledRejection', (err) => {
   console.log('Unhandled Rejection:', err.stack);
 });
 
-app.use(wildcardSubdomains({ namespace: 's' }));
+// app.use(wildcardSubdomains());
 app.use(statusMonitor());
 app.use(responseTime());
 app.use(cors());
