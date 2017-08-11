@@ -127,22 +127,17 @@ class CatalogModel extends bookshelf.Model {
 
   static async loadCatalog(storeId, status, catalogId) {
     const query = { id_toko: storeId };
-    let limit = 3;
-    if (catalogId) {
-      query.id_katalog = catalogId;
-      limit = 'ALL';
-    }
-    return await this.where(query)
-      .fetchAll({
-        withRelated: [
-          {
-            products: qb => qb.where({ status_produk: status })
-              .limit(limit)
-              .orderBy('id_produk', 'DESC'),
-          },
-          { 'products.images': qb => qb.limit(1) },
-        ],
-      });
+    if (catalogId) query.id_katalog = catalogId;
+    const catalogs = await this.where(query).fetchAll();
+    return await Promise.all(catalogs.map(catalog => catalog.load([
+      {
+        products: (qb) => {
+          qb.where({ status_produk: status }).orderBy('id_produk', 'DESC');
+          if (!catalogId) qb.limit(3);
+        },
+      },
+      { 'products.images': qb => qb.limit(1) },
+    ])));
   }
 
   static async loadCountProducts(storeId) {
@@ -167,11 +162,9 @@ class CatalogModel extends bookshelf.Model {
       this.loadCountProducts(storeId),
     ]);
 
-    if (!catalogs.models.length && catalogId) return [];
+    if (!catalogs.length && catalogId) return [];
 
-    const data = [];
-    // eslint-disable-next-line no-restricted-syntax
-    for (let catalog of catalogs.models) {
+    return catalogs.reduce((data, catalog) => {
       const products = catalog.related('products').map((product) => {
         const images = product.related('images').serialize();
         // TODO: Add dropshipper
@@ -184,8 +177,8 @@ class CatalogModel extends bookshelf.Model {
       catalog = catalog.serialize();
       catalog.count_product = found ? parseNum(found.get('count_product')) : 0;
       data.push({ catalog, products });
-    }
-    return data;
+      return data;
+    }, []);
   }
 }
 
