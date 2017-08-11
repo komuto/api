@@ -228,7 +228,6 @@ class ProductModel extends bookshelf.Model {
         id_users: product.get('id_users'),
         status_otpaddress: OTPAddressStatus.VERIFIED,
       }).fetch()));
-      // verified = OTPAddresses.map(otps => otps.some(otp => parseNum(otp.get('status_otpaddress')) === OTPAddressStatus.VERIFIED));
     }
 
     return products.models.reduce((results, product, index) => {
