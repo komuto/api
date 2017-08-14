@@ -65,7 +65,7 @@ app.set('case sensitive routing', true);
 // configure middleware
 app.use(core.middleware.requestUtilsMiddleware());
 
-app.prefix = (router => (app.use('/:mp([0-9]{1,10})', router)));
+app.prefix = (router => (app.use('/:mp', router)));
 
 app.prefix(marketplace.middleware.verify());
 app.prefix(image.routes);
