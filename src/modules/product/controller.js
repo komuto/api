@@ -56,6 +56,7 @@ ProductController.index = async (req, res, next) => {
     address: req.query.address,
     is_dropship: req.query.is_dropship,
     userId: req.user.id,
+    marketplaceId: req.marketplace.id,
   };
   const products = await Product.get(params);
 

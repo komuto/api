@@ -66,6 +66,7 @@ UserController.getUserSocial = async (req, res, next) => {
         password: User.hashPasswordSync('komuto'),
         photo: response.picture.data.url,
         status: UserStatus.ACTIVE,
+        marketplace_id: req.marketplace.id,
       };
       req.user = await User.create(User.matchDBColumn(response));
     }

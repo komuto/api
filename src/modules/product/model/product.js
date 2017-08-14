@@ -155,6 +155,7 @@ class ProductModel extends bookshelf.Model {
       userId,
       where,
       is_dropship: isDropship,
+      marketplaceId,
     } = params;
     let { sort, other = '', brands, services } = params;
 
@@ -186,6 +187,7 @@ class ProductModel extends bookshelf.Model {
         qb.select(['produk.*', 'toko.*']);
         qb.innerJoin('toko', 'toko.id_toko', 'produk.id_toko');
         qb.innerJoin('users', 'toko.id_users', 'users.id_users');
+        qb.where('users.id_marketplaceuser', marketplaceId);
         if (query) qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
         if (price && price.min !== 0 && price.max !== 0) qb.whereBetween('harga_produk', [price.min, price.max]);
         if (address) {
