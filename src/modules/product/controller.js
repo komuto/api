@@ -241,7 +241,7 @@ ProductController.dropship = async (req, res, next) => {
  */
 ProductController.storeProducts = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const hidden = req.query.hidden ? JSON.parse(req.query.hidden) : false;
+  const hidden = req.query.hidden && JSON.parse(req.query.hidden);
   const params = { storeId, hidden };
   const [catalogs, noCatalog] = await Promise.all([
     Catalog.getCatalogWithProducts(params),
