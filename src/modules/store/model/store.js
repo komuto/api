@@ -3,6 +3,7 @@ import core from '../../core';
 import config from '../../../../config';
 import { getStoreError, createStoreError } from './../messages';
 import { OTPAddressStatus } from './../../OTP/model';
+import { StoreExpeditionStatus } from './store_expedition';
 
 const { parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -244,7 +245,7 @@ class StoreModel extends bookshelf.Model {
       withRelated: [
         {
           expeditionServices: (qb) => {
-            if (!isManaged) qb.where('status_ekspedisitoko', '0');
+            if (!isManaged) qb.where('status_ekspedisitoko', StoreExpeditionStatus.ACTIVE);
           },
         },
         'expeditionServices.expedition',
