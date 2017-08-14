@@ -64,7 +64,7 @@ class UserModel extends bookshelf.Model {
     if (account) return user;
     user = {
       ...user,
-      marketplace_id: defaultNull(this.get('marketplaceuser')),
+      marketplace_id: defaultNull(this.get('id_marketplaceuser')),
       email: this.get('email_users'),
       cooperative_member_number: defaultNull(this.get('no_anggotakoperasi_users')),
       approval_cooperative_status: this.get('approval_koperasi_users'),
@@ -252,6 +252,7 @@ class UserModel extends bookshelf.Model {
     const column = {
       name: 'namalengkap_users',
       email: 'email_users',
+      marketplace_id: 'id_marketplaceuser',
       password: 'password_users',
       cooperative_member_number: 'no_anggotakoperasi_users',
       approval_cooperative_status: 'approval_koperasi_users',

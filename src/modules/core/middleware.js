@@ -57,6 +57,7 @@ export function auth(authorization = true) {
         err = new AuthorizationError('unauthorized');
         return next(err);
       }
+      if (user.marketplace_id !== req.marketplace.id) throw new AuthorizationError('unauthorized');
       req.user = user;
       return next();
     })(req, res, next);
