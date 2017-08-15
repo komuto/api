@@ -1,8 +1,7 @@
-import _ from 'lodash';
 import core from '../../core';
 import { createCatalogError, getCatalogError, updateCatalogError } from './../messages';
 import config from './../../../../config';
-import { ProductStatus } from './../../product/model';
+import { ProductStatus, DropshipStatus, Product } from './../../product/model';
 
 const bookshelf = core.postgres.db;
 const { parseDate, defaultNull, parseNum } = core.utils;
@@ -125,30 +124,29 @@ class CatalogModel extends bookshelf.Model {
     return !!catalog;
   }
 
-  static async loadCatalog(storeId, status, catalogId) {
-    const query = { id_toko: storeId };
-    if (catalogId) query.id_katalog = catalogId;
-    const catalogs = await this.where(query).fetchAll();
-    return await Promise.all(catalogs.map(catalog => catalog.load([
-      {
-        products: (qb) => {
-          qb.where({ status_produk: status }).orderBy('id_produk', 'DESC');
-          if (!catalogId) qb.limit(3);
-        },
-      },
-      { 'products.images': qb => qb.limit(1) },
-    ])));
+  static async loadProducts(catalogIds, storeId, limit, status) {
+    const dropshipStatus = DropshipStatus.SELECTED;
+    const productStatus = status;
+    return await Promise.all(catalogIds.map(id => Product.query((qb) => {
+      qb.select(['produk.*', 'd.id_dropshipper', 'nama_toko']);
+      qb.leftJoin('dropshipper as d', 'produk.id_produk', 'd.id_produk');
+      qb.join('toko as t', 'produk.id_toko', 't.id_toko');
+      qb.where('d.id_toko', storeId).andWhere('produk.status_produk', productStatus);
+      qb.where('status_dropshipper', dropshipStatus);
+      if (id !== 0) qb.where('d.id_katalog', id);
+      else qb.whereNull('d.id_katalog');
+      qb.orWhere('produk.id_toko', storeId).andWhere('produk.status_produk', productStatus);
+      if (id !== 0) qb.where('identifier_katalog', id);
+      else qb.whereNull('identifier_katalog');
+      qb.orderBy('id_produk', 'DESC');
+      if (limit) qb.limit(3);
+    }).fetchAll({ withRelated: [{ images: qb => qb.limit(1) }] })));
   }
 
-  static async loadCountProducts(storeId, status) {
-    return await this.query((qb) => {
-      qb.select('katalog.id_katalog');
-      qb.where('katalog.id_toko', storeId);
-      qb.where('produk.status_produk', status);
-      qb.innerJoin('produk', 'katalog.id_katalog', 'produk.identifier_katalog');
-      qb.count('produk.* as count_product');
-      qb.groupBy('id_katalog');
-    }).fetchAll();
+  static async loadCatalog(storeId, catalogId) {
+    const query = { id_toko: storeId };
+    if (catalogId) query.id_katalog = catalogId;
+    return await this.where(query).fetchAll();
   }
 
   /**
@@ -158,26 +156,42 @@ class CatalogModel extends bookshelf.Model {
     const { storeId, hidden, catalogId } = params;
     const status = hidden === true ? ProductStatus.HIDE : ProductStatus.SHOW;
 
-    const [catalogs, countProducts] = await Promise.all([
-      this.loadCatalog(storeId, status, catalogId),
-      this.loadCountProducts(storeId, status),
-    ]);
+    const catalogs = catalogId !== 0 ? await this.loadCatalog(storeId, catalogId) : [];
+    const catalogIds = catalogs.map(catalog => catalog.get('id_katalog'));
+    if (!catalogId || catalogId === 0) {
+      // For products without catalog
+      catalogIds.push(0);
+      if (catalogId !== 0) catalogs.models.push(0);
+      else catalogs.push(0);
+    }
 
-    if (!catalogs.length && catalogId) return [];
+    const getProducts = this.loadProducts(catalogIds, storeId, !catalogId, status);
+    const getCountProducts = catalogId ? []
+      : Product.countProductsByCatalog(catalogIds, storeId, status);
+    const [products, countProducts] = await Promise.all([getProducts, getCountProducts]);
 
-    return catalogs.reduce((data, catalog) => {
-      const products = catalog.related('products').map((product) => {
+    return catalogs.reduce((data, catalog, index) => {
+      const catalogProducts = products[index].map((product) => {
         const images = product.related('images').serialize();
-        // TODO: Add dropshipper
-        return {
+        const dropshipOrigin = !product.get('id_dropshipper') ? false
+          : {
+            store_id: product.get('id_toko'),
+            name: product.get('nama_toko'),
+            commission: Product.calculateCommission(product.get('harga_produk'), 'nominal'),
+          };
+        product = {
           ...product.serialize({ minimal: true }),
-          image: images.length ? images[0].file : config.defaultImage.product,
-        };
+          image: images.length ? images[0].file : config.defaultImage.product };
+        if (dropshipOrigin) product.dropship_origin = dropshipOrigin;
+        return product;
       });
-      const found = _.find(countProducts.models, o => o.get('id_katalog') === catalog.get('id_katalog'));
-      catalog = catalog.serialize();
-      catalog.count_product = found ? parseNum(found.get('count_product')) : 0;
-      data.push({ catalog, products });
+      catalog = catalog !== 0 ? catalog.serialize() : { name: 'Tanpa Katalog' };
+      if (catalogId === undefined) {
+        catalog.count_product = countProducts[index] ? parseNum(countProducts[index].get('count_product')) : 0;
+      } else {
+        catalog.count_product = catalogProducts.length;
+      }
+      data.push({ catalog, products: catalogProducts });
       return data;
     }, []);
   }

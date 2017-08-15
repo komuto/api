@@ -6,7 +6,7 @@ import { getProductError, errMsg, updateProductError } from './../messages';
 import { OTPAddressStatus, OTPAddress } from './../../OTP/model';
 import { Store } from './../../store/model/store';
 import config from './../../../../config';
-import { Dropship } from './dropship';
+import { Dropship, DropshipStatus } from './dropship';
 
 const { parseNum, parseDec, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -41,6 +41,7 @@ class ProductModel extends bookshelf.Model {
       discount: this.get('disc_produk'),
       is_discount: !!this.get('disc_produk'),
       is_wholesaler: this.get('is_grosir'),
+      is_dropshipper: this.get('is_dropshiper'),
       weight: this.get('berat_produk'),
     };
     if (wishlist) {
@@ -256,13 +257,13 @@ class ProductModel extends bookshelf.Model {
         images.models[0].serialize().file : config.defaultImage.product;
       product.count_like = likes.length;
       product.is_liked = !!isLiked;
-      if (isDropship) product.commission = this.calculateCommission(product.price);
+      if (isDropship) product.commission = this.calculateCommission(product.price, 'percent');
       results.push({ product, store });
       return results;
     }, []);
   }
 
-  static calculateCommission(price) {
+  static calculateCommission(price, type) {
     let fee;
     if (price <= 200000 && price > 0) fee = 0.025;
     else if (price <= 500000) fee = 0.02;
@@ -270,7 +271,9 @@ class ProductModel extends bookshelf.Model {
     else if (price <= 5000000) fee = 0.01;
     else if (price <= 10000000) fee = 0.005;
     const feeTotal = price * fee;
-    return 100 / (price / feeTotal);
+    if (type === 'nominal') return feeTotal;
+    else if (type === 'percent') return 100 / (price / feeTotal);
+    throw new Error('Choose commission type!');
   }
 
   /**
@@ -522,6 +525,22 @@ class ProductModel extends bookshelf.Model {
     }));
   }
 
+  static async countProductsByCatalog(catalogIds, storeId, status) {
+    const dropshipStatus = DropshipStatus.SELECTED;
+    const productStatus = status;
+    return await Promise.all(catalogIds.map(id => this.query((qb) => {
+      qb.count('produk.id_produk as count_product');
+      qb.leftJoin('dropshipper as d', 'produk.id_produk', 'd.id_produk');
+      qb.where('d.id_toko', storeId).andWhere('produk.status_produk', productStatus);
+      qb.where('status_dropshipper', dropshipStatus);
+      if (id !== 0) qb.where('d.id_katalog', id);
+      else qb.whereNull('d.id_katalog');
+      qb.orWhere('produk.id_toko', storeId).andWhere('produk.status_produk', productStatus);
+      if (id !== 0) qb.where('identifier_katalog', id);
+      else qb.whereNull('identifier_katalog');
+    }).fetch()));
+  }
+
   /**
    * Hide products
    * @param storeId
@@ -568,33 +587,6 @@ class ProductModel extends bookshelf.Model {
       });
     }
     return errors;
-  }
-
-  /**
-   * Get product with no catalog
-   */
-  static async getProductWithNoCatalog(params) {
-    const { storeId, hidden } = params;
-    const status = hidden === true ? ProductStatus.HIDE : ProductStatus.SHOW;
-    const products = await this.where({ id_toko: storeId, status_produk: status })
-      .query((qb) => {
-        qb.where('identifier_katalog', null);
-        qb.limit(3);
-      })
-      .fetchAll([{ images: qb => qb.limit(1) }]);
-    return {
-      catalog: {
-        name: 'Tanpa Katalog',
-        count_product: products.length,
-      },
-      products: products.models.map((product) => {
-        const images = product.related('images').serialize();
-        return {
-          ...product.serialize({ minimal: true }),
-          image: images.length ? images[0].file : config.defaultImage.product,
-        };
-      }),
-    };
   }
 
   /**

@@ -35,7 +35,7 @@ routes.get('/users/store/products',
  * GET /users/store/products/catalogs/id
  * View own products based on catalog id
  */
-routes.get('/users/store/products/catalogs/:id([0-9]{1,10})',
+routes.get('/users/store/products/catalogs/:id([0-9]{1,10})?',
   auth(),
   wrap(ProductController.storeCatalogProducts),
   apiResponse());
