@@ -1,4 +1,5 @@
 import moment from 'moment';
+import fs from 'fs';
 import core from '../../core';
 import config from '../../../../config';
 
@@ -44,6 +45,19 @@ class ImageProductModel extends bookshelf.Model {
       created_gambarproduk: date,
       updated_gambarproduk: date,
     }, { method: 'insert' }));
+    return await Promise.all(images);
+  }
+
+  /**
+   * @param id {integer} product id
+   */
+  static async deleteBulk(id) {
+    let images = await this.where({ id_produk: id }).fetchAll();
+    images = images.map((val) => {
+      const path = `${config.imagePath}/${config.imageFolder.product}/${val.get('file_gambarproduk')}`;
+      fs.unlink(path, () => {});
+      return val.destroy();
+    });
     return await Promise.all(images);
   }
 }

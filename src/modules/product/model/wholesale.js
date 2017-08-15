@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import core from '../../core';
 
 const bookshelf = core.postgres.db;
@@ -26,13 +27,32 @@ class WholesaleModel extends bookshelf.Model {
    * @param data {array}
    */
   static async createBulk(id, data) {
-    const wholesales = data.map(wholesale => new this().save({
-      id_produk: id,
-      min_paramgrosir: wholesale.min_order,
-      max_paramgrosir: wholesale.max_order,
-      harga_paramgrosir: wholesale.price,
-    }, { method: 'insert' }));
+    const wholesales = data.map(wholesale => new this().save(
+      _.assign(this.matchDBColumn(wholesale), { id_produk: id }),
+      { method: 'insert' }),
+    );
     return await Promise.all(wholesales);
+  }
+
+  /**
+   * @param id {integer} product id
+   * @param data {array}
+   */
+  static async updateBulk(id, data) {
+    let deletes = _.filter(data, o => o.is_deleted);
+    let updates = _.filter(data, o => !o.is_deleted === false);
+    let newData = _.filter(data, o => o.is_created);
+
+    deletes = deletes.map(val => this.where({ id_paramgrosir: val.id }).destroy());
+    updates = updates.map((val) => {
+      const wholesale = this.matchDBColumn(val);
+      return this.where({ id_paramgrosir: val.id }).save(wholesale, { patch: true });
+    });
+    newData = newData.map((val) => {
+      const wholesale = this.matchDBColumn(val);
+      return new this().save(_.assign(wholesale, { id_produk: id }), { method: 'insert' });
+    });
+    return await Promise.all([...deletes, ...updates, ...newData]).catch(() => {});
   }
 
   /**

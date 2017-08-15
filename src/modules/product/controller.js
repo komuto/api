@@ -2,7 +2,7 @@ import moment from 'moment';
 import requestIp from 'request-ip';
 import {
   Product,
-  ProductType,
+  ProductCondition,
   Discussion,
   Comment,
   Report,
@@ -41,7 +41,7 @@ ProductController.index = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const { category_id, condition: cond } = req.body;
-  const condition = cond && (cond === 'new' ? ProductType.NEW : ProductType.USED);
+  const condition = cond && (cond === 'new' ? ProductCondition.NEW : ProductCondition.USED);
   const where = Product.matchDBColumn({ condition, category_id });
   const params = {
     page,
@@ -97,6 +97,7 @@ ProductController.createProduct = async (req, res, next) => {
   req.body.date_created = moment();
   req.body.date_status = req.body.date_created;
   req.body.status = ProductStatus.SHOW;
+  if (req.body.is_insurance !== undefined) req.body.is_insurance = req.body.is_insurance ? 1 : 0;
   if (req.body.catalog_id) {
     if ((await Catalog.checkCatalog(req.body.store_id, req.body.catalog_id)) === false) {
       throw createProductError('catalog_id', 'catalog_not_found');
@@ -309,6 +310,27 @@ ProductController.getStoreProduct = async (req, res, next) => {
   if (!product) throw getProductError('product', 'not_found');
   req.resData = {
     message: 'Product Detail Data',
+    data: product,
+  };
+  return next();
+};
+
+/**
+ * Update product
+ */
+ProductController.updateProduct = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  if (req.body.is_insurance !== undefined) req.body.is_insurance = req.body.is_insurance ? 1 : 0;
+  const data = Product.matchDBColumn(req.body);
+  const product = await Product.update(req.params.id, storeId, data);
+  if (req.body.wholesales) await Wholesale.updateBulk(req.params.id, req.body.wholesales);
+  if (req.body.images) {
+    await ImageProduct.deleteBulk(req.params.id);
+    await ImageProduct.createBulk(req.params.id, req.body.images);
+  }
+  if (req.body.expeditions) await ExpeditionProduct.updateBulk(req.params.id, req.body.expeditions);
+  req.resData = {
+    message: 'Product Data',
     data: product,
   };
   return next();

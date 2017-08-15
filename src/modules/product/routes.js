@@ -192,4 +192,14 @@ routes.get('/users/store/products/:id([0-9]{1,10})',
   wrap(ProductController.getStoreProduct),
   apiResponse());
 
+/**
+ * PUT /users/store/products/id
+ * Update product
+ */
+routes.put('/users/store/products/:id([0-9]{1,10})',
+  auth(),
+  validateParam(constraints.updateProduct, true),
+  wrap(ProductController.updateProduct),
+  apiResponse());
+
 export default routes;

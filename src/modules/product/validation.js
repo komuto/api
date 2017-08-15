@@ -113,14 +113,14 @@ constraints.createProduct = {
     presence: true,
     inclusion: {
       within: [0, 1],
-      message: 'must be number of 0 or 1',
+      message: 'must be number of 0 = used or 1 = new',
     },
   },
-  insurance: {
+  is_insurance: {
     presence: true,
     inclusion: {
-      within: [0, 1],
-      message: 'must be number of 0 or 1',
+      within: [true, false],
+      message: 'Only accepts boolean',
     },
   },
   is_dropship: {
@@ -177,6 +177,56 @@ constraints.productIds = {
 constraints.moveCatalog = {
   catalog_id: { presence: true, numericality: true },
   product_ids: { presence: true },
+};
+
+constraints.updateProduct = {
+  stock: { presence: false, numericality: { onlyInteger: true } },
+  is_dropship: {
+    presence: false,
+    inclusion: {
+      within: [true, false],
+      message: 'Only accepts boolean',
+    },
+  },
+  is_wholesaler: {
+    presence: false,
+    inclusion: {
+      within: [true, false],
+      message: 'Only accepts boolean',
+    },
+  },
+  status: {
+    presence: false,
+    inclusion: {
+      within: [0, 1],
+      message: 'Only accepts 0 = hide or 1 = show',
+    },
+  },
+  images: { presence: false },
+  catalog_id: { presence: false, numericality: { onlyInteger: true } },
+  name: { presence: false },
+  category_id: { presence: false, numericality: { onlyInteger: true } },
+  brand_id: { presence: false, numericality: { onlyInteger: true } },
+  description: { presence: false },
+  price: { presence: false, numericality: { onlyInteger: true } },
+  discount: { presence: false, numericality: { onlyInteger: true } },
+  weight: { presence: false, numericality: { onlyInteger: true } },
+  condition: {
+    presence: false,
+    inclusion: {
+      within: [0, 1],
+      message: 'must be number of 0 = used or 1 = new',
+    },
+  },
+  is_insurance: {
+    presence: false,
+    inclusion: {
+      within: [true, false],
+      message: 'Only accepts boolean',
+    },
+  },
+  wholesales: { presence: false },
+  expeditions: { presence: false },
 };
 
 export default constraints;

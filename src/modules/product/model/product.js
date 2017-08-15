@@ -2,22 +2,21 @@ import _ from 'lodash';
 import slug from 'slug';
 import core from '../../core';
 import { Address } from '../../address/model';
-import { getProductError, errMsg } from './../messages';
+import { getProductError, errMsg, updateProductError } from './../messages';
 import { OTPAddressStatus, OTPAddress } from './../../OTP/model';
 import { Store } from './../../store/model/store';
 import config from './../../../../config';
-import expedition_service from "../../expedition/model/expedition_service";
-import { Dropship } from "./dropship";
+import { Dropship } from './dropship';
 
 const { parseNum, parseDec, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
 
 export const ProductStatus = {
-  SHOW: 1,
   HIDE: 0, // Gudangkan
+  SHOW: 1,
 };
 
-export const ProductType = {
+export const ProductCondition = {
   USED: 0,
   NEW: 1,
 };
@@ -60,9 +59,9 @@ class ProductModel extends bookshelf.Model {
       description: this.get('deskripsi_produk'),
       attrval: parseNum(this.get('attrval_produk'), 0),
       status: parseNum(this.get('status_produk'), 0),
-      insurance: parseNum(this.get('asuransi_produk'), 0),
+      is_insurance: parseNum(this.get('asuransi_produk'), 0) === 1,
       margin_dropshipper: this.get('margin_dropshiper'),
-      is_dropshipper: this.get('is_dropshiper'),
+      is_dropship: this.get('is_dropshiper'),
       is_wholesaler: this.get('is_grosir'),
       count_sold: parseNum(this.get('count_sold'), 0),
       count_popular: parseNum(this.get('count_populer'), 0),
@@ -599,6 +598,18 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
+   * Update product
+   */
+  static async update(id, storeId, data) {
+    const product = await this.where({ id_produk: id, id_toko: storeId }).fetch();
+    if (!product) throw getProductError('product', 'not_found');
+    await product.save(data, { patch: true }).catch(() => {
+      throw updateProductError('product', 'error');
+    });
+    return await product.refresh();
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData
@@ -614,8 +625,10 @@ class ProductModel extends bookshelf.Model {
       weight: 'berat_produk',
       stock: 'stock_produk',
       condition: 'jenis_produk',
-      insurance: 'asuransi_produk',
+      is_insurance: 'asuransi_produk',
       is_dropship: 'is_dropshiper',
+      is_wholesaler: 'is_grosir',
+      discount: 'disc_produk',
       catalog_id: 'identifier_katalog',
       other_attr: 'attrval_produk',
       date_created: 'date_created_produk',
@@ -631,4 +644,4 @@ class ProductModel extends bookshelf.Model {
 }
 
 export const Product = bookshelf.model('Product', ProductModel);
-export default { Product, ProductType };
+export default { Product, ProductCondition };
