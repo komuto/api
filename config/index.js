@@ -29,7 +29,7 @@ def.imageFolder.payment_method = 'payment';
 def.imageFolder.bank = 'bank';
 def.defaultImage = {};
 def.defaultImage.user = 'https://www.juptr.io/images/default-user.png';
-def.defaultImage.product = 'http://188.166.246.46/uploads/produk/noimage.png';
+def.defaultImage.product = 'https://188.166.246.46/uploads/produk/noimage.png';
 
 def.cdnPath = 'http://cdn.localhost.com';
 

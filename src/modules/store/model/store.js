@@ -309,6 +309,15 @@ class StoreModel extends bookshelf.Model {
     return store.get('id_toko');
   }
 
+  /**
+   * Get store by user id
+   */
+  static async getStoreByUserId(id) {
+    const store = await new this({ id_users: id }).fetch();
+    if (!store) throw getStoreError('store', 'not_found');
+    return store;
+  }
+
   static async updateVerification(id) {
     const store = await new this({ id_users: id }).fetch();
     if (!store) throw getStoreError('store', 'not_found');
