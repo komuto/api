@@ -33,6 +33,20 @@ class DropshipModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to Product
+   */
+  product() {
+    return this.belongsTo('Product', 'id_produk');
+  }
+
+  /**
+   * Add relation to Catalog
+   */
+  catalog() {
+    return this.belongsTo('Catalog', 'id_katalog');
+  }
+
+  /**
    * Create dropship
    */
   static async create(data) {
