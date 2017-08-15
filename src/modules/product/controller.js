@@ -243,11 +243,7 @@ ProductController.storeProducts = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const hidden = req.query.hidden && JSON.parse(req.query.hidden);
   const params = { storeId, hidden };
-  const [catalogs, noCatalog] = await Promise.all([
-    Catalog.getCatalogWithProducts(params),
-    Product.getProductWithNoCatalog(params),
-  ]);
-  catalogs.push(noCatalog);
+  const catalogs = await Catalog.getCatalogWithProducts(params);
   req.resData = {
     message: 'Store Products Data',
     data: catalogs,
@@ -268,6 +264,7 @@ ProductController.storeCatalogProducts = async (req, res, next) => {
     data: products[0],
   };
   return next();
+  // TODO: Check when the catalog id is null
 };
 
 /**
