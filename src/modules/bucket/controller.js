@@ -136,14 +136,6 @@ BucketController.checkout = async (req, res, next) => {
   let items = bucket.related('items');
   if (items.length === 0) throw getBucketError('bucket', 'not_found_items');
 
-  await Promise.all(req.body.items.map(async (val) => {
-    const where = { id_listbucket: val.id };
-    const item = await Item.get(where);
-    if (!item) throw getItemError('item', 'not_found');
-    await item.load('product');
-    await BucketController.saveCart(bucket, val, item.serialize().product, item, where);
-  }));
-
   const groups = _.groupBy(items.models, (val) => {
     val = val.serialize();
     return `${val.product.store_id}#${val.shipping.address_id}#${val.shipping.expedition_service_id}`;
