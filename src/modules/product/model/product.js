@@ -215,11 +215,7 @@ class ProductModel extends bookshelf.Model {
       .fetchPage({
         page,
         pageSize,
-        withRelated: [
-          'likes',
-          'view',
-          { images: qb => qb.limit(1) },
-        ],
+        withRelated: ['likes', 'view', 'images'],
       });
 
     let verified;
@@ -237,11 +233,12 @@ class ProductModel extends bookshelf.Model {
         ...Store.prototype.serialize.call(product),
         is_verified: other.verified || !!verified[index],
       };
-      const images = product.related('images').serialize();
+      const images = product.related('images');
       const likes = product.related('likes');
       const isLiked = userId ? _.find(likes.models, o => o.attributes.id_users === userId) : false;
       product = product.serialize();
-      product.image = images.length ? images[0].file : config.defaultImage.product;
+      product.image = images.length ?
+        images.models[0].serialize().file : config.defaultImage.product;
       product.count_like = likes.length;
       product.is_liked = !!isLiked;
       if (isDropship) product.commission = this.calculateCommission(product.price);
