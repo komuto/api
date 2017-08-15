@@ -156,12 +156,13 @@ class CatalogModel extends bookshelf.Model {
     const { storeId, hidden, catalogId } = params;
     const status = hidden === true ? ProductStatus.HIDE : ProductStatus.SHOW;
 
-    const catalogs = !(catalogId === 0) ? await this.loadCatalog(storeId, catalogId) : [];
+    const catalogs = catalogId !== 0 ? await this.loadCatalog(storeId, catalogId) : [];
     const catalogIds = catalogs.map(catalog => catalog.get('id_katalog'));
     if (!catalogId || catalogId === 0) {
       // For products without catalog
       catalogIds.push(0);
-      catalogs.models.push(0);
+      if (catalogId !== 0) catalogs.models.push(0);
+      else catalogs.push(0);
     }
 
     const getProducts = this.loadProducts(catalogIds, storeId, !catalogId, status);
@@ -173,9 +174,11 @@ class CatalogModel extends bookshelf.Model {
       const catalogProducts = products[index].map((product) => {
         const images = product.related('images').serialize();
         const dropshipOrigin = !product.get('id_dropshipper') ? false
-          : { store_id: product.get('id_toko'),
+          : {
+            store_id: product.get('id_toko'),
             name: product.get('nama_toko'),
-            commission: Product.calculateCommission(product.get('harga_produk'), 'nominal') };
+            commission: Product.calculateCommission(product.get('harga_produk'), 'nominal'),
+          };
         product = {
           ...product.serialize({ minimal: true }),
           image: images.length ? images[0].file : config.defaultImage.product };
@@ -183,7 +186,11 @@ class CatalogModel extends bookshelf.Model {
         return product;
       });
       catalog = catalog !== 0 ? catalog.serialize() : { name: 'Tanpa Katalog' };
-      catalog.count_product = countProducts[index] ? parseNum(countProducts[index].get('count_product')) : 0;
+      if (catalogId === undefined) {
+        catalog.count_product = countProducts[index] ? parseNum(countProducts[index].get('count_product')) : 0;
+      } else {
+        catalog.count_product = catalogProducts.length;
+      }
       data.push({ catalog, products: catalogProducts });
       return data;
     }, []);

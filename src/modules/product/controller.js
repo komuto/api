@@ -257,15 +257,15 @@ ProductController.storeProducts = async (req, res, next) => {
  */
 ProductController.storeCatalogProducts = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const catalogId = req.params.id;
-  const products = await Catalog.getCatalogWithProducts({ storeId, catalogId });
+  const hidden = req.query.hidden && JSON.parse(req.query.hidden);
+  const catalogId = req.params.id || 0;
+  const products = await Catalog.getCatalogWithProducts({ storeId, hidden, catalogId });
   if (!products.length) throw getCatalogProductsError('catalog_id', 'not_found');
   req.resData = {
     message: 'Store Catalog Products Data',
     data: products[0],
   };
   return next();
-  // TODO: Check when the catalog id is null
 };
 
 /**

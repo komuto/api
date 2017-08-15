@@ -28,7 +28,7 @@ routes.get('/products',
 routes.get('/users/store/products',
   auth(),
   validateParam(constraints.listStoreProduct),
-  ProductController.storeProducts,
+  wrap(ProductController.storeProducts),
   apiResponse());
 
 /**
