@@ -5,6 +5,7 @@ import { Expedition } from '../expedition/model';
 import { Invoice, InvoiceStatus } from '../payment/model';
 import { getBucketError, getItemError } from './messages';
 import { BadRequestError } from '../../../common/errors';
+import { PaymentMethod } from "../payment/model/payment_method";
 
 export const BucketController = {};
 export default { BucketController };
@@ -136,6 +137,8 @@ BucketController.checkout = async (req, res, next) => {
   let items = bucket.related('items');
   if (items.length === 0) throw getBucketError('bucket', 'not_found_items');
 
+  await PaymentMethod.findById(req.body.payment_method_id);
+
   const groups = _.groupBy(items.models, (val) => {
     val = val.serialize();
     return `${val.product.store_id}#${val.shipping.address_id}#${val.shipping.expedition_service_id}`;
@@ -180,7 +183,7 @@ BucketController.checkout = async (req, res, next) => {
       bucket_id: bucketObj.id,
       bid_id: null,
       shipping_id: val.shipping_id,
-      payment_method_id: bucketObj.payment_method,
+      payment_method_id: req.body.payment_method_id,
       invoice_number: Invoice.generateNumber(),
       remark_cancel: null,
       bill: totalPrice,
@@ -206,6 +209,7 @@ BucketController.checkout = async (req, res, next) => {
   await bucket.save({
     status_bucket: BucketStatus.CHECKOUT,
     tglstatus_bucket: new Date(),
+    id_paymentmethod: req.body.payment_method_id,
   }, { patch: true });
   req.resData = { data: bucket };
   return next();

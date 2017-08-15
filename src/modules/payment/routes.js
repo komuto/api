@@ -12,16 +12,6 @@ routes.post('/payments',
   apiResponse());
 
 /**
- * POST /buckets/id/payment
- * Choose payment methods
- */
-routes.post('/buckets/:id([0-9]{1,10})/payment',
-  auth(),
-  validateParam(constraints.choose_payment, true),
-  wrap(PaymentController.choosePaymentMethod),
-  apiResponse());
-
-/**
  * POST /buckets/id/bank
  * Bank payment method
  */

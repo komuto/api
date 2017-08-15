@@ -1,5 +1,6 @@
 import core from '../../core';
 import config from '../../../../config';
+import { getPaymentError } from './../messages';
 
 const { parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -47,6 +48,17 @@ class PaymentMethodModel extends bookshelf.Model {
     return await this.where({ status_paymentmethod: PaymentMethodStatus.ACTIVE })
       .orderBy('id_paymentmethod')
       .fetchAll();
+  }
+
+  /**
+   * Find by id
+   */
+  static async findById(id) {
+    const paymentMethod = await this.where({ id_paymentmethod: id }).fetch().catch(() => {
+      throw getPaymentError('payment_method', 'not_found');
+    });
+    if (!paymentMethod) throw getPaymentError('payment_method', 'not_found');
+    return paymentMethod;
   }
 }
 

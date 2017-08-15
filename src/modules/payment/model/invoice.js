@@ -1,7 +1,7 @@
 import moment from 'moment';
 import randomInt from 'random-int';
 import core from '../../core';
-import { getInvoiceError, getPaymentError, createInvoiceError } from './../messages';
+import { getInvoiceError, createInvoiceError } from './../messages';
 
 const { parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -78,15 +78,6 @@ class InvoiceModel extends bookshelf.Model {
     const invoice = await this.where({ id_invoice: id, id_user: userId }).fetch();
     if (!invoice) throw getInvoiceError('invoice', 'not_found');
     return invoice;
-  }
-
-  static async updatePaymentMethod(bucketId, paymentMethodId) {
-    return await this.where({ id_bucket: bucketId }).save({
-      id_paymentmethod: paymentMethodId,
-      updated_at: new Date(),
-    }, { patch: true }).catch(() => {
-      throw getPaymentError('payment', 'not_found');
-    });
   }
 
   /**
