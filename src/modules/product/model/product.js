@@ -418,6 +418,49 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
+   * Get product with its relation
+   * @param productId {integer} product id
+   * @param storeId {integer} store id
+   */
+  static async getFullOwnProduct(productId, storeId) {
+    const related = [
+      'category',
+      'images',
+      'expeditionServices.expedition',
+      { 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) },
+    ];
+    let product = await this.where({
+      id_produk: productId,
+      id_toko: storeId,
+    }).fetch({ withRelated: related });
+    if (!product) return false;
+
+    let wholesaler;
+    if (product.get('is_grosir')) {
+      await product.load('wholesale').catch(() => {
+        throw getProductError('product', 'error');
+      });
+      wholesaler = product.related('wholesale').serialize();
+    } else wholesaler = [];
+
+    const category = product.related('category').serialize();
+    let store = product.related('store');
+    store = store.serialize({ verified: true });
+    const images = product.related('images');
+    const expeditions = this.loadExpeditions(product);
+    product = product.serialize();
+
+    return {
+      product,
+      category,
+      store,
+      images,
+      wholesaler,
+      expeditions,
+    };
+  }
+
+  /**
    * Get ids product by store id
    */
   static async getIdsByStoreId(storeId) {
