@@ -1,8 +1,7 @@
 import moment from 'moment';
 import core from '../../core';
-import { model } from '../../address';
+import { Address } from '../../address/model';
 
-const { Address } = model;
 const bookshelf = core.postgres.db;
 
 export const FavoriteStoreStatus = {
@@ -30,7 +29,7 @@ class FavoriteStoreModel extends bookshelf.Model {
   }
 
   static async create(data) {
-    data.status_tokofavorit = '1';
+    data.status_tokofavorit = FavoriteStoreStatus.ON;
     data.tglstatus_tokofavorit = moment();
     return await new this(data).save();
   }

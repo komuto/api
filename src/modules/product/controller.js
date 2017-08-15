@@ -56,6 +56,7 @@ ProductController.index = async (req, res, next) => {
     address: req.query.address,
     is_dropship: req.query.is_dropship,
     userId: req.user.id,
+    marketplaceId: req.marketplace.id,
   };
   const products = await Product.get(params);
 
@@ -293,5 +294,19 @@ ProductController.bulkDelete = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const errors = await Product.bulkDelete(storeId, req.body.product_ids);
   if (errors.length) throw new BadRequestError(errMsg.bulkDeleteProduct.title, errors);
+  return next();
+};
+
+/**
+ * Get store product
+ */
+ProductController.getStoreProduct = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const product = await Product.getFullOwnProduct(req.params.id, storeId);
+  if (!product) throw getProductError('product', 'not_found');
+  req.resData = {
+    message: 'Product Detail Data',
+    data: product,
+  };
   return next();
 };

@@ -15,6 +15,8 @@ import { makeFavoriteError, deleteCatalogError } from './messages';
 import { OTPAddress } from './../OTP/model';
 import { Address } from './../address/model';
 import { User } from './../user/model';
+import { OTPAddressEmail } from '../OTP/email';
+import config from '../../../config';
 
 export const StoreController = {};
 export default { StoreController };
@@ -196,7 +198,15 @@ StoreController.createStore = async (req, res, next) => {
 
   const services = expeditionServices.map(data => (StoreExpedition.matchDBColumn(data, true)));
   await Store.createExpeditionServices(store, services);
-  await OTPAddress.create(req.user.id);
+  const otp = await OTPAddress.create(req.user.id);
+
+  const data = {
+    address,
+    user: req.user,
+    store: store.serialize(),
+    otp: otp.serialize(),
+  };
+  OTPAddressEmail.sendOtpAddress(config.komutoEmail, data);
 
   req.resData = {
     message: 'Store Data',

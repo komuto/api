@@ -23,6 +23,17 @@ class OTPAddressModel extends bookshelf.Model {
     return 'id_otpaddress';
   }
 
+  serialize() {
+    return {
+      id: this.get('id_otpaddress'),
+      user_id: this.get('id_users'),
+      code: this.get('kode_otpaddress'),
+      status: this.get('status_otpaddress'),
+      created_at: this.get('datecreated_otpaddress'),
+      expired_at: this.get('expdate_otpaddress'),
+    };
+  }
+
   /**
    * Create OTP address
    */

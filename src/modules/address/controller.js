@@ -2,6 +2,9 @@ import _ from 'lodash';
 import { Address, Province, District, SubDistrict, Village } from './model';
 import { getAddressError, deleteAddressError } from './messages';
 import { OTPAddress } from '../OTP/model';
+import { Store } from '../store/model';
+import config from '../../../config';
+import { OTPAddressEmail } from '../OTP/email';
 
 export const AddressController = {};
 export default { AddressController };
@@ -128,7 +131,16 @@ AddressController.updateStoreAddress = async (req, res, next) => {
   if (!address) throw getAddressError('address', 'not_found');
   address = await address.save(Address.matchDBColumn(req.body), { patch: true });
   await OTPAddress.updateStatus(req.user.id);
-  await OTPAddress.create(req.user.id);
+  const otp = await OTPAddress.create(req.user.id);
+  const store = await Store.getStoreByUserId(req.user.id);
+  const data = {
+    user: req.user,
+    store: store.serialize(),
+    address: address.serialize(),
+    otp: otp.serialize(),
+  };
+  OTPAddressEmail.sendOtpAddress(config.komutoEmail, data);
+
   req.resData = {
     message: 'Address Data',
     data: address,

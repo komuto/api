@@ -29,7 +29,7 @@ def.imageFolder.payment_method = 'payment';
 def.imageFolder.bank = 'bank';
 def.defaultImage = {};
 def.defaultImage.user = 'https://www.juptr.io/images/default-user.png';
-def.defaultImage.product = 'http://188.166.246.46/uploads/produk/noimage.png';
+def.defaultImage.product = 'https://188.166.246.46/uploads/produk/noimage.png';
 
 def.cdnPath = 'http://cdn.localhost.com';
 
@@ -89,6 +89,9 @@ def.cache.prefix = 'komuto-api';
 def.cache.debug = true;
 def.cache.enable = true;
 def.cache.duration = 1800000; // in ms: 30 minutes
+
+// secret key for encode marketplace id
+def.secretKey = '9a4c5dee925f';
 
 cfg.resolveLocalConfig(__dirname, (err, file) => {
   // eslint-disable-next-line global-require, import/no-dynamic-require

@@ -53,10 +53,8 @@ export function apiResponse() {
 export function auth(authorization = true) {
   return (req, res, next) => {
     passport.authenticate('jwt', (err, user) => {
-      if (!user && authorization) {
-        err = new AuthorizationError('unauthorized');
-        return next(err);
-      }
+      if (!user && authorization) return next(new AuthorizationError('unauthorized'));
+      if (authorization && user.marketplace_id !== req.marketplace.id) throw new AuthorizationError('unauthorized');
       req.user = user;
       return next();
     })(req, res, next);

@@ -14,7 +14,7 @@ import { controller } from '../OTP';
 import core from '../core';
 
 const routes = express.Router();
-const { apiResponse, auth, validateParam } = core.middleware;
+const { apiResponse, auth } = core.middleware;
 const { wrap } = core.utils;
 const { OTPController } = controller;
 

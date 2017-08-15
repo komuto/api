@@ -66,6 +66,7 @@ UserController.getUserSocial = async (req, res, next) => {
         password: User.hashPasswordSync('komuto'),
         photo: response.picture.data.url,
         status: UserStatus.ACTIVE,
+        marketplace_id: req.marketplace.id,
       };
       req.user = await User.create(User.matchDBColumn(response));
     }
@@ -130,6 +131,7 @@ UserController.createUser = async (req, res, next) => {
   const password = req.body.password;
   req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
   req.body.password = User.hashPasswordSync(req.body.password);
+  req.body.marketplace_id = req.marketplace.id;
   user = await User.create(User.matchDBColumn(req.body));
   const token = await UserToken.generateToken(user.id, TokenType.EMAIL_ACTIVATION);
   UserEmail.sendActivateAccount(user.email, token);

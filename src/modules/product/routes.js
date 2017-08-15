@@ -183,4 +183,13 @@ routes.post('/users/store/products',
   wrap(ProductController.bulkDelete),
   apiResponse());
 
+/**
+ * GET /users/store/products/id
+ * Get store product
+ */
+routes.get('/users/store/products/:id([0-9]{1,10})',
+  auth(),
+  wrap(ProductController.getStoreProduct),
+  apiResponse());
+
 export default routes;

@@ -1,9 +1,11 @@
 import moment from 'moment';
 import _ from 'lodash';
 import core from '../../core';
+import config from '../../../../config';
 import { BadRequestError } from '../../../../common/errors';
 
 const bookshelf = core.postgres.db;
+const IMAGE_PATH = config.imageFolder.bank;
 
 export const BankStatus = {
   INACTIVE: 0,
@@ -27,7 +29,7 @@ class BankModel extends bookshelf.Model {
       code: this.get('kode_masterbank'),
       status: this.get('status_masterbank'),
       status_at: moment(this.get('tglstatus_masterbank')).unix(),
-      logo: this.get('logo_masterbank'),
+      logo: core.imagePath(IMAGE_PATH, this.get('logo_masterbank'), 'img'),
     };
   }
 

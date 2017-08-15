@@ -1,10 +1,10 @@
 import _ from 'lodash';
-import moment from 'moment';
 import rp from 'request-promise-native';
 import core from '../../core';
 import { getExpeditionError } from './../messages';
 
 const bookshelf = core.postgres.db;
+const { parseNum, parseDate } = core.utils;
 
 class ExpeditionModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -28,9 +28,9 @@ class ExpeditionModel extends bookshelf.Model {
     if (minimal) return expedition;
     return {
       ...expedition,
-      status: parseInt(this.get('status_ekspedisi'), 10),
-      method: this.get('method_ekspedisi'),
-      status_at: moment(this.get('tglstatus_ekspedisi')).unix(),
+      status: parseNum(this.get('status_ekspedisi')),
+      method: parseNum(this.get('method_ekspedisi')),
+      status_at: parseDate(this.get('tglstatus_ekspedisi')),
     };
   }
 

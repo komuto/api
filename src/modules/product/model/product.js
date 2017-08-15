@@ -7,6 +7,8 @@ import { getProductError, errMsg } from './../messages';
 import { OTPAddressStatus, OTPAddress } from './../../OTP/model';
 import { Store } from './../../store/model/store';
 import config from './../../../../config';
+import expedition_service from "../../expedition/model/expedition_service";
+import { Dropship } from "./dropship";
 
 const { parseNum, parseDec, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -135,6 +137,20 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to Catalog
+   */
+  catalog() {
+    return this.belongsTo('Catalog', 'identifier_katalog');
+  }
+
+  /**
+   * Add relation to Brand
+   */
+  brand() {
+    return this.belongsTo('Brand', 'identifier_brand');
+  }
+
+  /**
    * Get product by id
    */
   static async findById(id) {
@@ -156,6 +172,7 @@ class ProductModel extends bookshelf.Model {
       userId,
       where,
       is_dropship: isDropship,
+      marketplaceId,
     } = params;
     let { sort, other = '', brands, services } = params;
 
@@ -187,6 +204,7 @@ class ProductModel extends bookshelf.Model {
         qb.select(['produk.*', 'toko.*']);
         qb.innerJoin('toko', 'toko.id_toko', 'produk.id_toko');
         qb.innerJoin('users', 'toko.id_users', 'users.id_users');
+        qb.where('users.id_marketplaceuser', marketplaceId);
         if (query) qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
         if (price && price.min !== 0 && price.max !== 0) qb.whereBetween('harga_produk', [price.min, price.max]);
         if (address) {
@@ -214,11 +232,7 @@ class ProductModel extends bookshelf.Model {
       .fetchPage({
         page,
         pageSize,
-        withRelated: [
-          'likes',
-          'view',
-          { images: qb => qb.limit(1) },
-        ],
+        withRelated: ['likes', 'view', 'images'],
       });
 
     let verified;
@@ -236,11 +250,12 @@ class ProductModel extends bookshelf.Model {
         ...Store.prototype.serialize.call(product),
         is_verified: other.verified || !!verified[index],
       };
-      const images = product.related('images').serialize();
+      const images = product.related('images');
       const likes = product.related('likes');
       const isLiked = userId ? _.find(likes.models, o => o.attributes.id_users === userId) : false;
       product = product.serialize();
-      product.image = images.length ? images[0].file : config.defaultImage.product;
+      product.image = images.length ?
+        images.models[0].serialize().file : config.defaultImage.product;
       product.count_like = likes.length;
       product.is_liked = !!isLiked;
       if (isDropship) product.commission = this.calculateCommission(product.price, 'percent');
@@ -418,6 +433,65 @@ class ProductModel extends bookshelf.Model {
       wholesaler,
       other_products: otherProds,
       expeditions,
+    };
+  }
+
+  /**
+   * Get product with its relation
+   * @param productId {integer} product id
+   * @param storeId {integer} store id
+   */
+  static async getFullOwnProduct(productId, storeId) {
+    let isDropship = false;
+    const where = { id_produk: productId, id_toko: storeId };
+    const related = {
+      withRelated: [
+        'category',
+        'images',
+        'expeditionServices.expedition',
+        'brand',
+        'catalog',
+      ],
+    };
+    let product = await this.where(where).fetch(related);
+    let dropship;
+    if (!product) {
+      dropship = await Dropship.where(where).fetch({ withRelated: ['catalog'] });
+      if (!dropship) return false;
+      product = await this.where({ id_produk: dropship.get('id_produk') }).fetch(related);
+      isDropship = true;
+    }
+
+    let wholesaler;
+    if (product.get('is_grosir')) {
+      await product.load('wholesale').catch(() => {
+        throw getProductError('product', 'error');
+      });
+      wholesaler = product.related('wholesale').serialize();
+    } else wholesaler = [];
+
+    const category = product.related('category');
+    const images = product.related('images');
+    const expeditionServices = product.related('expeditionServices').map((service) => {
+      const expedition = service.related('expedition');
+      return `${expedition.serialize().name} ${service.serialize().name}`;
+    });
+    let catalog;
+    if (isDropship) {
+      catalog = dropship.get('id_katalog') ? dropship.related('catalog') : null;
+    } else {
+      catalog = product.get('identifier_katalog') ? product.related('catalog') : null;
+    }
+    const brand = product.get('identifier_brand') ? product.related('brand') : null;
+
+    return {
+      product,
+      category,
+      images,
+      wholesaler,
+      catalog,
+      brand,
+      expedition_services: expeditionServices,
     };
   }
 
