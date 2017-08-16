@@ -1,4 +1,4 @@
-import { ExpeditionProduct, ExpeditionProductStatus } from './expedition_product';
+import { ProductExpedition, ProductExpeditionStatus } from './product_expedition';
 import { Product, ProductCondition, ProductStatus } from './product';
 import { ImageProduct } from './image_product';
 import { Wholesale } from './wholesale';
@@ -9,8 +9,8 @@ import { Dropship, DropshipStatus } from './dropship';
 import { View } from './view';
 
 export default {
-  ExpeditionProduct,
-  ExpeditionProductStatus,
+  ProductExpedition,
+  ProductExpeditionStatus,
   ImageProduct,
   Product,
   ProductCondition,

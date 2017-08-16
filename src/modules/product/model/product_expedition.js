@@ -3,12 +3,12 @@ import core from '../../core';
 
 const bookshelf = core.postgres.db;
 
-export const ExpeditionProductStatus = {
+export const ProductExpeditionStatus = {
   USED: 1,
   UNUSED: 2,
 };
 
-class ExpeditionProductModel extends bookshelf.Model {
+class ProductExpeditionModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
     return 'detil_ekspedisiproduk';
@@ -39,7 +39,7 @@ class ExpeditionProductModel extends bookshelf.Model {
     const expeditions = data.map(expedition => new this().save({
       id_produk: id,
       id_ekspedisiservice: expedition.expedition_service_id,
-      status_detilekspedisiproduk: ExpeditionProductStatus.USED,
+      status_detilekspedisiproduk: ProductExpeditionStatus.USED,
       tglstatus_detilekspedisiproduk: date,
     }, { method: 'insert' }));
     return await Promise.all(expeditions);
@@ -89,4 +89,4 @@ class ExpeditionProductModel extends bookshelf.Model {
   }
 }
 
-export const ExpeditionProduct = bookshelf.model('ExpeditionProduct', ExpeditionProductModel);
+export const ProductExpedition = bookshelf.model('ProductExpedition', ProductExpeditionModel);

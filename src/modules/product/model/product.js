@@ -7,7 +7,7 @@ import { OTPAddressStatus, OTPAddress } from './../../OTP/model';
 import { Store } from './../../store/model/store';
 import config from './../../../../config';
 import { Dropship, DropshipStatus } from './dropship';
-import { ExpeditionProductStatus } from './expedition_product';
+import { ProductExpeditionStatus } from './product_expedition';
 import { Expedition } from '../../expedition/model';
 
 const { parseNum, parseDec, parseDate } = core.utils;
@@ -617,16 +617,24 @@ class ProductModel extends bookshelf.Model {
     const expeditions = [];
     const expeditionIds = [];
     const expeditionServiceIds = [];
-    const product = await this.where({ id_produk: id, id_toko: storeId }).fetch({
+    const where = { id_produk: id, id_toko: storeId };
+    const related = {
       withRelated: [
         {
           expeditionServices: (qb) => {
-            qb.where('status_detilekspedisiproduk', ExpeditionProductStatus.USED);
+            qb.where('status_detilekspedisiproduk', ProductExpeditionStatus.USED);
           },
         },
         'expeditionServices.expedition',
       ],
-    });
+    };
+    let product = await this.where(where).fetch(related);
+    let dropship;
+    if (!product) {
+      dropship = await Dropship.where(where).fetch({ withRelated: ['catalog'] });
+      if (!dropship) throw getProductError('product', 'not_found');
+      product = await this.where({ id_produk: dropship.get('id_produk') }).fetch(related);
+    }
     const expeditionServices = product.related('expeditionServices');
     expeditionServices.each((service) => {
       const expedition = service.related('expedition').serialize();

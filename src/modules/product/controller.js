@@ -8,7 +8,7 @@ import {
   Report,
   Wholesale,
   ImageProduct,
-  ExpeditionProduct,
+  ProductExpedition,
   ProductStatus,
   Dropship,
   DropshipStatus,
@@ -105,7 +105,7 @@ ProductController.createProduct = async (req, res, next) => {
   }
   const product = await new Product().save(Product.matchDBColumn(req.body), { method: 'insert' });
   const productId = product.get('id_produk');
-  const expeditions = ExpeditionProduct.createBulk(productId, req.body.expeditions);
+  const expeditions = ProductExpedition.createBulk(productId, req.body.expeditions);
   const images = ImageProduct.createBulk(productId, req.body.images);
   const wholesales = (Array.isArray(req.body.wholesales) && req.body.wholesales.length > 0)
     ? Wholesale.createBulk(productId, req.body.wholesales) : [];
@@ -325,7 +325,7 @@ ProductController.updateProduct = async (req, res, next) => {
     await ImageProduct.deleteBulk(req.params.id);
     await ImageProduct.createBulk(req.params.id, req.body.images);
   }
-  if (req.body.expeditions) await ExpeditionProduct.updateBulk(req.params.id, req.body.expeditions);
+  if (req.body.expeditions) await ProductExpedition.updateBulk(req.params.id, req.body.expeditions);
   req.resData = {
     message: 'Product Data',
     data: product,
@@ -334,7 +334,7 @@ ProductController.updateProduct = async (req, res, next) => {
 };
 
 /**
- * Get store expedition manage
+ * Get product expedition manage
  */
 ProductController.getProductExpeditionsManage = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
