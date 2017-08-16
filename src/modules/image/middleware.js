@@ -19,6 +19,9 @@ const getImageType = (body) => {
     case 'payment':
       body.is_single = true;
       break;
+    case 'profile':
+      body.is_single = true;
+      break;
     default:
       break;
   }
