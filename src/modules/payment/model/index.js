@@ -1,7 +1,6 @@
 import { Invoice, InvoiceStatus } from './invoice';
 import { PaymentMethod, PaymentMethodStatus, PaymentMethodType } from './payment_method';
 import { PaymentConfirmation, PaymentConfirmationStatus } from './payment_confirmation';
-import { Doku } from './doku';
 
 export default {
   Invoice,
@@ -11,5 +10,4 @@ export default {
   PaymentMethodType,
   PaymentConfirmation,
   PaymentConfirmationStatus,
-  Doku,
 };
