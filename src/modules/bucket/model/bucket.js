@@ -1,11 +1,13 @@
 import ModelBase from 'bookshelf-modelbase';
 import randomInt from 'random-int';
 import moment from 'moment';
+import _ from 'lodash';
 import 'moment-precise-range-plugin';
 import core from '../../core';
 import { getBucketError } from '../messages';
 import './shipping';
 import { Item } from './item';
+import { PromoType } from './promo';
 
 const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -224,6 +226,54 @@ class BucketModel extends bookshelf.Model {
    */
   static async cancelPromo(bucketId) {
     return await this.where({ id_bucket: bucketId }).save({ id_promo: null }, { patch: true });
+  }
+
+  static async getTotalPrice(userId) {
+    const bucket = await this.getForCheckout(userId);
+    let items = bucket.related('items');
+    if (items.length === 0) throw getBucketError('bucket', 'not_found_items');
+
+    const groups = _.groupBy(items.models, (val) => {
+      val = val.serialize();
+      return `${val.product.store_id}#${val.shipping.address_id}#${val.shipping.expedition_service_id}`;
+    });
+
+    items = _.map(groups, group => ({
+      shipping_id: group[0].serialize().shipping.id,
+      store_id: group[0].serialize().product.store_id,
+      items: group,
+    }));
+
+    return items.reduce((sum, val) => {
+      const bucketObj = bucket.serialize();
+      const weight = val.items[0].serialize().weight;
+      const deliveryCost = val.items[0].serialize().shipping.delivery_cost
+        / Math.ceil(weight / 1000);
+
+      let totalPrice = 0;
+      let adminCost = 0;
+      let insuranceFee = 0;
+      let totalWeight = 0;
+      _.forEach(val.items, (o) => {
+        o = o.serialize();
+        totalPrice += o.product.price * o.qty;
+        adminCost += o.additional_cost;
+        insuranceFee += o.shipping.insurance_fee;
+        totalWeight += o.weight;
+      });
+
+      let promo = 0;
+      if (bucketObj.promo) {
+        if (bucketObj.promo.type === PromoType.NOMINAL) {
+          promo = bucketObj.promo.nominal / items.length;
+        } else promo = (totalPrice * bucketObj.promo.percentage) / 100;
+      }
+
+      const totalDeliveryCost = deliveryCost * Math.ceil(totalWeight / 1000);
+      totalPrice += (adminCost + insuranceFee + totalDeliveryCost) - promo;
+
+      return sum + totalPrice;
+    }, 0);
   }
 
   /**

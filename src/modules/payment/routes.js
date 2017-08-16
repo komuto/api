@@ -7,8 +7,9 @@ const routes = express.Router();
 const { wrap } = core.utils;
 const { apiResponse, auth, validateParam } = core.middleware;
 
-routes.post('/payments',
-  wrap(PaymentController.store),
+routes.get('/payments',
+  auth(),
+  wrap(PaymentController.getDokuData),
   apiResponse());
 
 /**
