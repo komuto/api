@@ -202,4 +202,13 @@ routes.put('/users/store/products/:id([0-9]{1,10})',
   wrap(ProductController.updateProduct),
   apiResponse());
 
+/**
+ * GET /users/store/expeditions
+ * Get the user's store expeditions
+ */
+routes.get('/users/store/products/:id([0-9]{1,10})/expeditions/manage',
+  auth(),
+  wrap(ProductController.getProductExpeditionsManage),
+  apiResponse());
+
 export default routes;

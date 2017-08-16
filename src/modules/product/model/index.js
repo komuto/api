@@ -1,4 +1,4 @@
-import { ExpeditionProduct } from './expedition_product';
+import { ExpeditionProduct, ExpeditionProductStatus } from './expedition_product';
 import { Product, ProductCondition, ProductStatus } from './product';
 import { ImageProduct } from './image_product';
 import { Wholesale } from './wholesale';
@@ -10,6 +10,7 @@ import { View } from './view';
 
 export default {
   ExpeditionProduct,
+  ExpeditionProductStatus,
   ImageProduct,
   Product,
   ProductCondition,

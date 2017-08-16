@@ -3,7 +3,7 @@ import core from '../../core';
 
 const bookshelf = core.postgres.db;
 
-const ExpeditionProductStatus = {
+export const ExpeditionProductStatus = {
   USED: 1,
   UNUSED: 2,
 };
@@ -90,4 +90,3 @@ class ExpeditionProductModel extends bookshelf.Model {
 }
 
 export const ExpeditionProduct = bookshelf.model('ExpeditionProduct', ExpeditionProductModel);
-export default { ExpeditionProduct };

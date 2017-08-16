@@ -332,3 +332,16 @@ ProductController.updateProduct = async (req, res, next) => {
   };
   return next();
 };
+
+/**
+ * Get store expedition manage
+ */
+ProductController.getProductExpeditionsManage = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const expeditions = await Product.getProductExpeditionsManage(req.params.id, storeId);
+  req.resData = {
+    message: 'Product Expeditions Manage Data',
+    data: expeditions,
+  };
+  return next();
+};
