@@ -239,7 +239,7 @@ UserController.getUserExpeditions = async (req, res, next) => {
  * Get store expedition manage
  */
 UserController.getUserExpeditionsManage = async (req, res, next) => {
-  const expeditions = await Store.getUserExpeditions(req.user.id, true);
+  const expeditions = await Store.getUserExpeditionsManage(req.user.id);
   req.resData = {
     message: 'Store Expeditions Manage Data',
     data: expeditions,

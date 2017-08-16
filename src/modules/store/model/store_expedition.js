@@ -5,8 +5,8 @@ const bookshelf = core.postgres.db;
 const { parseDate } = core.utils;
 
 export const StoreExpeditionStatus = {
-  INACTIVE: 0,
-  ACTIVE: 1,
+  USED: 1,
+  UNUSED: 2,
 };
 
 class StoreExpeditionModel extends bookshelf.Model {

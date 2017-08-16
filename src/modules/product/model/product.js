@@ -620,11 +620,7 @@ class ProductModel extends bookshelf.Model {
     const where = { id_produk: id, id_toko: storeId };
     const related = {
       withRelated: [
-        {
-          expeditionServices: (qb) => {
-            qb.where('status_detilekspedisiproduk', ProductExpeditionStatus.USED);
-          },
-        },
+        { expeditionServices: qb => qb.where('status_detilekspedisiproduk', ProductExpeditionStatus.USED) },
         'expeditionServices.expedition',
       ],
     };
