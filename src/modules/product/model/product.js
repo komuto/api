@@ -485,6 +485,11 @@ class ProductModel extends bookshelf.Model {
     }
     const brand = product.get('identifier_brand') ? product.related('brand') : null;
 
+    if (isDropship) {
+      product = product.serialize();
+      product.commission = this.calculateCommission(product.price, 'percent');
+    }
+
     return {
       product,
       category,
