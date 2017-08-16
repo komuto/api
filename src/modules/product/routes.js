@@ -199,6 +199,9 @@ routes.get('/users/store/products/:id([0-9]{1,10})',
 routes.put('/users/store/products/:id([0-9]{1,10})',
   auth(),
   validateParam(constraints.updateProduct, true),
+  validateParam(constraints.updateWholesale, false, 'wholesales'),
+  validateParam(constraints.updateExpeditions, false, 'expeditions'),
+  validateParam(constraints.createImages, false, 'images'),
   wrap(ProductController.updateProduct),
   apiResponse());
 

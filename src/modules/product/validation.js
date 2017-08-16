@@ -113,7 +113,7 @@ constraints.createProduct = {
     presence: true,
     inclusion: {
       within: [0, 1],
-      message: 'must be number of 0 = used or 1 = new',
+      message: 'must be number of 0 (used) or 1 (new)',
     },
   },
   is_insurance: {
@@ -136,13 +136,31 @@ constraints.createProduct = {
 };
 
 constraints.createWholesale = {
-  min_order: { numericality: { onlyInteger: true } },
-  max_order: { numericality: { onlyInteger: true } },
-  price: { numericality: true },
+  min_order: { presence: true, numericality: { onlyInteger: true } },
+  max_order: { presence: true, numericality: { onlyInteger: true } },
+  price: { presence: true, numericality: true },
+};
+
+constraints.updateWholesale = {
+  id: { presence: true, numericality: { onlyInteger: true } },
+  min_order: { presence: true, numericality: { onlyInteger: true } },
+  max_order: { presence: true, numericality: { onlyInteger: true } },
+  price: { presence: true, numericality: true },
 };
 
 constraints.createExpeditions = {
   expedition_service_id: { presence: true, numericality: { onlyInteger: true } },
+};
+
+constraints.updateExpeditions = {
+  expedition_service_id: { presence: true, numericality: { onlyInteger: true } },
+  status: {
+    presence: true,
+    inclusion: {
+      within: [1, 2],
+      message: 'accept only 1 (used) or 2 (unused)',
+    },
+  },
 };
 
 constraints.createImages = {
@@ -199,7 +217,7 @@ constraints.updateProduct = {
     presence: false,
     inclusion: {
       within: [0, 1],
-      message: 'Only accepts 0 = hide or 1 = show',
+      message: 'Only accepts 0 (hide) or 1 (show)',
     },
   },
   images: { presence: false },
@@ -215,7 +233,7 @@ constraints.updateProduct = {
     presence: false,
     inclusion: {
       within: [0, 1],
-      message: 'must be number of 0 = used or 1 = new',
+      message: 'must be number of 0 (used) or 1 (new)',
     },
   },
   is_insurance: {
