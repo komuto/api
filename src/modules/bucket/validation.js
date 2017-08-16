@@ -30,4 +30,23 @@ constraints.checkout = {
   },
 };
 
+constraints.bulkUpdate = {
+  id: { presence: true },
+  expedition_id: { presence: false },
+  expedition_service_id: { presence: false },
+  qty: { presence: false },
+  note: { presence: false },
+  address_id: { presence: false },
+  is_insurance: {
+    presence: false,
+    inclusion: {
+      within: [true, false],
+      message: 'accept only `true` or `false` value',
+    },
+  },
+  service: { presence: true },
+  origin_ro_id: { presence: true, numericality: { onlyInteger: true } },
+  destination_ro_id: { presence: true, numericality: { onlyInteger: true } },
+};
+
 export default constraints;

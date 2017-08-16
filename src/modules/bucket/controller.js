@@ -214,3 +214,23 @@ BucketController.checkout = async (req, res, next) => {
   req.resData = { data: bucket };
   return next();
 };
+
+BucketController.bulkUpdate = async (req, res, next) => {
+  const bucket = await Bucket.getForCheckout(req.user.id);
+  let items = bucket.related('items');
+  if (items.length === 0) throw getBucketError('bucket', 'not_found_items');
+
+  items = await Promise.all(req.body.items.map(async (val) => {
+    const where = { id_listbucket: val.id };
+    const item = await Item.get(where);
+    if (!item) throw getItemError('item', 'not_found');
+    await item.load('product');
+    return await BucketController.saveCart(bucket, val, item.serialize().product, item, where);
+  }));
+
+  req.resData = {
+    message: 'Items Data',
+    data: items,
+  };
+  return next();
+};

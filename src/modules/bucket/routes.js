@@ -81,4 +81,13 @@ routes.post('/checkout',
   wrap(BucketController.checkout),
   apiResponse());
 
+/**
+ * Bulk update cart
+ */
+routes.put('/buckets',
+  auth(),
+  validateParam(constraints.bulkUpdate, false, 'items', false),
+  wrap(BucketController.bulkUpdate),
+  apiResponse());
+
 export default routes;
