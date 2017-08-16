@@ -153,14 +153,14 @@ export function validateParam(
   strict = false,
 ) {
   return (req, res, next) => {
-    if (prop) {
-      const params = req.body[prop];
+    if (prop !== undefined) {
+      const params = prop ? req.body[prop] : req.body;
       // Can the param be empty array or not
       const evaluate = strict ? true : params && params.length > 0;
       if (evaluate) {
         params.forEach((param) => {
           const hasError = validate(param, constraints);
-          if (hasError) throw formatError(`Invalid parameter ${prop}`, hasError);
+          if (hasError) throw formatError(`Invalid parameter ${prop || ''}`, hasError);
         });
       }
     } else {

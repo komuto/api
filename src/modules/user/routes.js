@@ -12,9 +12,10 @@ import {
 import { UserController } from './controller';
 import { controller } from '../OTP';
 import core from '../core';
+import productConstraints from './../product/validation';
 
 const routes = express.Router();
-const { apiResponse, auth } = core.middleware;
+const { apiResponse, auth, validateParam } = core.middleware;
 const { wrap } = core.utils;
 const { OTPController } = controller;
 
@@ -114,6 +115,7 @@ routes.get('/users/wishlist',
 */
 routes.put('/users/store/expeditions',
   auth(),
+  validateParam(productConstraints.updateExpeditions, false, null, true),
   wrap(UserController.updateExpeditions),
   apiResponse());
 
