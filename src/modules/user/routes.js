@@ -75,8 +75,8 @@ routes.post('/users',
  * Update user
  */
 routes.put('/users',
-  validateUpdate(),
   auth(),
+  validateUpdate(),
   wrap(UserController.updateUser),
   apiResponse());
 
@@ -85,8 +85,8 @@ routes.put('/users',
  * Update user account
  */
 routes.put('/accounts/profile',
-  validateUpdate(),
   auth(),
+  validateUpdate(),
   wrap(UserController.updateAccount),
   apiResponse());
 
@@ -95,8 +95,8 @@ routes.put('/accounts/profile',
  * Change user password
  */
 routes.put('/users/password',
-  validateUpdate(),
   auth(),
+  validateUpdate(),
   wrap(UserController.updatePassword),
   apiResponse());
 

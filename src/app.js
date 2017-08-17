@@ -24,6 +24,7 @@ import bucket from './modules/bucket';
 import otp from './modules/OTP';
 import payment from './modules/payment';
 import marketplace from './modules/marketplace';
+import saldo from './modules/saldo';
 
 const app = express();
 
@@ -85,6 +86,7 @@ app.prefix(store.routes);
 app.prefix(bucket.routes);
 app.prefix(otp.routes);
 app.prefix(payment.routes);
+app.prefix(saldo.routes);
 
 app.use(core.middleware.pathNotFound());
 app.use(core.middleware.errResponse());
