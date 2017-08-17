@@ -12,6 +12,11 @@ routes.get('/payments',
   wrap(PaymentController.getDokuData),
   apiResponse());
 
+routes.post('/payments',
+  auth(),
+  wrap(PaymentController.store),
+  apiResponse());
+
 /**
  * POST /buckets/id/bank
  * Bank payment method

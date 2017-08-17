@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import sha1 from 'sha1';
 import Doku from 'doku';
 import moment from 'moment';
 import {
@@ -62,6 +63,70 @@ PaymentController.getDokuData = async (req, res, next) => {
     },
   };
   return next();
+};
+
+PaymentController.store = async (req, res, next) => {
+  const token = req.body.token;
+  const pairingCode = req.body.pairing_code;
+  const invoiceNo = req.body.invoice_no;
+  const amount = '10000.00';
+
+  const params = {
+    token,
+    amount,
+    invoice: invoiceNo,
+    currency: '360',
+    pairing_code: pairingCode,
+  };
+
+  const words = doku.doCreateWords(params);
+
+  const basket = [
+    {
+      name: 'sayur',
+      amount: '10000.00',
+      quantity: '1',
+      subtotal: '10000.00',
+    },
+  ];
+
+  const customer = {
+    name: req.user.name,
+    data_phone: req.user.phone_number,
+    data_email: req.user.email,
+    data_address: 'yogyakarta',
+  };
+
+  const date = moment().format('YmdHis');
+
+  const dataPayment = {
+    req_mall_id: doku.getMallId(),
+    req_chain_merchant: 'NA',
+    req_amount: amount,
+    req_words: words,
+    req_purchase_amount: amount,
+    req_trans_id_merchant: invoiceNo,
+    req_request_date_time: date,
+    req_currency: '360',
+    req_purchase_currency: '360',
+    req_session_id: sha1(date),
+    req_name: customer.name,
+    req_payment_channel: 15,
+    req_basket: basket,
+    req_email: customer.email,
+    req_token_id: token,
+  };
+
+  doku.doPayment(dataPayment, (response) => {
+    const obj = JSON.parse(JSON.stringify(response));
+    if (obj.res_response_msg === 'SUCCESS' && obj.res_response_code === '0000') {
+      console.log('SUCCESS RESPONSE', obj);
+    } else {
+      console.log('FAILED RESPONSE', obj);
+    }
+    req.resData = { data: obj };
+    return next();
+  });
 };
 
 PaymentController.listTransactions = async (req, res, next) => {
