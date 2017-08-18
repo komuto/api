@@ -1,5 +1,6 @@
 import moment from 'moment';
 import _ from 'lodash';
+import firebaseadmin from 'firebase-admin';
 import {
   Store,
   Catalog,
@@ -69,6 +70,28 @@ StoreController.listFavorites = async (req, res, next) => {
 };
 
 StoreController.createMessage = async (req, res, next) => {
+  const payload = {
+    notification: {
+      title: 'Komuto: Testing',
+      body: 'Hello world',
+    },
+    data: {
+      type: 'PAYMENT',
+    },
+  };
+  firebaseadmin.messaging().sendToDeviceGroup('123456', payload)
+    .then((response) => {
+      // See the MessagingDevicesResponse reference documentation for
+      // the contents of response.
+      console.log('Successfully sent message:');
+      console.logFull(response);
+    })
+    .catch((error) => {
+      console.log('Error sending message:', error);
+    });
+
+  return next();
+
   const messageObj = Message.matchDBColumn({
     user_id: req.user.id,
     store_id: req.params.id,

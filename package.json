@@ -26,6 +26,7 @@
     "express-session": "^1.15.1",
     "express-status-monitor": "^0.1.7",
     "fb": "^2.0.0",
+    "firebase-admin": "^5.2.1",
     "helmet": "^3.3.0",
     "http-status": "^0.2.3",
     "jest-cli": "^20.0.4",

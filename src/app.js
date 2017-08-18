@@ -7,6 +7,8 @@ import cors from 'cors';
 import helmet from 'helmet';
 import statusMonitor from 'express-status-monitor';
 import responseTime from 'response-time';
+import * as admin from 'firebase-admin';
+import serviceAccount from './../config/serviceAccountKey.json';
 import config from '../config';
 import c from './constants';
 import core from './modules/core';
@@ -36,6 +38,8 @@ process.on('unhandledRejection', (err) => {
   // eslint-disable-next-line no-console
   console.log('Unhandled Rejection:', err.stack);
 });
+
+admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 
 app.use(statusMonitor());
 app.use(responseTime());
