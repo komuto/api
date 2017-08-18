@@ -156,7 +156,15 @@ UserController.getAccountProfile = async (req, res, next) => {
   const birthPlace = await User.getBirthPlace(place_of_birth);
   req.resData = {
     message: 'Profile Data',
-    data: { id, name, photo, gender, place_of_birth: birthPlace, date_of_birth },
+    data: {
+      id,
+      name,
+      photo,
+      gender,
+      date_of_birth,
+      place_of_birth: birthPlace,
+      place_of_birth_id: req.user.place_of_birth,
+    },
   };
   return next();
 };
