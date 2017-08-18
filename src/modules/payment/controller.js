@@ -97,7 +97,7 @@ PaymentController.store = async (req, res, next) => {
     data_address: 'yogyakarta',
   };
 
-  const date = moment().format('YmdHis');
+  const date = moment().format('YMMDDHHmmss');
 
   const dataPayment = {
     req_mall_id: doku.getMallId(),
