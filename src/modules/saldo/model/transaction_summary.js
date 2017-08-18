@@ -3,7 +3,7 @@ import core from '../../core';
 const { matchDB } = core.utils;
 const bookshelf = core.postgres.db;
 
-export const TransType = {
+export const SummTransType = {
   PAYMENT: 'PAID',
   REFUND: 'RFND',
   SELLING: 'SELL',
@@ -31,10 +31,9 @@ class transSummaryModel extends bookshelf.Model {
    * @param {Object} data
    * @param type {string} transaction type
    */
-  static async create(data, type) {
+  static async create(data) {
     data = {
       ...data,
-      kode_summarytransaksi: type,
       status_summarytransaksi: '1',
       is_debit: false,
     };
@@ -53,6 +52,8 @@ class transSummaryModel extends bookshelf.Model {
       last_saldo: 'saldo_akhir',
       marketplace_id: 'id_marketplaceuser',
       user_id: 'id_users',
+      type: 'kode_summarytransaksi',
+      remark: 'remark',
     };
     return matchDB(data, column);
   }
