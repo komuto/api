@@ -18,7 +18,7 @@ export const errMsg = {
   },
   registrationMsg: {
     title: 'Registrasi gagal',
-    duplicate_email: '^Email sudah terdaftar',
+    duplicate_email: 'Email sudah terdaftar',
     name_presence: '^Nama harus diisi',
     email_presence: '^Email harus diisi',
     email_not_valid: '^Email tidak valid',
