@@ -7,7 +7,7 @@ import core from '../../core';
 import { model as addressModel } from '../../address';
 import { model as OTPModel } from '../../OTP';
 
-const { defaultNull, checkNull, parseDate, parseNum } = core.utils;
+const { defaultNull, parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
 const { District } = addressModel;
 const { OTPHPStatus } = OTPModel;
@@ -83,6 +83,7 @@ class UserModel extends bookshelf.Model {
     if (birth) {
       this.load({ birthPlace: qb => qb.column('nama_kotakab') });
       const name = this.related('birthPlace').get('nama_kotakab');
+      user.place_of_birth_id = user.place_of_birth;
       if (name) user.place_of_birth = toTitleCase(name.split(' ')[1]);
     }
     if (phone) {
