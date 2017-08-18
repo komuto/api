@@ -79,7 +79,7 @@ StoreController.createMessage = async (req, res, next) => {
       type: 'PAYMENT',
     },
   };
-  firebaseadmin.messaging().sendToDeviceGroup('123456', payload)
+  firebaseadmin.messaging().sendToDevice(req.user.reg_token, payload)
     .then((response) => {
       // See the MessagingDevicesResponse reference documentation for
       // the contents of response.

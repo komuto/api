@@ -78,6 +78,7 @@ class UserModel extends bookshelf.Model {
       status_at: moment(this.get('tglstatus_users')).unix(),
       provider_name: this.get('hybridauth_provider_name'),
       provider_uid: this.get('hybridauth_provider_uid'),
+      reg_token: this.get('reg_token'),
     };
     if (pass) user.password = this.get('password_users');
     if (birth) {
@@ -267,6 +268,7 @@ class UserModel extends bookshelf.Model {
       date_of_birth: 'tgl_lahir',
       provider_name: 'hybridauth_provider_name',
       provider_uid: 'hybridauth_provider_uid',
+      reg_token: 'reg_token',
     };
     const newData = {};
     Object.keys(data).forEach((prop) => {
