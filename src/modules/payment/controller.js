@@ -112,7 +112,7 @@ PaymentController.store = async (req, res, next) => {
     req_session_id: sha1(date),
     req_name: customer.name,
     req_payment_channel: 15,
-    req_basket: basket,
+    req_basket: doku.formatBasket(basket),
     req_email: customer.email,
     req_token_id: token,
   };
