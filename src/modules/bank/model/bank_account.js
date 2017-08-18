@@ -67,6 +67,10 @@ class BankAccountModel extends bookshelf.Model {
     return await this.where({ id_rekeninguser: id, id_users: userId }).fetch();
   }
 
+  static async getKomutoAccounts() {
+    return await this.where({ id_marketplaceuser: 0 }).fetchAll({ withRelated: ['bank'] });
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data
