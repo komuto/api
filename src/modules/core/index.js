@@ -6,6 +6,7 @@ import routes from './routes';
 import * as apiCache from './cache';
 import config from '../../../config';
 import { email } from './email';
+import { Notification, buyerNotification, sellerNotification } from './notification';
 
 const imagePath = (path, file, parent = 'uploads') => {
   if (!file) return null;
@@ -28,4 +29,7 @@ export default {
   imagePath,
   categoryPath,
   expeditionPath,
+  Notification,
+  buyerNotification,
+  sellerNotification,
 };

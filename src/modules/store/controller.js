@@ -1,6 +1,5 @@
 import moment from 'moment';
 import _ from 'lodash';
-import firebaseadmin from 'firebase-admin';
 import {
   Store,
   Catalog,
@@ -18,6 +17,9 @@ import { Address } from './../address/model';
 import { User } from './../user/model';
 import { OTPAddressEmail } from '../OTP/email';
 import config from '../../../config';
+import core from '../core';
+
+const { Notification, buyerNotification, sellerNotification } = core;
 
 export const StoreController = {};
 export default { StoreController };
@@ -70,28 +72,6 @@ StoreController.listFavorites = async (req, res, next) => {
 };
 
 StoreController.createMessage = async (req, res, next) => {
-  const payload = {
-    notification: {
-      title: 'Komuto: Testing',
-      body: 'Hello world',
-    },
-    data: {
-      type: 'PAYMENT',
-    },
-  };
-  firebaseadmin.messaging().sendToDevice(req.user.reg_token, payload)
-    .then((response) => {
-      // See the MessagingDevicesResponse reference documentation for
-      // the contents of response.
-      console.log('Successfully sent message:');
-      console.logFull(response);
-    })
-    .catch((error) => {
-      console.log('Error sending message:', error);
-    });
-
-  return next();
-
   const messageObj = Message.matchDBColumn({
     user_id: req.user.id,
     store_id: req.params.id,
@@ -101,14 +81,15 @@ StoreController.createMessage = async (req, res, next) => {
     flag_sender_at: new Date(),
     flag_receiver_at: new Date(),
   });
-  const message = await Message.create(messageObj);
 
+  const message = await Message.create(messageObj);
   const detailMessageObj = DetailMessage.matchDBColumn({
     message_id: message.toJSON().id,
     user_id: req.user.id,
     content: req.body.content,
     created_at: new Date(),
   });
+  Notification.send(buyerNotification.MSG, req.user.reg_token);
   const detailMessage = await DetailMessage.create(detailMessageObj);
   req.resData = {
     message: 'Message Data',
