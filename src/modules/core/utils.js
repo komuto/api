@@ -88,3 +88,16 @@ export function formatError(field, msg) {
   const data = formatSingularErr(field, this[msg]);
   return new BadRequestError(this.title, data);
 }
+
+/**
+ * Transform supplied data properties to match with db column
+ * @param input
+ * @param columnName
+ * @returns {object}
+ */
+export function matchDB(input, columnName) {
+  return Object.keys(input).reduce((matched, prop) => {
+    if (columnName[prop] && input[prop] !== undefined) matched[columnName[prop]] = input[prop];
+    return matched;
+  }, {});
+}

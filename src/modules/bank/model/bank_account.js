@@ -60,6 +60,14 @@ class BankAccountModel extends bookshelf.Model {
   }
 
   /**
+   * @param id {int} bank account id
+   * @param userId {int}
+   */
+  static async getBankAccount(id, userId) {
+    return await this.where({ id_rekeninguser: id, id_users: userId }).fetch();
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData
