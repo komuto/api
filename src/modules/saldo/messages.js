@@ -11,7 +11,7 @@ export const errMsg = {
     amount_presence: 'Belum memilih jumlah tarik dana',
     otp_presence: 'Harus ada kode otp',
     otp_not_valid: 'Kode tidak valid',
-    otp_not_found: 'Kode otp salah',
+    otp_not_found: 'Kode otp salah atau expired',
     not_number: 'harus angka',
   },
 };
