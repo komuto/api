@@ -263,3 +263,12 @@ StoreController.archiveMessage = async (req, res, next) => {
   req.resData = { data: message };
   return next();
 };
+
+/**
+ * Delete Message
+ */
+StoreController.deleteMessage = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  await Message.updateFlag(req.params.id, storeId, 'store', MessageFlagStatus.PERMANENT_DELETED);
+  return next();
+};

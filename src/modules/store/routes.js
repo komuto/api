@@ -159,4 +159,13 @@ routes.get('/users/store/messages/:id([0-9]{1,10})/archive',
   wrap(StoreController.archiveMessage),
   apiResponse());
 
+/**
+ * DELETE /users/store/messages/id
+ * Delete message
+ */
+routes.delete('/users/store/messages/:id([0-9]{1,10})',
+  auth(),
+  wrap(StoreController.deleteMessage),
+  apiResponse());
+
 export default routes;

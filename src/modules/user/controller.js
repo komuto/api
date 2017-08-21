@@ -335,3 +335,12 @@ UserController.archiveMessage = async (req, res, next) => {
   req.resData = { data: message };
   return next();
 };
+
+
+/**
+ * Delete Message
+ */
+UserController.deleteMessage = async (req, res, next) => {
+  await Message.updateFlag(req.params.id, req.user.id, 'user', MessageFlagStatus.PERMANENT_DELETED);
+  return next();
+};
