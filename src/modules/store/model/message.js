@@ -101,12 +101,33 @@ class MessageModel extends bookshelf.Model {
     const where = { id_messages: id };
     if (type === 'store') where.id_toko = typeId;
     else where.id_users = typeId;
-    const message = await this.where(where).fetch({ withRelated: ['store', 'detailMessages'] });
+    const column = type === 'store' ? 'flagreceiver_messages' : 'flagsender_messages';
+    const message = await this.where(where)
+      .query(qb => qb.whereNot(column, MessageFlagStatus.PERMANENT_DELETED))
+      .fetch({ withRelated: ['store', 'detailMessages'] });
     if (!message) throw getMessageError('message', 'not_found');
     return {
       ...message.serialize(),
       detail_messages: message.related('detailMessages'),
     };
+  }
+
+  /**
+   * Update flag message
+   * @param id
+   * @param typeId
+   * @param type
+   * @param flagStatus
+   */
+  static async updateFlag(id, typeId, type, flagStatus) {
+    const where = { id_messages: id };
+    if (type === 'store') where.id_toko = typeId;
+    else where.id_users = typeId;
+    const column = type === 'store' ? 'flagreceiver_messages' : 'flagsender_messages';
+    const columnAt = type === 'store' ? 'flagreceiver_date' : 'flagsender_date';
+    const message = await this.where(where).fetch();
+    if (!message) throw getMessageError('message', 'not_found');
+    return await message.save({ [column]: flagStatus, [columnAt]: new Date() }, { patch: true });
   }
 
   /**

@@ -238,4 +238,13 @@ routes.get('/users/messages/:id([0-9]{1,10})',
   wrap(UserController.getMessage),
   apiResponse());
 
+/**
+ * GET /users/messages/id/archive
+ * Archive messages
+ */
+routes.get('/users/messages/:id([0-9]{1,10})/archive',
+  auth(),
+  wrap(UserController.archiveMessage),
+  apiResponse());
+
 export default routes;

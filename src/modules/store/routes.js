@@ -150,4 +150,13 @@ routes.get('/users/store/messages/:id([0-9]{1,10})',
   wrap(StoreController.getMessage),
   apiResponse());
 
+/**
+ * GET /users/store/messages/id/archive
+ * Archive message
+ */
+routes.get('/users/store/messages/:id([0-9]{1,10})/archive',
+  auth(),
+  wrap(StoreController.archiveMessage),
+  apiResponse());
+
 export default routes;

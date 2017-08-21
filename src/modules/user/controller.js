@@ -6,7 +6,7 @@ import { User, UserToken, TokenType, UserStatus } from './model';
 import { UserEmail } from './email';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
-import { Store, StoreExpedition, Message } from './../store/model';
+import { Store, StoreExpedition, Message, MessageFlagStatus } from './../store/model';
 import { userUpdateError, resetPassError, registrationError, activateUserError, fbError } from './messages';
 import { Discussion, Product } from '../product/model';
 
@@ -324,5 +324,14 @@ UserController.getMessage = async (req, res, next) => {
     message: 'Detail Message Data',
     data: message,
   };
+  return next();
+};
+
+/**
+ * Archive Message
+ */
+UserController.archiveMessage = async (req, res, next) => {
+  const message = await Message.updateFlag(req.params.id, req.user.id, 'user', MessageFlagStatus.ARCHIVE);
+  req.resData = { data: message };
   return next();
 };

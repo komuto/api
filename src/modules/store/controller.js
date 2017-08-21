@@ -253,3 +253,13 @@ StoreController.getMessage = async (req, res, next) => {
   };
   return next();
 };
+
+/**
+ * Archive Message
+ */
+StoreController.archiveMessage = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const message = await Message.updateFlag(req.params.id, storeId, 'store', MessageFlagStatus.ARCHIVE);
+  req.resData = { data: message };
+  return next();
+};
