@@ -40,4 +40,13 @@ constraints.catalog = { name: { presence: true } };
 
 constraints.verify = { code: { presence: true } };
 
+constraints.get_messages = {
+  is_archived: {
+    inclusion: {
+      within: ['true', 'false'],
+      message: 'accept only boolean',
+    },
+  },
+};
+
 export default constraints;

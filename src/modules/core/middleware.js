@@ -149,7 +149,7 @@ export function formatValidation(rules, msg) {
 export function validateParam(
   constraints,
   isBody = false,
-  prop = null,
+  prop = undefined,
   strict = false,
 ) {
   return (req, res, next) => {

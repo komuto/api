@@ -27,13 +27,22 @@ class MessageModel extends bookshelf.Model {
     return {
       id: this.get('id_messages'),
       store_id: this.get('id_toko'),
-      user_id: this.get('id_users'),
+      user_id: this.relations.user ? undefined : this.get('id_users'),
+      user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
       subject: this.get('subject_messages'),
       flag_sender: parseNum(this.get('flagsender_messages')),
       flag_receiver: parseNum(this.get('flagreceiver_messages')),
       flag_sender_at: parseDate(this.get('flagsender_date')),
       flag_receiver_at: parseDate(this.get('flagreceiver_date')),
     };
+  }
+
+  user() {
+    return this.belongsTo('User', 'id_users');
+  }
+
+  detailMessages() {
+    return this.hasMany('DetailMessage', 'id_messages');
   }
 
   /**
@@ -44,6 +53,34 @@ class MessageModel extends bookshelf.Model {
     return await new this(data).save().catch(() => {
       throw createMessageError('message', 'error');
     });
+  }
+
+  /**
+   * Create message
+   * @param storeId
+   * @param isArchived
+   */
+  static async findByStoreId(storeId, isArchived = false) {
+    const messages = await this.where({ id_toko: storeId })
+      .query((qb) => {
+        qb.whereNotIn('flagreceiver_messages', [
+          MessageFlagStatus.DELETED,
+          MessageFlagStatus.PERMANENT_DELETED,
+        ]);
+        if (isArchived) {
+          qb.where('flagreceiver_messages', MessageFlagStatus.ARCHIVE);
+        } else {
+          qb.whereNot('flagreceiver_messages', MessageFlagStatus.ARCHIVE);
+        }
+      })
+      .fetchAll({ withRelated: ['user'] });
+    return await Promise.all(messages.map(async (message) => {
+      await message.load({ detailMessages: qb => qb.limit(1) });
+      return {
+        ...message.serialize(),
+        detail_message: message.related('detailMessages').models[0],
+      };
+    }));
   }
 
   /**

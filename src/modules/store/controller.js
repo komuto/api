@@ -226,3 +226,17 @@ StoreController.updateStore = async (req, res, next) => {
   req.resData = { data: store };
   return next();
 };
+
+/**
+ * Get Messages
+ */
+StoreController.getMessages = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const isArchived = req.query.is_archived ? req.query.is_archived : false;
+  const messages = await Message.findByStoreId(storeId, JSON.parse(isArchived));
+  req.resData = {
+    message: 'Message Data',
+    data: messages,
+  };
+  return next();
+};

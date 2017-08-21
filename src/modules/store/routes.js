@@ -131,4 +131,14 @@ routes.put('/users/store/term-condition',
   wrap(StoreController.updateStore),
   apiResponse());
 
+/**
+ * GET /users/store/messages
+ * Get list messages
+ */
+routes.get('/users/store/messages',
+  auth(),
+  validateParam(constraints.get_messages),
+  wrap(StoreController.getMessages),
+  apiResponse());
+
 export default routes;
