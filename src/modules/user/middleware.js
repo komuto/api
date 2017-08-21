@@ -66,7 +66,7 @@ export function validateVerifyPhone() {
  */
 export function addToken(req, res, next) {
   const payload = { id_users: req.user.id };
-  req.user.token = jwt.sign(payload, jwtOptions.secretOrKey);
+  req.user.token = jwt.sign(payload, jwtOptions.secretOrKey, { expiresIn: '7d' });
   return next();
 }
 
