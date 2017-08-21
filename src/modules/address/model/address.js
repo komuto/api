@@ -140,9 +140,8 @@ class AddressModel extends bookshelf.Model {
    * @param {Object} newData
    */
   static async update(data, newData) {
-    const address = await this.where(data).save(newData, { method: 'update' }).catch(() => {
-      throw getAddressError('address', 'not_found');
-    });
+    const address = await this.where(data).save(newData, { method: 'update', require: false })
+      .catch(() => { throw getAddressError('address', 'not_found'); });
     await address.refresh({ withRelated: ['province', 'district', 'subDistrict', 'village'] });
 
     const province = address.related('province');
