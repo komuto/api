@@ -36,6 +36,8 @@ constraints.create_message = {
   content: { presence: true },
 };
 
+constraints.reply_message = { content: { presence: true } };
+
 constraints.catalog = { name: { presence: true } };
 
 constraints.verify = { code: { presence: true } };

@@ -6,7 +6,7 @@ import { User, UserToken, TokenType, UserStatus } from './model';
 import { UserEmail } from './email';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
-import { Store, StoreExpedition, Message, MessageFlagStatus } from './../store/model';
+import { Store, StoreExpedition, Message, MessageFlagStatus, DetailMessage } from './../store/model';
 import { userUpdateError, resetPassError, registrationError, activateUserError, fbError } from './messages';
 import { Discussion, Product } from '../product/model';
 
@@ -336,11 +336,25 @@ UserController.archiveMessage = async (req, res, next) => {
   return next();
 };
 
-
 /**
  * Delete Message
  */
 UserController.deleteMessage = async (req, res, next) => {
   await Message.updateFlag(req.params.id, req.user.id, 'user', MessageFlagStatus.PERMANENT_DELETED);
+  return next();
+};
+
+/**
+ * Reply Message
+ */
+UserController.replyMessage = async (req, res, next) => {
+  await Message.findById(req.params.id, req.user.id, 'user');
+  const data = DetailMessage.matchDBColumn(_.assign(req.body, {
+    message_id: req.params.id,
+    user_id: req.user.id,
+    created_at: moment(),
+  }));
+  const detailMessage = await DetailMessage.create(data);
+  req.resData = { data: detailMessage };
   return next();
 };

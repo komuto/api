@@ -231,7 +231,7 @@ routes.get('/users/messages',
 
 /**
  * GET /users/messages/id
- * Get detail messages
+ * Get detail message
  */
 routes.get('/users/messages/:id([0-9]{1,10})',
   auth(),
@@ -240,7 +240,7 @@ routes.get('/users/messages/:id([0-9]{1,10})',
 
 /**
  * GET /users/messages/id/archive
- * Archive messages
+ * Archive message
  */
 routes.get('/users/messages/:id([0-9]{1,10})/archive',
   auth(),
@@ -249,11 +249,21 @@ routes.get('/users/messages/:id([0-9]{1,10})/archive',
 
 /**
  * DELETE /users/messages/id
- * Delete messages
+ * Delete message
  */
 routes.delete('/users/messages/:id([0-9]{1,10})',
   auth(),
   wrap(UserController.deleteMessage),
+  apiResponse());
+
+/**
+ * POST /users/messages/id
+ * Reply message
+ */
+routes.post('/users/messages/:id([0-9]{1,10})',
+  auth(),
+  validateParam(storeConstraints.reply_message, true),
+  wrap(UserController.replyMessage),
   apiResponse());
 
 export default routes;

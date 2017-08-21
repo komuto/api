@@ -92,7 +92,7 @@ class MessageModel extends bookshelf.Model {
   }
 
   /**
-   * Detail messages
+   * Detail message
    * @param id
    * @param typeId
    * @param type

@@ -2,7 +2,7 @@ import core from '../../core';
 import { createCommentError } from './../messages';
 
 const bookshelf = core.postgres.db;
-const { parseDate } = core.utils;
+const { parseDate, parseNum } = core.utils;
 
 class DetailMessageModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -18,7 +18,7 @@ class DetailMessageModel extends bookshelf.Model {
   serialize() {
     return {
       id: this.get('id_detilmessages'),
-      message_id: this.get('id_messages'),
+      message_id: parseNum(this.get('id_messages')),
       user_id: this.get('id_users'),
       content: this.get('content_messages'),
       created_at: parseDate(this.get('date_detilmessages')),

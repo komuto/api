@@ -168,4 +168,14 @@ routes.delete('/users/store/messages/:id([0-9]{1,10})',
   wrap(StoreController.deleteMessage),
   apiResponse());
 
+/**
+ * POST /users/store/messages/id
+ * Reply message
+ */
+routes.post('/users/store/messages/:id([0-9]{1,10})',
+  auth(),
+  validateParam(constraints.reply_message, true),
+  wrap(StoreController.replyMessage),
+  apiResponse());
+
 export default routes;

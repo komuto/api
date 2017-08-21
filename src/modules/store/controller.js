@@ -272,3 +272,19 @@ StoreController.deleteMessage = async (req, res, next) => {
   await Message.updateFlag(req.params.id, storeId, 'store', MessageFlagStatus.PERMANENT_DELETED);
   return next();
 };
+
+/**
+ * Reply Message
+ */
+StoreController.replyMessage = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  await Message.findById(req.params.id, storeId, 'store');
+  const data = DetailMessage.matchDBColumn(_.assign(req.body, {
+    message_id: req.params.id,
+    user_id: req.user.id,
+    created_at: moment(),
+  }));
+  const detailMessage = await DetailMessage.create(data);
+  req.resData = { data: detailMessage };
+  return next();
+};
