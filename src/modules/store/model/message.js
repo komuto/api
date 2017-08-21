@@ -67,16 +67,17 @@ class MessageModel extends bookshelf.Model {
    */
   static async getById(id, type, isArchived = false) {
     const where = type === 'store' ? { id_toko: id } : { id_users: id };
+    const column = type === 'store' ? 'flagreceiver_messages' : 'flagsender_messages';
     const messages = await this.where(where)
       .query((qb) => {
-        qb.whereNotIn('flagreceiver_messages', [
+        qb.whereNotIn(column, [
           MessageFlagStatus.DELETED,
           MessageFlagStatus.PERMANENT_DELETED,
         ]);
         if (isArchived) {
-          qb.where('flagreceiver_messages', MessageFlagStatus.ARCHIVE);
+          qb.where(column, MessageFlagStatus.ARCHIVE);
         } else {
-          qb.whereNot('flagreceiver_messages', MessageFlagStatus.ARCHIVE);
+          qb.whereNot(column, MessageFlagStatus.ARCHIVE);
         }
       })
       .fetchAll({ withRelated: ['store'] });
