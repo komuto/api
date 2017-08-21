@@ -229,4 +229,13 @@ routes.get('/users/messages',
   wrap(UserController.getMessages),
   apiResponse());
 
+/**
+ * GET /users/messages/id
+ * Get detail messages
+ */
+routes.get('/users/messages/:id([0-9]{1,10})',
+  auth(),
+  wrap(UserController.getMessage),
+  apiResponse());
+
 export default routes;

@@ -1,5 +1,5 @@
 import core from '../../core';
-import { createMessageError } from './../messages';
+import { createMessageError, getMessageError } from './../messages';
 
 const bookshelf = core.postgres.db;
 const { parseDate, parseNum } = core.utils;
@@ -82,11 +82,30 @@ class MessageModel extends bookshelf.Model {
       .fetchAll({ withRelated: ['store'] });
     return await Promise.all(messages.map(async (message) => {
       await message.load({ detailMessages: qb => qb.limit(1) });
+      const detail = message.related('detailMessages').models[0];
       return {
         ...message.serialize(),
-        detail_message: message.related('detailMessages').models[0],
+        detail_message: detail || {},
       };
     }));
+  }
+
+  /**
+   * Detail messages
+   * @param id
+   * @param typeId
+   * @param type
+   */
+  static async findById(id, typeId, type) {
+    const where = { id_messages: id };
+    if (type === 'store') where.id_toko = typeId;
+    else where.id_users = typeId;
+    const message = await this.where(where).fetch({ withRelated: ['store', 'detailMessages'] });
+    if (!message) throw getMessageError('message', 'not_found');
+    return {
+      ...message.serialize(),
+      detail_messages: message.related('detailMessages'),
+    };
   }
 
   /**

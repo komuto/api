@@ -240,3 +240,16 @@ StoreController.getMessages = async (req, res, next) => {
   };
   return next();
 };
+
+/**
+ * Get Detail Message
+ */
+StoreController.getMessage = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const message = await Message.findById(req.params.id, storeId, 'store');
+  req.resData = {
+    message: 'Detail Message Data',
+    data: message,
+  };
+  return next();
+};

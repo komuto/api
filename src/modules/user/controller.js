@@ -314,3 +314,15 @@ UserController.getMessages = async (req, res, next) => {
   };
   return next();
 };
+
+/**
+ * Get Detail Message
+ */
+UserController.getMessage = async (req, res, next) => {
+  const message = await Message.findById(req.params.id, req.user.id, 'user');
+  req.resData = {
+    message: 'Detail Message Data',
+    data: message,
+  };
+  return next();
+};

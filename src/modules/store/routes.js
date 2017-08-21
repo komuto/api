@@ -141,4 +141,13 @@ routes.get('/users/store/messages',
   wrap(StoreController.getMessages),
   apiResponse());
 
+/**
+ * GET /users/store/messages/id
+ * Get detail messages
+ */
+routes.get('/users/store/messages/:id([0-9]{1,10})',
+  auth(),
+  wrap(StoreController.getMessage),
+  apiResponse());
+
 export default routes;

@@ -34,6 +34,10 @@ export const errMsg = {
     title: 'Create komentar gagal',
     error: 'Gagal membuat komentar',
   },
+  getMessage: {
+    title: 'Get pesan gagal',
+    not_found: 'Pesan tidak ditemukan',
+  },
   makeFavoriteMsg: {
     title: 'Favoritkan toko gagal',
     repeat_favorite: 'Anda telah memfavoritkan toko ini',
@@ -60,6 +64,8 @@ export const getStoreError = formatError.bind(errMsg.getStore);
 export const createCommentError = formatError.bind(errMsg.createComment);
 
 export const createMessageError = formatError.bind(errMsg.createMessage);
+
+export const getMessageError = formatError.bind(errMsg.getMessage);
 
 export const makeFavoriteError = formatError.bind(errMsg.makeFavoriteMsg);
 
