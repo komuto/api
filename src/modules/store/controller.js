@@ -81,7 +81,6 @@ StoreController.createMessage = async (req, res, next) => {
     flag_sender_at: new Date(),
     flag_receiver_at: new Date(),
   });
-
   const message = await Message.create(messageObj);
   const detailMessageObj = DetailMessage.matchDBColumn({
     message_id: message.toJSON().id,
@@ -89,7 +88,7 @@ StoreController.createMessage = async (req, res, next) => {
     content: req.body.content,
     created_at: new Date(),
   });
-  Notification.send(buyerNotification.MSG, req.user.reg_token);
+  Notification.send(buyerNotification.MESSAGE, req.user.reg_token);
   const detailMessage = await DetailMessage.create(detailMessageObj);
   req.resData = {
     message: 'Message Data',
