@@ -2,6 +2,7 @@ import _ from 'lodash';
 import sha1 from 'sha1';
 import Doku from 'doku';
 import moment from 'moment';
+import randomInt from 'random-int';
 import {
   PaymentMethod,
   PaymentConfirmation,
@@ -49,7 +50,7 @@ PaymentController.viaBank = async (req, res, next) => {
 PaymentController.getDokuData = async (req, res, next) => {
   const total = await Bucket.getTotalPrice(req.user.id);
   const amount = `${total}.00`;
-  const invoice = 'INVOICE_00001';
+  const invoice = `INVOICE_${randomInt(10000, 99999)}`;
   const currency = '360';
   const words = doku.doCreateWords({ amount, invoice, currency });
   req.resData = {
