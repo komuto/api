@@ -117,6 +117,8 @@ class ExpeditionModel extends bookshelf.Model {
       },
     }).catch(() => ([]));
 
+    if (!res.length) return [];
+
     const result = JSON.parse(res).rajaongkir.results[0];
     const results = [];
     _.forEach(result.costs.reverse(), (cost) => {
