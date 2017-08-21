@@ -19,7 +19,7 @@ import { OTPAddressEmail } from '../OTP/email';
 import config from '../../../config';
 import core from '../core';
 
-const { Notification, buyerNotification, sellerNotification } = core;
+const { Notification, buyerNotification } = core;
 
 export const StoreController = {};
 export default { StoreController };
@@ -233,7 +233,7 @@ StoreController.updateStore = async (req, res, next) => {
 StoreController.getMessages = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const isArchived = req.query.is_archived ? req.query.is_archived : false;
-  const messages = await Message.findByStoreId(storeId, JSON.parse(isArchived));
+  const messages = await Message.getById(storeId, 'store', JSON.parse(isArchived));
   req.resData = {
     message: 'Message Data',
     data: messages,

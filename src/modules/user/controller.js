@@ -6,7 +6,7 @@ import { User, UserToken, TokenType, UserStatus } from './model';
 import { UserEmail } from './email';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
-import { Store, StoreExpedition } from './../store/model';
+import { Store, StoreExpedition, Message } from './../store/model';
 import { userUpdateError, resetPassError, registrationError, activateUserError, fbError } from './messages';
 import { Discussion, Product } from '../product/model';
 
@@ -298,6 +298,19 @@ UserController.getStoreDiscussions = async (req, res, next) => {
     message: 'Discussion Data',
     meta: { page, limit: pageSize },
     data: discussions,
+  };
+  return next();
+};
+
+/**
+ * Get Messages
+ */
+UserController.getMessages = async (req, res, next) => {
+  const isArchived = req.query.is_archived ? req.query.is_archived : false;
+  const messages = await Message.getById(req.user.id, 'user', JSON.parse(isArchived));
+  req.resData = {
+    message: 'Message Data',
+    data: messages,
   };
   return next();
 };

@@ -26,9 +26,9 @@ class MessageModel extends bookshelf.Model {
   serialize() {
     return {
       id: this.get('id_messages'),
-      store_id: this.get('id_toko'),
-      user_id: this.relations.user ? undefined : this.get('id_users'),
-      user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
+      store_id: this.relations.store ? undefined : this.get('id_toko'),
+      store: this.relations.store ? this.related('store').serialize({ favorite: true }) : undefined,
+      user_id: this.get('id_users'),
       subject: this.get('subject_messages'),
       flag_sender: parseNum(this.get('flagsender_messages')),
       flag_receiver: parseNum(this.get('flagreceiver_messages')),
@@ -39,6 +39,10 @@ class MessageModel extends bookshelf.Model {
 
   user() {
     return this.belongsTo('User', 'id_users');
+  }
+
+  store() {
+    return this.belongsTo('Store', 'id_toko');
   }
 
   detailMessages() {
@@ -56,12 +60,14 @@ class MessageModel extends bookshelf.Model {
   }
 
   /**
-   * Create message
-   * @param storeId
+   * List messages
+   * @param id
+   * @param type
    * @param isArchived
    */
-  static async findByStoreId(storeId, isArchived = false) {
-    const messages = await this.where({ id_toko: storeId })
+  static async getById(id, type, isArchived = false) {
+    const where = type === 'store' ? { id_toko: id } : { id_users: id };
+    const messages = await this.where(where)
       .query((qb) => {
         qb.whereNotIn('flagreceiver_messages', [
           MessageFlagStatus.DELETED,
@@ -73,7 +79,7 @@ class MessageModel extends bookshelf.Model {
           qb.whereNot('flagreceiver_messages', MessageFlagStatus.ARCHIVE);
         }
       })
-      .fetchAll({ withRelated: ['user'] });
+      .fetchAll({ withRelated: ['store'] });
     return await Promise.all(messages.map(async (message) => {
       await message.load({ detailMessages: qb => qb.limit(1) });
       return {

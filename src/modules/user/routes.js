@@ -13,6 +13,7 @@ import { UserController } from './controller';
 import { controller } from '../OTP';
 import core from '../core';
 import productConstraints from './../product/validation';
+import storeConstraints from './../store/validation';
 
 const routes = express.Router();
 const { apiResponse, auth, validateParam } = core.middleware;
@@ -216,6 +217,16 @@ routes.get('/users/discussions',
 routes.get('/users/store/discussions',
   auth(),
   wrap(UserController.getStoreDiscussions),
+  apiResponse());
+
+/**
+ * GET /users/messages
+ * Get list messages
+ */
+routes.get('/users/messages',
+  auth(),
+  validateParam(storeConstraints.get_messages),
+  wrap(UserController.getMessages),
   apiResponse());
 
 export default routes;
