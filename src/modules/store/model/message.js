@@ -104,7 +104,7 @@ class MessageModel extends bookshelf.Model {
     const column = type === 'store' ? 'flagreceiver_messages' : 'flagsender_messages';
     const message = await this.where(where)
       .query(qb => qb.whereNot(column, MessageFlagStatus.PERMANENT_DELETED))
-      .fetch({ withRelated: ['store', 'detailMessages'] });
+      .fetch({ withRelated: ['store', 'detailMessages.user'] });
     if (!message) throw getMessageError('message', 'not_found');
     return {
       ...message.serialize(),
