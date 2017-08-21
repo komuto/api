@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Expedition, ExpeditionService } from './model';
 import { Product } from './../product/model';
-import { BadRequestError } from '../../../common/errors';
+import { NotFoundError } from '../../../common/errors';
 
 export const ExpeditionController = {};
 export default { ExpeditionController };
@@ -54,7 +54,7 @@ ExpeditionController.getExpeditionService = async (req, res, next) => {
 ExpeditionController.getExpeditionCost = async (req, res, next) => {
   const { expedition, services } = await Expedition.getExpeditionNameAndServices(req.params.id);
   const cost = await Expedition.getCost(expedition, services, req.query);
-  if (cost.length === 0) throw new BadRequestError('No expedition found');
+  if (cost.length === 0) throw new NotFoundError('No expedition found');
   req.resData = {
     message: 'Expedition Cost Data',
     data: cost,
@@ -73,7 +73,7 @@ ExpeditionController.getExpeditionCostByProduct = async (req, res, next) => {
     const cost = await Expedition.getCost(val.expedition, val.services, req.query);
     costs.push(...cost.map(o => ({ ...o, expedition_id: val.expedition_id })));
   }
-  if (costs.length === 0) throw new BadRequestError('No expedition found');
+  if (costs.length === 0) throw new NotFoundError('No expedition found');
   req.resData = {
     message: 'Expedition Cost Data',
     data: costs,
