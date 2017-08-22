@@ -1,6 +1,7 @@
 import moment from 'moment';
 import core from '../core';
-import { getReviewError, createReviewError } from './messages';
+import { createReviewError } from './messages';
+import config from '../../../config';
 
 const bookshelf = core.postgres.db;
 const { parseNum, parseDate } = core.utils;
@@ -60,9 +61,11 @@ class ReviewModel extends bookshelf.Model {
    * @param data {Object}
    * @param {integer} pageSize limit
    * @param {integer} page
+   * @param {boolean} withProduct
    */
-  static async getAll(data, { pageSize, page }) {
+  static async getAll(data, { pageSize, page }, withProduct = false) {
     const withRelated = ['user'];
+    if (withProduct) withRelated.push('product.store');
     const reviews = await this.query((qb) => {
       if (data.store_id) {
         qb.innerJoin('produk', 'produk.id_produk', 'ulasan_produk.id_produk');
@@ -74,13 +77,26 @@ class ReviewModel extends bookshelf.Model {
     }).orderBy('-id_ulasanproduk')
       .fetchPage({ pageSize, page, withRelated });
     const { pageSize: limit, rowCount: total, pageCount: pages } = reviews.pagination;
-    const models = reviews.models.map((review) => {
-      const { name, id, photo } = review.related('user').serialize();
+    const models = await Promise.all(reviews.models.map(async (review) => {
+      const { id, name, photo } = review.related('user').serialize();
+      if (withProduct) {
+        const product = review.related('product');
+        const { id: pId, name: pName } = product.serialize();
+        const store = product.related('store').serialize({ favorite: true });
+        await product.load({ images: qb => qb.limit(1) });
+        let image = product.related('images').models[0];
+        image = image ? image.serialize() : config.defaultImage.product;
+        return {
+          ...review.serialize(),
+          product: { id: pId, name: pName, image: image.file, store },
+          user: { id, name, photo },
+        };
+      }
       return {
         ...review.serialize({ minimal: false }),
         user: { id, name, photo },
       };
-    });
+    }));
     return {
       pagination: { page: reviews.pagination.page, limit, total, pages },
       models,
