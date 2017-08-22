@@ -96,31 +96,20 @@ class DiscussionModel extends bookshelf.Model {
     let query = this.where({ id_users: data });
     if (isProduct) query = this.forge().where('id_produk', 'in', data);
     const discussions = await query.orderBy('tgl_diskusi', 'DESC')
-      .fetchPage({
-        page,
-        pageSize,
-        withRelated: [
-          {
-            'product.images': (qb) => {
-              qb.limit(0);
-            },
-          },
-        ],
-      })
-      .catch(() => {
-        throw getDiscussionError('discussion', 'not_found');
-      });
+      .fetchPage({ page, pageSize, withRelated: ['product'] })
+      .catch(() => { throw getDiscussionError('discussion', 'not_found'); });
 
-    return discussions.map((discussion) => {
+    return await Promise.all(discussions.map(async (discussion) => {
       let product = discussion.related('product');
-      const images = product.related('images');
+      await product.load({ images: qb => qb.limit(1) });
+      const image = product.related('images').models[0];
       product = product.serialize({ minimal: true });
-      product.image = images.length ? images[0].file : config.defaultImage.product;
+      product.image = image ? image.serialize().file : config.defaultImage.product;
       return {
         ...discussion.serialize({ minimal: true }),
         product,
       };
-    });
+    }));
   }
 
   /**
