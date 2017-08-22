@@ -14,14 +14,12 @@ import {
   DropshipStatus,
   View,
 } from './model';
-import { Wishlist } from './../user/model';
-import { model as storeModel } from '../store';
-import { getProductError, createProductError, getCatalogProductsError, errMsg } from './messages';
+import { Wishlist } from '../user/model';
+import { Store, Catalog } from '../store/model';
+import { getProductError, createProductError, getCatalogProductsError, addDropshipProductError, errMsg } from './messages';
 import { ReportEmail } from './email';
 import config from './../../../config';
 import { BadRequestError } from './../../../common/errors';
-
-const { Store, Catalog } = storeModel;
 
 export const ProductController = {};
 export default { ProductController };
@@ -221,10 +219,20 @@ ProductController.report = async (req, res, next) => {
  * Dropship product
  */
 ProductController.dropship = async (req, res, next) => {
+  const productId = req.params.id;
+  const catalogId = req.body.catalog_id;
   const storeId = await Store.getStoreId(req.user.id);
+  const [product, catalog] = await Promise.all([
+    Product.where({ id_produk: productId }).fetch(),
+    Catalog.where({ id_katalog: catalogId, id_toko: storeId }).fetch()]);
+
+  if (!product.get('is_dropshiper')) throw addDropshipProductError('product', 'product_not_dropship');
+  if (!catalog) throw addDropshipProductError('catalog', 'catalog_not_found');
+  if (product.get('id_toko') === storeId) throw addDropshipProductError('product', 'own_product');
+
   const data = Dropship.matchDBColumn({
-    product_id: req.params.id,
-    catalog_id: req.body.catalog_id,
+    product_id: productId,
+    catalog_id: catalogId,
     store_id: storeId,
     status: DropshipStatus.SELECTED,
     status_at: moment(),
