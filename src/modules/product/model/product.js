@@ -663,6 +663,12 @@ class ProductModel extends bookshelf.Model {
     return expeditions;
   }
 
+  static async getOwner(id) {
+    const product = await this.where({ id_produk: id }).fetch({ withRelated: ['store.user'] });
+    const store = product.related('store');
+    return store.related('user');
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data
