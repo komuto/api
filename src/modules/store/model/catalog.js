@@ -181,7 +181,9 @@ class CatalogModel extends bookshelf.Model {
           };
         product = {
           ...product.serialize({ minimal: true }),
-          image: images.length ? images[0].file : config.defaultImage.product };
+          image: images.length ? images[0].file : config.defaultImage.product,
+          is_checked: false,
+        };
         if (dropshipOrigin) product.dropship_origin = dropshipOrigin;
         return product;
       });
