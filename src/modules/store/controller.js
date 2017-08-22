@@ -88,7 +88,7 @@ StoreController.createMessage = async (req, res, next) => {
     content: req.body.content,
     created_at: new Date(),
   });
-  Notification.send(buyerNotification.MESSAGE, req.user.reg_token);
+  if (req.user.reg_token) Notification.send(buyerNotification.MESSAGE, req.user.reg_token);
   const detailMessage = await DetailMessage.create(detailMessageObj);
   req.resData = {
     message: 'Message Data',
