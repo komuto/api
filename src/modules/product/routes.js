@@ -97,18 +97,18 @@ routes.post('/products/:id([0-9]{1,10})/discussions',
   apiResponse());
 
 /**
- * GET /products/id/discussions/discussion_id/comments
+ * GET /discussions/id/comments
  * Get all comments of a discussion
  */
-routes.get('/products/:id([0-9]{1,10})/discussions/:discussion_id([0-9]{1,10})/comments',
+routes.get('/discussions/:id([0-9]{1,10})/comments',
   wrap(ProductController.getComments),
   apiResponse());
 
 /**
- * POST /products/id/discussions/discussion_id/comments
+ * POST /discussions/id/comments
  * Create comment
  */
-routes.post('/products/:id([0-9]{1,10})/discussions/:discussion_id([0-9]{1,10})/comments',
+routes.post('/discussions/:id([0-9]{1,10})/comments',
   auth(),
   validateParam(constraints.comment, true),
   wrap(ProductController.createComment),

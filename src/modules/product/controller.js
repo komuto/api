@@ -150,7 +150,7 @@ ProductController.getDiscussions = async (req, res, next) => {
 ProductController.getComments = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const comments = await Comment.getByDiscussionId(req.params.discussion_id, page, pageSize);
+  const comments = await Comment.getByDiscussionId(req.params.id, page, pageSize);
   req.resData = {
     message: 'Discussion Comments Data',
     meta: { page, limit: pageSize },
@@ -184,7 +184,7 @@ ProductController.createDiscussion = async (req, res, next) => {
 ProductController.createComment = async (req, res, next) => {
   const data = Comment.matchDBColumn({
     user_id: req.user.id,
-    discussion_id: req.params.discussion_id,
+    discussion_id: req.params.id,
     content: req.body.content,
     created_at: moment(),
     is_deleted: 0,
