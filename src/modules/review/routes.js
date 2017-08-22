@@ -42,4 +42,13 @@ routes.get('/users/reviews',
   wrap(ReviewController.getUserReviews),
   apiResponse());
 
+/**
+ * GET /users/store/reviews
+ * Get all reviews of store
+ */
+routes.get('/users/store/reviews',
+  auth(),
+  wrap(ReviewController.getStoreReviews),
+  apiResponse());
+
 export default routes;
