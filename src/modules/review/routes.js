@@ -33,4 +33,13 @@ routes.post('/products/:id([0-9]{1,10})/reviews',
   wrap(ReviewController.createReview),
   apiResponse());
 
+/**
+ * GET /users/reviews
+ * Get all reviews of user
+ */
+routes.get('/users/reviews',
+  auth(),
+  wrap(ReviewController.getUserReviews),
+  apiResponse());
+
 export default routes;
