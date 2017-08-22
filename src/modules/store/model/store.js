@@ -26,12 +26,16 @@ class StoreModel extends bookshelf.Model {
     return 'id_toko';
   }
 
-  serialize({ favorite = false, verified = false } = {}) {
+  serialize({ favorite = false, verified = false, message = false } = {}) {
     const store = {
       id: this.get('id_toko'),
       name: this.get('nama_toko'),
       logo: core.imagePath(IMAGE_PATH, this.get('logo_toko')),
     };
+    if (message) {
+      store.user_id = this.get('id_users');
+      return store;
+    }
     if (favorite) return store;
     if (verified) {
       store.is_verified = this.related('verifyAddress').length !== 0;

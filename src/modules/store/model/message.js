@@ -27,7 +27,7 @@ class MessageModel extends bookshelf.Model {
     return {
       id: this.get('id_messages'),
       store_id: this.relations.store ? undefined : this.get('id_toko'),
-      store: this.relations.store ? this.related('store').serialize({ favorite: true }) : undefined,
+      store: this.relations.store ? this.related('store').serialize({ message: true }) : undefined,
       user_id: this.get('id_users'),
       subject: this.get('subject_messages'),
       flag_sender: parseNum(this.get('flagsender_messages')),

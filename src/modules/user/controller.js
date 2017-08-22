@@ -9,6 +9,9 @@ import { BadRequestError } from '../../../common/errors';
 import { Store, StoreExpedition, Message, MessageFlagStatus, DetailMessage } from './../store/model';
 import { userUpdateError, resetPassError, registrationError, activateUserError, fbError } from './messages';
 import { Discussion, Product } from '../product/model';
+import core from '../core';
+
+const { Notification, buyerNotification } = core;
 
 const fb = new Facebook(config.fb);
 
@@ -348,13 +351,15 @@ UserController.deleteMessage = async (req, res, next) => {
  * Reply Message
  */
 UserController.replyMessage = async (req, res, next) => {
-  await Message.findById(req.params.id, req.user.id, 'user');
+  const msg = await Message.findById(req.params.id, req.user.id, 'user');
   const data = DetailMessage.matchDBColumn(_.assign(req.body, {
     message_id: req.params.id,
     user_id: req.user.id,
     created_at: moment(),
   }));
   const detailMessage = await DetailMessage.create(data);
+  const user = await User.getById(msg.store.user_id);
+  if (user.get('reg_token')) Notification.send(buyerNotification.MESSAGE, user.get('reg_token'));
   req.resData = { data: detailMessage };
   return next();
 };
