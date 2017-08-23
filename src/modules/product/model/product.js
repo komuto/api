@@ -582,8 +582,14 @@ class ProductModel extends bookshelf.Model {
   static async moveCatalog(storeId, ids, catalogId) {
     // eslint-disable-next-line no-restricted-syntax
     for (const id of ids) {
-      await this.where({ id_toko: storeId, id_produk: id })
-        .save({ identifier_katalog: catalogId }, { patch: true }).catch(() => {});
+      const where = { id_toko: storeId, id_produk: id };
+      const product = await this.where(where).fetch();
+      if (!product) {
+        const dropship = await Dropship.where(where).fetch();
+        await dropship.save({ id_katalog: catalogId }, { patch: true }).catch(() => {});
+      } else {
+        await product.save({ identifier_katalog: catalogId }, { patch: true }).catch(() => {});
+      }
     }
   }
 
