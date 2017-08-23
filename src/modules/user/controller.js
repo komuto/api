@@ -11,7 +11,7 @@ import { userUpdateError, resetPassError, registrationError, activateUserError, 
 import { Discussion, Product } from '../product/model';
 import core from '../core';
 
-const { Notification, buyerNotification } = core;
+const { Notification, sellerNotification } = core;
 
 const fb = new Facebook(config.fb);
 
@@ -359,7 +359,7 @@ UserController.replyMessage = async (req, res, next) => {
   }));
   const detailMessage = await DetailMessage.create(data);
   const user = await User.getById(msg.store.user_id);
-  if (user.get('reg_token')) Notification.send(buyerNotification.MESSAGE, user.get('reg_token'));
+  if (user.get('reg_token')) Notification.send(sellerNotification.MESSAGE, user.get('reg_token'));
   req.resData = { data: detailMessage };
   return next();
 };

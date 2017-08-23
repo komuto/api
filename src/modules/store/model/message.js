@@ -54,9 +54,10 @@ class MessageModel extends bookshelf.Model {
    * @param data
    */
   static async create(data) {
-    return await new this(data).save().catch(() => {
+    const message = await new this(data).save().catch(() => {
       throw createMessageError('message', 'error');
     });
+    return message.refresh({ withRelated: ['store.user'] });
   }
 
   /**

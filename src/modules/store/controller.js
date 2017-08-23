@@ -19,7 +19,7 @@ import { OTPAddressEmail } from '../OTP/email';
 import config from '../../../config';
 import core from '../core';
 
-const { Notification, buyerNotification } = core;
+const { Notification, sellerNotification, buyerNotification } = core;
 
 export const StoreController = {};
 export default { StoreController };
@@ -88,9 +88,10 @@ StoreController.createMessage = async (req, res, next) => {
     content: req.body.content,
     created_at: new Date(),
   });
-  // TODO: send notification to store owner
-  if (req.user.reg_token) Notification.send(buyerNotification.MESSAGE, req.user.reg_token);
   const detailMessage = await DetailMessage.create(detailMessageObj);
+  const store = message.related('store');
+  const storeOwner = store.related('user');
+  if (storeOwner.get('reg_token')) Notification.send(sellerNotification.MESSAGE, storeOwner.get('reg_token'));
   req.resData = {
     message: 'Message Data',
     data: { message, detailMessage },

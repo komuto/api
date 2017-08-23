@@ -1,28 +1,5 @@
 import firebaseadmin from 'firebase-admin';
 
-export const buyerNotification = {
-  MESSAGE: {
-    title: 'Komuto',
-    body: 'Anda memiliki pesan baru',
-    type: 'BUYER_MESSAGE',
-  },
-  DISCUSSION: {
-    title: 'Komuto',
-    body: 'Anda memiliki diskusi baru',
-    type: 'BUYER_DISCUSSION',
-  },
-  REVIEW: {
-    title: 'Komuto',
-    body: 'Anda memiliki review baru',
-    type: 'BUYER_REVIEW',
-  },
-  RESOLUTION: {
-    title: 'Komuto',
-    body: 'Anda memiliki resolusi baru',
-    type: 'BUYER_RESOLUTION',
-  },
-};
-
 export const sellerNotification = {
   MESSAGE: {
     title: 'Komuto',
@@ -31,18 +8,41 @@ export const sellerNotification = {
   },
   DISCUSSION: {
     title: 'Komuto',
-    body: 'Penjual mengomentari diskusi anda',
+    body: 'Anda memiliki diskusi baru',
     type: 'SELLER_DISCUSSION',
   },
   REVIEW: {
     title: 'Komuto',
-    body: 'Penjual mengomentari review anda',
+    body: 'Anda memiliki review baru',
     type: 'SELLER_REVIEW',
   },
   RESOLUTION: {
     title: 'Komuto',
-    body: 'Penjual mengomentari pusat resolusi',
+    body: 'Anda memiliki resolusi baru',
     type: 'SELLER_RESOLUTION',
+  },
+};
+
+export const buyerNotification = {
+  MESSAGE: {
+    title: 'Komuto',
+    body: 'Anda memiliki pesan baru',
+    type: 'BUYER_MESSAGE',
+  },
+  DISCUSSION: {
+    title: 'Komuto',
+    body: 'Penjual mengomentari diskusi anda',
+    type: 'BUYER_DISCUSSION',
+  },
+  REVIEW: {
+    title: 'Komuto',
+    body: 'Penjual mengomentari review anda',
+    type: 'BUYER_REVIEW',
+  },
+  RESOLUTION: {
+    title: 'Komuto',
+    body: 'Penjual mengomentari pusat resolusi',
+    type: 'BUYER_RESOLUTION',
   },
 };
 

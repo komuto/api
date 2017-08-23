@@ -4,7 +4,7 @@ import { Store } from '../store/model';
 import { Product } from '../product/model';
 import core from '../core';
 
-const { Notification, buyerNotification } = core;
+const { Notification, sellerNotification } = core;
 
 export const ReviewController = {};
 export default { ReviewController };
@@ -15,7 +15,7 @@ ReviewController.createReview = async (req, res, next) => {
   if (await Review.getByOtherId(req.user.id, req.params.id)) throw createReviewError('review', 'duplicate');
   const review = await Review.create(Review.matchDBColumn(req.body));
   const user = await Product.getOwner(req.params.id);
-  if (user.get('reg_token')) Notification.send(buyerNotification.REVIEW, user.get('reg_token'));
+  if (user.get('reg_token')) Notification.send(sellerNotification.REVIEW, user.get('reg_token'));
   req.resData = { data: review };
   return next();
 };
