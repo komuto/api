@@ -40,6 +40,12 @@ export const errMsg = {
     title: 'Get catalog products gagal',
     not_found: 'Katalog tidak ditemukan',
   },
+  addDropshipProducts: {
+    title: 'Gagal menambah product dropship',
+    own_product: 'Tidak bisa menambah produk sendiri',
+    catalog_not_found: 'Katalog tidak ditemukan',
+    product_not_dropship: 'Produk tidak bisa dijadikan dropship',
+  },
 };
 
 export const getProductError = formatError.bind(errMsg.getProduct);
@@ -57,4 +63,6 @@ export const createReportError = formatError.bind(errMsg.createReport);
 export const getCatalogProductsError = formatError.bind(errMsg.getCatalogProducts);
 
 export const updateProductError = formatError.bind(errMsg.updateProduct);
+
+export const addDropshipProductError = formatError.bind(errMsg.addDropshipProducts);
 
