@@ -88,6 +88,7 @@ StoreController.createMessage = async (req, res, next) => {
     content: req.body.content,
     created_at: new Date(),
   });
+  // TODO: send notification to store owner
   if (req.user.reg_token) Notification.send(buyerNotification.MESSAGE, req.user.reg_token);
   const detailMessage = await DetailMessage.create(detailMessageObj);
   req.resData = {

@@ -226,7 +226,7 @@ ProductController.dropship = async (req, res, next) => {
     product_id: req.params.id,
     catalog_id: req.body.catalog_id,
     store_id: storeId,
-    status: DropshipStatus.SELECTED,
+    status: DropshipStatus.SHOW,
     status_at: moment(),
     created_at: moment(),
   });

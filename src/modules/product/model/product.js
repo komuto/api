@@ -533,7 +533,7 @@ class ProductModel extends bookshelf.Model {
   }
 
   static async countProductsByCatalog(catalogIds, storeId, status) {
-    const dropshipStatus = DropshipStatus.SELECTED;
+    const dropshipStatus = DropshipStatus.SHOW;
     const productStatus = status;
     return await Promise.all(catalogIds.map(id => this.query((qb) => {
       qb.count('produk.id_produk as count_product');
@@ -556,13 +556,20 @@ class ProductModel extends bookshelf.Model {
   static async hides(storeId, ids) {
     // eslint-disable-next-line no-restricted-syntax
     for (const id of ids) {
-      const product = await this.where({ id_toko: storeId, id_produk: id }).fetch().catch(() => {});
-      // eslint-disable-next-line no-continue
-      if (!product) continue;
-      const status = parseNum(product.toJSON().status) === ProductStatus.HIDE
-        ? ProductStatus.SHOW : ProductStatus.HIDE;
-      await this.where({ id_toko: storeId, id_produk: id })
-        .save({ status_produk: status }, { patch: true }).catch(() => {});
+      const where = { id_toko: storeId, id_produk: id };
+      const product = await this.where(where).fetch().catch(() => {});
+      if (!product) {
+        const dropship = await Dropship.where(where).fetch();
+        // eslint-disable-next-line no-continue
+        if (!dropship) continue;
+        const status = parseNum(dropship.toJSON().status) === DropshipStatus.HIDE
+          ? DropshipStatus.SHOW : DropshipStatus.HIDE;
+        await dropship.save({ status_dropshipper: status }, { patch: true }).catch(() => {});
+      } else {
+        const status = parseNum(product.toJSON().status) === ProductStatus.HIDE
+          ? ProductStatus.SHOW : ProductStatus.HIDE;
+        await product.save({ status_produk: status }, { patch: true }).catch(() => {});
+      }
     }
   }
 
@@ -625,9 +632,8 @@ class ProductModel extends bookshelf.Model {
       ],
     };
     let product = await this.where(where).fetch(related);
-    let dropship;
     if (!product) {
-      dropship = await Dropship.where(where).fetch({ withRelated: ['catalog'] });
+      const dropship = await Dropship.where(where).fetch({ withRelated: ['catalog'] });
       if (!dropship) throw getProductError('product', 'not_found');
       product = await this.where({ id_produk: dropship.get('id_produk') }).fetch(related);
     }

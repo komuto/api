@@ -125,7 +125,7 @@ class CatalogModel extends bookshelf.Model {
   }
 
   static async loadProducts(catalogIds, storeId, limit, status) {
-    const dropshipStatus = DropshipStatus.SELECTED;
+    const dropshipStatus = DropshipStatus.SHOW;
     const productStatus = status;
     return await Promise.all(catalogIds.map(id => Product.query((qb) => {
       qb.select(['produk.*', 'd.id_dropshipper', 'nama_toko']);

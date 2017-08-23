@@ -5,8 +5,8 @@ const bookshelf = core.postgres.db;
 const { parseDate, parseNum } = core.utils;
 
 export const DropshipStatus = {
-  UNSELECTED: 0,
-  SELECTED: 1,
+  HIDE: 0,
+  SHOW: 1,
 };
 
 class DropshipModel extends bookshelf.Model {
