@@ -596,9 +596,18 @@ class ProductModel extends bookshelf.Model {
     const errors = [];
     // eslint-disable-next-line no-restricted-syntax
     for (const id of ids) {
-      await this.where({ id_toko: storeId, id_produk: id }).destroy().catch((err) => {
-        if (err) errors.push({ product_id: id, error: errMsg.bulkDeleteProduct.error });
-      });
+      const where = { id_toko: storeId, id_produk: id };
+      const product = await this.where(where).fetch();
+      if (!product) {
+        const dropship = await Dropship.where(where).fetch();
+        await dropship.destroy().catch(() => {
+          errors.push({ product_id: id, error: errMsg.bulkDeleteProduct.error });
+        });
+      } else {
+        await product.destroy().catch(() => {
+          errors.push({ product_id: id, error: errMsg.bulkDeleteProduct.error });
+        });
+      }
     }
     return errors;
   }
