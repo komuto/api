@@ -1,3 +1,4 @@
+import Promise from 'bluebird';
 import core from '../../core';
 import { createCatalogError, getCatalogError, updateCatalogError } from './../messages';
 import config from './../../../../config';
@@ -127,6 +128,7 @@ class CatalogModel extends bookshelf.Model {
   static async loadProducts(catalogIds, storeId, limit, status) {
     const dropshipStatus = DropshipStatus.SHOW;
     const productStatus = status;
+    const pagination = { page: 1, pageSize: 5 };
     return await Promise.all(catalogIds.map(id => Product.query((qb) => {
       qb.select(['produk.*', 'd.id_dropshipper', 'nama_toko']);
       qb.leftJoin('dropshipper as d', 'produk.id_produk', 'd.id_produk');
@@ -140,7 +142,7 @@ class CatalogModel extends bookshelf.Model {
       else qb.whereNull('identifier_katalog');
       qb.orderBy('id_produk', 'DESC');
       if (limit) qb.limit(3);
-    }).fetchAll({ withRelated: [{ images: qb => qb.limit(1) }] })));
+    }).fetchPage(pagination)));
   }
 
   static async loadCatalog(storeId, catalogId) {
@@ -170,8 +172,11 @@ class CatalogModel extends bookshelf.Model {
       : Product.countProductsByCatalog(catalogIds, storeId, status);
     const [products, countProducts] = await Promise.all([getProducts, getCountProducts]);
 
-    return catalogs.reduce((data, catalog, index) => {
-      const catalogProducts = products[index].map((product) => {
+    return await Promise.reduce(catalogs.models, async (data, catalog, index) => {
+      const catalogProducts = [];
+      // eslint-disable-next-line no-restricted-syntax
+      for (let product of products[index].models) {
+        await product.load({ images: qb => qb.limit(1) });
         const images = product.related('images').serialize();
         const dropshipOrigin = !product.get('id_dropshipper') ? false
           : {
@@ -185,8 +190,8 @@ class CatalogModel extends bookshelf.Model {
           is_checked: false,
         };
         if (dropshipOrigin) product.dropship_origin = dropshipOrigin;
-        return product;
-      });
+        catalogProducts.push(product);
+      }
       catalog = catalog !== 0 ? catalog.serialize() : { name: 'Tanpa Katalog' };
       if (catalogId === undefined) {
         catalog.count_product = countProducts[index] ? parseNum(countProducts[index].get('count_product')) : 0;
