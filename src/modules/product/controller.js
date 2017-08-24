@@ -268,10 +268,19 @@ ProductController.storeCatalogProducts = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const hidden = req.query.hidden && JSON.parse(req.query.hidden);
   const catalogId = req.params.id || 0;
-  const products = await Catalog.getCatalogWithProducts({ storeId, hidden, catalogId });
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const products = await Catalog.getCatalogWithProducts({
+    storeId,
+    hidden,
+    catalogId,
+    page,
+    pageSize,
+  });
   if (!products.length) throw getCatalogProductsError('catalog_id', 'not_found');
   req.resData = {
     message: 'Store Catalog Products Data',
+    meta: { page, limit: pageSize },
     data: products[0],
   };
   return next();

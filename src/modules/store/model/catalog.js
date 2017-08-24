@@ -125,10 +125,10 @@ class CatalogModel extends bookshelf.Model {
     return !!catalog;
   }
 
-  static async loadProducts(catalogIds, storeId, limit, status) {
+  static async loadProducts(catalogIds, storeId, limit, status, page, pageSize) {
     const dropshipStatus = DropshipStatus.SHOW;
     const productStatus = status;
-    const pagination = { page: 1, pageSize: 5 };
+    const pagination = page && pageSize ? { page, pageSize } : {};
     return await Promise.all(catalogIds.map(id => Product.query((qb) => {
       qb.select(['produk.*', 'd.id_dropshipper', 'nama_toko']);
       qb.leftJoin('dropshipper as d', 'produk.id_produk', 'd.id_produk');
@@ -155,7 +155,7 @@ class CatalogModel extends bookshelf.Model {
    * Get catalog with products
    */
   static async getCatalogWithProducts(params) {
-    const { storeId, hidden, catalogId } = params;
+    const { storeId, hidden, catalogId, page = null, pageSize = null } = params;
     const status = hidden === true ? ProductStatus.HIDE : ProductStatus.SHOW;
 
     const catalogs = catalogId !== 0 ? await this.loadCatalog(storeId, catalogId) : [];
@@ -167,12 +167,12 @@ class CatalogModel extends bookshelf.Model {
       else catalogs.push(0);
     }
 
-    const getProducts = this.loadProducts(catalogIds, storeId, !catalogId, status);
+    const getProducts = this.loadProducts(catalogIds, storeId, !catalogId, status, page, pageSize);
     const getCountProducts = catalogId ? []
       : Product.countProductsByCatalog(catalogIds, storeId, status);
     const [products, countProducts] = await Promise.all([getProducts, getCountProducts]);
 
-    return await Promise.reduce(catalogs.models, async (data, catalog, index) => {
+    return await Promise.reduce(catalogs.models || catalogs, async (data, catalog, index) => {
       const catalogProducts = [];
       // eslint-disable-next-line no-restricted-syntax
       for (let product of products[index].models) {
