@@ -80,16 +80,21 @@ export function pathNotFound() {
   };
 }
 
-export function errResponse() {
-  // eslint-disable-next-line no-unused-vars
+export function errResponse() { // eslint-disable-next-line no-unused-vars
   return (err, req, res, next) => {
     const statusCode = err.httpStatus || 406;
-    res.status(statusCode).json({
+    const response = {
       status: false,
       code: err.httpStatus || 406,
       message: err.message,
       data: err.data || {},
-    });
+    };
+    if (config.env !== 'development') {
+      response.code = 400;
+      response.message = 'Something went wrong';
+      response.data = {};
+    }
+    res.status(statusCode).json(response);
   };
 }
 
