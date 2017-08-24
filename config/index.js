@@ -94,9 +94,11 @@ def.cache.duration = 1800000; // in ms: 30 minutes
 // secret key for encode marketplace id
 def.secretKey = '9a4c5dee925f';
 
-// Doku auth
-def.sharedKey = '3iVKd220tSAz';
-def.mallId = '4533';
+// Midtrans auth
+def.midtrans = {};
+def.midtrans.clientKey = 'VT-client-2kdvJYszbJGhsBYH';
+def.midtrans.serverKey = 'VT-server-GbE4FnysSEzYC-jF_kC1x0hZ';
+def.midtrans.isProduction = false;
 
 cfg.resolveLocalConfig(__dirname, (err, file) => {
   // eslint-disable-next-line global-require, import/no-dynamic-require

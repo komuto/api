@@ -9,12 +9,7 @@ const { apiResponse, auth, validateParam } = core.middleware;
 
 routes.get('/payments',
   auth(),
-  wrap(PaymentController.getDokuData),
-  apiResponse());
-
-routes.post('/payments',
-  auth(),
-  wrap(PaymentController.store),
+  wrap(PaymentController.getSnapToken),
   apiResponse());
 
 /**

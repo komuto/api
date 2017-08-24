@@ -1,6 +1,5 @@
 import _ from 'lodash';
-import sha1 from 'sha1';
-import Doku from 'doku';
+import Midtrans from 'midtrans-nodex';
 import moment from 'moment';
 import randomInt from 'random-int';
 import {
@@ -12,7 +11,11 @@ import { Bucket, BucketStatus } from './../bucket/model';
 import { BankAccount } from '../bank/model';
 import config from '../../../config';
 
-const doku = new Doku(config.mallId, config.sharedKey);
+const midtrans = new Midtrans({
+  clientKey: config.midtrans.clientKey,
+  serverKey: config.midtrans.serverKey,
+  isProduction: config.midtrans.isProduction,
+});
 
 export const PaymentController = {};
 export default { PaymentController };
@@ -47,87 +50,57 @@ PaymentController.viaBank = async (req, res, next) => {
   return next();
 };
 
-PaymentController.getDokuData = async (req, res, next) => {
-  const total = await Bucket.getTotalPrice(req.user.id);
-  const amount = `${total}.00`;
-  const invoice = `INVOICE_${randomInt(10000, 99999)}`;
-  const currency = '360';
-  const words = doku.doCreateWords({ amount, invoice, currency });
-  req.resData = {
-    message: 'Doku Data',
-    data: {
-      invoice,
-      currency,
-      amount,
-      words,
-      chain_merchant: 'NA',
+PaymentController.getSnapToken = async (req, res, next) => {
+  const bucket = await Bucket.getDetail(req.user.id);
+  let total = 0;
+  const itemDetails = bucket.items.map((item) => {
+    total += item.total_price;
+    return {
+      id: `ITEM-${item.id}`,
+      price: item.total_price,
+      quantity: item.qty,
+      name: item.product.name,
+    };
+  });
+  const payload = {
+    transaction_details: {
+      order_id: `ORDER-${randomInt(10000, 99999)}`,
+      gross_amount: total,
     },
+    item_details: itemDetails,
+    customer_details: {
+      first_name: req.user.name,
+      last_name: req.user.name,
+      email: req.user.email,
+      phone: req.user.phone_number,
+      billing_address: {
+        first_name: 'TEST',
+        last_name: 'MIDTRANSER',
+        email: 'test@midtrans.com',
+        phone: '081 2233 44-55',
+        address: 'Sudirman',
+        city: 'Jakarta',
+        postal_code: '12190',
+        country_code: 'IDN',
+      },
+      shipping_address: {
+        first_name: 'TEST',
+        last_name: 'MIDTRANSER',
+        email: 'test@midtrans.com',
+        phone: '0 8128-75 7-9338',
+        address: 'Sudirman',
+        city: 'Jakarta',
+        postal_code: '12190',
+        country_code: 'IDN',
+      },
+    },
+  };
+  const token = await midtrans.snap.transactions(payload);
+  req.resData = {
+    message: 'Snap Token',
+    data: token.data,
   };
   return next();
-};
-
-PaymentController.store = async (req, res, next) => {
-  const token = req.body.token;
-  const pairingCode = req.body.pairing_code;
-  const invoiceNo = req.body.invoice_no;
-  const amount = '10000.00';
-
-  const params = {
-    token,
-    amount,
-    invoice: invoiceNo,
-    currency: '360',
-    pairing_code: pairingCode,
-  };
-
-  const words = doku.doCreateWords(params);
-
-  const basket = [
-    {
-      name: 'sayur',
-      amount: '10000.00',
-      quantity: '1',
-      subtotal: '10000.00',
-    },
-  ];
-
-  const customer = {
-    name: req.user.name,
-    data_phone: req.user.phone_number,
-    data_email: req.user.email,
-    data_address: 'yogyakarta',
-  };
-
-  const date = moment().format('YMMDDHHmmss');
-
-  const dataPayment = {
-    req_mall_id: doku.getMallId(),
-    req_chain_merchant: 'NA',
-    req_amount: amount,
-    req_words: words,
-    req_purchase_amount: amount,
-    req_trans_id_merchant: invoiceNo,
-    req_request_date_time: date,
-    req_currency: '360',
-    req_purchase_currency: '360',
-    req_session_id: sha1(date),
-    req_name: customer.name,
-    req_payment_channel: 15,
-    req_basket: doku.formatBasket(basket),
-    req_email: customer.email,
-    req_token_id: token,
-  };
-
-  doku.doPayment(dataPayment, (response) => {
-    const obj = JSON.parse(JSON.stringify(response));
-    if (obj.res_response_msg === 'SUCCESS' && obj.res_response_code === '0000') {
-      console.log('SUCCESS RESPONSE', obj);
-    } else {
-      console.log('FAILED RESPONSE', obj);
-    }
-    req.resData = { data: obj };
-    return next();
-  });
 };
 
 PaymentController.listTransactions = async (req, res, next) => {
