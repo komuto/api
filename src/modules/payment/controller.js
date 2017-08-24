@@ -10,12 +10,14 @@ import {
 import { Bucket, BucketStatus } from './../bucket/model';
 import { BankAccount } from '../bank/model';
 import config from '../../../config';
+import core from '../core';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
   serverKey: config.midtrans.serverKey,
   isProduction: config.midtrans.isProduction,
 });
+const { getName } = core.utils;
 
 export const PaymentController = {};
 export default { PaymentController };
@@ -62,6 +64,7 @@ PaymentController.getSnapToken = async (req, res, next) => {
       name: item.product.name,
     };
   });
+  const { firstName, lastName } = getName(req.user.name);
   const payload = {
     transaction_details: {
       order_id: `ORDER-${randomInt(10000, 99999)}`,
@@ -69,30 +72,10 @@ PaymentController.getSnapToken = async (req, res, next) => {
     },
     item_details: itemDetails,
     customer_details: {
-      first_name: req.user.name,
-      last_name: req.user.name,
+      first_name: firstName,
+      last_name: lastName,
       email: req.user.email,
       phone: req.user.phone_number,
-      billing_address: {
-        first_name: 'TEST',
-        last_name: 'MIDTRANSER',
-        email: 'test@midtrans.com',
-        phone: '081 2233 44-55',
-        address: 'Sudirman',
-        city: 'Jakarta',
-        postal_code: '12190',
-        country_code: 'IDN',
-      },
-      shipping_address: {
-        first_name: 'TEST',
-        last_name: 'MIDTRANSER',
-        email: 'test@midtrans.com',
-        phone: '0 8128-75 7-9338',
-        address: 'Sudirman',
-        city: 'Jakarta',
-        postal_code: '12190',
-        country_code: 'IDN',
-      },
     },
   };
   const token = await midtrans.snap.transactions(payload);

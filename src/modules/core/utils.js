@@ -101,3 +101,10 @@ export function matchDB(input, columnName) {
     return matched;
   }, {});
 }
+
+export function getName(str) {
+  const name = str.split(' ');
+  const firstName = name.splice(0, 1)[0];
+  const lastName = name.length ? name.join(' ') : firstName;
+  return { firstName, lastName };
+}
