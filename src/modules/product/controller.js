@@ -94,7 +94,6 @@ ProductController.createProduct = async (req, res, next) => {
   req.body.other_attr = '0';
   req.body.date_created = moment();
   req.body.date_status = req.body.date_created;
-  req.body.status = ProductStatus.SHOW;
   if (req.body.is_insurance !== undefined) req.body.is_insurance = req.body.is_insurance ? 1 : 0;
   if (req.body.catalog_id) {
     if ((await Catalog.checkCatalog(req.body.store_id, req.body.catalog_id)) === false) {

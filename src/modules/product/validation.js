@@ -116,6 +116,13 @@ constraints.createProduct = {
       message: 'must be number of 0 (used) or 1 (new)',
     },
   },
+  status: {
+    presence: true,
+    inclusion: {
+      within: [0, 1],
+      message: 'must be number of 0 (hide) or 1 (show)',
+    },
+  },
   is_insurance: {
     presence: true,
     inclusion: {
