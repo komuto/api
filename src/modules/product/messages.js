@@ -45,6 +45,7 @@ export const errMsg = {
     own_product: 'Tidak bisa menambah produk sendiri',
     catalog_not_found: 'Katalog tidak ditemukan',
     product_not_dropship: 'Produk tidak bisa dijadikan dropship',
+    duplicate: 'Produk sudah ada di daftar dropship',
   },
 };
 

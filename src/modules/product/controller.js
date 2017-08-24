@@ -9,7 +9,6 @@ import {
   Wholesale,
   ImageProduct,
   ProductExpedition,
-  ProductStatus,
   Dropship,
   DropshipStatus,
   View,
@@ -221,9 +220,14 @@ ProductController.dropship = async (req, res, next) => {
   const productId = req.params.id;
   const catalogId = req.body.catalog_id;
   const storeId = await Store.getStoreId(req.user.id);
+
+  const found = await Dropship.findDuplicate(productId, storeId);
+  if (found) throw addDropshipProductError('product', 'duplicate');
+
   const [product, catalog] = await Promise.all([
     Product.where({ id_produk: productId }).fetch(),
-    Catalog.where({ id_katalog: catalogId, id_toko: storeId }).fetch()]);
+    Catalog.where({ id_katalog: catalogId, id_toko: storeId }).fetch(),
+  ]);
 
   if (!product.get('is_dropshiper')) throw addDropshipProductError('product', 'product_not_dropship');
   if (!catalog) throw addDropshipProductError('catalog', 'catalog_not_found');
