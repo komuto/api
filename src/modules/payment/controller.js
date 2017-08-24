@@ -103,3 +103,10 @@ PaymentController.detailTransaction = async (req, res, next) => {
   };
   return next();
 };
+
+PaymentController.notification = async (req, res, next) => {
+  console.log('\n=== MIDTRANS ===');
+  console.log(req.body);
+  console.log('\n');
+  return next();
+};

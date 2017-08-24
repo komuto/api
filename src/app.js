@@ -27,6 +27,7 @@ import otp from './modules/OTP';
 import payment from './modules/payment';
 import marketplace from './modules/marketplace';
 import saldo from './modules/saldo';
+import midtrans from './modules/midtrans';
 
 const app = express();
 
@@ -72,12 +73,14 @@ app.use(core.middleware.requestUtilsMiddleware());
 
 app.prefix = (router => (app.use('/:mp', router)));
 
+app.use(core.routes);
+app.use(midtrans.routes);
+
 app.prefix(marketplace.middleware.verify());
 app.prefix(image.routes);
 
 app.use(core.middleware.checkContentType());
 
-app.use(core.routes);
 app.prefix(user.routes);
 app.prefix(category.routes);
 app.prefix(expedition.routes);
