@@ -38,6 +38,16 @@ constraints.create_message = {
 
 constraints.reply_message = { content: { presence: true } };
 
+constraints.update_message = {
+  type: {
+    presence: true,
+    inclusion: {
+      within: ['archive', 'conversation'],
+      message: 'accept only `archive` or `conversation`',
+    },
+  },
+};
+
 constraints.catalog = { name: { presence: true } };
 
 constraints.verify = { code: { presence: true } };

@@ -331,10 +331,11 @@ UserController.getMessage = async (req, res, next) => {
 };
 
 /**
- * Archive Message
+ * Update Flag Message
  */
-UserController.archiveMessage = async (req, res, next) => {
-  const message = await Message.updateFlag(req.params.id, req.user.id, 'user', MessageFlagStatus.ARCHIVE);
+UserController.updateMessage = async (req, res, next) => {
+  const flag = req.body.type === 'archive' ? MessageFlagStatus.ARCHIVE : MessageFlagStatus.READ;
+  const message = await Message.updateFlag(req.params.id, req.user.id, 'user', flag);
   req.resData = { data: message };
   return next();
 };

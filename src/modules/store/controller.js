@@ -257,11 +257,12 @@ StoreController.getMessage = async (req, res, next) => {
 };
 
 /**
- * Archive Message
+ * Update Flag Message
  */
-StoreController.archiveMessage = async (req, res, next) => {
+StoreController.updateMessage = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const message = await Message.updateFlag(req.params.id, storeId, 'store', MessageFlagStatus.ARCHIVE);
+  const flag = req.body.type === 'archive' ? MessageFlagStatus.ARCHIVE : MessageFlagStatus.READ;
+  const message = await Message.updateFlag(req.params.id, storeId, 'store', flag);
   req.resData = { data: message };
   return next();
 };

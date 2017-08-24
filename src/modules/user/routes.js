@@ -239,12 +239,13 @@ routes.get('/users/messages/:id([0-9]{1,10})',
   apiResponse());
 
 /**
- * GET /users/messages/id/archive
- * Archive message
+ * PUT /users/messages/id/archive
+ * Update flag message
  */
-routes.get('/users/messages/:id([0-9]{1,10})/archive',
+routes.put('/users/messages/:id([0-9]{1,10})',
   auth(),
-  wrap(UserController.archiveMessage),
+  validateParam(storeConstraints.update_message, true),
+  wrap(UserController.updateMessage),
   apiResponse());
 
 /**
