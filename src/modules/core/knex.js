@@ -9,11 +9,12 @@ import cfg from '../../../config';
  * TODO: add log file for debugging
  */
 function connect(config) {
-  return bookshelf(knex(config));
+  const knexInit = knex(config);
+  return { knexInit, db: bookshelf(knexInit) };
 }
 
-const db = connect(cfg.knex);
+const { db, knexInit } = connect(cfg.knex);
 db.plugin('pagination');
 db.plugin('registry');
 
-export default { db };
+export default { db, knex: knexInit };
