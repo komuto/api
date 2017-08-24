@@ -5,6 +5,7 @@ import config from './../../../../config';
 import { ProductStatus, DropshipStatus, Product } from './../../product/model';
 
 const bookshelf = core.postgres.db;
+const knex = core.postgres.knex;
 const { parseDate, defaultNull, parseNum } = core.utils;
 
 class CatalogModel extends bookshelf.Model {
@@ -130,19 +131,24 @@ class CatalogModel extends bookshelf.Model {
     const productStatus = status;
     const pagination = page && pageSize ? { page, pageSize } : {};
     return await Promise.all(catalogIds.map(id => Product.query((qb) => {
-      qb.select(['produk.*', 'd.id_dropshipper', 'nama_toko']);
-      qb.leftJoin('dropshipper as d', 'produk.id_produk', 'd.id_produk');
-      qb.join('toko as t', 'produk.id_toko', 't.id_toko');
-      qb.where('d.id_toko', storeId).andWhere('produk.status_produk', productStatus);
-      qb.where('status_dropshipper', dropshipStatus);
-      if (id !== 0) qb.where('d.id_katalog', id);
-      else qb.whereNull('d.id_katalog');
-      qb.orWhere('produk.id_toko', storeId).andWhere('produk.status_produk', productStatus);
+      qb.select(knex.raw('*, null as id_dropshipper, null as nama_toko'));
+      qb.where('id_toko', storeId);
       if (id !== 0) qb.where('identifier_katalog', id);
       else qb.whereNull('identifier_katalog');
+      // qb.whereRaw('status_produk = ? union select *, null as id_dropshipper, null as nama_toko' +
+      //   ' from produk where id_toko = ?', [productStatus, 41]);
+      qb.union(function () {
+        this.select(['p.*', 'd.id_dropshipper', 'nama_toko']);
+        // this.from('dropshipper as d');
+        this.join('produk as p', 'p.id_produk', 'd.id_produk');
+        this.join('toko as t', 'p.id_toko', 't.id_toko');
+        this.where('d.id_toko', storeId).andWhere('status_dropshipper', dropshipStatus);
+        if (id !== 0) this.where('d.id_katalog', id);
+        else this.whereNull('d.id_katalog');
+      });
       qb.orderBy('id_produk', 'DESC');
       if (limit) qb.limit(3);
-    }).fetchPage(pagination)));
+    }).fetchPage({ ...pagination, debug: true })));
   }
 
   static async loadCatalog(storeId, catalogId) {
