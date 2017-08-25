@@ -559,7 +559,7 @@ class ProductModel extends bookshelf.Model {
       const where = { id_toko: storeId, id_produk: id };
       const product = await this.where(where).fetch().catch(() => {});
       if (!product) {
-        const dropship = await Dropship.where(where).fetch();
+        const dropship = await Dropship.where(where).fetch().catch(() => {});
         // eslint-disable-next-line no-continue
         if (!dropship) continue;
         const status = parseNum(dropship.toJSON().status) === DropshipStatus.HIDE
@@ -583,9 +583,9 @@ class ProductModel extends bookshelf.Model {
     // eslint-disable-next-line no-restricted-syntax
     for (const id of ids) {
       const where = { id_toko: storeId, id_produk: id };
-      const product = await this.where(where).fetch();
+      const product = await this.where(where).fetch().catch(() => {});
       if (!product) {
-        const dropship = await Dropship.where(where).fetch();
+        const dropship = await Dropship.where(where).fetch().catch(() => {});
         await dropship.save({ id_katalog: catalogId }, { patch: true }).catch(() => {});
       } else {
         await product.save({ identifier_katalog: catalogId }, { patch: true }).catch(() => {});
@@ -603,9 +603,9 @@ class ProductModel extends bookshelf.Model {
     // eslint-disable-next-line no-restricted-syntax
     for (const id of ids) {
       const where = { id_toko: storeId, id_produk: id };
-      const product = await this.where(where).fetch();
+      const product = await this.where(where).fetch().catch(() => {});
       if (!product) {
-        const dropship = await Dropship.where(where).fetch();
+        const dropship = await Dropship.where(where).fetch().catch(() => {});
         await dropship.destroy().catch(() => {
           errors.push({ product_id: id, error: errMsg.bulkDeleteProduct.error });
         });
@@ -616,6 +616,20 @@ class ProductModel extends bookshelf.Model {
       }
     }
     return errors;
+  }
+
+  /**
+   * Update dropship status products
+   * @param storeId
+   * @param ids
+   */
+  static async bulkUpdateDropship(storeId, ids) {
+    // eslint-disable-next-line no-restricted-syntax
+    for (const id of ids) {
+      const product = await this.where({ id_toko: storeId, id_produk: id }).fetch().catch(() => {});
+      const status = !product.toJSON().is_dropship;
+      await product.save({ is_dropshiper: status }, { patch: true }).catch(() => {});
+    }
   }
 
   /**

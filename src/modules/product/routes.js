@@ -146,7 +146,7 @@ routes.post('/users/store/products/hides',
 
 /**
  * POST /users/store/products/move-catalog
- * Hide products
+ * Hide/show products
  */
 routes.post('/users/store/products/move-catalog',
   auth(),
@@ -162,6 +162,16 @@ routes.post('/users/store/products',
   auth(),
   validateManageProductsParam(constraints.productIds),
   wrap(ProductController.bulkDelete),
+  apiResponse());
+
+/**
+ * POST /users/store/products/dropships
+ * Update status dropship
+ */
+routes.post('/users/store/products/dropships',
+  auth(),
+  validateManageProductsParam(constraints.productIds),
+  wrap(ProductController.bulkUpdateDropship),
   apiResponse());
 
 /**

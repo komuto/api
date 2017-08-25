@@ -319,6 +319,15 @@ ProductController.bulkDelete = async (req, res, next) => {
 };
 
 /**
+ * Delete products
+ */
+ProductController.bulkUpdateDropship = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  await Product.bulkUpdateDropship(storeId, req.body.product_ids);
+  return next();
+};
+
+/**
  * Get store product
  */
 ProductController.getStoreProduct = async (req, res, next) => {
