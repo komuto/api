@@ -109,6 +109,12 @@ constraints.createProduct = {
     presence: true,
     numericality: { onlyInteger: true },
   },
+  discount: {
+    presence: true,
+    numericality: { onlyInteger: true },
+    greaterThanOrEqualTo: 0,
+    lessThanOrEqualTo: 100,
+  },
   condition: {
     presence: true,
     inclusion: {
@@ -228,7 +234,14 @@ constraints.updateProduct = {
   brand_id: { presence: false, numericality: { onlyInteger: true } },
   description: { presence: false },
   price: { presence: false, numericality: { onlyInteger: true } },
-  discount: { presence: false, numericality: { onlyInteger: true } },
+  discount: {
+    presence: false,
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 0,
+      lessThanOrEqualTo: 100,
+    },
+  },
   weight: { presence: false, numericality: { onlyInteger: true } },
   condition: {
     presence: false,
