@@ -638,6 +638,7 @@ class ProductModel extends bookshelf.Model {
   static async update(id, storeId, data) {
     const product = await this.where({ id_produk: id, id_toko: storeId }).fetch();
     if (!product) throw getProductError('product', 'not_found');
+    if (_.isEmpty(data)) return product;
     await product.save(data, { patch: true }).catch(() => {
       throw updateProductError('product', 'error');
     });
