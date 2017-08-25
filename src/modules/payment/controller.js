@@ -105,8 +105,14 @@ PaymentController.detailTransaction = async (req, res, next) => {
 };
 
 PaymentController.notification = async (req, res, next) => {
-  console.log('\n=== MIDTRANS ===');
-  console.log(req.body);
-  console.log('\n');
-  return next();
+  let data = '';
+  req.on('data', (chunk) => { data += chunk; });
+  req.on('end', () => {
+    req.body = data ? JSON.parse(data) : {};
+    if (typeof req.body === 'string') req.body = JSON.parse(req.body);
+    console.log('\n=== MIDTRANS ===');
+    console.log(req.body);
+    console.log('\n');
+    return next();
+  });
 };

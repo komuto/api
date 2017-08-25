@@ -10,7 +10,7 @@ const { apiResponse } = core.middleware;
  * POST /notification
  * Handling notification
  */
-routes.get('/notification',
+routes.post('/notification',
   wrap(PaymentController.notification),
   apiResponse());
 

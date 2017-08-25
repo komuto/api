@@ -47,6 +47,10 @@ app.use(responseTime());
 app.use(cors());
 app.use(helmet());
 app.use(compression());
+
+// midtrans notification
+app.use(midtrans.routes);
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(config.publicPath, { maxAge: c.ONE_YEAR }));
@@ -74,7 +78,6 @@ app.use(core.middleware.requestUtilsMiddleware());
 app.prefix = (router => (app.use('/:mp', router)));
 
 app.use(core.routes);
-app.use(midtrans.routes);
 
 app.prefix(marketplace.middleware.verify());
 app.prefix(image.routes);
