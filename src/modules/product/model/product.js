@@ -706,6 +706,28 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
+   * Get catalog with products for multiple check
+   */
+  static async storeProductsByCatalog(params) {
+    const { storeId, catalogId, page, pageSize } = params;
+    const products = await this.where({
+      id_toko: storeId,
+      identifier_katalog: catalogId,
+      status_produk: ProductStatus.SHOW,
+      is_dropshiper: false,
+    }).fetchPage({ page, pageSize });
+    return await Promise.all(products.map(async (product) => {
+      await product.load({ images: qb => qb.limit(1) });
+      const images = product.related('images').models;
+      const image = images.length ? images[0].serialize().file : config.defaultImage.product;
+      return {
+        ...product.serialize({ minimal: true }),
+        image,
+      };
+    }));
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData

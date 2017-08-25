@@ -290,6 +290,28 @@ ProductController.storeCatalogProducts = async (req, res, next) => {
 };
 
 /**
+ * Get store products based on catalog id for multiple check
+ */
+ProductController.listStoreCatalogProducts = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const catalogId = req.params.id || 0;
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const products = await Product.storeProductsByCatalog({
+    catalogId,
+    storeId,
+    page,
+    pageSize,
+  });
+  req.resData = {
+    message: 'Store Catalog Products Data',
+    meta: { page, limit: pageSize },
+    data: products,
+  };
+  return next();
+};
+
+/**
  * Hide products
  */
 ProductController.hides = async (req, res, next) => {

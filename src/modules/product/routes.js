@@ -40,6 +40,15 @@ routes.get('/users/store/products/catalogs/:id([0-9]{1,10})?',
   apiResponse());
 
 /**
+ * GET /users/store/products/catalogs/id/list
+ * View own products based on catalog id for multiple check
+ */
+routes.get('/users/store/products/catalogs/:id([0-9]{1,10})/list',
+  auth(),
+  wrap(ProductController.listStoreCatalogProducts),
+  apiResponse());
+
+/**
  * GET /products/search
  * View list of search result
  */
