@@ -297,11 +297,13 @@ ProductController.listStoreCatalogProducts = async (req, res, next) => {
   const catalogId = req.params.id || 0;
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const isDropship = req.query.is_dropship ? JSON.parse(req.query.is_dropship) : false;
   const products = await Product.storeProductsByCatalog({
     catalogId,
     storeId,
     page,
     pageSize,
+    isDropship,
   });
   req.resData = {
     message: 'Store Catalog Products Data',

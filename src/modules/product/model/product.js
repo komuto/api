@@ -709,12 +709,12 @@ class ProductModel extends bookshelf.Model {
    * Get catalog with products for multiple check
    */
   static async storeProductsByCatalog(params) {
-    const { storeId, catalogId, page, pageSize } = params;
+    const { storeId, catalogId, page, pageSize, isDropship } = params;
     const products = await this.where({
       id_toko: storeId,
       identifier_katalog: catalogId,
       status_produk: ProductStatus.SHOW,
-      is_dropshiper: false,
+      is_dropshiper: isDropship,
     }).fetchPage({ page, pageSize });
     return await Promise.all(products.map(async (product) => {
       await product.load({ images: qb => qb.limit(1) });
