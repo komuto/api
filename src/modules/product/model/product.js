@@ -485,9 +485,7 @@ class ProductModel extends bookshelf.Model {
       catalog = product.get('identifier_katalog') ? product.related('catalog') : null;
     }
     let brand = product.get('identifier_brand') ? product.related('brand') : null;
-    if (brand) {
-      if (!brand.get('id_brand')) brand = null;
-    }
+    if (brand && !brand.get('id_brand')) brand = null;
 
     if (isDropship) {
       product = product.serialize();

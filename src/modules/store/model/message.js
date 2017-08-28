@@ -107,9 +107,15 @@ class MessageModel extends bookshelf.Model {
       .query(qb => qb.whereNot(column, MessageFlagStatus.PERMANENT_DELETED))
       .fetch({ withRelated: ['store', 'detailMessages.user'] });
     if (!message) throw getMessageError('message', 'not_found');
+    const detailMessages = message.related('detailMessages').map((msg) => {
+      msg = msg.serialize();
+      const store = message.serialize().store;
+      msg.store = (store.user_id === msg.user.id) ? store : null;
+      return msg;
+    });
     return {
       ...message.serialize(),
-      detail_messages: message.related('detailMessages'),
+      detail_messages: detailMessages,
     };
   }
 
