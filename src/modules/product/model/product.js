@@ -449,9 +449,10 @@ class ProductModel extends bookshelf.Model {
       withRelated: [
         'category',
         'images',
-        'expeditionServices.expedition',
         'brand',
         'catalog',
+        'expeditionServices.expedition',
+        { expeditionServices: qb => qb.where('status_detilekspedisiproduk', 1) },
       ],
     };
     let product = await this.where(where).fetch(related);
