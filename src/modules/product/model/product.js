@@ -163,7 +163,8 @@ class ProductModel extends bookshelf.Model {
   /**
    * Get products
    */
-  static async get(params) {
+  static async get(params, storeId = false) {
+    params.is_dropship = !!storeId || params.is_dropship;
     const {
       page,
       pageSize,
@@ -205,8 +206,9 @@ class ProductModel extends bookshelf.Model {
         qb.select(['produk.*', 'toko.*']);
         qb.innerJoin('toko', 'toko.id_toko', 'produk.id_toko');
         qb.innerJoin('users', 'toko.id_users', 'users.id_users');
+        if (storeId) qb.whereNot('produk.id_toko', storeId);
         qb.where('users.id_marketplaceuser', marketplaceId);
-        if (query) qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
+        if (query) qb.whereRaw('to_tsvector(nama_produk) @@ to_tsquery(?)', query);
         if (price && price.min !== 0 && price.max !== 0) qb.whereBetween('harga_produk', [price.min, price.max]);
         if (address) {
           qb.innerJoin('alamat_users', 'alamat_users.id_users', 'users.id_users');

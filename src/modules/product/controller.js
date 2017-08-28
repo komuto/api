@@ -37,7 +37,7 @@ const getPrice = (price) => {
 ProductController.index = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const { category_id, condition: cond } = req.body;
+  const { category_id, condition: cond, store_id: storeId } = req.body;
   const condition = cond && (cond === 'new' ? ProductCondition.NEW : ProductCondition.USED);
   const where = Product.matchDBColumn({ condition, category_id });
   const params = {
@@ -45,7 +45,7 @@ ProductController.index = async (req, res, next) => {
     pageSize,
     where,
     price: req.query.price ? getPrice(req.query.price) : null,
-    query: req.query.q,
+    query: req.query.q && req.query.q.replace(' ', '&'),
     sort: req.query.sort || 'newest',
     other: req.query.other,
     brands: req.query.brands,
@@ -55,7 +55,7 @@ ProductController.index = async (req, res, next) => {
     userId: req.user.id,
     marketplaceId: req.marketplace.id,
   };
-  const products = await Product.get(params);
+  const products = await Product.get(params, storeId);
 
   req.resData = {
     message: 'Products Data',
@@ -226,8 +226,7 @@ ProductController.dropship = async (req, res, next) => {
 
   const [product, catalog] = await Promise.all([
     Product.where({ id_produk: productId }).fetch(),
-    Catalog.where({ id_katalog: catalogId, id_toko: storeId }).fetch(),
-  ]);
+    Catalog.where({ id_katalog: catalogId, id_toko: storeId }).fetch()]);
 
   if (!product.get('is_dropshiper')) throw addDropshipProductError('product', 'product_not_dropship');
   if (!catalog) throw addDropshipProductError('catalog', 'catalog_not_found');
@@ -396,5 +395,10 @@ ProductController.getProductExpeditionsManage = async (req, res, next) => {
     message: 'Product Expeditions Manage Data',
     data: expeditions,
   };
+  return next();
+};
+
+ProductController.getDropshipProducts = async (req, res, next) => {
+  req.body.store_id = await Store.getStoreId(req.user.id);
   return next();
 };
