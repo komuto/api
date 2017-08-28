@@ -134,6 +134,15 @@ routes.post('/products/:id([0-9]{1,10})/report',
   apiResponse());
 
 /**
+ * Get products for dropshipping
+ */
+routes.get('/products/dropship',
+  auth(),
+  wrap(ProductController.getDropshipProducts),
+  wrap(ProductController.index),
+  apiResponse());
+
+/**
  * POST /products/id/dropship
  * Dropship product
  */
