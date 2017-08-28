@@ -539,17 +539,23 @@ class ProductModel extends bookshelf.Model {
   static async countProductsByCatalog(catalogIds, storeId, status) {
     const dropshipStatus = DropshipStatus.SHOW;
     const productStatus = status;
-    return await Promise.all(catalogIds.map(id => this.query((qb) => {
-      qb.count('produk.id_produk as count_product');
-      qb.leftJoin('dropshipper as d', 'produk.id_produk', 'd.id_produk');
-      qb.where('d.id_toko', storeId).andWhere('produk.status_produk', productStatus);
-      qb.where('status_dropshipper', dropshipStatus);
-      if (id !== 0) qb.where('d.id_katalog', id);
-      else qb.whereNull('d.id_katalog');
-      qb.orWhere('produk.id_toko', storeId).andWhere('produk.status_produk', productStatus);
-      if (id !== 0) qb.where('identifier_katalog', id);
-      else qb.whereNull('identifier_katalog');
-    }).fetch()));
+    return await Promise.all(catalogIds.map(async (id) => {
+      const getFromProduct = this.where({
+        identifier_katalog: id === 0 ? null : id,
+        id_toko: storeId,
+        status_produk: productStatus,
+      }).query(qb => qb.count('id_produk as count_product')).fetch();
+      const getFromDropshipper = Dropship.where({
+        id_katalog: id === 0 ? null : id,
+        id_toko: storeId,
+        status_dropshipper: dropshipStatus,
+      }).query(qb => qb.count('id_dropshipper as count_product')).fetch();
+      const [product, dropshipper] = await Promise
+        .all([getFromProduct, getFromDropshipper]);
+      const countProduct = product.get('count_product') || 0;
+      const countDropshipper = dropshipper.get('count_product') || 0;
+      return parseNum(countProduct) + parseNum(countDropshipper);
+    }));
   }
 
   /**

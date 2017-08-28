@@ -1,8 +1,7 @@
-import Promise from 'bluebird';
 import core from '../../core';
 import { createCatalogError, getCatalogError, updateCatalogError } from './../messages';
 import config from './../../../../config';
-import { ProductStatus, DropshipStatus, Product } from './../../product/model';
+import { ProductStatus, DropshipStatus, Product, ImageProduct } from '../../product/model';
 
 const bookshelf = core.postgres.db;
 const knex = core.postgres.knex;
@@ -126,29 +125,28 @@ class CatalogModel extends bookshelf.Model {
     return !!catalog;
   }
 
-  static async loadProducts(catalogIds, storeId, limit, status, page, pageSize) {
+  static async loadProducts(catalogIds, storeId, status, offset, limit) {
     const dropshipStatus = DropshipStatus.SHOW;
     const productStatus = status;
-    const pagination = page && pageSize ? { page, pageSize } : {};
-    return await Promise.all(catalogIds.map(id => Product.query((qb) => {
-      qb.select(knex.raw('*, null as id_dropshipper, null as nama_toko'));
-      qb.where('id_toko', storeId);
-      if (id !== 0) qb.where('identifier_katalog', id);
-      else qb.whereNull('identifier_katalog');
-      // qb.whereRaw('status_produk = ? union select *, null as id_dropshipper, null as nama_toko' +
-      //   ' from produk where id_toko = ?', [productStatus, 41]);
-      qb.union(function () {
-        this.select(['p.*', 'd.id_dropshipper', 'nama_toko']);
-        // this.from('dropshipper as d');
-        this.join('produk as p', 'p.id_produk', 'd.id_produk');
-        this.join('toko as t', 'p.id_toko', 't.id_toko');
-        this.where('d.id_toko', storeId).andWhere('status_dropshipper', dropshipStatus);
-        if (id !== 0) this.where('d.id_katalog', id);
-        else this.whereNull('d.id_katalog');
-      });
-      qb.orderBy('id_produk', 'DESC');
-      if (limit) qb.limit(3);
-    }).fetchPage({ ...pagination, debug: true })));
+    return await Promise.all(catalogIds.map(id => knex.select(knex.raw('"p".*, "d"."id_dropshipper", "nama_toko"'))
+      .from('dropshipper as d')
+      .join('produk as p', 'p.id_produk', 'd.id_produk')
+      .join('toko as t', 'p.id_toko', 't.id_toko')
+      .where({
+        'd.id_katalog': id === 0 ? null : id,
+        'd.id_toko': storeId,
+        status_dropshipper: dropshipStatus })
+      .union(function () {
+        this.select(knex.raw('*, null as id_dropshipper, null as nama_toko'))
+          .from('produk')
+          .where({ identifier_katalog: id === 0 ? null : id,
+            id_toko: storeId,
+            status_produk: productStatus });
+      })
+      .orderBy('id_produk', 'DESC')
+      .limit(limit)
+      .offset(offset)
+      .then(products => products)));
   }
 
   static async loadCatalog(storeId, catalogId) {
@@ -161,52 +159,59 @@ class CatalogModel extends bookshelf.Model {
    * Get catalog with products
    */
   static async getCatalogWithProducts(params) {
-    const { storeId, hidden, catalogId, page = null, pageSize = null } = params;
+    const { storeId, hidden, catalogId, page = 1, pageSize = 10 } = params;
     const status = hidden === true ? ProductStatus.HIDE : ProductStatus.SHOW;
+    const limit = catalogId === undefined ? 3 : pageSize;
+    const offset = page === 1 || catalogId === undefined ? 0 : (page - 1) * pageSize;
 
-    const catalogs = catalogId !== 0 ? await this.loadCatalog(storeId, catalogId) : [];
-    const catalogIds = catalogs.map(catalog => catalog.get('id_katalog'));
+    const catalogs = catalogId !== 0 ? await this.loadCatalog(storeId, catalogId) : { models: [0] };
+    const catalogIds = catalogId !== 0 ? catalogs.map(catalog => catalog.get('id_katalog')) : [];
     if (!catalogId || catalogId === 0) {
       // For products without catalog
       catalogIds.push(0);
-      if (catalogId !== 0) catalogs.models.push(0);
-      else catalogs.push(0);
+      if (!catalogId && catalogId !== 0) catalogs.models.push(0);
     }
 
-    const getProducts = this.loadProducts(catalogIds, storeId, !catalogId, status, page, pageSize);
+    // Create getter object so that knex object could be serialized using Product model
+    const getter = { get(prop) {
+      return this[prop];
+    } };
+    const getProducts = this.loadProducts(catalogIds, storeId, status, offset, limit);
     const getCountProducts = catalogId ? []
       : Product.countProductsByCatalog(catalogIds, storeId, status);
-    const [products, countProducts] = await Promise.all([getProducts, getCountProducts]);
-
-    return await Promise.reduce(catalogs.models || catalogs, async (data, catalog, index) => {
-      const catalogProducts = [];
-      // eslint-disable-next-line no-restricted-syntax
-      for (let product of products[index].models) {
-        await product.load({ images: qb => qb.limit(1) });
-        const images = product.related('images').serialize();
-        const dropshipOrigin = !product.get('id_dropshipper') ? false
+    const [productsCatalog, countProducts] = await Promise.all([getProducts, getCountProducts]);
+    const getImages = productsCatalog.map(products =>
+      Promise.all(products.map(product =>
+        ImageProduct.where('id_produk', product.id_produk).fetch())));
+    return await Promise.all(productsCatalog.map(async (products, index) => {
+      const images = await getImages[index];
+      const catalogProducts = products.map((product, idx) => {
+        const image = images[idx] ? images[idx].serialize().file : config.defaultImage.product;
+        const dropshipOrigin = !product.id_dropshipper ? false
           : {
-            store_id: product.get('id_toko'),
-            name: product.get('nama_toko'),
-            commission: Product.calculateCommission(product.get('harga_produk'), 'nominal'),
+            store_id: product.id_toko,
+            name: product.nama_toko,
+            commission: Product.calculateCommission(product.harga_produk, 'nominal'),
           };
+        // Initialize prototype chain
+        Object.setPrototypeOf(product, getter);
         product = {
-          ...product.serialize({ minimal: true }),
-          image: images.length ? images[0].file : config.defaultImage.product,
+          ...Product.prototype.serialize.call(product, { minimal: true }),
+          image,
           is_checked: false,
         };
         if (dropshipOrigin) product.dropship_origin = dropshipOrigin;
-        catalogProducts.push(product);
-      }
+        return product;
+      });
+      let catalog = catalogs.models[index];
       catalog = catalog !== 0 ? catalog.serialize() : { name: 'Tanpa Katalog' };
       if (catalogId === undefined) {
-        catalog.count_product = countProducts[index] ? parseNum(countProducts[index].get('count_product')) : 0;
+        catalog.count_product = countProducts[index] || 0;
       } else {
         catalog.count_product = catalogProducts.length;
       }
-      data.push({ catalog, products: catalogProducts });
-      return data;
-    }, []);
+      return { catalog, products: catalogProducts };
+    }));
   }
 }
 
