@@ -288,6 +288,7 @@ class ProductModel extends bookshelf.Model {
       qb.select('nama_produk');
       qb.groupBy('nama_produk');
       qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
+      qb.limit(8);
     }).fetchAll();
   }
 
