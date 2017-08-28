@@ -98,8 +98,9 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
 };
 
 BucketController.addToCart = async (req, res, next) => {
-  const bucket = await Bucket.findOrCreateBucket(req.user.id);
-  const product = await Product.findById(req.body.product_id);
+  let bucket = Bucket.findOrCreateBucket(req.user.id);
+  let product = Product.findById(req.body.product_id);
+  [bucket, product] = await Promise.all([bucket, product]);
   const where = Item.matchDBColumn({ bucket_id: bucket.id, product_id: product.id });
   const item = await Item.get(where);
   req.resData = {
