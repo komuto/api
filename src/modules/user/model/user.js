@@ -246,6 +246,14 @@ class UserModel extends bookshelf.Model {
   }
 
   /**
+   * Update FCM registration token
+   */
+  static async updateRegToken(id, token) {
+    const user = await this.where({ id_users: id }).save({ reg_token: token }, { patch: true });
+    return await user.refresh();
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData

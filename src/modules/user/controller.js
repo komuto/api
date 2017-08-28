@@ -364,3 +364,12 @@ UserController.replyMessage = async (req, res, next) => {
   req.resData = { data: detailMessage };
   return next();
 };
+
+/**
+ * Update Registration Token
+ */
+UserController.updateRegToken = async (req, res, next) => {
+  const user = await User.updateRegToken(req.user.id, req.body.reg_token);
+  req.resData = { data: user };
+  return next();
+};

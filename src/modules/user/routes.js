@@ -267,4 +267,14 @@ routes.post('/users/messages/:id([0-9]{1,10})',
   wrap(UserController.replyMessage),
   apiResponse());
 
+/**
+ * PUT /users/registration-token
+ * Update registration token
+ */
+routes.put('/users/registration-token',
+  auth(),
+  validateParam({ reg_token: { presence: true } }, true),
+  wrap(UserController.updateRegToken),
+  apiResponse());
+
 export default routes;
