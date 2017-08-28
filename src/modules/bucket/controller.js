@@ -76,7 +76,8 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
     note: null,
   });
 
-  // TODO: validation user's address_id
+  // TODO: Validation user's address_id
+  // TODO: Check qty
   let shippingId;
   if (item) {
     shippingId = item.serialize().shipping_id;

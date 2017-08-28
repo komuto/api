@@ -5,7 +5,7 @@ import { ProductStatus, DropshipStatus, Product, ImageProduct } from '../../prod
 
 const bookshelf = core.postgres.db;
 const knex = core.postgres.knex;
-const { parseDate, defaultNull, parseNum } = core.utils;
+const { parseDate, defaultNull } = core.utils;
 
 class CatalogModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -110,8 +110,9 @@ class CatalogModel extends bookshelf.Model {
    * @return boolean
    */
   static async checkProduct(id) {
-    const catalog = await this.where({ id_katalog: id }).fetch({ withRelated: {
-      products: qb => qb.column('identifier_katalog') } });
+    const catalog = await this.where({ id_katalog: id }).fetch({
+      withRelated: { products: qb => qb.column('identifier_katalog') },
+    });
     return !!catalog.related('products').length;
   }
 
@@ -135,13 +136,16 @@ class CatalogModel extends bookshelf.Model {
       .where({
         'd.id_katalog': id === 0 ? null : id,
         'd.id_toko': storeId,
-        status_dropshipper: dropshipStatus })
+        status_dropshipper: dropshipStatus,
+      })
       .union(function () {
         this.select(knex.raw('*, null as id_dropshipper, null as nama_toko'))
           .from('produk')
-          .where({ identifier_katalog: id === 0 ? null : id,
+          .where({
+            identifier_katalog: id === 0 ? null : id,
             id_toko: storeId,
-            status_produk: productStatus });
+            status_produk: productStatus,
+          });
       })
       .orderBy('id_produk', 'DESC')
       .limit(limit)
@@ -173,9 +177,9 @@ class CatalogModel extends bookshelf.Model {
     }
 
     // Create getter object so that knex object could be serialized using Product model
-    const getter = { get(prop) {
-      return this[prop];
-    } };
+    const getter = {
+      get(prop) { return this[prop]; },
+    };
     const getProducts = this.loadProducts(catalogIds, storeId, status, offset, limit);
     const getCountProducts = catalogId ? []
       : Product.countProductsByCatalog(catalogIds, storeId, status);
