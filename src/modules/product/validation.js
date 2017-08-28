@@ -111,9 +111,11 @@ constraints.createProduct = {
   },
   discount: {
     presence: true,
-    numericality: { onlyInteger: true },
-    greaterThanOrEqualTo: 0,
-    lessThanOrEqualTo: 100,
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 0,
+      lessThanOrEqualTo: 100,
+    },
   },
   condition: {
     presence: true,
