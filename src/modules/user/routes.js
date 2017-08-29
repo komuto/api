@@ -12,6 +12,7 @@ import {
 import { UserController } from './controller';
 import { controller } from '../OTP';
 import core from '../core';
+import constraints from './validation';
 import productConstraints from './../product/validation';
 import storeConstraints from './../store/validation';
 
@@ -273,8 +274,27 @@ routes.post('/users/messages/:id([0-9]{1,10})',
  */
 routes.put('/users/registration-token',
   auth(),
-  validateParam({ reg_token: { presence: true } }, true),
+  validateParam(constraints.regToken, true),
   wrap(UserController.updateRegToken),
+  apiResponse());
+
+/**
+ * GET /users/notifications
+ * Get notification configuration
+ */
+routes.get('/users/notifications',
+  auth(),
+  wrap(UserController.getNotifications),
+  apiResponse());
+
+/**
+ * POST /users/notifications
+ * Save notification configuration
+ */
+routes.post('/users/notifications',
+  auth(),
+  validateParam(constraints.saveNotifications, true, 'notifications', true),
+  wrap(UserController.saveNotifications),
   apiResponse());
 
 export default routes;

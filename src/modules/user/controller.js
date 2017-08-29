@@ -373,3 +373,25 @@ UserController.updateRegToken = async (req, res, next) => {
   req.resData = { data: user };
   return next();
 };
+
+/**
+ * Get Notification Configuration
+ */
+UserController.getNotifications = async (req, res, next) => {
+  const notification = User.getNotifications(req.user.notifications, req.marketplace.name);
+  req.resData = {
+    message: 'Notification Configuration',
+    data: notification,
+  };
+  return next();
+};
+
+/**
+ * Save Notification Configuration
+ */
+UserController.saveNotifications = async (req, res, next) => {
+  const notifications = req.body.notifications;
+  await User.where({ id_users: req.user.id }).save({ notifications }, { patch: true });
+  req.resData = { data: User.getNotifications(notifications, req.marketplace.name) };
+  return next();
+};

@@ -72,4 +72,23 @@ constraints.verifyPhone = {
       message: OTPMsg.not_valid } },
 };
 
+constraints.regToken = { reg_token: { presence: true } };
+
+constraints.saveNotifications = {
+  type: {
+    presence: true,
+    inclusion: {
+      within: [1, 2, 3, 4, 5],
+      message: 'accept only value 1-5',
+    },
+  },
+  is_active: {
+    presence: true,
+    inclusion: {
+      within: [true, false],
+      message: 'accept only boolean',
+    },
+  },
+};
+
 export default constraints;

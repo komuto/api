@@ -33,6 +33,22 @@ export const UserCooperativeStatus = {
   NOT_MEMBER: 4,
 };
 
+const notificationType = {
+  MESSAGE_FROM_ADMIN: 1,
+  NEWSLETTER: 2,
+  REVIEW: 3,
+  DISCUSSION: 4,
+  PRIVATE_MESSAGE: 5,
+};
+
+const notificationDefault = [
+  { type: notificationType.MESSAGE_FROM_ADMIN, is_active: true },
+  { type: notificationType.NEWSLETTER, is_active: true },
+  { type: notificationType.REVIEW, is_active: true },
+  { type: notificationType.DISCUSSION, is_active: true },
+  { type: notificationType.PRIVATE_MESSAGE, is_active: true },
+];
+
 class UserModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -45,12 +61,19 @@ class UserModel extends bookshelf.Model {
   }
 
   /**
-   * @param pass {bool} true = include password
-   * @param birth {bool} true = get name of the district id
-   * @param account {bool} true = minimal for account collection
-   * @param phone {bool} true = check if the phone is verified
+   * @param pass {boolean} true = include password
+   * @param birth {boolean} true = get name of the district id
+   * @param account {boolean} true = minimal for account collection
+   * @param phone {boolean} true = check if the phone is verified
+   * @param notification {boolean} true = include notification
    */
-  serialize({ pass = false, birth = false, account = false, phone = false } = {}) {
+  serialize({
+              pass = false,
+              birth = false,
+              account = false,
+              phone = false,
+              notification = false,
+            } = {}) {
     let user = {
       id: this.get('id_users'),
       name: this.get('namalengkap_users'),
@@ -90,6 +113,7 @@ class UserModel extends bookshelf.Model {
     if (phone) {
       user.is_phone_verified = this.related('verifyPhone').length !== 0;
     }
+    if (notification) user.notifications = this.get('notifications');
     return user;
   }
 
@@ -251,6 +275,38 @@ class UserModel extends bookshelf.Model {
   static async updateRegToken(id, token) {
     const user = await this.where({ id_users: id }).save({ reg_token: token }, { patch: true });
     return await user.refresh();
+  }
+
+  static getNotificationContent(type, name) {
+    let content = '';
+    switch (type) {
+      case notificationType.MESSAGE_FROM_ADMIN:
+        content = 'Setiap pesan pribadi dari admin saya terima.';
+        break;
+      case notificationType.NEWSLETTER:
+        content = `Setiap Pesan Berita dari ${name}.`;
+        break;
+      case notificationType.REVIEW:
+        content = 'Setiap Review dan komentar saya terima.';
+        break;
+      case notificationType.DISCUSSION:
+        content = 'Setiap Diskusi produk dan komentar saya terima.';
+        break;
+      case notificationType.PRIVATE_MESSAGE:
+        content = 'Setiap Pesan Pribadi saya terima';
+        break;
+      default:
+        break;
+    }
+    return content;
+  }
+
+  static getNotifications(notifications, marketplaceName) {
+    if (!notifications) notifications = notificationDefault;
+    return notifications.map(val => ({
+      ...val,
+      content: this.getNotificationContent(val.type, marketplaceName),
+    }));
   }
 
   /**
