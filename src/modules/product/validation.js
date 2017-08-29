@@ -144,15 +144,15 @@ constraints.createProduct = {
 };
 
 constraints.createWholesale = {
-  min_order: { presence: true, numericality: { onlyInteger: true } },
-  max_order: { presence: true, numericality: { onlyInteger: true } },
+  min: { presence: true, numericality: { onlyInteger: true } },
+  max: { presence: true, numericality: { onlyInteger: true } },
   price: { presence: true, numericality: true },
 };
 
 constraints.updateWholesale = {
   id: { presence: true, numericality: { onlyInteger: true } },
-  min_order: { presence: true, numericality: { onlyInteger: true } },
-  max_order: { presence: true, numericality: { onlyInteger: true } },
+  min: { presence: true, numericality: { onlyInteger: true } },
+  max: { presence: true, numericality: { onlyInteger: true } },
   price: { presence: true, numericality: true },
 };
 

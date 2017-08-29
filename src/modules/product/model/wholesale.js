@@ -62,8 +62,8 @@ class WholesaleModel extends bookshelf.Model {
    */
   static matchDBColumn(data) {
     const column = {
-      min_order: 'min_paramgrosir',
-      max_order: 'max_paramgrosir',
+      min: 'min_paramgrosir',
+      max: 'max_paramgrosir',
       price: 'harga_paramgrosir',
     };
     const newData = {};
