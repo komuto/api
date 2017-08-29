@@ -223,4 +223,14 @@ routes.get('/users/store/products/:id([0-9]{1,10})/expeditions/manage',
   wrap(ProductController.getProductExpeditionsManage),
   apiResponse());
 
+/**
+ * GET /commissions
+ * Get share fee
+ */
+routes.get('/commissions',
+  auth(),
+  validateParam({ price: { presence: true, numericality: { onlyInteger: true } } }),
+  wrap(ProductController.getCommission),
+  apiResponse());
+
 export default routes;

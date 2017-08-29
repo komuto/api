@@ -12,6 +12,7 @@ import {
   Dropship,
   DropshipStatus,
   View,
+  MasterFee,
 } from './model';
 import { Wishlist } from '../user/model';
 import { Store, Catalog } from '../store/model';
@@ -400,5 +401,18 @@ ProductController.getProductExpeditionsManage = async (req, res, next) => {
 
 ProductController.getDropshipProducts = async (req, res, next) => {
   req.body.store_id = await Store.getStoreId(req.user.id);
+  return next();
+};
+
+ProductController.getCommission = async (req, res, next) => {
+  const commission = await MasterFee.calculateCommission(
+    req.marketplace.id,
+    req.query.price,
+    false,
+    );
+  req.resData = {
+    message: 'Commission Data',
+    data: { commission },
+  };
   return next();
 };
