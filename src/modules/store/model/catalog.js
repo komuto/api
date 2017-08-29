@@ -127,7 +127,6 @@ class CatalogModel extends bookshelf.Model {
   }
 
   static async loadProducts(catalogIds, storeId, status, offset, limit) {
-    const dropshipStatus = DropshipStatus.SHOW;
     const productStatus = status;
     return await Promise.all(catalogIds.map(id => knex.select(knex.raw('"p".*, "d"."id_dropshipper", "nama_toko"'))
       .from('dropshipper as d')
@@ -136,7 +135,7 @@ class CatalogModel extends bookshelf.Model {
       .where({
         'd.id_katalog': id === 0 ? null : id,
         'd.id_toko': storeId,
-        status_dropshipper: dropshipStatus,
+        status_dropshipper: productStatus,
       })
       .union(function () {
         this.select(knex.raw('*, null as id_dropshipper, null as nama_toko'))
