@@ -154,6 +154,13 @@ constraints.updateWholesale = {
   min: { presence: true, numericality: { onlyInteger: true } },
   max: { presence: true, numericality: { onlyInteger: true } },
   price: { presence: true, numericality: true },
+  status: {
+    presence: true,
+    inclusion: {
+      within: [1, 2, 3],
+      message: 'accept only 1 (create), 2 (update) or 3 (delete)',
+    },
+  },
 };
 
 constraints.createExpeditions = {

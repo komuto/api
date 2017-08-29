@@ -39,9 +39,9 @@ class WholesaleModel extends bookshelf.Model {
    * @param data {array}
    */
   static async updateBulk(id, data) {
-    let deletes = _.filter(data, o => o.is_deleted);
-    let updates = _.filter(data, o => !o.is_deleted === false);
-    let newData = _.filter(data, o => o.is_created);
+    let deletes = _.filter(data, o => o.status === 3);
+    let updates = _.filter(data, o => o.status === 2);
+    let newData = _.filter(data, o => o.status === 1);
 
     deletes = deletes.map(val => this.where({ id_paramgrosir: val.id }).destroy());
     updates = updates.map((val) => {
