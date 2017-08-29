@@ -66,13 +66,6 @@ constraints.list = {
       maximum: 10,
     },
   },
-  is_dropship: {
-    presence: false,
-    inclusion: {
-      within: ['true', 'false'],
-      message: 'Only accepts boolean',
-    },
-  },
 };
 
 constraints.search = { q: { presence: true } };

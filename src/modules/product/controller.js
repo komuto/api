@@ -51,7 +51,6 @@ ProductController.index = async (req, res, next) => {
     brands: req.query.brands,
     services: req.query.services,
     address: req.query.address,
-    is_dropship: req.query.is_dropship,
     userId: req.user.id,
     marketplaceId: req.marketplace.id,
   };
@@ -254,7 +253,7 @@ ProductController.dropship = async (req, res, next) => {
 ProductController.storeProducts = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const hidden = req.query.hidden && JSON.parse(req.query.hidden);
-  const params = { storeId, hidden };
+  const params = { storeId, hidden, marketplaceId: req.marketplace.id };
   const catalogs = await Catalog.getCatalogWithProducts(params);
   req.resData = {
     message: 'Store Products Data',
@@ -278,6 +277,7 @@ ProductController.storeCatalogProducts = async (req, res, next) => {
     catalogId,
     page,
     pageSize,
+    marketplaceId: req.marketplace.id,
   });
   if (!products.length) throw getCatalogProductsError('catalog_id', 'not_found');
   req.resData = {
@@ -355,7 +355,7 @@ ProductController.bulkUpdateDropship = async (req, res, next) => {
  */
 ProductController.getStoreProduct = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const product = await Product.getFullOwnProduct(req.params.id, storeId);
+  const product = await Product.getFullOwnProduct(req.params.id, storeId, req.marketplace.id);
   if (!product) throw getProductError('product', 'not_found');
   req.resData = {
     message: 'Product Detail Data',

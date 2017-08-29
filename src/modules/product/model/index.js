@@ -7,6 +7,7 @@ import { Comment } from './comment';
 import { Report, ReportType, ReportTypeWord } from './report';
 import { Dropship, DropshipStatus } from './dropship';
 import { View } from './view';
+import { MasterFee } from './master_fee';
 
 export default {
   ProductExpedition,
@@ -24,4 +25,5 @@ export default {
   Dropship,
   DropshipStatus,
   View,
+  MasterFee,
 };

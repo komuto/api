@@ -5,7 +5,7 @@ import { ProductStatus, DropshipStatus, Product, ImageProduct } from '../../prod
 
 const bookshelf = core.postgres.db;
 const knex = core.postgres.knex;
-const { parseDate, defaultNull } = core.utils;
+const { parseDate, defaultNull, parseNum, parseDec } = core.utils;
 
 class CatalogModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -163,7 +163,7 @@ class CatalogModel extends bookshelf.Model {
    * Get catalog with products
    */
   static async getCatalogWithProducts(params) {
-    const { storeId, hidden, catalogId, page = 1, pageSize = 10 } = params;
+    const { storeId, hidden, catalogId, page = 1, pageSize = 10, marketplaceId } = params;
     const status = hidden === true ? ProductStatus.HIDE : ProductStatus.SHOW;
     const limit = catalogId === undefined ? 3 : pageSize;
     const offset = page === 1 || catalogId === undefined ? 0 : (page - 1) * pageSize;
@@ -187,15 +187,18 @@ class CatalogModel extends bookshelf.Model {
     const getImages = productsCatalog.map(products =>
       Promise.all(products.map(product =>
         ImageProduct.where('id_produk', product.id_produk).fetch())));
-    return await Promise.all(productsCatalog.map(async (products, index) => {
+    return productsCatalog.map(async (products, index) => {
       const images = await getImages[index];
-      const catalogProducts = products.map((product, idx) => {
+      const catalogProducts = await Promise.all(products.map(async (product, idx) => {
         const image = images[idx] ? images[idx].serialize().file : config.defaultImage.product;
         const dropshipOrigin = !product.id_dropshipper ? false
           : {
             store_id: product.id_toko,
             name: product.nama_toko,
-            commission: Product.calculateCommission(product.harga_produk, 'nominal'),
+            commission: 0,
+            // TODO: Refactoring
+            // commission: await Product.calculateCommission(marketplaceId,
+            // parseNum(product.harga_produk), 'nominal'),
           };
         // Initialize prototype chain
         Object.setPrototypeOf(product, getter);
@@ -206,7 +209,7 @@ class CatalogModel extends bookshelf.Model {
         };
         if (dropshipOrigin) product.dropship_origin = dropshipOrigin;
         return product;
-      });
+      }));
       let catalog = catalogs.models[index];
       catalog = catalog !== 0 ? catalog.serialize() : { name: 'Tanpa Katalog' };
       if (catalogId === undefined) {
@@ -215,7 +218,7 @@ class CatalogModel extends bookshelf.Model {
         catalog.count_product = catalogProducts.length;
       }
       return { catalog, products: catalogProducts };
-    }));
+    });
   }
 }
 

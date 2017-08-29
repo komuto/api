@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import Promise from 'bluebird';
 import slug from 'slug';
 import core from '../../core';
 import { Address } from '../../address/model';
@@ -9,6 +10,7 @@ import config from './../../../../config';
 import { Dropship, DropshipStatus } from './dropship';
 import { ProductExpeditionStatus } from './product_expedition';
 import { Expedition } from '../../expedition/model';
+import { MasterFee } from './master_fee';
 
 const { parseNum, parseDec, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -164,7 +166,7 @@ class ProductModel extends bookshelf.Model {
    * Get products
    */
   static async get(params, storeId = false) {
-    params.is_dropship = !!storeId || params.is_dropship;
+    const isDropship = !!storeId;
     const {
       page,
       pageSize,
@@ -173,7 +175,6 @@ class ProductModel extends bookshelf.Model {
       address,
       userId,
       where,
-      is_dropship: isDropship,
       marketplaceId,
     } = params;
     let { sort, other = '', brands, services } = params;
@@ -228,7 +229,6 @@ class ProductModel extends bookshelf.Model {
           qb.innerJoin('detil_ekspedisiproduk', 'detil_ekspedisiproduk.id_produk', 'produk.id_produk');
           qb.whereIn('detil_ekspedisiproduk.id_ekspedisiservice', services);
         }
-        if (isDropship) qb.where('is_dropshiper', JSON.parse(isDropship));
       })
       .orderBy(sort)
       .orderBy('id_produk')
@@ -248,7 +248,7 @@ class ProductModel extends bookshelf.Model {
       }).fetch()));
     }
 
-    return products.models.reduce((results, product, index) => {
+    return await Promise.reduce(products.models, async (results, product, index) => {
       const store = {
         ...Store.prototype.serialize.call(product),
         is_verified: other.verified || !!verified[index],
@@ -261,23 +261,17 @@ class ProductModel extends bookshelf.Model {
         images.models[0].serialize().file : config.defaultImage.product;
       product.count_like = likes.length;
       product.is_liked = !!isLiked;
-      if (isDropship) product.commission = this.calculateCommission(product.price, 'percent');
+      if (userId && isDropship) {
+        // TODO: Refactoring
+        product.commission = await MasterFee.calculateCommission(
+          marketplaceId,
+          product.price,
+          isDropship,
+          );
+      }
       results.push({ product, store });
       return results;
     }, []);
-  }
-
-  static calculateCommission(price, type) {
-    let fee;
-    if (price <= 200000 && price > 0) fee = 0.025;
-    else if (price <= 500000) fee = 0.02;
-    else if (price <= 1000000) fee = 0.015;
-    else if (price <= 5000000) fee = 0.01;
-    else if (price <= 10000000) fee = 0.005;
-    const feeTotal = price * fee;
-    if (type === 'nominal') return feeTotal;
-    else if (type === 'percent') return 100 / (price / feeTotal);
-    throw new Error('Choose commission type!');
   }
 
   /**
@@ -367,10 +361,11 @@ class ProductModel extends bookshelf.Model {
       'category',
       'images',
       'reviews.user.addresses',
-      'expeditionServices.expedition',
       'likes',
       'discussions',
       'view',
+      'expeditionServices.expedition',
+      { expeditionServices: qb => qb.where('status_detilekspedisiproduk', 1) },
       { 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) },
     ];
     if (userId) related.push('store.favoriteStores');
@@ -444,8 +439,9 @@ class ProductModel extends bookshelf.Model {
    * Get product with its relation
    * @param productId {integer} product id
    * @param storeId {integer} store id
+   * @param marketplaceId {integer} marketplace id
    */
-  static async getFullOwnProduct(productId, storeId) {
+  static async getFullOwnProduct(productId, storeId, marketplaceId) {
     let isDropship = false;
     const where = { id_produk: productId, id_toko: storeId };
     const related = {
@@ -490,10 +486,12 @@ class ProductModel extends bookshelf.Model {
     let brand = product.get('identifier_brand') ? product.related('brand') : null;
     if (brand && !brand.get('id_brand')) brand = null;
 
-    if (isDropship) {
-      product = product.serialize();
-      product.commission = this.calculateCommission(product.price, 'percent');
-    }
+    product = product.serialize();
+    product.commission = await MasterFee.calculateCommission(
+      marketplaceId,
+      product.price,
+      isDropship,
+      );
 
     return {
       product,
