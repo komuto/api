@@ -729,6 +729,7 @@ class ProductModel extends bookshelf.Model {
       return {
         ...product.serialize({ minimal: true }),
         image,
+        is_checked: false,
       };
     }));
   }
