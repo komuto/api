@@ -1,4 +1,6 @@
+import _ from 'lodash';
 import core from '../../core';
+import { getFeeError } from '../messages';
 
 const bookshelf = core.postgres.db;
 const { parseNum, parseDec } = core.utils;
@@ -37,6 +39,22 @@ class MasterFeeModel extends bookshelf.Model {
     masterFee = masterFee.serialize();
     if (!isDropship) return masterFee.fee;
     return (masterFee.fee * masterFee.dropshipper_fee) / 100;
+  }
+
+  static async findByMarketplaceId(marketplaceId) {
+    return await this.where({ identifier_marketplace_fee: marketplaceId }).orderBy('max_fee').fetchAll();
+  }
+
+  static calculateCommissionByFees(masterFee, price, isPercentage = false) {
+    if (!masterFee.models.length) throw getFeeError('master_fee', 'not_found');
+
+    let found = _.find(masterFee.models, o => o.serialize().max >= price);
+    if (!found) return 0;
+
+    found = found.serialize();
+    const fee = (found.fee * found.dropshipper_fee) / 100;
+    if (isPercentage) return fee;
+    return (fee * price) / 100;
   }
 }
 

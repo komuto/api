@@ -248,6 +248,8 @@ class ProductModel extends bookshelf.Model {
       }).fetch()));
     }
 
+    const masterFee = await MasterFee.findByMarketplaceId(marketplaceId);
+
     return await Promise.reduce(products.models, async (results, product, index) => {
       const store = {
         ...Store.prototype.serialize.call(product),
@@ -262,12 +264,7 @@ class ProductModel extends bookshelf.Model {
       product.count_like = likes.length;
       product.is_liked = !!isLiked;
       if (userId && isDropship) {
-        // TODO: Refactoring
-        product.commission = await MasterFee.calculateCommission(
-          marketplaceId,
-          product.price,
-          isDropship,
-          );
+        product.commission = MasterFee.calculateCommissionByFees(masterFee, product.price, true);
       }
       results.push({ product, store });
       return results;

@@ -1,11 +1,11 @@
 import core from '../../core';
 import { createCatalogError, getCatalogError, updateCatalogError } from './../messages';
 import config from './../../../../config';
-import { ProductStatus, DropshipStatus, Product, ImageProduct } from '../../product/model';
+import { ProductStatus, DropshipStatus, Product, ImageProduct, MasterFee } from '../../product/model';
 
 const bookshelf = core.postgres.db;
 const knex = core.postgres.knex;
-const { parseDate, defaultNull, parseNum, parseDec } = core.utils;
+const { parseDate, defaultNull, parseNum } = core.utils;
 
 class CatalogModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -187,18 +187,21 @@ class CatalogModel extends bookshelf.Model {
     const getImages = productsCatalog.map(products =>
       Promise.all(products.map(product =>
         ImageProduct.where('id_produk', product.id_produk).fetch())));
-    return productsCatalog.map(async (products, index) => {
+
+    const masterFee = await MasterFee.findByMarketplaceId(marketplaceId);
+
+    return await Promise.all(productsCatalog.map(async (products, index) => {
       const images = await getImages[index];
-      const catalogProducts = await Promise.all(products.map(async (product, idx) => {
+      const catalogProducts = products.map((product, idx) => {
         const image = images[idx] ? images[idx].serialize().file : config.defaultImage.product;
         const dropshipOrigin = !product.id_dropshipper ? false
           : {
             store_id: product.id_toko,
             name: product.nama_toko,
-            commission: 0,
-            // TODO: Refactoring
-            // commission: await Product.calculateCommission(marketplaceId,
-            // parseNum(product.harga_produk), 'nominal'),
+            commission: MasterFee.calculateCommissionByFees(
+              masterFee,
+              parseNum(product.harga_produk),
+              ),
           };
         // Initialize prototype chain
         Object.setPrototypeOf(product, getter);
@@ -209,7 +212,7 @@ class CatalogModel extends bookshelf.Model {
         };
         if (dropshipOrigin) product.dropship_origin = dropshipOrigin;
         return product;
-      }));
+      });
       let catalog = catalogs.models[index];
       catalog = catalog !== 0 ? catalog.serialize() : { name: 'Tanpa Katalog' };
       if (catalogId === undefined) {
@@ -218,7 +221,7 @@ class CatalogModel extends bookshelf.Model {
         catalog.count_product = catalogProducts.length;
       }
       return { catalog, products: catalogProducts };
-    });
+    }));
   }
 }
 
