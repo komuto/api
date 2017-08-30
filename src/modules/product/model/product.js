@@ -74,8 +74,8 @@ class ProductModel extends bookshelf.Model {
       count_popular: parseNum(this.get('count_populer'), 0),
       count_view: this.relations.view && this.related('view').serialize().ip
         ? this.related('view').serialize().ip.length : 0,
-      identifier_brand: this.get('identifier_brand'),
-      identifier_catalog: this.get('identifier_katalog'),
+      brand_id: this.get('identifier_brand'),
+      catalog_id: this.get('identifier_katalog'),
       status_at: parseDate(this.get('tglstatus_produk')),
       created_at: parseDate(this.get('date_created_produk')),
     };
@@ -764,11 +764,14 @@ class ProductModel extends bookshelf.Model {
             parseNum(product.harga_produk),
           ),
         };
+      const catalogId = product.id_dropshipper ? product.identifier_katalog : product.id_katalog;
+
       // Initialize prototype chain
       Object.setPrototypeOf(product, getter);
       product = {
         ...this.prototype.serialize.call(product, { minimal: true }),
         image,
+        catalog_id: catalogId,
         is_checked: false,
       };
       if (dropshipOrigin) product.dropship_origin = dropshipOrigin;

@@ -135,13 +135,13 @@ class CatalogModel extends bookshelf.Model {
       whereProduct.identifier_katalog = id === 0 ? null : id;
     }
 
-    return knex.select(knex.raw('"p".*, "d"."id_dropshipper", "nama_toko"'))
+    return knex.select(knex.raw('"p".*, "d"."id_dropshipper", "nama_toko", "d"."id_katalog"'))
       .from('dropshipper as d')
       .join('produk as p', 'p.id_produk', 'd.id_produk')
       .join('toko as t', 'p.id_toko', 't.id_toko')
       .where(whereDropship)
       .union(function () {
-        this.select(knex.raw('*, null as id_dropshipper, null as nama_toko'))
+        this.select(knex.raw('*, null as id_dropshipper, null as nama_toko, null as id_katalog'))
           .from('produk')
           .where(whereProduct);
       })
