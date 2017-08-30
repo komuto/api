@@ -253,8 +253,7 @@ ProductController.dropship = async (req, res, next) => {
  */
 ProductController.storeProducts = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const hidden = req.query.hidden && JSON.parse(req.query.hidden);
-  const params = { storeId, hidden, marketplaceId: req.marketplace.id };
+  const params = { storeId, marketplaceId: req.marketplace.id };
   const catalogs = await Catalog.getCatalogWithProducts(params);
   req.resData = {
     message: 'Store Products Data',
@@ -268,13 +267,11 @@ ProductController.storeProducts = async (req, res, next) => {
  */
 ProductController.storeCatalogProducts = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const hidden = req.query.hidden && JSON.parse(req.query.hidden);
   const catalogId = req.params.id || 0;
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const products = await Catalog.getCatalogWithProducts({
     storeId,
-    hidden,
     catalogId,
     page,
     pageSize,
@@ -285,6 +282,27 @@ ProductController.storeCatalogProducts = async (req, res, next) => {
     message: 'Store Catalog Products Data',
     meta: { page, limit: pageSize },
     data: products[0],
+  };
+  return next();
+};
+
+/**
+ * Get hidden store products
+ */
+ProductController.hiddenStoreProducts = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const products = await Product.getHiddenStoreProducts({
+    storeId,
+    page,
+    pageSize,
+    marketplaceId: req.marketplace.id,
+  });
+  req.resData = {
+    message: 'Hidden Store Products Data',
+    meta: { page, limit: pageSize },
+    data: products,
   };
   return next();
 };

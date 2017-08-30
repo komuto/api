@@ -126,30 +126,29 @@ class CatalogModel extends bookshelf.Model {
     return !!catalog;
   }
 
-  static async loadProducts(catalogIds, storeId, status, offset, limit) {
-    const productStatus = status;
-    return await Promise.all(catalogIds.map(id => knex.select(knex.raw('"p".*, "d"."id_dropshipper", "nama_toko"'))
+  static async loadProduct(id, storeId, status, offset, limit) {
+    const whereDropship = { 'd.id_toko': storeId, status_dropshipper: status };
+    const whereProduct = { id_toko: storeId, status_produk: status };
+
+    if (id) {
+      whereDropship['d.id_katalog'] = id === 0 ? null : id;
+      whereProduct.identifier_katalog = id === 0 ? null : id;
+    }
+
+    return knex.select(knex.raw('"p".*, "d"."id_dropshipper", "nama_toko"'))
       .from('dropshipper as d')
       .join('produk as p', 'p.id_produk', 'd.id_produk')
       .join('toko as t', 'p.id_toko', 't.id_toko')
-      .where({
-        'd.id_katalog': id === 0 ? null : id,
-        'd.id_toko': storeId,
-        status_dropshipper: productStatus,
-      })
+      .where(whereDropship)
       .union(function () {
         this.select(knex.raw('*, null as id_dropshipper, null as nama_toko'))
           .from('produk')
-          .where({
-            identifier_katalog: id === 0 ? null : id,
-            id_toko: storeId,
-            status_produk: productStatus,
-          });
+          .where(whereProduct);
       })
       .orderBy('id_produk', 'DESC')
       .limit(limit)
       .offset(offset)
-      .then(products => products)));
+      .then(products => products);
   }
 
   static async loadCatalog(storeId, catalogId) {
@@ -162,8 +161,8 @@ class CatalogModel extends bookshelf.Model {
    * Get catalog with products
    */
   static async getCatalogWithProducts(params) {
-    const { storeId, hidden, catalogId, page = 1, pageSize = 10, marketplaceId } = params;
-    const status = hidden === true ? ProductStatus.HIDE : ProductStatus.SHOW;
+    const { storeId, catalogId, page = 1, pageSize = 10, marketplaceId } = params;
+    const status = ProductStatus.SHOW;
     const limit = catalogId === undefined ? 3 : pageSize;
     const offset = page === 1 || catalogId === undefined ? 0 : (page - 1) * pageSize;
 
@@ -179,14 +178,17 @@ class CatalogModel extends bookshelf.Model {
     const getter = {
       get(prop) { return this[prop]; },
     };
-    const getProducts = this.loadProducts(catalogIds, storeId, status, offset, limit);
+    const getProducts = await Promise.all(
+      catalogIds.map(id => this.loadProduct(id, storeId, status, offset, limit)),
+    );
     const getCountProducts = catalogId ? []
       : Product.countProductsByCatalog(catalogIds, storeId, status);
     const [productsCatalog, countProducts] = await Promise.all([getProducts, getCountProducts]);
-    const getImages = productsCatalog.map(products =>
-      Promise.all(products.map(product =>
-        ImageProduct.where('id_produk', product.id_produk).fetch())));
-
+    const getImages = productsCatalog.map(
+      products => Promise.all(
+        products.map(product => ImageProduct.where('id_produk', product.id_produk).fetch()),
+      ),
+    );
     const masterFee = await MasterFee.findByMarketplaceId(marketplaceId);
 
     return await Promise.all(productsCatalog.map(async (products, index) => {

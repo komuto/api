@@ -5,12 +5,14 @@ import core from '../../core';
 import { Address } from '../../address/model';
 import { getProductError, errMsg, updateProductError } from './../messages';
 import { OTPAddressStatus, OTPAddress } from './../../OTP/model';
-import { Store } from './../../store/model/store';
+import { Store } from '../../store/model/store';
 import config from './../../../../config';
 import { Dropship, DropshipStatus } from './dropship';
 import { ProductExpeditionStatus } from './product_expedition';
 import { Expedition } from '../../expedition/model';
 import { MasterFee } from './master_fee';
+import { Catalog } from '../../store/model/catalog';
+import { ImageProduct } from './image_product';
 
 const { parseNum, parseDec, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -732,6 +734,46 @@ class ProductModel extends bookshelf.Model {
         is_checked: false,
       };
     }));
+  }
+
+  /**
+   * Get hidden store products
+   */
+  static async getHiddenStoreProducts(params) {
+    const { storeId, page, pageSize: limit, marketplaceId } = params;
+    const offset = (page - 1) * limit;
+
+    // Create getter object so that knex object could be serialized using Product model
+    const getter = {
+      get(prop) { return this[prop]; },
+    };
+    const getProducts = await Catalog.loadProduct(null, storeId, ProductStatus.HIDE, offset, limit);
+    const getImages = await Promise.all(
+        getProducts.map(product => ImageProduct.where('id_produk', product.id_produk).fetch()),
+    );
+    const masterFee = await MasterFee.findByMarketplaceId(marketplaceId);
+
+    return getProducts.map((product, id) => {
+      const image = getImages[id] ? getImages[id].serialize().file : config.defaultImage.product;
+      const dropshipOrigin = !product.id_dropshipper ? false
+        : {
+          store_id: product.id_toko,
+          name: product.nama_toko,
+          commission: MasterFee.calculateCommissionByFees(
+            masterFee,
+            parseNum(product.harga_produk),
+          ),
+        };
+      // Initialize prototype chain
+      Object.setPrototypeOf(product, getter);
+      product = {
+        ...this.prototype.serialize.call(product, { minimal: true }),
+        image,
+        is_checked: false,
+      };
+      if (dropshipOrigin) product.dropship_origin = dropshipOrigin;
+      return product;
+    });
   }
 
   /**

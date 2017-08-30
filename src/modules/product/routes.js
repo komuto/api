@@ -40,6 +40,15 @@ routes.get('/users/store/products/catalogs/:id([0-9]{1,10})?',
   apiResponse());
 
 /**
+ * GET /users/store/products/hidden
+ * View hidden products
+ */
+routes.get('/users/store/products/hidden',
+  auth(),
+  wrap(ProductController.hiddenStoreProducts),
+  apiResponse());
+
+/**
  * GET /users/store/products/catalogs/id/list
  * View own products based on catalog id for multiple check
  */
