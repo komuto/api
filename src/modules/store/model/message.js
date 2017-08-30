@@ -99,21 +99,28 @@ class MessageModel extends bookshelf.Model {
    */
   static async findById(id, typeId, type) {
     const where = { id_messages: id };
+    const column = type === 'store' ? 'flagreceiver_messages' : 'flagsender_messages';
     if (type === 'store') where.id_toko = typeId;
     else where.id_users = typeId;
-    const column = type === 'store' ? 'flagreceiver_messages' : 'flagsender_messages';
-    const message = await this.where(where)
+
+    let message = await this.where(where)
       .query(qb => qb.whereNot(column, MessageFlagStatus.PERMANENT_DELETED))
       .fetch({ withRelated: ['store', 'detailMessages.user'] });
     if (!message) throw getMessageError('message', 'not_found');
+
     const detailMessages = message.related('detailMessages').map((msg) => {
       msg = msg.serialize();
       const store = message.serialize().store;
       msg.store = (store.user_id === msg.user.id) ? store : null;
       return msg;
     });
+
+    message = message.serialize();
+    const flag = type === 'store' ? message.flag_receiver : message.flag_sender;
+    message.type = flag === MessageFlagStatus.ARCHIVE ? 'archive' : 'conversation';
+
     return {
-      ...message.serialize(),
+      ...message,
       detail_messages: detailMessages,
     };
   }
