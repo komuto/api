@@ -11,7 +11,7 @@ import {
   StoreExpedition,
   StoreStatus,
 } from './model';
-import { makeFavoriteError, deleteCatalogError } from './messages';
+import { makeFavoriteError, deleteCatalogError, createMessageError } from './messages';
 import { OTPAddress } from './../OTP/model';
 import { Address } from './../address/model';
 import { User } from './../user/model';
@@ -72,6 +72,9 @@ StoreController.listFavorites = async (req, res, next) => {
 };
 
 StoreController.createMessage = async (req, res, next) => {
+  const store = await Store.findById(req.params.id);
+  const storeOwner = store.related('user');
+  if (storeOwner.get('id_users') === req.user.id) throw createMessageError('store', 'own_store');
   const messageObj = Message.matchDBColumn({
     user_id: req.user.id,
     store_id: req.params.id,
@@ -89,12 +92,10 @@ StoreController.createMessage = async (req, res, next) => {
     created_at: new Date(),
   });
   const detailMessage = await DetailMessage.create(detailMessageObj);
-  const store = message.related('store');
-  const storeOwner = store.related('user');
   if (storeOwner.get('reg_token')) Notification.send(sellerNotification.MESSAGE, storeOwner.get('reg_token'));
   req.resData = {
     message: 'Message Data',
-    data: { message, detailMessage },
+    data: { message, detail_message: detailMessage },
   };
   return next();
 };

@@ -31,8 +31,9 @@ export const errMsg = {
     error: 'Gagal membuat komentar',
   },
   createMessage: {
-    title: 'Create komentar gagal',
-    error: 'Gagal membuat komentar',
+    title: 'Create pesan gagal',
+    error: 'Gagal membuat pesan',
+    own_store: 'Anda tidak bisa mengirim pesan ke toko anda',
   },
   getMessage: {
     title: 'Get pesan gagal',

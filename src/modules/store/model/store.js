@@ -350,6 +350,18 @@ class StoreModel extends bookshelf.Model {
   }
 
   /**
+   * Find store by id
+   * @param id {integer} store id
+   */
+  static async findById(id) {
+    const store = await new this({ id_toko: id }).fetch({ withRelated: 'user' }).catch(() => {
+      throw getStoreError('store', 'not_found');
+    });
+    if (!store) throw getStoreError('store', 'not_found');
+    return store;
+  }
+
+  /**
    * Get store by user id
    */
   static async getStoreByUserId(id) {
