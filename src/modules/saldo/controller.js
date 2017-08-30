@@ -18,7 +18,8 @@ SaldoController.withdrawWallet = async (req, res, next) => {
   const createWithdraw = Withdraw.create(Withdraw.matchDBColumn({
     amount,
     bank_account_id,
-    user_id: id }));
+    user_id: id,
+  }));
   const type = await getType;
   const createSummary = TransSummary.create(TransSummary.matchDBColumn({
     amount,
@@ -26,7 +27,8 @@ SaldoController.withdrawWallet = async (req, res, next) => {
     last_saldo: remainingSaldo,
     user_id: id,
     type: SummTransType.WITHDRAW,
-    remark: type.get('nama_tipetransaksi') }));
+    remark: type.get('nama_tipetransaksi'),
+  }));
   const updateSaldo = User.where({ id_users: id })
     .save({ saldo_wallet: remainingSaldo }, { patch: true });
   const changeOTPStatus = req.otp.save({ status: OTPStatus.USED }, { patch: true })
@@ -36,6 +38,15 @@ SaldoController.withdrawWallet = async (req, res, next) => {
       // If unable to update otp status then swallow the error
       if (e.message !== 'otp') throw withdrawError('withdraw', 'title');
     });
+  return next();
+};
+
+SaldoController.history = async (req, res, next) => {
+  const transactions = await TransSummary.get(req.user.id);
+  req.resData = {
+    message: 'History Saldo',
+    data: transactions,
+  };
   return next();
 };
 

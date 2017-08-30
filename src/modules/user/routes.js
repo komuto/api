@@ -240,7 +240,7 @@ routes.get('/users/messages/:id([0-9]{1,10})',
   apiResponse());
 
 /**
- * PUT /users/messages/id/archive
+ * PUT /users/messages/id
  * Update flag message
  */
 routes.put('/users/messages/:id([0-9]{1,10})',

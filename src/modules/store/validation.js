@@ -5,6 +5,7 @@ constraints.create = {
   'store.name': { presence: true },
   'store.slogan': { presence: true },
   'store.description': { presence: true },
+  // TODO: Add validation expedition service status (1/2)
   expedition_services: { presence: true },
   user: { presence: true },
   address: { presence: true },

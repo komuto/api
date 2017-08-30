@@ -1,6 +1,6 @@
 import core from '../../core';
 
-const { matchDB } = core.utils;
+const { matchDB, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
 
 export const SummTransType = {
@@ -26,18 +26,48 @@ class transSummaryModel extends bookshelf.Model {
   get hasTimestamps() {
     return ['tgl_summarytransaksi', 'tglstatus_summarytransaksi'];
   }
+
+  serialize() {
+    return {
+      id: this.get('id_summarytransaksi'),
+      user_id: parseNum(this.get('id_users')),
+      amount: parseNum(this.get('nominal_summarytransaksi')),
+      first_saldo: parseNum(this.get('saldo_awal')),
+      last_saldo: parseNum(this.get('saldo_akhir')),
+      type: this.get('kode_summarytransaksi'),
+      remark: this.get('remark'),
+    };
+  }
+
+  /**
+   * Add relation to DetailTransSummary
+   */
+  detailTransSummary() {
+    return this.hasOne('DetailTransSummary', 'id_summarytransaksi', 'id_summarytransaksi');
+  }
+
   /**
    * Create a new line item
    * @param {Object} data
-   * @param type {string} transaction type
    */
   static async create(data) {
     data = {
       ...data,
-      status_summarytransaksi: '1',
+      status_summarytransaksi: 1, // default value
       is_debit: false,
     };
     return new this(data).save();
+  }
+
+  static async get(userId) {
+    const transactions = await this.where('id_users', userId).fetchAll({ withRelated: 'detailTransSummary' });
+    return transactions.map((transaction) => {
+      const detail = transaction.related('detailTransSummary');
+      return {
+        ...transaction.serialize(),
+        bucket_id: detail.get('id_bucket') || null,
+      };
+    });
   }
 
   /**

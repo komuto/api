@@ -19,4 +19,12 @@ routes.post('/users/saldo/withdraw',
   wrap(SaldoController.withdrawWallet),
   apiResponse());
 
+/**
+ * History saldo
+ */
+routes.get('/users/saldo/history',
+  auth(),
+  wrap(SaldoController.history),
+  apiResponse());
+
 export default routes;
