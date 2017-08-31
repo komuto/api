@@ -130,18 +130,18 @@ class CatalogModel extends bookshelf.Model {
     const whereDropship = { 'd.id_toko': storeId, status_dropshipper: status };
     const whereProduct = { id_toko: storeId, status_produk: status };
 
-    if (id) {
+    if (id !== null) {
       whereDropship['d.id_katalog'] = id === 0 ? null : id;
       whereProduct.identifier_katalog = id === 0 ? null : id;
     }
 
-    return knex.select(knex.raw('"p".*, "d"."id_dropshipper", "nama_toko", "d"."id_katalog"'))
+    return knex.select(knex.raw('"p".*, "d"."id_dropshipper", "nama_toko"'))
       .from('dropshipper as d')
       .join('produk as p', 'p.id_produk', 'd.id_produk')
       .join('toko as t', 'p.id_toko', 't.id_toko')
       .where(whereDropship)
       .union(function () {
-        this.select(knex.raw('*, null as id_dropshipper, null as nama_toko, null as id_katalog'))
+        this.select(knex.raw('*, null as id_dropshipper, null as nama_toko'))
           .from('produk')
           .where(whereProduct);
       })

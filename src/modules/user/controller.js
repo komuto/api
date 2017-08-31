@@ -2,7 +2,7 @@ import { Facebook } from 'fb';
 import passport from 'passport';
 import moment from 'moment';
 import _ from 'lodash';
-import { User, UserToken, TokenType, UserStatus } from './model';
+import { User, UserToken, TokenType, UserStatus, getNotification, NotificationType } from './model';
 import { UserEmail } from './email';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
@@ -10,7 +10,6 @@ import { Store, StoreExpedition, Message, MessageFlagStatus, DetailMessage } fro
 import { userUpdateError, resetPassError, registrationError, activateUserError, fbError } from './messages';
 import { Discussion, Product } from '../product/model';
 import core from '../core';
-import { getNotification, NotificationType } from "./model/user";
 
 const { Notification, sellerNotification } = core;
 
