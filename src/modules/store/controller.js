@@ -94,7 +94,7 @@ StoreController.createMessage = async (req, res, next) => {
   const detailMessage = await DetailMessage.create(detailMessageObj);
   const notifications = storeOwner.serialize({ notification: true }).notifications;
   if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && storeOwner.get('reg_token')) {
-    Notification.send(sellerNotification.MESSAGE, storeOwner.get('reg_token'));
+    Notification.send(sellerNotification.MESSAGE, storeOwner.get('reg_token'), message.toJSON().id);
   }
   req.resData = {
     message: 'Message Data',
@@ -295,7 +295,7 @@ StoreController.replyMessage = async (req, res, next) => {
   const buyer = await User.getById(msg.user_id);
   const notifications = buyer.serialize({ notification: true }).notifications;
   if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && buyer.get('reg_token')) {
-    Notification.send(buyerNotification.MESSAGE, buyer.get('reg_token'));
+    Notification.send(buyerNotification.MESSAGE, buyer.get('reg_token'), req.params.id);
   }
   req.resData = { data: detailMessage };
   return next();
