@@ -698,6 +698,7 @@ class ProductModel extends bookshelf.Model {
 
   static async getOwner(id) {
     const product = await this.where({ id_produk: id }).fetch({ withRelated: ['store.user'] });
+    if (!product) throw getProductError('product', 'not_found');
     const store = product.related('store');
     return store.related('user');
   }

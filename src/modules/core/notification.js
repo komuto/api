@@ -34,11 +34,6 @@ export const buyerNotification = {
     body: 'Penjual mengomentari diskusi anda',
     type: 'BUYER_DISCUSSION',
   },
-  REVIEW: {
-    title: 'Komuto',
-    body: 'Penjual mengomentari review anda',
-    type: 'BUYER_REVIEW',
-  },
   RESOLUTION: {
     title: 'Komuto',
     body: 'Penjual mengomentari pusat resolusi',

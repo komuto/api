@@ -45,6 +45,13 @@ class CommentModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to Discussion
+   */
+  discussion() {
+    return this.belongsTo('Discussion', 'id_diskusi');
+  }
+
+  /**
    * Get comments by discussion
    */
   static async getByDiscussionId(id, page, pageSize) {

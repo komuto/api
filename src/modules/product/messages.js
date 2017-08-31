@@ -19,6 +19,7 @@ export const errMsg = {
   createDiscussion: {
     title: 'Create diskusi gagal',
     error: 'Gagal menambah diskusi',
+    owner: 'Anda tidak bisa menambah diskusi ke produk Anda',
   },
   createDropship: {
     title: 'Create dropship gagal',

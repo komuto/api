@@ -23,8 +23,10 @@ class ServiceModel extends bookshelf.Model {
       is_checked: false,
     };
     if (minimal) {
-      return { ...service,
-        expedition: this.relations.expedition ? this.related('expedition') : undefined };
+      return {
+        ...service,
+        expedition: this.relations.expedition ? this.related('expedition') : undefined,
+      };
     }
     return {
       ...service,

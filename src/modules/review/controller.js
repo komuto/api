@@ -14,8 +14,8 @@ ReviewController.createReview = async (req, res, next) => {
   req.body.product_id = req.params.id;
   if (await Review.getByOtherId(req.user.id, req.params.id)) throw createReviewError('review', 'duplicate');
   const review = await Review.create(Review.matchDBColumn(req.body));
-  const user = await Product.getOwner(req.params.id);
-  if (user.get('reg_token')) Notification.send(sellerNotification.REVIEW, user.get('reg_token'));
+  const owner = await Product.getOwner(req.params.id);
+  if (owner.get('reg_token')) Notification.send(sellerNotification.REVIEW, owner.get('reg_token'));
   req.resData = { data: review };
   return next();
 };
