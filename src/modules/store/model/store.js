@@ -294,7 +294,8 @@ class StoreModel extends bookshelf.Model {
     });
     const dataExpeditions = await Expedition.query(qb => qb.whereIn('id_ekspedisi', expeditionIds))
       .fetchAll({
-        withRelated: [{ services: qb => qb.whereNotIn('id_ekspedisiservice', expeditionServiceIds) }] });
+        withRelated: [{ services: qb => qb.whereNotIn('id_ekspedisiservice', expeditionServiceIds) }]
+      });
     dataExpeditions.each((val) => {
       const expedition = _.find(expeditions, { id: val.serialize().id });
       const services = val.related('services').map((o) => {

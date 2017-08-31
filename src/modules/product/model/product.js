@@ -11,8 +11,6 @@ import { Dropship, DropshipStatus } from './dropship';
 import { ProductExpeditionStatus } from './product_expedition';
 import { Expedition } from '../../expedition/model';
 import { MasterFee } from './master_fee';
-import { Catalog } from '../../store/model/catalog';
-import { ImageProduct } from './image_product';
 
 const { parseNum, parseDec, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -364,7 +362,7 @@ class ProductModel extends bookshelf.Model {
       'discussions',
       'view',
       'expeditionServices.expedition',
-      { expeditionServices: qb => qb.where('status_detilekspedisiproduk', 1) },
+      { expeditionServices: qb => qb.where('status_detilekspedisiproduk', ProductExpeditionStatus.USED) },
       { 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) },
     ];
     if (userId) related.push('store.favoriteStores');
@@ -450,7 +448,7 @@ class ProductModel extends bookshelf.Model {
         'brand',
         'catalog',
         'expeditionServices.expedition',
-        { expeditionServices: qb => qb.where('status_detilekspedisiproduk', 1) },
+        { expeditionServices: qb => qb.where('status_detilekspedisiproduk', ProductExpeditionStatus.USED) },
       ],
     };
     let product = await this.where(where).fetch(related);
@@ -681,7 +679,8 @@ class ProductModel extends bookshelf.Model {
     });
     const dataExpeditions = await Expedition.query(qb => qb.whereIn('id_ekspedisi', expeditionIds))
       .fetchAll({
-        withRelated: [{ services: qb => qb.whereNotIn('id_ekspedisiservice', expeditionServiceIds) }] });
+        withRelated: [{ services: qb => qb.whereNotIn('id_ekspedisiservice', expeditionServiceIds) }],
+      });
     dataExpeditions.each((val) => {
       const expedition = _.find(expeditions, { id: val.serialize().id });
       const services = val.related('services').map((o) => {
