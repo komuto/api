@@ -5,12 +5,11 @@ import rp from 'request-promise-native';
 import config from '../../../../config';
 import core from '../../core';
 import { model as addressModel } from '../../address';
-import { model as OTPModel } from '../../OTP';
+import { OTPHPStatus, OTPAddressStatus } from '../../OTP/model';
 
 const { defaultNull, parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
 const { District } = addressModel;
-const { OTPHPStatus } = OTPModel;
 
 // used by bcrypt to generate new salt
 // 8 rounds will produce about 40 hashes per second on a 2GHz core
@@ -230,12 +229,12 @@ class UserModel extends bookshelf.Model {
   static async getUserProfile(id) {
     let user = await this.where('id_users', id).fetch({
       withRelated: [
-        'store',
         'birthPlace',
+        { 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) },
         { verifyPhone: qb => qb.where('status_otphp', OTPHPStatus.VERIFIED) },
       ],
     });
-    const store = user.related('store');
+    const store = user.related('store').serialize({ verified: true });
     user = user.serialize({ birth: true, phone: true });
     return { user, store };
   }
