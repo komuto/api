@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 import moment from 'moment';
 import toTitleCase from 'to-title-case';
 import rp from 'request-promise-native';
+import _ from 'lodash';
 import config from '../../../../config';
 import core from '../../core';
 import { model as addressModel } from '../../address';
@@ -32,7 +33,7 @@ export const UserCooperativeStatus = {
   NOT_MEMBER: 4,
 };
 
-const notificationType = {
+export const NotificationType = {
   MESSAGE_FROM_ADMIN: 1,
   NEWSLETTER: 2,
   REVIEW: 3,
@@ -40,12 +41,16 @@ const notificationType = {
   PRIVATE_MESSAGE: 5,
 };
 
+export const getNotification = (notifications, type) => (
+  _.find(notifications, o => o.type === type).is_active
+);
+
 const notificationDefault = [
-  { type: notificationType.MESSAGE_FROM_ADMIN, is_active: true },
-  { type: notificationType.NEWSLETTER, is_active: true },
-  { type: notificationType.REVIEW, is_active: true },
-  { type: notificationType.DISCUSSION, is_active: true },
-  { type: notificationType.PRIVATE_MESSAGE, is_active: true },
+  { type: NotificationType.MESSAGE_FROM_ADMIN, is_active: true },
+  { type: NotificationType.NEWSLETTER, is_active: true },
+  { type: NotificationType.REVIEW, is_active: true },
+  { type: NotificationType.DISCUSSION, is_active: true },
+  { type: NotificationType.PRIVATE_MESSAGE, is_active: true },
 ];
 
 class UserModel extends bookshelf.Model {
@@ -112,7 +117,7 @@ class UserModel extends bookshelf.Model {
     if (phone) {
       user.is_phone_verified = this.related('verifyPhone').length !== 0;
     }
-    if (notification) user.notifications = this.get('notifications');
+    if (notification) user.notifications = this.get('notifications') || notificationDefault;
     return user;
   }
 
@@ -279,19 +284,19 @@ class UserModel extends bookshelf.Model {
   static getNotificationContent(type, name) {
     let content = '';
     switch (type) {
-      case notificationType.MESSAGE_FROM_ADMIN:
+      case NotificationType.MESSAGE_FROM_ADMIN:
         content = 'Setiap pesan pribadi dari admin saya terima.';
         break;
-      case notificationType.NEWSLETTER:
+      case NotificationType.NEWSLETTER:
         content = `Setiap Pesan Berita dari ${name}.`;
         break;
-      case notificationType.REVIEW:
+      case NotificationType.REVIEW:
         content = 'Setiap Review dan komentar saya terima.';
         break;
-      case notificationType.DISCUSSION:
+      case NotificationType.DISCUSSION:
         content = 'Setiap Diskusi produk dan komentar saya terima.';
         break;
-      case notificationType.PRIVATE_MESSAGE:
+      case NotificationType.PRIVATE_MESSAGE:
         content = 'Setiap Pesan Pribadi saya terima';
         break;
       default:

@@ -14,7 +14,7 @@ import {
 import { makeFavoriteError, deleteCatalogError, createMessageError } from './messages';
 import { OTPAddress } from './../OTP/model';
 import { Address } from './../address/model';
-import { User } from './../user/model';
+import { User, getNotification, NotificationType } from './../user/model';
 import { OTPAddressEmail } from '../OTP/email';
 import config from '../../../config';
 import core from '../core';
@@ -92,7 +92,10 @@ StoreController.createMessage = async (req, res, next) => {
     created_at: new Date(),
   });
   const detailMessage = await DetailMessage.create(detailMessageObj);
-  if (storeOwner.get('reg_token')) Notification.send(sellerNotification.MESSAGE, storeOwner.get('reg_token'));
+  const notifications = storeOwner.serialize({ notification: true }).notifications;
+  if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && storeOwner.get('reg_token')) {
+    Notification.send(sellerNotification.MESSAGE, storeOwner.get('reg_token'));
+  }
   req.resData = {
     message: 'Message Data',
     data: { message, detail_message: detailMessage },
@@ -289,8 +292,11 @@ StoreController.replyMessage = async (req, res, next) => {
     created_at: moment(),
   }));
   const detailMessage = await DetailMessage.create(data);
-  const user = await User.getById(msg.user_id);
-  if (user.get('reg_token')) Notification.send(buyerNotification.MESSAGE, user.get('reg_token'));
+  const buyer = await User.getById(msg.user_id);
+  const notifications = buyer.serialize({ notification: true }).notifications;
+  if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && buyer.get('reg_token')) {
+    Notification.send(buyerNotification.MESSAGE, buyer.get('reg_token'));
+  }
   req.resData = { data: detailMessage };
   return next();
 };
