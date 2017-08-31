@@ -29,10 +29,14 @@ UserController.getOneUser = async (req, res, next) => {
 /**
  * Login authentication
  */
-UserController.login = (req, res, next) => {
-  passport.authenticate('local-login', (err, user) => {
+UserController.login = async (req, res, next) => {
+  passport.authenticate('local-login', async (err, user) => {
     if (err) {
       return next(err);
+    }
+    if (req.body.reg_token) {
+      await User.where('id_users', user.id).save({ reg_token: req.body.reg_token }, { patch: true });
+      user.reg_token = req.body.reg_token;
     }
     req.user = user;
     return next();
