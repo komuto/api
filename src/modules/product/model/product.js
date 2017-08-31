@@ -565,19 +565,8 @@ class ProductModel extends bookshelf.Model {
     // eslint-disable-next-line no-restricted-syntax
     for (const id of ids) {
       const where = { id_toko: storeId, id_produk: id };
-      const product = await this.where(where).fetch().catch(() => {});
-      if (!product) {
-        const dropship = await Dropship.where(where).fetch().catch(() => {});
-        // eslint-disable-next-line no-continue
-        if (!dropship) continue;
-        const status = parseNum(dropship.toJSON().status) === DropshipStatus.HIDE
-          ? DropshipStatus.SHOW : DropshipStatus.HIDE;
-        await dropship.save({ status_dropshipper: status }, { patch: true }).catch(() => {});
-      } else {
-        const status = parseNum(product.toJSON().status) === ProductStatus.HIDE
-          ? ProductStatus.SHOW : ProductStatus.HIDE;
-        await product.save({ status_produk: status }, { patch: true }).catch(() => {});
-      }
+      await this.where(where).save({ status_produk: ProductStatus.HIDE }, { patch: true })
+        .catch(() => {});
     }
   }
 
@@ -714,16 +703,19 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
-   * Get catalog with products for multiple check
+   * Get store products (hidden / multiple check)
    */
-  static async storeProductsByCatalog(params) {
-    const { storeId, catalogId, page, pageSize, isDropship } = params;
-    const products = await this.where({
-      id_toko: storeId,
-      identifier_katalog: catalogId,
-      status_produk: ProductStatus.SHOW,
-      is_dropshiper: isDropship,
-    }).fetchPage({ page, pageSize });
+  static async storeProducts(params) {
+    const { storeId, catalogId = null, page, pageSize, isDropship = null, hidden = false } = params;
+    const status = hidden ? ProductStatus.HIDE : ProductStatus.SHOW;
+    const where = { id_toko: storeId, status_produk: status };
+    const isChecked = catalogId ? false : undefined;
+
+    if (catalogId) where.identifier_katalog = catalogId;
+    if (isDropship !== null) where.is_dropshiper = isDropship;
+
+    const products = await this.where(where).fetchPage({ page, pageSize });
+
     return await Promise.all(products.map(async (product) => {
       await product.load({ images: qb => qb.limit(1) });
       const images = product.related('images').models;
@@ -731,52 +723,9 @@ class ProductModel extends bookshelf.Model {
       return {
         ...product.serialize({ minimal: true }),
         image,
-        is_checked: false,
+        is_checked: isChecked,
       };
     }));
-  }
-
-  /**
-   * Get hidden store products
-   */
-  static async getHiddenStoreProducts(params) {
-    const { storeId, page, pageSize: limit, marketplaceId } = params;
-    const offset = (page - 1) * limit;
-
-    // Create getter object so that knex object could be serialized using Product model
-    const getter = {
-      get(prop) { return this[prop]; },
-    };
-    const getProducts = await Catalog.loadProduct(null, storeId, ProductStatus.HIDE, offset, limit);
-    const getImages = await Promise.all(
-        getProducts.map(product => ImageProduct.where('id_produk', product.id_produk).fetch()),
-    );
-    const masterFee = await MasterFee.findByMarketplaceId(marketplaceId);
-
-    return getProducts.map((product, id) => {
-      const image = getImages[id] ? getImages[id].serialize().file : config.defaultImage.product;
-      const dropshipOrigin = !product.id_dropshipper ? false
-        : {
-          store_id: product.id_toko,
-          name: product.nama_toko,
-          commission: MasterFee.calculateCommissionByFees(
-            masterFee,
-            parseNum(product.harga_produk),
-          ),
-        };
-      const catalogId = product.id_dropshipper ? product.identifier_katalog : product.id_katalog;
-
-      // Initialize prototype chain
-      Object.setPrototypeOf(product, getter);
-      product = {
-        ...this.prototype.serialize.call(product, { minimal: true }),
-        image,
-        catalog_id: catalogId,
-        is_checked: false,
-      };
-      if (dropshipOrigin) product.dropship_origin = dropshipOrigin;
-      return product;
-    });
   }
 
   /**
