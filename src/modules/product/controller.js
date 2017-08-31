@@ -14,7 +14,7 @@ import {
   View,
   MasterFee,
 } from './model';
-import { Wishlist } from '../user/model';
+import { Wishlist, getNotification, NotificationType } from '../user/model';
 import { Store, Catalog } from '../store/model';
 import {
   getProductError,
@@ -177,7 +177,10 @@ ProductController.createDiscussion = async (req, res, next) => {
     created_at: moment(),
   });
   const discussion = await Discussion.create(data);
-  if (owner.get('reg_token')) Notification.send(sellerNotification.DISCUSSION, owner.get('reg_token'));
+  const notifications = owner.serialize({ notification: true }).notifications;
+  if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && owner.get('reg_token')) {
+    Notification.send(sellerNotification.DISCUSSION, owner.get('reg_token'));
+  }
   req.resData = {
     message: 'Discussion Data',
     data: discussion,
@@ -200,12 +203,17 @@ ProductController.createComment = async (req, res, next) => {
   await comment.load('discussion');
   const discussion = comment.related('discussion');
   const owner = await Product.getOwner(discussion.get('id_produk'));
+  let notifications = owner.serialize({ notification: true }).notifications;
 
   if (owner.get('id_users') === req.user.id) {
     await discussion.load('user');
-    const user = discussion.related('user');
-    if (user.get('reg_token')) Notification.send(buyerNotification.DISCUSSION, user.get('reg_token'));
-  } else if (owner.get('reg_token')) {
+    const buyer = discussion.related('user');
+    notifications = buyer.serialize({ notification: true }).notifications;
+
+    if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && buyer.get('reg_token')) {
+      Notification.send(buyerNotification.DISCUSSION, buyer.get('reg_token'));
+    }
+  } else if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && owner.get('reg_token')) {
     Notification.send(sellerNotification.DISCUSSION, owner.get('reg_token'));
   }
 

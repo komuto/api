@@ -10,6 +10,7 @@ import { Store, StoreExpedition, Message, MessageFlagStatus, DetailMessage } fro
 import { userUpdateError, resetPassError, registrationError, activateUserError, fbError } from './messages';
 import { Discussion, Product } from '../product/model';
 import core from '../core';
+import { getNotification, NotificationType } from "./model/user";
 
 const { Notification, sellerNotification } = core;
 
@@ -359,8 +360,11 @@ UserController.replyMessage = async (req, res, next) => {
     created_at: moment(),
   }));
   const detailMessage = await DetailMessage.create(data);
-  const user = await User.getById(msg.store.user_id);
-  if (user.get('reg_token')) Notification.send(sellerNotification.MESSAGE, user.get('reg_token'));
+  const storeOwner = await User.getById(msg.store.user_id);
+  const notifications = storeOwner.serialize({ notification: true }).notifications;
+  if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && storeOwner.get('reg_token')) {
+    Notification.send(sellerNotification.MESSAGE, storeOwner.get('reg_token'));
+  }
   req.resData = { data: detailMessage };
   return next();
 };
