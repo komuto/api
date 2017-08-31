@@ -679,8 +679,7 @@ class ProductModel extends bookshelf.Model {
     });
     const dataExpeditions = await Expedition.query(qb => qb.whereIn('id_ekspedisi', expeditionIds))
       .fetchAll({
-        withRelated: [{ services: qb => qb.whereNotIn('id_ekspedisiservice', expeditionServiceIds) }],
-      });
+        withRelated: [{ services: qb => qb.whereNotIn('id_ekspedisiservice', expeditionServiceIds) }], });
     dataExpeditions.each((val) => {
       const expedition = _.find(expeditions, { id: val.serialize().id });
       const services = val.related('services').map((o) => {
@@ -706,9 +705,9 @@ class ProductModel extends bookshelf.Model {
    * Get store products (hidden / multiple check)
    */
   static async storeProducts(params) {
-    const { storeId, catalogId = null, page, pageSize, isDropship = null, hidden = false } = params;
-    const status = hidden ? ProductStatus.HIDE : ProductStatus.SHOW;
-    const where = { id_toko: storeId, status_produk: status };
+    const { storeId, catalogId = null, page, pageSize, isDropship = null, hidden = null } = params;
+    const where = { id_toko: storeId };
+    if (hidden !== null) where.status_produk = hidden ? ProductStatus.HIDE : ProductStatus.SHOW;
     const isChecked = catalogId ? false : undefined;
 
     if (catalogId) where.identifier_katalog = catalogId;
