@@ -42,15 +42,15 @@ export const buyerNotification = {
 };
 
 class NotificationClass {
-  static getPayload(notification, id) {
+  static getPayload(notification, id, productId) {
     return {
       notification: { title: notification.title, body: notification.body },
-      data: { id, type: notification.type },
+      data: { id, product_id: productId, type: notification.type },
     };
   }
 
-  static send(notification, token, id = null) {
-    const payload = this.getPayload(notification, id);
+  static send(notification, token, id = null, productId = null) {
+    const payload = this.getPayload(notification, id, productId);
     firebaseadmin.messaging().sendToDevice(token, payload)
       .then((response) => {
         console.log('Successfully sent message:');
