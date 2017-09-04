@@ -59,7 +59,7 @@ PaymentController.getSnapToken = async (req, res, next) => {
     total += item.total_price;
     return {
       id: `ITEM-${item.id}`,
-      price: item.total_price,
+      price: item.total_price / item.qty,
       quantity: item.qty,
       name: item.product.name,
     };
