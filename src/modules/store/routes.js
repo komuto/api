@@ -6,14 +6,12 @@ import constraints from './validation';
 const routes = express.Router();
 const { wrap } = core.utils;
 const { apiResponse, auth, validateParam } = core.middleware;
-const cache = core.cache;
 
 /**
  * GET /stores/id
  * Get full detailed store
  */
 routes.get('/stores/:id([0-9]{1,10})',
-  // cache('5 minutes'),
   auth(false),
   wrap(StoreController.getStore),
   apiResponse());

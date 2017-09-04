@@ -14,7 +14,7 @@ const { apiResponse, auth, validateParam } = core.middleware;
  * View list of provinces
  */
 routes.get('/locations/provinces',
-  cache(),
+  cache('7 days'),
   wrap(AddressController.getProvinces),
   apiResponse());
 
@@ -23,7 +23,7 @@ routes.get('/locations/provinces',
  * View list of districts
  */
 routes.get('/locations/districts',
-  cache(),
+  cache('7 days'),
   wrap(AddressController.getDistricts),
   apiResponse());
 
@@ -32,7 +32,7 @@ routes.get('/locations/districts',
  * View list of sub districts
  */
 routes.get('/locations/sub-districts',
-  cache(),
+  cache('7 days'),
   wrap(AddressController.getSubDistricts),
   apiResponse());
 
@@ -41,7 +41,7 @@ routes.get('/locations/sub-districts',
  * View list of villages
  */
 routes.get('/locations/villages',
-  cache(),
+  cache('7 days'),
   wrap(AddressController.getVillages),
   apiResponse());
 

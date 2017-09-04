@@ -13,7 +13,7 @@ const cache = core.cache;
  * View list of expeditions
  */
 routes.get('/expeditions',
-  cache(),
+  cache('7 days'),
   wrap(ExpeditionController.getExpeditions),
   apiResponse());
 
@@ -22,7 +22,7 @@ routes.get('/expeditions',
  * View list of services
  */
 routes.get('/expeditions/services',
-  cache(),
+  cache('7 days'),
   wrap(ExpeditionController.getListExpeditionServices),
   apiResponse());
 
@@ -31,7 +31,7 @@ routes.get('/expeditions/services',
  * View expedition service
  */
 routes.get('/expeditions/:id([0-9]{1,10})/services',
-  cache(),
+  cache('7 days'),
   wrap(ExpeditionController.getExpeditionService),
   apiResponse());
 
@@ -41,7 +41,6 @@ routes.get('/expeditions/:id([0-9]{1,10})/services',
  */
 routes.get('/expeditions/:id([0-9]{1,10})/cost',
   validateParam(constraints.cost),
-  cache(),
   wrap(ExpeditionController.getExpeditionCost),
   apiResponse());
 

@@ -7,7 +7,6 @@ import { validateManageProductsParam } from './middleware';
 const routes = express.Router();
 const { wrap } = core.utils;
 const { apiResponse, auth, validateParam } = core.middleware;
-const { cache } = core;
 
 /**
  * GET /products
@@ -15,7 +14,6 @@ const { cache } = core;
  */
 routes.get('/products',
   auth(false),
-  // cache('5 minutes'),
   validateParam(constraints.list),
   wrap(ProductController.index),
   apiResponse());
