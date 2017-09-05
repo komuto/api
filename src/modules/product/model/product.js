@@ -373,8 +373,7 @@ class ProductModel extends bookshelf.Model {
     if (product && product.get('id_toko') !== storeId) {
       const withRelated = [{ 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) }];
       if (userId) withRelated.push('store.favoriteStores');
-      dropship = await Dropship.where({ id_produk: productId, id_toko: storeId })
-        .fetch({ withRelated });
+      dropship = await Dropship.findByProductIdAndStoreId(productId, storeId, withRelated);
       if (!dropship) return false;
       isDropshipped = true;
     }

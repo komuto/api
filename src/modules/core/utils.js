@@ -110,7 +110,7 @@ export function getName(str) {
 }
 
 export function getProductAndStore(val) {
-  const arr = val.split('.');
+  const arr = String(val).split('.');
   return {
     productId: parseNum(arr[0]),
     storeId: parseNum(arr[1]),

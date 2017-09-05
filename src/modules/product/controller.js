@@ -259,7 +259,7 @@ ProductController.dropship = async (req, res, next) => {
   const catalogId = req.body.catalog_id;
   const storeId = await Store.getStoreId(req.user.id);
 
-  const found = await Dropship.findDuplicate(req.params.id, storeId);
+  const found = await Dropship.findByProductIdAndStoreId(req.params.id, storeId);
   if (found) throw addDropshipProductError('product', 'duplicate');
 
   const [product, catalog] = await Promise.all([

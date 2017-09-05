@@ -5,12 +5,12 @@ constraints.promo = {
 };
 
 constraints.cart = {
-  product_id: { presence: true },
-  expedition_id: { presence: true },
-  expedition_service_id: { presence: true },
-  qty: { presence: true },
+  product_id: { presence: true, numericality: true },
+  expedition_id: { presence: true, numericality: { onlyInteger: true } },
+  expedition_service_id: { presence: true, numericality: { onlyInteger: true } },
+  qty: { presence: true, numericality: { onlyInteger: true } },
   note: { presence: false },
-  address_id: { presence: true },
+  address_id: { presence: true, numericality: { onlyInteger: true } },
   is_insurance: {
     presence: true,
     inclusion: {
@@ -31,12 +31,12 @@ constraints.checkout = {
 };
 
 constraints.bulkUpdate = {
-  id: { presence: true },
-  expedition_id: { presence: false },
-  expedition_service_id: { presence: false },
-  qty: { presence: false },
+  id: { presence: true, numericality: { onlyInteger: true } },
+  expedition_id: { presence: false, numericality: { onlyInteger: true } },
+  expedition_service_id: { presence: false, numericality: { onlyInteger: true } },
+  qty: { presence: false, numericality: { onlyInteger: true } },
   note: { presence: false },
-  address_id: { presence: false },
+  address_id: { presence: false, numericality: { onlyInteger: true } },
   is_insurance: {
     presence: false,
     inclusion: {

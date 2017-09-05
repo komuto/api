@@ -5,6 +5,8 @@ import { Expedition } from '../expedition/model';
 import { Invoice, InvoiceStatus, PaymentMethod } from '../payment/model';
 import { getBucketError, getItemError } from './messages';
 import { BadRequestError } from '../../../common/errors';
+import { getProductAndStore } from '../core/utils';
+import { Dropship } from "../product/model/dropship";
 
 export const BucketController = {};
 export default { BucketController };
@@ -99,10 +101,19 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
 };
 
 BucketController.addToCart = async (req, res, next) => {
+  let dropship;
   let bucket = Bucket.findOrCreateBucket(req.user.id);
-  let product = Product.findById(req.body.product_id);
+  const { productId, storeId } = getProductAndStore(req.body.product_id);
+  let product = Product.findById(productId);
   [bucket, product] = await Promise.all([bucket, product]);
-  const where = Item.matchDBColumn({ bucket_id: bucket.id, product_id: product.id });
+
+  let columns = { bucket_id: bucket.id, product_id: product.id };
+  if (product.store_id !== storeId) {
+    dropship = await Dropship.findByProductIdAndStoreId(productId, storeId);
+    columns = { ...columns, dropshipper_id: dropship.serialize().id };
+  }
+
+  const where = Item.matchDBColumn(columns);
   const item = await Item.get(where);
   req.resData = {
     data: await BucketController.saveCart(bucket, req.body, product, item, where),

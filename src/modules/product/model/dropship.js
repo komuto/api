@@ -62,8 +62,8 @@ class DropshipModel extends bookshelf.Model {
     });
   }
 
-  static async findDuplicate(productId, storeId) {
-    return await new this({ id_produk: productId, id_toko: storeId }).fetch();
+  static async findByProductIdAndStoreId(productId, storeId, withRelated = null) {
+    return await new this({ id_produk: productId, id_toko: storeId }).fetch({ withRelated });
   }
 
   /**
