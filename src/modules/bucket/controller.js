@@ -1,12 +1,11 @@
 import _ from 'lodash';
 import { Bucket, Promo, Item, Shipping, BucketStatus, PromoType } from './model';
-import { Product } from '../product/model';
+import { Product, Dropship } from '../product/model';
 import { Expedition } from '../expedition/model';
 import { Invoice, InvoiceStatus, PaymentMethod } from '../payment/model';
 import { getBucketError, getItemError } from './messages';
 import { BadRequestError } from '../../../common/errors';
 import { getProductAndStore } from '../core/utils';
-import { Dropship } from "../product/model/dropship";
 
 export const BucketController = {};
 export default { BucketController };
