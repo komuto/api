@@ -297,4 +297,13 @@ routes.post('/users/notifications',
   wrap(UserController.saveNotifications),
   apiResponse());
 
+/**
+ * GET /users/resolutions
+ * Get resolutions
+ */
+routes.get('/users/resolutions',
+  auth(),
+  wrap(UserController.getResolutions),
+  apiResponse());
+
 export default routes;

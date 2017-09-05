@@ -402,3 +402,10 @@ UserController.saveNotifications = async (req, res, next) => {
   req.resData = { data: User.getNotifications(notifications, req.marketplace.name) };
   return next();
 };
+
+/**
+ * Get Resolutions
+ */
+UserController.getResolutions = async (req, res, next) => {
+  return next();
+};
