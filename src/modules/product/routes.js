@@ -68,7 +68,7 @@ routes.get('/products/search',
  * GET /products/id
  * Get full detailed product
  */
-routes.get('/products/:id([0-9]{1,10})',
+routes.get('/products/:id([0-9]{1,10}.[0-9]{1,10})',
   auth(false),
   wrap(ProductController.getProduct),
   apiResponse());

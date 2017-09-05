@@ -351,9 +351,13 @@ class ProductModel extends bookshelf.Model {
   /**
    * Get product with its relation
    * @param productId {integer} product id
+   * @param storeId {integer} store id
    * @param userId {integer} user id
    */
-  static async getFullProduct(productId, userId) {
+  static async getFullProduct(productId, storeId, userId) {
+    let store;
+    let dropship;
+    let isDropshipped = false;
     const related = [
       'category',
       'images',
@@ -362,15 +366,23 @@ class ProductModel extends bookshelf.Model {
       'discussions',
       'view',
       'expeditionServices.expedition',
+      'store',
       { expeditionServices: qb => qb.where('status_detilekspedisiproduk', ProductExpeditionStatus.USED) },
-      { 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) },
     ];
-    if (userId) related.push('store.favoriteStores');
     let product = await this.where({ id_produk: productId }).fetch({ withRelated: related });
-    if (!product) return false;
+    if (product && product.get('id_toko') !== storeId) {
+      const withRelated = [{ 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) }];
+      if (userId) withRelated.push('store.favoriteStores');
+      dropship = await Dropship.where({ id_produk: productId, id_toko: storeId })
+        .fetch({ withRelated });
+      if (!dropship) return false;
+      isDropshipped = true;
+    }
+
     // Eager load other products so it doesn't block other process by not awaiting directly
+    // TODO: Join dropshipper
     const getOtherProds = this.query((qb) => {
-      qb.where('id_toko', product.get('id_toko'));
+      qb.where('id_toko', storeId);
       qb.whereNot('id_produk', productId);
       qb.orderBy('id_produk', 'desc');
       qb.limit(3);
@@ -385,16 +397,25 @@ class ProductModel extends bookshelf.Model {
     } else wholesaler = [];
 
     const category = product.related('category').serialize();
-    let store = product.related('store');
+    if (!isDropshipped) {
+      const load = [{ 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) }];
+      if (userId) load.push('store.favoriteStores');
+      await product.load(load);
+      store = product.related('store');
+    } else {
+      store = dropship.related('store');
+    }
     const isFavorite = userId ? this.loadFavorites(store, userId) : false;
     store = store.serialize({ verified: true });
     const images = product.related('images');
-    const getAddress = Address.getStoreAddress(store.user_id);
+    const address = await Address.getStoreAddress(product.related('store').get('id_users'));
+    const location = { province: address.related('province'), district: address.related('district') };
     const expeditions = this.loadExpeditions(product);
     const { reviews, rating } = this.loadReviewsRatings(product);
     const { likes, isLiked } = this.loadLikes(product, userId);
     const discussions = product.related('discussions');
 
+    store.is_favorite = isFavorite;
     rating.quality = parseFloat(this.ratingAvg(rating.quality));
     rating.accuracy = parseFloat(this.ratingAvg(rating.accuracy));
     product = product.serialize();
@@ -402,10 +423,6 @@ class ProductModel extends bookshelf.Model {
     product.count_like = likes.length;
     product.is_liked = isLiked;
     product.count_discussion = discussions.length;
-    const address = await getAddress;
-    store.is_favorite = isFavorite;
-    store.province = address.related('province').serialize();
-    store.district = address.related('district').serialize();
     let otherProds = await getOtherProds;
     otherProds = otherProds.map((otherProduct) => {
       const { likes: like, isLiked: liked } = this.loadLikes(otherProduct, userId);
@@ -423,6 +440,7 @@ class ProductModel extends bookshelf.Model {
       product,
       category,
       store,
+      location,
       images,
       reviews,
       rating,
@@ -679,7 +697,7 @@ class ProductModel extends bookshelf.Model {
     });
     const dataExpeditions = await Expedition.query(qb => qb.whereIn('id_ekspedisi', expeditionIds))
       .fetchAll({
-        withRelated: [{ services: qb => qb.whereNotIn('id_ekspedisiservice', expeditionServiceIds) }], });
+        withRelated: [{ services: qb => qb.whereNotIn('id_ekspedisiservice', expeditionServiceIds) }] });
     dataExpeditions.each((val) => {
       const expedition = _.find(expeditions, { id: val.serialize().id });
       const services = val.related('services').map((o) => {

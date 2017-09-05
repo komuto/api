@@ -47,6 +47,13 @@ class DropshipModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to Store
+   */
+  store() {
+    return this.belongsTo('Store', 'id_toko');
+  }
+
+  /**
    * Create dropship
    */
   static async create(data) {

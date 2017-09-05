@@ -27,7 +27,10 @@ import {
 import { ReportEmail } from './email';
 import config from './../../../config';
 import { BadRequestError } from './../../../common/errors';
-import { Notification, sellerNotification, buyerNotification } from '../core';
+import core from '../core';
+
+const { Notification, sellerNotification, buyerNotification } = core;
+const { getProductAndStore } = core.utils;
 
 export const ProductController = {};
 export default { ProductController };
@@ -86,9 +89,10 @@ ProductController.search = async (req, res, next) => {
 };
 
 ProductController.getProduct = async (req, res, next) => {
-  const product = await Product.getFullProduct(req.params.id, req.user.id);
+  const { productId, storeId } = getProductAndStore(req.params.id);
+  const product = await Product.getFullProduct(productId, storeId, req.user.id);
   if (!product) throw getProductError('product', 'not_found');
-  View.store(req.params.id, requestIp.getClientIp(req));
+  View.store(productId, requestIp.getClientIp(req));
   req.resData = {
     message: 'Product Detail Data',
     data: product,

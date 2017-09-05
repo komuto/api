@@ -108,3 +108,11 @@ export function getName(str) {
   const lastName = name.length ? name.join(' ') : firstName;
   return { firstName, lastName };
 }
+
+export function getProductAndStore(val) {
+  const arr = val.split('.');
+  return {
+    productId: parseNum(arr[0]),
+    storeId: parseNum(arr[1]),
+  };
+}
