@@ -40,7 +40,7 @@ class ItemModel extends bookshelf.Model {
       invoice_id: this.get('id_invoice'),
       shipping_id: parseNum(this.get('id_pengiriman_produk')),
       shipping: this.relations.shipping ? this.related('shipping').serialize() : undefined,
-      dropshipper_id: parseNum(this.get('id_dropshipper')),
+      dropshipper_id: parseNum(this.get('id_dropshipper'), null),
       note: this.get('keteranganopsi_listbucket'),
     };
     if (this.relations.product) delete item.product_id;
@@ -63,33 +63,45 @@ class ItemModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to dropship
+   */
+  dropship() {
+    return this.belongsTo('Dropship', 'id_dropshipper');
+  }
+
+  /**
    * Get item by bucket_id and product_id
    */
   static async get(where) {
     return await this.where(where).fetch();
   }
 
-  static loadDetailItem(item) {
+  static async loadDetailItem(item) {
     let product = item.related('product');
     let shipping = item.related('shipping');
-    const store = product.related('store');
+    let store = product.related('store');
+    await product.load({ images: qb => (qb.limit(1)) });
     const images = product.related('images').serialize();
     const expeditions = Product.loadExpeditions(product);
     const districtStore = store.related('user').related('addresses').models[0].related('district');
+
+    if (item.get('id_dropshipper')) {
+      await item.load('dropship.store');
+      store = item.related('dropship').related('store');
+    }
+
     product = product.serialize({ minimal: true });
     product.image = images.length ? images[0].file : config.defaultImage.product;
-    product.store = {
-      ...store.serialize(),
-      district: districtStore,
-    };
+    product.store = store;
+    product.location = { district: districtStore };
     product.expeditions = expeditions;
     shipping = shipping.serialize();
+
     const province = shipping.address.related('province');
     const district = shipping.address.related('district');
     const subDistrict = shipping.address.related('subDistrict');
-    shipping.address = shipping.address.serialize();
     shipping.address = {
-      ...shipping.address,
+      ...shipping.address.serialize(),
       province,
       district,
       subDistrict,
@@ -110,7 +122,6 @@ class ItemModel extends bookshelf.Model {
         { 'product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
         'product.store.user.addresses.district',
         'product.expeditionServices.expedition',
-        { 'product.images': qb => (qb.limit(1)) },
         'shipping.address.province',
         'shipping.address.district',
         'shipping.address.subDistrict',
@@ -118,7 +129,7 @@ class ItemModel extends bookshelf.Model {
       ],
     });
     if (!item) throw getItemError('item', 'not_found');
-    return this.loadDetailItem(item);
+    return await this.loadDetailItem(item);
   }
 
   /**

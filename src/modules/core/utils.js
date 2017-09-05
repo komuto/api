@@ -52,7 +52,7 @@ export function parseDate(key, defaultValue) {
 }
 
 export function parseNum(key, defaultValue) {
-  if (key === 0 || key === null) return defaultValue || 0;
+  if (key === 0 || key === null) return defaultValue !== undefined ? defaultValue : 0 || 0;
   return checkNull(key, defaultValue, parseInt(key, 10));
 }
 

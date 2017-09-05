@@ -91,7 +91,6 @@ class BucketModel extends bookshelf.Model {
         { 'items.product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
         'items.product.store.user.addresses.district',
         'items.product.expeditionServices.expedition',
-        { 'items.product.images': qb => (qb.limit(1)) },
         'items.shipping.address.province',
         'items.shipping.address.district',
         'items.shipping.address.subDistrict',
@@ -99,7 +98,7 @@ class BucketModel extends bookshelf.Model {
       ],
     });
     if (!bucket) throw getBucketError('bucket', 'not_found');
-    const items = bucket.related('items').map(item => (Item.loadDetailItem(item)));
+    const items = await Promise.all(bucket.related('items').map(async item => await Item.loadDetailItem(item)));
     return { ...bucket.serialize(), items };
   }
 
