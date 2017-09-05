@@ -129,11 +129,10 @@ ProductController.createProduct = async (req, res, next) => {
  * Add to wishlist
  */
 ProductController.addWishlist = async (req, res, next) => {
-  const product = await Product.findById(req.params.id);
-  product.is_liked = await Wishlist.addWishlist(req.params.id, req.user.id);
-  req.resData = {
-    data: product,
-  };
+  const { productId } = getProductAndStore(req.params.id);
+  const product = await Product.findById(productId);
+  product.is_liked = await Wishlist.addWishlist(productId, req.user.id);
+  req.resData = { data: product };
   return next();
 };
 
@@ -141,9 +140,10 @@ ProductController.addWishlist = async (req, res, next) => {
  * Get discussions
  */
 ProductController.getDiscussions = async (req, res, next) => {
+  const { productId } = getProductAndStore(req.params.id);
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const discussions = await Discussion.getByProductId(req.params.id, page, pageSize);
+  const discussions = await Discussion.getByProductId(productId, page, pageSize);
   req.resData = {
     message: 'Product Discussion Data',
     meta: { page, limit: pageSize },
@@ -156,9 +156,10 @@ ProductController.getDiscussions = async (req, res, next) => {
  * Get comments
  */
 ProductController.getComments = async (req, res, next) => {
+  const { productId } = getProductAndStore(req.params.id);
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const comments = await Comment.getByDiscussionId(req.params.id, page, pageSize);
+  const comments = await Comment.getByDiscussionId(productId, page, pageSize);
   req.resData = {
     message: 'Discussion Comments Data',
     meta: { page, limit: pageSize },
@@ -171,11 +172,12 @@ ProductController.getComments = async (req, res, next) => {
  * Create discussion
  */
 ProductController.createDiscussion = async (req, res, next) => {
-  const owner = await Product.getOwner(req.params.id);
+  const { productId } = getProductAndStore(req.params.id);
+  const owner = await Product.getOwner(productId);
   if (owner.get('id_users') === req.user.id) throw createDiscussionError('product', 'owner');
   const data = Discussion.matchDBColumn({
     user_id: req.user.id,
-    product_id: req.params.id,
+    product_id: productId,
     question: req.body.question,
     is_deleted: 0,
     created_at: moment(),
@@ -183,7 +185,7 @@ ProductController.createDiscussion = async (req, res, next) => {
   const discussion = await Discussion.create(data);
   const notifications = owner.serialize({ notification: true }).notifications;
   if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && owner.get('reg_token')) {
-    Notification.send(sellerNotification.DISCUSSION, owner.get('reg_token'), discussion.toJSON().id, req.params.id);
+    Notification.send(sellerNotification.DISCUSSION, owner.get('reg_token'), discussion.toJSON().id, productId);
   }
   req.resData = {
     message: 'Discussion Data',
@@ -196,9 +198,10 @@ ProductController.createDiscussion = async (req, res, next) => {
  * Create comment
  */
 ProductController.createComment = async (req, res, next) => {
+  const { productId } = getProductAndStore(req.params.id);
   const data = Comment.matchDBColumn({
     user_id: req.user.id,
-    discussion_id: req.params.id,
+    discussion_id: productId,
     content: req.body.content,
     created_at: moment(),
     is_deleted: 0,
@@ -232,9 +235,10 @@ ProductController.createComment = async (req, res, next) => {
  * Report product
  */
 ProductController.report = async (req, res, next) => {
-  const product = await Product.findById(req.params.id);
+  const { productId } = getProductAndStore(req.params.id);
+  const product = await Product.findById(productId);
   const data = Report.matchDBColumn({
-    product_id: req.params.id,
+    product_id: productId,
     user_id: req.user.id,
     type: req.body.report_type,
     description: req.body.description,
@@ -252,15 +256,14 @@ ProductController.report = async (req, res, next) => {
  * Dropship product
  */
 ProductController.dropship = async (req, res, next) => {
-  const productId = req.params.id;
   const catalogId = req.body.catalog_id;
   const storeId = await Store.getStoreId(req.user.id);
 
-  const found = await Dropship.findDuplicate(productId, storeId);
+  const found = await Dropship.findDuplicate(req.params.id, storeId);
   if (found) throw addDropshipProductError('product', 'duplicate');
 
   const [product, catalog] = await Promise.all([
-    Product.where({ id_produk: productId }).fetch(),
+    Product.where({ id_produk: req.params.id }).fetch(),
     Catalog.where({ id_katalog: catalogId, id_toko: storeId }).fetch()]);
 
   if (!product.get('is_dropshiper')) throw addDropshipProductError('product', 'product_not_dropship');
@@ -268,7 +271,7 @@ ProductController.dropship = async (req, res, next) => {
   if (product.get('id_toko') === storeId) throw addDropshipProductError('product', 'own_product');
 
   const data = Dropship.matchDBColumn({
-    product_id: productId,
+    product_id: req.params.id,
     catalog_id: catalogId,
     store_id: storeId,
     status: DropshipStatus.SHOW,

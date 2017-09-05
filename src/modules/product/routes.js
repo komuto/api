@@ -89,7 +89,7 @@ routes.post('/products',
  * GET /products/id/wishlist
  * Add to wishlist
  */
-routes.get('/products/:id([0-9]{1,10})/wishlist',
+routes.get('/products/:id([0-9]{1,10}.[0-9]{1,10})/wishlist',
   auth(),
   wrap(ProductController.addWishlist),
   apiResponse());
@@ -98,7 +98,7 @@ routes.get('/products/:id([0-9]{1,10})/wishlist',
  * GET /products/id/discussions
  * Get all discussions of a product
  */
-routes.get('/products/:id([0-9]{1,10})/discussions',
+routes.get('/products/:id([0-9]{1,10}.[0-9]{1,10})/discussions',
   wrap(ProductController.getDiscussions),
   apiResponse());
 
@@ -106,7 +106,7 @@ routes.get('/products/:id([0-9]{1,10})/discussions',
  * POST /products/id/discussions
  * Create discussion
  */
-routes.post('/products/:id([0-9]{1,10})/discussions',
+routes.post('/products/:id([0-9]{1,10}.[0-9]{1,10})/discussions',
   auth(),
   validateParam(constraints.discussion, true),
   wrap(ProductController.createDiscussion),
@@ -116,7 +116,7 @@ routes.post('/products/:id([0-9]{1,10})/discussions',
  * GET /discussions/id/comments
  * Get all comments of a discussion
  */
-routes.get('/discussions/:id([0-9]{1,10})/comments',
+routes.get('/discussions/:id([0-9]{1,10}.[0-9]{1,10})/comments',
   wrap(ProductController.getComments),
   apiResponse());
 
@@ -124,7 +124,7 @@ routes.get('/discussions/:id([0-9]{1,10})/comments',
  * POST /discussions/id/comments
  * Create comment
  */
-routes.post('/discussions/:id([0-9]{1,10})/comments',
+routes.post('/discussions/:id([0-9]{1,10}.[0-9]{1,10})/comments',
   auth(),
   validateParam(constraints.comment, true),
   wrap(ProductController.createComment),
@@ -134,7 +134,7 @@ routes.post('/discussions/:id([0-9]{1,10})/comments',
  * POST /products/id/report
  * Report product
  */
-routes.post('/products/:id([0-9]{1,10})/report',
+routes.post('/products/:id([0-9]{1,10}.[0-9]{1,10})/report',
   auth(),
   validateParam(constraints.report, true),
   wrap(ProductController.report),
@@ -222,7 +222,7 @@ routes.put('/users/store/products/:id([0-9]{1,10})',
   apiResponse());
 
 /**
- * GET /users/store/expeditions
+ * GET /users/store/products/id/expeditions
  * Get the user's store expeditions
  */
 routes.get('/users/store/products/:id([0-9]{1,10})/expeditions/manage',
