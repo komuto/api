@@ -129,9 +129,15 @@ ProductController.createProduct = async (req, res, next) => {
  * Add to wishlist
  */
 ProductController.addWishlist = async (req, res, next) => {
-  const { productId } = getProductAndStore(req.params.id);
+  const { productId, storeId } = getProductAndStore(req.params.id);
   const product = await Product.findById(productId);
-  product.is_liked = await Wishlist.addWishlist(productId, req.user.id);
+  let dropshipperId = null;
+  if (product.store_id !== storeId) {
+    const dropship = await Dropship.findByProductIdAndStoreId(productId, storeId);
+    if (!dropship) throw getProductError('product', 'not_found');
+    dropshipperId = dropship.get('id_dropshipper');
+  }
+  product.is_liked = await Wishlist.addWishlist(productId, req.user.id, dropshipperId);
   req.resData = { data: product };
   return next();
 };
