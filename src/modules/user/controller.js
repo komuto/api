@@ -7,7 +7,10 @@ import { UserEmail } from './email';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
 import { Store, StoreExpedition, Message, MessageFlagStatus, DetailMessage } from './../store/model';
-import { userUpdateError, resetPassError, registrationError, activateUserError, fbError } from './messages';
+import {
+  userUpdateError, resetPassError, registrationError, activateUserError, fbError,
+  getResolutionError
+} from './messages';
 import { Discussion, Product } from '../product/model';
 import core from '../core';
 
@@ -411,7 +414,20 @@ UserController.getResolutions = async (req, res, next) => {
   const resolutions = await User.getResolutions(req.user.id, isClosed);
   req.resData = {
     message: 'Resolution Data',
-    data: resolutions.map(val => val.serialize(req.user.name)),
+    data: resolutions.map(val => val.serialize({ minimal: true })),
+  };
+  return next();
+};
+
+/**
+ * Get Detail Resolution
+ */
+UserController.getResolution = async (req, res, next) => {
+  const resolution = await User.getResolution(req.user.id, req.params.id);
+  if (!resolution) throw getResolutionError('resolution_center', 'not_found');
+  req.resData = {
+    message: 'Resolution Data',
+    data: resolution.serialize({ minimal: false }, req.user.name),
   };
   return next();
 };

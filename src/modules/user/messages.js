@@ -64,6 +64,10 @@ export const errMsg = {
     not_valid: 'tidak valid',
     not_found: 'Kode tidak ditemukan atau expired atau sudah terpakai',
   },
+  getResolution: {
+    title: 'Get resolusi gagal',
+    not_found: 'Resolusi tidak ditemukan',
+  },
 };
 
 export const userUpdateError = formatError.bind(errMsg.updateMsg);
@@ -77,6 +81,8 @@ export const activateUserError = formatError.bind(errMsg.activateMsg);
 export const getUserError = formatError.bind(errMsg.getUserMsg);
 
 export const loginError = formatError.bind(errMsg.loginMsg);
+
+export const getResolutionError = formatError.bind(errMsg.getResolution);
 
 function formatFbError(code, e) {
   const session = [102, 190, 458, 459, 460, 463, 464, 467];

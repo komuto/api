@@ -7,6 +7,7 @@ import config from '../../../../config';
 import core from '../../core';
 import { model as addressModel } from '../../address';
 import { OTPHPStatus, OTPAddressStatus } from '../../OTP/model';
+import { ResolutionCenter } from './resolution_center';
 
 const { defaultNull, parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -330,6 +331,10 @@ class UserModel extends bookshelf.Model {
       }],
     });
     return user.related('resolutionCenter');
+  }
+
+  static async getResolution(id, resolutionId) {
+    return await ResolutionCenter.where({ id_users: id, id_rescenter: resolutionId }).fetch();
   }
 
   /**

@@ -307,4 +307,13 @@ routes.get('/users/resolutions',
   wrap(UserController.getResolutions),
   apiResponse());
 
+/**
+ * GET /users/resolutions/id
+ * Get detail resolution
+ */
+routes.get('/users/resolutions/:id([0-9]{1,10})',
+  auth(),
+  wrap(UserController.getResolution),
+  apiResponse());
+
 export default routes;
