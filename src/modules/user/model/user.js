@@ -161,6 +161,13 @@ class UserModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to ResolutionCenter
+   */
+  resolutionCenter() {
+    return this.hasMany('ResolutionCenter', 'id_users');
+  }
+
+  /**
    * Create password hash from plain text
    * @param {string} str
    */
@@ -311,6 +318,11 @@ class UserModel extends bookshelf.Model {
       ...val,
       content: this.getNotificationContent(val.type, marketplaceName),
     }));
+  }
+
+  static async getResolutions(id) {
+    const user = await new this({ id_users: id }).fetch({ withRelated: ['resolutionCenter'] });
+    return user.related('resolutionCenter');
   }
 
   /**

@@ -1,6 +1,7 @@
 import { User, UserStatus, NotificationType, getNotification } from './user';
 import { UserToken, TokenStatus, TokenType } from './user_token';
 import { Wishlist, WishlistStatus } from './wishlist';
+import { ResolutionCenter } from './resolution_center';
 
 export default { User,
   UserStatus,
@@ -11,5 +12,6 @@ export default { User,
   WishlistStatus,
   NotificationType,
   getNotification,
+  ResolutionCenter,
 };
 

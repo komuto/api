@@ -407,5 +407,10 @@ UserController.saveNotifications = async (req, res, next) => {
  * Get Resolutions
  */
 UserController.getResolutions = async (req, res, next) => {
+  const resolutions = await User.getResolutions(req.user.id);
+  req.resData = {
+    message: 'Resolution Data',
+    data: resolutions.map(val => val.serialize(req.user.name)),
+  };
   return next();
 };
