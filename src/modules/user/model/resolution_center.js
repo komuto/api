@@ -76,7 +76,7 @@ class ResolutionCenterModel extends bookshelf.Model {
     });
   }
 
-  static createContent(name, message) {
+  static createDiscussion(name, message) {
     const content = [
       {
         user: name,
@@ -117,7 +117,7 @@ class ResolutionCenterModel extends bookshelf.Model {
       priority: 'prioritas_rescenter',
       topic: 'topik_rescenter',
       title: 'title_rescenter',
-      content: 'isipesan_rescenter',
+      discussions: 'isipesan_rescenter',
       status: 'status_ticket_rescenter',
       status_at: 'tglstatus_ticket_rescenter',
       ends_at: 'enddate_rescenter',

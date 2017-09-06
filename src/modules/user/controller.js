@@ -454,7 +454,7 @@ UserController.createResolution = async (req, res, next) => {
   const data = ResolutionCenter.matchDBColumn({
     ...req.body,
     user_id: req.user.id,
-    content: ResolutionCenter.createContent(req.user.name, req.body.message),
+    discussions: ResolutionCenter.createDiscussion(req.user.name, req.body.message),
     ticket_number: ticketNumber,
     status: ResolutionCenterStatus.WAIT_TO_REPLY,
     status_at: moment(),
