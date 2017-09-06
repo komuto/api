@@ -316,4 +316,14 @@ routes.get('/users/resolutions/:id([0-9]{1,10})',
   wrap(UserController.getResolution),
   apiResponse());
 
+/**
+ * POST /users/resolutions
+ * Create resolution
+ */
+routes.post('/users/resolutions',
+  auth(),
+  validateParam(constraints.createResolution, true),
+  wrap(UserController.createResolution),
+  apiResponse());
+
 export default routes;

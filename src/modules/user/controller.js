@@ -2,14 +2,28 @@ import { Facebook } from 'fb';
 import passport from 'passport';
 import moment from 'moment';
 import _ from 'lodash';
-import { User, UserToken, TokenType, UserStatus, getNotification, NotificationType } from './model';
+import {
+  User,
+  UserToken,
+  TokenType,
+  UserStatus,
+  getNotification,
+  NotificationType,
+  ResolutionCenter,
+  ResolutionCenterStatus,
+  ImageGroup,
+} from './model';
 import { UserEmail } from './email';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
 import { Store, StoreExpedition, Message, MessageFlagStatus, DetailMessage } from './../store/model';
 import {
-  userUpdateError, resetPassError, registrationError, activateUserError, fbError,
-  getResolutionError
+  userUpdateError,
+  resetPassError,
+  registrationError,
+  activateUserError,
+  fbError,
+  getResolutionError,
 } from './messages';
 import { Discussion, Product } from '../product/model';
 import core from '../core';
@@ -429,5 +443,26 @@ UserController.getResolution = async (req, res, next) => {
     message: 'Resolution Data',
     data: resolution.serialize({ minimal: false }, req.user.name),
   };
+  return next();
+};
+
+/**
+ * Create Resolution
+ */
+UserController.createResolution = async (req, res, next) => {
+  const ticketNumber = await ResolutionCenter.getTicketNumber();
+  const data = ResolutionCenter.matchDBColumn({
+    ...req.body,
+    user_id: req.user.id,
+    content: ResolutionCenter.createContent(req.user.name, req.body.message),
+    ticket_number: ticketNumber,
+    status: ResolutionCenterStatus.WAIT_TO_REPLY,
+    status_at: moment(),
+    ends_at: moment(),
+    created_at: moment(),
+  });
+  const resolution = await ResolutionCenter.create(data);
+  if (req.body.images) await ImageGroup.bulkCreate(resolution.get('id_rescenter'), req.body.images);
+  req.resData = { data: resolution.serialize({ minimal: true }) };
   return next();
 };

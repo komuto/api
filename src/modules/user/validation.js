@@ -73,8 +73,8 @@ constraints.verifyPhone = {
     numericality: {
       greaterThanOrEqualTo: 10000,
       lessThanOrEqualTo: 99999,
-      message: OTPMsg.not_valid
-    }
+      message: OTPMsg.not_valid,
+    },
   },
 };
 
@@ -104,6 +104,26 @@ constraints.getResolutions = {
       message: 'accept only boolean',
     },
   },
+};
+
+constraints.createResolution = {
+  priority: {
+    presence: true,
+    inclusion: {
+      within: [1, 2, 3],
+      message: 'accept only `1` (low), `2` (medium), or `3` (high)',
+    },
+  },
+  topic: {
+    presence: true,
+    inclusion: {
+      within: [1, 2, 3, 4],
+      message: 'accept only `1` (general), `2` (info), `3` (transaction), or `4` (etc)',
+    },
+  },
+  title: { presence: true },
+  message: { presence: true },
+  images: { presence: false },
 };
 
 export default constraints;
