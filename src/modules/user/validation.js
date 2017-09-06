@@ -126,4 +126,6 @@ constraints.createResolution = {
   images: { presence: false },
 };
 
+constraints.replyResolution = { message: { presence: true } };
+
 export default constraints;

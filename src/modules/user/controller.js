@@ -466,3 +466,18 @@ UserController.createResolution = async (req, res, next) => {
   req.resData = { data: resolution.serialize({ minimal: true }) };
   return next();
 };
+
+/**
+ * Reply Resolution
+ */
+UserController.replyResolution = async (req, res, next) => {
+  const resolution = await ResolutionCenter.getDetail(req.user.id, req.params.id);
+  if (!resolution) throw getResolutionError('resolution_center', 'not_found');
+  const discussions = resolution.pushMessage(req.user.name, req.body.message);
+  await resolution.save({ isipesan_rescenter: discussions, update_at: moment() }, { patch: true });
+  req.resData = {
+    message: 'Resolution Data',
+    data: resolution.serialize({ minimal: false }, req.user.name),
+  };
+  return next();
+};

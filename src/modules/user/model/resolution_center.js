@@ -38,7 +38,7 @@ class ResolutionCenterModel extends bookshelf.Model {
     };
     if (minimal) return resolution;
 
-    resolution.content = JSON.parse(this.get('isipesan_rescenter')).map(msg => ({
+    resolution.discussions = JSON.parse(this.get('isipesan_rescenter')).map(msg => ({
       name: msg.user !== 'Admin' ? name : 'admin',
       message: msg.pesan,
       created_at: parseDate(msg.create_at),
@@ -93,6 +93,16 @@ class ResolutionCenterModel extends bookshelf.Model {
     }).fetch();
 
     return `RS-00${(resolution.get('id_rescenter') + 1)}`;
+  }
+
+  pushMessage(name, msg) {
+    const discussions = JSON.parse(this.get('isipesan_rescenter'));
+    discussions.push({
+      user: name,
+      pesan: msg,
+      create_at: moment().format('YYYY-MM-DD HH:mm:ss'),
+    });
+    return JSON.stringify(discussions);
   }
 
   /**
