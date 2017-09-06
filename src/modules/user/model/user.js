@@ -320,8 +320,15 @@ class UserModel extends bookshelf.Model {
     }));
   }
 
-  static async getResolutions(id) {
-    const user = await new this({ id_users: id }).fetch({ withRelated: ['resolutionCenter'] });
+  static async getResolutions(id, isClosed) {
+    const user = await new this({ id_users: id }).fetch({
+      withRelated: [{
+        resolutionCenter: (qb) => {
+          if (isClosed) qb.where('status_ticket_rescenter', 0);
+          else qb.whereNot('status_ticket_rescenter', 0);
+        },
+      }],
+    });
     return user.related('resolutionCenter');
   }
 

@@ -51,16 +51,20 @@ constraints.update = {
   approval_cooperative_status: { format: { pattern: /^[0-4]$/, message: updateMsg.app_coop_not_valid } },
   gender: { format: { pattern: /^male|female$/, message: updateMsg.gender_not_valid } },
   status: { format: { pattern: /^[0-3]$/, message: updateMsg.status_not_valid } },
-  place_of_birth: { numericality: {
-    greaterThanOrEqualTo: 1000,
-    lessThanOrEqualTo: 9999,
-    message: updateMsg.place_not_valid } },
+  place_of_birth: {
+    numericality: {
+      greaterThanOrEqualTo: 1000,
+      lessThanOrEqualTo: 9999,
+      message: updateMsg.place_not_valid
+    }
+  },
 };
 
 constraints.updatePhone = {
   phone_number: {
     presence: { message: updateMsg.phone_presence },
-    format: { pattern: /^[0-9]+$/, message: updateMsg.phone_not_valid } },
+    format: { pattern: /^[0-9]+$/, message: updateMsg.phone_not_valid }
+  },
 };
 
 constraints.verifyPhone = {
@@ -69,7 +73,9 @@ constraints.verifyPhone = {
     numericality: {
       greaterThanOrEqualTo: 10000,
       lessThanOrEqualTo: 99999,
-      message: OTPMsg.not_valid } },
+      message: OTPMsg.not_valid
+    }
+  },
 };
 
 constraints.regToken = { reg_token: { presence: true } };
@@ -86,6 +92,15 @@ constraints.saveNotifications = {
     presence: true,
     inclusion: {
       within: [true, false],
+      message: 'accept only boolean',
+    },
+  },
+};
+
+constraints.getResolutions = {
+  is_closed: {
+    inclusion: {
+      within: ['true', 'false'],
       message: 'accept only boolean',
     },
   },

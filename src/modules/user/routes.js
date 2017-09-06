@@ -303,6 +303,7 @@ routes.post('/users/notifications',
  */
 routes.get('/users/resolutions',
   auth(),
+  validateParam(constraints.getResolutions),
   wrap(UserController.getResolutions),
   apiResponse());
 
