@@ -91,8 +91,8 @@ export function formatError(field, msg) {
 
 /**
  * Transform supplied data properties to match with db column
- * @param input
- * @param columnName
+ * @param input {object}
+ * @param columnName {object}
  * @returns {object}
  */
 export function matchDB(input, columnName) {
@@ -108,3 +108,8 @@ export function getName(str) {
   const lastName = name.length ? name.join(' ') : firstName;
   return { firstName, lastName };
 }
+
+// Create getter object so that knex object could be serialized using Product model
+export const getter = {
+  get(prop) { return this[prop]; },
+};

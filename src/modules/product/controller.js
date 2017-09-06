@@ -46,7 +46,8 @@ const getPrice = (price) => {
 ProductController.index = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const { category_id, condition: cond, store_id: storeId } = req.body;
+  const { category_id, condition: cond } = req.query;
+  const { store_id: storeId } = req.body;
   const condition = cond && (cond === 'new' ? ProductCondition.NEW : ProductCondition.USED);
   const where = Product.matchDBColumn({ condition, category_id });
   const params = {
@@ -62,8 +63,9 @@ ProductController.index = async (req, res, next) => {
     address: req.query.address,
     userId: req.user.id,
     marketplaceId: req.marketplace.id,
+    storeId,
   };
-  const products = await Product.get(params, storeId);
+  const products = await Product.get(params);
 
   req.resData = {
     message: 'Products Data',

@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import Promise from 'bluebird';
 import slug from 'slug';
 import core from '../../core';
 import { Address } from '../../address/model';
@@ -11,9 +10,13 @@ import { Dropship, DropshipStatus } from './dropship';
 import { ProductExpeditionStatus } from './product_expedition';
 import { Expedition } from '../../expedition/model';
 import { MasterFee } from './master_fee';
+import { ImageProduct } from './image_product';
+import { View } from './view';
+import { Wishlist } from '../../user/model/wishlist';
 
-const { parseNum, parseDec, parseDate } = core.utils;
+const { parseNum, parseDec, parseDate, getter, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
+const knex = bookshelf.knex;
 
 export const ProductStatus = {
   HIDE: 0, // Gudangkan
@@ -59,7 +62,7 @@ class ProductModel extends bookshelf.Model {
     return {
       ...product,
       category_id: this.get('id_kategoriproduk'),
-      store_id: this.get('id_toko'),
+      store_id: this.get('origin_toko') || this.get('id_toko'),
       condition: parseNum(this.get('jenis_produk'), 0),
       description: this.get('deskripsi_produk'),
       attrval: parseNum(this.get('attrval_produk'), 0),
@@ -70,7 +73,8 @@ class ProductModel extends bookshelf.Model {
       is_wholesaler: this.get('is_grosir'),
       count_sold: parseNum(this.get('count_sold'), 0),
       count_popular: parseNum(this.get('count_populer'), 0),
-      count_view: this.relations.view && this.related('view').serialize().ip
+      count_view: this.relations && this.relations.view
+        && this.related('view').serialize().ip
         ? this.related('view').serialize().ip.length : 0,
       brand_id: this.get('identifier_brand'),
       catalog_id: this.get('identifier_katalog'),
@@ -162,39 +166,96 @@ class ProductModel extends bookshelf.Model {
     return product.toJSON();
   }
 
-  /**
-   * Get products
-   */
-  static async get(params, storeId = false) {
-    const isDropship = !!storeId;
+  static addWhereClause(products, params) {
     const {
-      page,
-      pageSize,
       query,
       price,
       address,
+      where,
+      storeId,
+      other,
+      marketplaceId,
+    } = params;
+    let { brands, services } = params;
+
+    products.where(where).andWhere('u.id_marketplaceuser', marketplaceId);
+    if (storeId) products.whereNot('p.id_toko', storeId);
+    if (query) products.whereRaw('to_tsvector(nama_produk) @@ to_tsquery(?)', query);
+    if (price && price.min !== 0 && price.max !== 0) products.whereBetween('harga_produk', [price.min, price.max]);
+    if (address) {
+      products.innerJoin('alamat_users as au', 'au.id_users', 'u.id_users');
+      products.where({ alamat_originjual: 1, id_kotakab: address });
+    }
+    if (other.verified) {
+      products.innerJoin('otp_address as otp', 'otp.id_users', 'u.id_users');
+      products.where('status_otpaddress', OTPAddressStatus.VERIFIED);
+    }
+    if (other.discount) products.where('disc_produk', '>', 0);
+    if (brands) {
+      brands = brands.split(',');
+      products.whereIn('identifier_brand', brands);
+    }
+    if (services) {
+      services = services.split(',');
+      products.innerJoin('detil_ekspedisiproduk as de', 'de.id_produk', 'p.id_produk');
+      products.whereIn('de.id_ekspedisiservice', services);
+    }
+    return products;
+  }
+
+  static async getProducts(params) {
+    const { page, pageSize, sort } = params;
+    const offset = page === 1 ? 0 : (page - 1) * pageSize;
+    const self = this;
+
+    const fromProduct = knex.select(['p.*', 'tglstatus_produk as date_created', 't.*', 'p.id_toko as origin_toko',
+      'p.identifier_katalog as identifier_katalog'])
+      .select(knex.raw('null as "id_dropshipper"'))
+      .from('produk as p')
+      .join('toko as t', 'p.id_toko', 't.id_toko')
+      .join('users as u', 't.id_users', 'u.id_users');
+
+    return self.addWhereClause(fromProduct, params)
+      .union(function () {
+        const fromDropship = this.select(['p.*', 'tglstatus_dropshipper as date_created', 't.*', 'p.id_toko as origin_toko',
+          'd.id_katalog as indentifier_katalog', 'd.id_dropshipper'])
+          .from('dropshipper as d')
+          .join('produk as p', 'd.id_produk', 'p.id_produk')
+          .join('toko as t', 'd.id_toko', 't.id_toko')
+          .join('users as u', 't.id_users', 'u.id_users');
+        self.addWhereClause(fromDropship, params);
+      })
+      .orderBy(sort.column, sort.by)
+      .limit(pageSize)
+      .offset(offset)
+      .then(products => products);
+  }
+
+  /**
+   * Get products
+   */
+  static async get(params) {
+    const {
       userId,
       where,
       marketplaceId,
+      storeId,
     } = params;
-    let { sort, other = '', brands, services } = params;
+    const isDropship = !!storeId;
+    let { sort, other = '' } = params;
 
     switch (sort) {
-      case 'newest':
-        sort = 'date_created_produk';
-        break;
       case 'cheapest':
-        sort = 'harga_produk';
+        sort = { column: 'harga_produk', by: 'asc' };
         break;
       case 'expensive':
-        sort = '-harga_produk';
+        sort = { column: 'harga_produk', by: 'desc' };
         break;
       case 'selling':
-        sort = '-count_sold';
+        sort = { column: 'count_sold', by: 'desc' };
         break;
       default:
-        sort = 'date_created_produk';
-        break;
+        sort = { column: 'date_created', by: 'desc ' };
     }
 
     other = other.split(',').reduce((result, type) => {
@@ -202,73 +263,49 @@ class ProductModel extends bookshelf.Model {
       else result[type] = true;
       return result;
     }, {});
-    const products = await this.where(where)
-      .query((qb) => {
-        qb.select(['produk.*', 'toko.*']);
-        qb.innerJoin('toko', 'toko.id_toko', 'produk.id_toko');
-        qb.innerJoin('users', 'toko.id_users', 'users.id_users');
-        if (storeId) qb.whereNot('produk.id_toko', storeId);
-        qb.where('users.id_marketplaceuser', marketplaceId);
-        if (query) qb.whereRaw('to_tsvector(nama_produk) @@ to_tsquery(?)', query);
-        if (price && price.min !== 0 && price.max !== 0) qb.whereBetween('harga_produk', [price.min, price.max]);
-        if (address) {
-          qb.innerJoin('alamat_users', 'alamat_users.id_users', 'users.id_users');
-          qb.where({ alamat_originjual: 1, id_kotakab: address });
-        }
-        if (other.verified) {
-          qb.innerJoin('otp_address', 'otp_address.id_users', 'users.id_users');
-          qb.where('status_otpaddress', OTPAddressStatus.VERIFIED);
-        }
-        if (other.discount) qb.where('disc_produk', '>', 0);
-        if (brands) {
-          brands = brands.split(',');
-          qb.whereIn('identifier_brand', brands);
-        }
-        if (services) {
-          services = services.split(',');
-          qb.innerJoin('detil_ekspedisiproduk', 'detil_ekspedisiproduk.id_produk', 'produk.id_produk');
-          qb.whereIn('detil_ekspedisiproduk.id_ekspedisiservice', services);
-        }
-      })
-      .orderBy(sort)
-      .orderBy('id_produk')
-      .fetchPage({
-        page,
-        pageSize,
-        withRelated: ['likes', 'view', 'images'],
-      });
 
-    let verified;
-    if (!other.verified) {
-      // Get all otp addresses, then iterate over those
-      // then check which store is verified and which don't
-      verified = await Promise.all(products.models.map(product => OTPAddress.where({
-        id_users: product.get('id_users'),
-        status_otpaddress: OTPAddressStatus.VERIFIED,
-      }).fetch()));
-    }
+    const products = await this.getProducts({ ...params, sort, other, where });
+    const getRelations = products.map((product) => {
+      const id = product.id_produk;
+      const idDropshipper = product.id_dropshipper;
+      const getImage = ImageProduct.where('id_produk', id)
+        .query(qb => qb.orderBy('id_gambarproduk')).fetch();
+      const getLikes = Wishlist.where({ id_produk: id, id_dropshipper: idDropshipper }).fetchAll();
+      const getViews = View.where({ id_produk: id, id_dropshipper: idDropshipper }).fetch();
+      let verified;
+      if (!other.verified) {
+        // Get all otp addresses, then iterate over those
+        // then check which store is verified and which don't
+        verified = OTPAddress.where({
+          id_users: product.id_users,
+          status_otpaddress: OTPAddressStatus.VERIFIED,
+        }).fetch();
+      }
+      return Promise.all([getImage, getLikes, getViews, verified]);
+    });
 
     const masterFee = await MasterFee.findByMarketplaceId(marketplaceId);
 
-    return await Promise.reduce(products.models, async (results, product, index) => {
+    return await Promise.all(products.map(async (product, index) => {
+      // Provide this.get() utility for serialize
+      Object.setPrototypeOf(product, getter);
+      const [image, wishlists, view, verified] = await getRelations[index];
       const store = {
         ...Store.prototype.serialize.call(product),
-        is_verified: other.verified || !!verified[index],
+        is_verified: other.verified || !!verified,
       };
-      const images = product.related('images');
-      const likes = product.related('likes');
-      const isLiked = userId ? _.find(likes.models, o => o.attributes.id_users === userId) : false;
-      product = product.serialize();
-      product.image = images.length ?
-        images.models[0].serialize().file : config.defaultImage.product;
-      product.count_like = likes.length;
-      product.is_liked = !!isLiked;
+      const isLike = !!userId && wishlists.some(wishlist => parseNum(wishlist.get('id_users')) === userId
+        && parseNum(wishlist.get('id_dropshipper')) === parseNum(product.get('id_dropshipper')));
+      product = this.prototype.serialize.call(product);
+      product.image = image ? image.serialize().file : config.defaultImage.product;
+      product.count_like = wishlists.length;
+      product.count_view = view ? view.serialize().ip.length : 0;
+      product.is_liked = isLike;
       if (userId && isDropship) {
         product.commission = MasterFee.calculateCommissionByFees(masterFee, product.price, true);
       }
-      results.push({ product, store });
-      return results;
-    }, []);
+      return { product, store };
+    }));
   }
 
   /**
@@ -679,7 +716,7 @@ class ProductModel extends bookshelf.Model {
     });
     const dataExpeditions = await Expedition.query(qb => qb.whereIn('id_ekspedisi', expeditionIds))
       .fetchAll({
-        withRelated: [{ services: qb => qb.whereNotIn('id_ekspedisiservice', expeditionServiceIds) }], });
+        withRelated: [{ services: qb => qb.whereNotIn('id_ekspedisiservice', expeditionServiceIds) }] });
     dataExpeditions.each((val) => {
       const expedition = _.find(expeditions, { id: val.serialize().id });
       const services = val.related('services').map((o) => {
@@ -753,11 +790,7 @@ class ProductModel extends bookshelf.Model {
       date_status: 'tglstatus_produk',
       status: 'status_produk',
     };
-    const newData = {};
-    Object.keys(data).forEach((prop) => {
-      if (column[prop] && data[prop] !== undefined) newData[column[prop]] = data[prop];
-    });
-    return newData;
+    return matchDB(data, column);
   }
 }
 

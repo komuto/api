@@ -23,7 +23,7 @@ class ViewModel extends bookshelf.Model {
   }
 
   static async store(id, ip) {
-    const view = await this.where({ id_produk: id }).fetch().catch(() => {});
+    const view = await this.where({ id_produk: id }).fetch();
     if (!view) {
       return await new this({
         id_produk: id,
