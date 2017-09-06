@@ -37,13 +37,17 @@ class ResolutionCenterModel extends bookshelf.Model {
       updated_at: parseDate(this.get('update_at'), null),
     };
     if (minimal) return resolution;
-    // TODO: Serialize content key
     const content = JSON.parse(this.get('isipesan_rescenter')).map(msg => ({
-      ...msg,
-      user: msg.user !== 'Admin' ? name : 'admin',
-      create_at: parseDate(msg.create_at),
+      name: msg.user !== 'Admin' ? name : 'admin',
+      message: msg.pesan,
+      created_at: parseDate(msg.create_at),
     }));
+    if (this.relations.imageGroups) resolution.images = this.related('imageGroups');
     return { ...resolution, content };
+  }
+
+  imageGroups() {
+    return this.hasMany('ImageGroup', 'parent_id');
   }
 
   static async get(id, isClosed) {
@@ -56,7 +60,12 @@ class ResolutionCenterModel extends bookshelf.Model {
   }
 
   static async getDetail(id, resolutionId) {
-    return await this.where({ id_users: id, id_rescenter: resolutionId }).fetch();
+    return await this.where({ id_users: id, id_rescenter: resolutionId })
+      .fetch({
+        withRelated: [
+          { imageGroups: qb => qb.where('group', 'resolusi') },
+        ],
+      });
   }
 
   static async create(data) {
