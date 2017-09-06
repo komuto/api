@@ -321,19 +321,6 @@ class UserModel extends bookshelf.Model {
     }));
   }
 
-  static async getResolutions(id, isClosed) {
-    return await ResolutionCenter.where({ id_users: id })
-      .query((qb) => {
-        if (isClosed) qb.where('status_ticket_rescenter', 0);
-        else qb.whereNot('status_ticket_rescenter', 0);
-      })
-      .fetchAll();
-  }
-
-  static async getResolution(id, resolutionId) {
-    return await ResolutionCenter.where({ id_users: id, id_rescenter: resolutionId }).fetch();
-  }
-
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data

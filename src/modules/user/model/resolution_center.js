@@ -46,6 +46,19 @@ class ResolutionCenterModel extends bookshelf.Model {
     return { ...resolution, content };
   }
 
+  static async get(id, isClosed) {
+    return await this.where({ id_users: id })
+      .query((qb) => {
+        if (isClosed) qb.where('status_ticket_rescenter', 0);
+        else qb.whereNot('status_ticket_rescenter', 0);
+      })
+      .fetchAll();
+  }
+
+  static async getDetail(id, resolutionId) {
+    return await this.where({ id_users: id, id_rescenter: resolutionId }).fetch();
+  }
+
   static async create(data) {
     return await new this(data).save().catch(() => {
       throw createResolutionError('resolution_center', 'error');

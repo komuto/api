@@ -425,7 +425,7 @@ UserController.saveNotifications = async (req, res, next) => {
  */
 UserController.getResolutions = async (req, res, next) => {
   const isClosed = req.query.is_closed ? JSON.parse(req.query.is_closed) : false;
-  const resolutions = await User.getResolutions(req.user.id, isClosed);
+  const resolutions = await ResolutionCenter.get(req.user.id, isClosed);
   req.resData = {
     message: 'Resolution Data',
     data: resolutions.map(val => val.serialize({ minimal: true })),
@@ -437,7 +437,7 @@ UserController.getResolutions = async (req, res, next) => {
  * Get Detail Resolution
  */
 UserController.getResolution = async (req, res, next) => {
-  const resolution = await User.getResolution(req.user.id, req.params.id);
+  const resolution = await ResolutionCenter.getDetail(req.user.id, req.params.id);
   if (!resolution) throw getResolutionError('resolution_center', 'not_found');
   req.resData = {
     message: 'Resolution Data',
