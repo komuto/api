@@ -22,6 +22,9 @@ const getImageType = (body) => {
     case 'profile':
       body.is_single = true;
       break;
+    case 'resolution':
+      body.is_single = false;
+      break;
     default:
       break;
   }

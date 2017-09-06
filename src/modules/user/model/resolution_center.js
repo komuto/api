@@ -37,13 +37,15 @@ class ResolutionCenterModel extends bookshelf.Model {
       updated_at: parseDate(this.get('update_at'), null),
     };
     if (minimal) return resolution;
-    const content = JSON.parse(this.get('isipesan_rescenter')).map(msg => ({
+
+    resolution.content = JSON.parse(this.get('isipesan_rescenter')).map(msg => ({
       name: msg.user !== 'Admin' ? name : 'admin',
       message: msg.pesan,
       created_at: parseDate(msg.create_at),
     }));
+
     if (this.relations.imageGroups) resolution.images = this.related('imageGroups');
-    return { ...resolution, content };
+    return resolution;
   }
 
   imageGroups() {
