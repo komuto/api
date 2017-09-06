@@ -12,6 +12,16 @@ export const InvoiceStatus = {
   FAILED: 2,
 };
 
+export const InvoiceTransactionStatus = {
+  REJECTED: 0,
+  WAITING: 1,
+  PROCEED: 2,
+  SENDING: 3,
+  RECEIVED: 4,
+  PROBLEM: 5,
+  COMPLAINT: 6,
+};
+
 class InvoiceModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -36,6 +46,7 @@ class InvoiceModel extends bookshelf.Model {
       total_bill: parseNum(this.get('total_tagihan')),
       total_price: parseNum(this.get('total_harga')),
       status: parseNum(this.get('status_invoice')),
+      transaction_status: parseNum(this.get('status_transaksi'), null),
     };
     if (minimal) return invoice;
     return {
@@ -106,6 +117,7 @@ class InvoiceModel extends bookshelf.Model {
       created_at: 'createdate_invoice',
       confirmed_at: 'confirmation_date',
       updated_at: 'updated_at',
+      transaction_status: 'status_transaksi',
     };
     const newData = {};
     Object.keys(data).forEach((prop) => {

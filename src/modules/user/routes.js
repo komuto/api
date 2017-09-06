@@ -323,6 +323,7 @@ routes.get('/users/resolutions/:id([0-9]{1,10})',
 routes.post('/users/resolutions',
   auth(),
   validateParam(constraints.createResolution, true),
+  // TODO: Images validation
   wrap(UserController.createResolution),
   apiResponse());
 

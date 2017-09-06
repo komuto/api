@@ -8,6 +8,10 @@ export const errMsg = {
     not_found: 'Keranjang tidak ditemukan',
     not_found_items: 'Tidak menemukan items',
   },
+  getTransaction: {
+    title: 'Get transaksi gagal',
+    not_found: 'Transaksi tidak ditemukan',
+  },
   getItem: {
     title: 'Get item gagal',
     not_found: 'Item tidak ditemukan',
@@ -27,6 +31,8 @@ export const errMsg = {
 };
 
 export const getBucketError = formatError.bind(errMsg.getBucket);
+
+export const getTransactionError = formatError.bind(errMsg.getTransaction);
 
 export const getItemError = formatError.bind(errMsg.getItem);
 

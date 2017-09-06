@@ -4,7 +4,7 @@ import moment from 'moment';
 import _ from 'lodash';
 import 'moment-precise-range-plugin';
 import core from '../../core';
-import { getBucketError } from '../messages';
+import { getBucketError, getTransactionError } from '../messages';
 import './shipping';
 import { Item } from './item';
 import { PromoType } from './promo';
@@ -157,6 +157,7 @@ class BucketModel extends bookshelf.Model {
   }
 
   static getTimeLeft(maxTime) {
+    // TODO: Get from global parameter
     const maxPaymentDate = moment(maxTime).add(2, 'days');
     if (moment().isAfter(maxPaymentDate)) return 0;
     const { days, hours, minutes, seconds } = moment.preciseDiff(maxPaymentDate, moment(), true);
@@ -195,7 +196,7 @@ class BucketModel extends bookshelf.Model {
     const buckets = await this.where({ id_users: userId, status_bucket: BucketStatus.CHECKOUT })
       .query(qb => (qb.whereNotNull('id_paymentmethod')))
       .fetchAll({ withRelated: ['invoices.items.product.images'] });
-    if (!buckets.length) throw getBucketError('bucket', 'not_found');
+    if (!buckets.length) return [];
 
     return buckets.map(bucket => (this.loadDetailTransaction(bucket)));
   }
@@ -207,7 +208,7 @@ class BucketModel extends bookshelf.Model {
       status_bucket: BucketStatus.CHECKOUT,
     }).query(qb => (qb.whereNotNull('id_paymentmethod')))
       .fetch({ withRelated: ['invoices.items.product.images', 'promo'] });
-    if (!bucket) throw getBucketError('bucket', 'not_found');
+    if (!bucket) throw getTransactionError('transaction', 'not_found');
     return this.loadDetailTransaction(bucket);
   }
 
