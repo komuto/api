@@ -43,9 +43,12 @@ export const buyerNotification = {
 
 class NotificationClass {
   static getPayload(notification, id, productId) {
+    const data = { type: notification.type };
+    if (id) data.id = String(id);
+    if (productId) data.productId = String(productId);
     return {
       notification: { title: notification.title, body: notification.body },
-      data: { id, product_id: productId, type: notification.type },
+      data,
     };
   }
 
