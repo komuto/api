@@ -13,6 +13,7 @@ import { MasterFee } from './master_fee';
 import { ImageProduct } from './image_product';
 import { View } from './view';
 import { Wishlist } from '../../user/model/wishlist';
+import { Review } from '../../review/model';
 
 const { parseNum, parseDec, parseDate, getter, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
@@ -48,7 +49,7 @@ class ProductModel extends bookshelf.Model {
       discount: this.get('disc_produk'),
       is_discount: !!this.get('disc_produk'),
       is_wholesaler: this.get('is_grosir'),
-      is_dropshipper: this.get('is_dropshiper'),
+      is_dropship: this.get('is_dropshiper'),
       weight: this.get('berat_produk'),
       stock: this.get('stock_produk'),
     };
@@ -69,7 +70,6 @@ class ProductModel extends bookshelf.Model {
       status: parseNum(this.get('status_produk'), 0),
       is_insurance: parseNum(this.get('asuransi_produk'), 0) === 1,
       margin_dropshipper: this.get('margin_dropshiper'),
-      is_dropship: this.get('is_dropshiper'),
       is_wholesaler: this.get('is_grosir'),
       count_sold: parseNum(this.get('count_sold'), 0),
       count_popular: parseNum(this.get('count_populer'), 0),
@@ -119,10 +119,10 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
-   * Add relation to User
+   * Add relation to Wishlist
    */
   likes() {
-    return this.hasMany('User', 'id_produk').through('Wishlist', 'id_users', 'id_produk', 'id_users');
+    return this.hasMany('Wishlist', 'id_produk');
   }
 
   wholesale() {
@@ -336,10 +336,10 @@ class ProductModel extends bookshelf.Model {
       }, []);
   }
 
-  static loadReviewsRatings(product) {
+  static loadReviewsRatings(getReviews) {
     const accSum = [0, 0];
     const qtySum = [0, 0];
-    const reviews = product.related('reviews').map((review) => {
+    const reviews = getReviews.map((review) => {
       const { name, id: userId, photo } = review.related('user').serialize();
       review = review.serialize();
       const { quality, accuracy } = review;
@@ -357,6 +357,19 @@ class ProductModel extends bookshelf.Model {
     const likes = product.related('likes');
     const isLiked = !!_.find(likes.models, o => o.get('id_users') === id);
     return { likes, isLiked };
+  }
+
+  /**
+   * @param userId {int}
+   * @param wishlists {object} bookshelf object before serialize
+   * @param product {object} bookshelf object before serialize
+   */
+  static loadLikesDropship(userId, wishlists, product) {
+    const id = product ? parseNum(product.get('id_dropshipper')) : null;
+    const isLiked = wishlists.some(wishlist => parseNum(wishlist.get('id_users')) === userId
+    && parseNum(wishlist.get('id_dropshipper'), null) === id);
+    const countLike = wishlists.length;
+    return { is_liked: isLiked, count_like: countLike };
   }
 
   static loadFavorites(store, id) {
@@ -393,14 +406,11 @@ class ProductModel extends bookshelf.Model {
    * @param userId {integer} user id
    */
   static async getFullProduct(productId, storeId, userId) {
-    let store;
     let dropship;
     let isDropshipped = false;
     const related = [
       'category',
       'images',
-      'reviews.user.addresses',
-      'likes',
       'discussions',
       'view',
       'expeditionServices.expedition',
@@ -416,61 +426,90 @@ class ProductModel extends bookshelf.Model {
       isDropshipped = true;
     }
 
+    let getReviews = Review.where({ id_produk: productId,
+      id_dropshipper: !isDropshipped ? null : dropship.get('id_dropshipper') }).fetchAll({ withRelated: 'user' });
+
     // Eager load other products so it doesn't block other process by not awaiting directly
-    // TODO: Join dropshipper
     const getOtherProds = this.query((qb) => {
-      qb.where('id_toko', storeId);
-      qb.whereNot('id_produk', productId);
-      qb.orderBy('id_produk', 'desc');
+      qb.select(['produk.*', 'd.id_dropshipper']);
+      qb.select(knex.raw('COALESCE(d.tglstatus_dropshipper, tglstatus_produk) as date_created, ' +
+      'COALESCE(d.id_toko, produk.id_toko) as id_toko'));
+      qb.leftJoin('dropshipper as d', 'd.id_produk', 'produk.id_produk');
+      qb.where('produk.id_toko', storeId).whereNot('produk.id_produk', productId)
+        .andWhere('status_produk', ProductStatus.SHOW).whereNull('d.id_dropshipper');
+      qb.orWhere('d.id_toko', storeId).whereNot('d.id_produk', productId);
+      qb.orderBy('date_created', 'desc');
       qb.limit(3);
-    }).fetchAll({ withRelated: ['likes', { images: qb => qb.limit(1) }] });
+    }).fetchAll({ withRelated: [{ images: qb => qb.limit(1) }] });
 
-    let wholesaler;
-    if (product.get('is_grosir')) {
-      await product.load('wholesale').catch(() => {
-        throw getProductError('product', 'error');
-      });
-      wholesaler = product.related('wholesale').serialize();
-    } else wholesaler = [];
-
-    const category = product.related('category').serialize();
+    let getStore;
     if (!isDropshipped) {
       const load = [{ 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) }];
       if (userId) load.push('store.favoriteStores');
-      await product.load(load);
-      store = product.related('store');
-    } else {
-      store = dropship.related('store');
-    }
-    const isFavorite = userId ? this.loadFavorites(store, userId) : false;
-    store = store.serialize({ verified: true });
+      getStore = product.load(load);
+    } else getStore = false;
+    let getWholesaler = !product.get('is_grosir') ? false
+      : product.load('wholesale').catch(() => { throw getProductError('product', 'error'); });
+    const category = product.related('category').serialize();
+    const getAddress = Address.getStoreAddress(product.related('store').get('id_users'));
     const images = product.related('images');
-    const address = await Address.getStoreAddress(product.related('store').get('id_users'));
+    const address = await getAddress;
     const location = { province: address.related('province'), district: address.related('district') };
     const expeditions = this.loadExpeditions(product);
-    const { reviews, rating } = this.loadReviewsRatings(product);
-    const { likes, isLiked } = this.loadLikes(product, userId);
     const discussions = product.related('discussions');
 
+    getStore = getStore !== false && await getStore;
+    let store = getStore !== false ? product.related('store') : dropship.related('store');
+    const isFavorite = userId ? this.loadFavorites(store, userId) : false;
+    store = store.serialize({ verified: true });
+    let otherProds = await getOtherProds;
+    const [likes, ...otherLikes] = await Promise.all(otherProds.reduce((res, prod, index) => {
+      // include likes for main product
+      if (index === 0) {
+        const wishlist = Wishlist.where({
+          id_produk: product.get('id_produk'),
+          id_dropshipper: (dropship && parseNum(dropship.get('id_dropshipper'))) || null,
+        }).fetchAll();
+        res.push(wishlist);
+      }
+      // likes for other products
+      const wishlist = Wishlist.where({
+        id_produk: prod.get('id_produk'),
+        id_dropshipper: parseNum(prod.get('id_dropshipper')) || null,
+      }).fetchAll();
+      res.push(wishlist);
+      return res;
+    }, []));
+
+    getWholesaler = getWholesaler !== false && await getWholesaler;
+    const wholesaler = getWholesaler === false ? [] : product.related('wholesale').serialize();
     store.is_favorite = isFavorite;
+    getReviews = await getReviews;
+    const { reviews, rating } = await this.loadReviewsRatings(getReviews);
     rating.quality = parseFloat(this.ratingAvg(rating.quality));
     rating.accuracy = parseFloat(this.ratingAvg(rating.accuracy));
-    product = product.serialize();
+    const { count_like, is_liked } = this.loadLikesDropship(userId, likes, dropship);
+    product = {
+      ...product.serialize(),
+      store_id: storeId,
+      count_review: reviews.length,
+      count_like,
+      is_liked,
+      count_discussion: discussions.length,
+    };
     product.id = parseDec(`${product.id}.${storeId}`);
-    product.store_id = storeId;
-    product.count_review = reviews.length;
-    product.count_like = likes.length;
-    product.is_liked = isLiked;
-    product.count_discussion = discussions.length;
-    let otherProds = await getOtherProds;
-    otherProds = otherProds.map((otherProduct) => {
-      const { likes: like, isLiked: liked } = this.loadLikes(otherProduct, userId);
+
+    otherProds = otherProds.map((otherProduct, index) => {
+      const { count_like: cl, is_liked: il }
+        = this.loadLikesDropship(userId, otherLikes[index], otherProduct);
       const otherImages = otherProduct.related('images').serialize();
       const image = otherImages.length ? otherImages[0].file : config.defaultImage.product;
+      const id = parseDec(`${otherProduct.get('id_produk')}.${otherProduct.get('id_toko')}`);
       return {
         ...otherProduct.serialize({ minimal: true }),
-        count_like: like.length,
-        is_liked: liked,
+        id,
+        count_like: cl,
+        is_liked: il,
         image,
       };
     });
