@@ -5,7 +5,7 @@ import { ProductStatus, Product, ImageProduct, MasterFee } from '../../product/m
 
 const bookshelf = core.postgres.db;
 const knex = core.postgres.knex;
-const { parseDate, defaultNull, parseNum } = core.utils;
+const { parseDate, defaultNull, parseNum, getter } = core.utils;
 
 class CatalogModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -174,10 +174,6 @@ class CatalogModel extends bookshelf.Model {
       if (!catalogId && catalogId !== 0) catalogs.models.push(0);
     }
 
-    // Create getter object so that knex object could be serialized using Product model
-    const getter = {
-      get(prop) { return this[prop]; },
-    };
     const getProducts = await Promise.all(
       catalogIds.map(id => this.loadProduct(id, storeId, status, offset, limit)),
     );
@@ -204,7 +200,7 @@ class CatalogModel extends bookshelf.Model {
               parseNum(product.harga_produk),
               ),
           };
-        // Initialize prototype chain
+        // Provide this.get() utility for serialize
         Object.setPrototypeOf(product, getter);
         product = {
           ...Product.prototype.serialize.call(product, { minimal: true }),

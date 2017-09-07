@@ -10,7 +10,7 @@
     "bcrypt": "^1.0.2",
     "bluebird": "^3.5.0",
     "body-parser": "^1.15.2",
-    "bookshelf": "^0.10.3",
+    "bookshelf": "^0.10.4",
     "bookshelf-modelbase": "^2.10.4",
     "chai": "^4.0.2",
     "chalk": "^1.1.3",
