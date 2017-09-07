@@ -46,4 +46,12 @@ routes.get('/transactions/:id([0-9]{1,10})',
   wrap(PaymentController.detailTransaction),
   apiResponse());
 
+/**
+ * GET detail invoice
+ */
+routes.get('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})',
+  auth(),
+  wrap(PaymentController.detailInvoice),
+  apiResponse());
+
 export default routes;

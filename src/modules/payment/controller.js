@@ -11,6 +11,7 @@ import { Bucket, BucketStatus } from './../bucket/model';
 import { BankAccount } from '../bank/model';
 import config from '../../../config';
 import core from '../core';
+import { Invoice } from './model/invoice';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -98,8 +99,17 @@ PaymentController.listTransactions = async (req, res, next) => {
 PaymentController.detailTransaction = async (req, res, next) => {
   const bucket = await Bucket.detailTransaction(req.user.id, req.params.id);
   req.resData = {
-    message: 'Transactions Data',
+    message: 'Transaction Data',
     data: bucket,
+  };
+  return next();
+};
+
+PaymentController.detailInvoice = async (req, res, next) => {
+  const invoice = await Invoice.detail(req.user.id, req.params.id, req.params.invoice_id);
+  req.resData = {
+    message: 'Invoice Data',
+    data: invoice,
   };
   return next();
 };

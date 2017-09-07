@@ -2,6 +2,7 @@ import moment from 'moment';
 import randomInt from 'random-int';
 import core from '../../core';
 import { getInvoiceError, createInvoiceError } from './../messages';
+import config from '../../../../config';
 
 const { parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -55,16 +56,16 @@ class InvoiceModel extends bookshelf.Model {
     if (minimal) return invoice;
     return {
       ...invoice,
-      user_id: this.get('id_user'),
-      bucket_id: this.get('id_bucket'),
+      user_id: parseNum(this.get('id_user')),
+      bucket_id: parseNum(this.get('id_bucket')),
       bid_id: this.get('id_bidlelang'),
-      shipping_id: this.get('id_pengiriman_produk'),
+      shipping_id: parseNum(this.get('id_pengiriman_produk')),
       remark_cancel: this.get('remark_pembatalan'),
-      delivery_cost: this.get('biaya_ongkir'),
-      insurance_fee: this.get('biaya_asuransi'),
-      admin_cost: this.get('biaya_admin'),
-      wallet: this.get('bayar_wallet'),
-      promo: this.get('promo'),
+      delivery_cost: parseNum(this.get('biaya_ongkir')),
+      insurance_fee: parseNum(this.get('biaya_asuransi')),
+      admin_cost: parseNum(this.get('biaya_admin')),
+      wallet: parseNum(this.get('bayar_wallet')),
+      promo: parseNum(this.get('promo')),
       confirmed_at: parseDate(this.get('confirmation_date')),
       updated_at: parseDate(this.get('updated_at')),
     };
@@ -99,6 +100,30 @@ class InvoiceModel extends bookshelf.Model {
     const invoice = await this.where({ id_invoice: id, id_user: userId }).fetch();
     if (!invoice) throw getInvoiceError('invoice', 'not_found');
     return invoice;
+  }
+
+  static async detail(userId, bucketId, id) {
+    const invoice = await this.where({
+      id_invoice: id,
+      id_user: userId,
+      id_bucket: bucketId,
+    }).fetch({ withRelated: ['items.product.images', 'store', 'shipping'] });
+
+    if (!invoice) throw getInvoiceError('invoice', 'not_found');
+
+    const items = invoice.related('items').map((item) => {
+      const product = item.related('product');
+      const image = product.related('images').models;
+      return {
+        ...item.serialize({ minimal: true }),
+        product: {
+          ...product.serialize({ minimal: true }),
+          image: image.length ? image[0].serialize().file : config.defaultImage.product,
+        },
+      };
+    });
+
+    return { ...invoice.serialize(), items };
   }
 
   /**
