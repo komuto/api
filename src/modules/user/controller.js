@@ -2,12 +2,29 @@ import { Facebook } from 'fb';
 import passport from 'passport';
 import moment from 'moment';
 import _ from 'lodash';
-import { User, UserToken, TokenType, UserStatus, getNotification, NotificationType } from './model';
+import {
+  User,
+  UserToken,
+  TokenType,
+  UserStatus,
+  getNotification,
+  NotificationType,
+  ResolutionCenter,
+  ResolutionCenterStatus,
+  ImageGroup,
+} from './model';
 import { UserEmail } from './email';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
 import { Store, StoreExpedition, Message, MessageFlagStatus, DetailMessage } from './../store/model';
-import { userUpdateError, resetPassError, registrationError, activateUserError, fbError } from './messages';
+import {
+  userUpdateError,
+  resetPassError,
+  registrationError,
+  activateUserError,
+  fbError,
+  getResolutionError,
+} from './messages';
 import { Discussion, Product } from '../product/model';
 import core from '../core';
 
@@ -400,5 +417,67 @@ UserController.saveNotifications = async (req, res, next) => {
   const notifications = req.body.notifications;
   await User.where({ id_users: req.user.id }).save({ notifications }, { patch: true });
   req.resData = { data: User.getNotifications(notifications, req.marketplace.name) };
+  return next();
+};
+
+/**
+ * Get Resolutions
+ */
+UserController.getResolutions = async (req, res, next) => {
+  const isClosed = req.query.is_closed ? JSON.parse(req.query.is_closed) : false;
+  const resolutions = await ResolutionCenter.get(req.user.id, isClosed);
+  req.resData = {
+    message: 'Resolution Data',
+    data: resolutions.map(val => val.serialize({ minimal: true })),
+  };
+  return next();
+};
+
+/**
+ * Get Detail Resolution
+ */
+UserController.getResolution = async (req, res, next) => {
+  const resolution = await ResolutionCenter.getDetail(req.user.id, req.params.id);
+  if (!resolution) throw getResolutionError('resolution_center', 'not_found');
+  req.resData = {
+    message: 'Resolution Data',
+    data: resolution.serialize({ minimal: false }, req.user.name),
+  };
+  return next();
+};
+
+/**
+ * Create Resolution
+ */
+UserController.createResolution = async (req, res, next) => {
+  const ticketNumber = await ResolutionCenter.getTicketNumber();
+  const data = ResolutionCenter.matchDBColumn({
+    ...req.body,
+    user_id: req.user.id,
+    discussions: ResolutionCenter.createDiscussion(req.user.name, req.body.message),
+    ticket_number: ticketNumber,
+    status: ResolutionCenterStatus.WAIT_TO_REPLY,
+    status_at: moment(),
+    ends_at: moment(),
+    created_at: moment(),
+  });
+  const resolution = await ResolutionCenter.create(data);
+  if (req.body.images) await ImageGroup.bulkCreate(resolution.get('id_rescenter'), req.body.images);
+  req.resData = { data: resolution.serialize({ minimal: true }) };
+  return next();
+};
+
+/**
+ * Reply Resolution
+ */
+UserController.replyResolution = async (req, res, next) => {
+  const resolution = await ResolutionCenter.getDetail(req.user.id, req.params.id);
+  if (!resolution) throw getResolutionError('resolution_center', 'not_found');
+  const discussions = resolution.pushMessage(req.user.name, req.body.message);
+  await resolution.save({ isipesan_rescenter: discussions, update_at: moment() }, { patch: true });
+  req.resData = {
+    message: 'Resolution Data',
+    data: resolution.serialize({ minimal: false }, req.user.name),
+  };
   return next();
 };

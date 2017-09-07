@@ -297,4 +297,44 @@ routes.post('/users/notifications',
   wrap(UserController.saveNotifications),
   apiResponse());
 
+/**
+ * GET /users/resolutions
+ * Get resolutions
+ */
+routes.get('/users/resolutions',
+  auth(),
+  validateParam(constraints.getResolutions),
+  wrap(UserController.getResolutions),
+  apiResponse());
+
+/**
+ * GET /users/resolutions/id
+ * Get detail resolution
+ */
+routes.get('/users/resolutions/:id([0-9]{1,10})',
+  auth(),
+  wrap(UserController.getResolution),
+  apiResponse());
+
+/**
+ * POST /users/resolutions
+ * Create resolution
+ */
+routes.post('/users/resolutions',
+  auth(),
+  validateParam(constraints.createResolution, true),
+  // TODO: Images validation
+  wrap(UserController.createResolution),
+  apiResponse());
+
+/**
+ * POST /users/resolutions/id
+ * Reply resolution
+ */
+routes.post('/users/resolutions/:id([0-9]{1,10})',
+  auth(),
+  validateParam(constraints.replyResolution, true),
+  wrap(UserController.replyResolution),
+  apiResponse());
+
 export default routes;

@@ -7,6 +7,7 @@ import config from '../../../../config';
 import core from '../../core';
 import { model as addressModel } from '../../address';
 import { OTPHPStatus, OTPAddressStatus } from '../../OTP/model';
+import { ResolutionCenter } from './resolution_center';
 
 const { defaultNull, parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -158,6 +159,13 @@ class UserModel extends bookshelf.Model {
    */
   verifyPhone() {
     return this.hasMany('OTPHP', 'id_users');
+  }
+
+  /**
+   * Add relation to ResolutionCenter
+   */
+  resolutionCenter() {
+    return this.hasMany('ResolutionCenter', 'id_users');
   }
 
   /**
