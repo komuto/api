@@ -2,7 +2,6 @@ import ModelBase from 'bookshelf-modelbase';
 import randomInt from 'random-int';
 import moment from 'moment';
 import _ from 'lodash';
-import Promise from 'bluebird';
 import 'moment-precise-range-plugin';
 import core from '../../core';
 import { getBucketError, getTransactionError } from '../messages';
@@ -10,7 +9,7 @@ import './shipping';
 import { Item } from './item';
 import { PromoType } from './promo';
 import config from './../../../../config';
-import { InvoiceTransactionStatus } from '../../payment/model';
+import { Wishlist } from "../../user/model/wishlist";
 
 const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -166,66 +165,44 @@ class BucketModel extends bookshelf.Model {
     return { days, hours, minutes, seconds };
   }
 
-  static async loadDetailTransaction(bucket) {
-    const {
-      invoices,
-      total_price,
-      time_left,
-    } = await Promise.reduce(bucket.related('invoices').models, async (accu, invoice, index) => {
+  static loadDetailTransaction(bucket, isDetail) {
+    const { data, total_price, time_left } = bucket.related('invoices').reduce((accu, invoice, index) => {
       const items = invoice.related('items').map((item) => {
-        const product = item.related('product');
+        let product = item.related('product');
         const image = product.related('images').models;
-        return {
-          ...item.serialize({ minimal: true }),
-          product: {
-            ...product.serialize({ minimal: true }),
-            image: image.length ? image[0].serialize().file : config.defaultImage.product,
-          },
-        };
-      });
-      accu.total_price += parseInt(invoice.get('total_harga'), 10);
-      if (invoice.get('status_transaksi') === InvoiceTransactionStatus.SENDING) {
-        await invoice.load('shipping');
-      }
-      accu.invoices.push({ ...invoice.serialize({ minimal: true }), items });
-      if (index === 0) accu.time_left = this.getTimeLeft(invoice.get('updated_at'));
-      return accu;
-    }, { total_price: 0, invoices: [], time_left: 0 });
-    return {
-      bucket: bucket.serialize(),
-      summary_invoice: {
-        total_price,
-        status: 1,
-        time_left,
-      },
-      invoices,
-    };
-  }
-
-  static loadTransaction(bucket) {
-    const { products, total_price, time_left } = bucket.related('invoices').reduce((accu, invoice, index) => {
-      const itemProducts = invoice.related('items').map((item) => {
-        const product = item.related('product');
-        const image = product.related('images').models;
-        return {
+        product = {
           ...product.serialize({ minimal: true }),
           image: image.length ? image[0].serialize().file : config.defaultImage.product,
         };
+        if (isDetail) {
+          return {
+            ...item.serialize({ minimal: true }),
+            product,
+          };
+        }
+        return product;
       });
       accu.total_price += parseInt(invoice.get('total_harga'), 10);
-      accu.products.push(...itemProducts);
+      if (isDetail) {
+        accu.data.push({ ...invoice.serialize({ minimal: true }), items });
+      } else {
+        accu.data.push(...items);
+      }
       if (index === 0) accu.time_left = this.getTimeLeft(invoice.get('updated_at'));
       return accu;
-    }, { total_price: 0, products: [], time_left: 0 });
-    return {
+    }, { total_price: 0, data: [], time_left: 0 });
+
+    const response = {
       bucket: bucket.serialize(),
       summary_invoice: {
         total_price,
         status: 1,
         time_left,
       },
-      products,
     };
+
+    if (isDetail) return { ...response, invoices: data };
+    return { ...response, products: data };
   }
 
   static async listTransactions(userId) {
@@ -233,7 +210,7 @@ class BucketModel extends bookshelf.Model {
       .query(qb => (qb.whereNotNull('id_paymentmethod')))
       .fetchAll({ withRelated: ['invoices.items.product.images'] });
     if (!buckets.length) return [];
-    return buckets.map(bucket => (this.loadTransaction(bucket)));
+    return buckets.map(bucket => (this.loadDetailTransaction(bucket, false)));
   }
 
   static async detailTransaction(userId, bucketId) {
@@ -244,7 +221,7 @@ class BucketModel extends bookshelf.Model {
     }).query(qb => (qb.whereNotNull('id_paymentmethod')))
       .fetch({ withRelated: ['invoices.items.product.images', 'promo', 'invoices.store'] });
     if (!bucket) throw getTransactionError('transaction', 'not_found');
-    return this.loadDetailTransaction(bucket);
+    return this.loadDetailTransaction(bucket, true);
   }
 
   /**
