@@ -8,6 +8,7 @@ import { getBucketError, getTransactionError } from '../messages';
 import './shipping';
 import { Item } from './item';
 import { PromoType } from './promo';
+import config from './../../../../config';
 
 const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -191,13 +192,38 @@ class BucketModel extends bookshelf.Model {
     };
   }
 
+  static loadTransaction(bucket) {
+    const { products, total_price, time_left } = bucket.related('invoices').reduce((accu, invoice, index) => {
+      const itemProducts = invoice.related('items').map((item) => {
+        const product = item.related('product');
+        const image = product.related('images').models;
+        return {
+          ...product.serialize({ minimal: true }),
+          image: image.length ? image[0].serialize().file : config.defaultImage.product,
+        };
+      });
+      accu.total_price += parseInt(invoice.get('total_harga'), 10);
+      accu.products.push(...itemProducts);
+      if (index === 0) accu.time_left = this.getTimeLeft(invoice.get('updated_at'));
+      return accu;
+    }, { total_price: 0, products: [], time_left: 0 });
+    return {
+      bucket: bucket.serialize(),
+      summary_invoice: {
+        total_price,
+        status: 1,
+        time_left,
+      },
+      products,
+    };
+  }
+
   static async listTransactions(userId) {
     const buckets = await this.where({ id_users: userId, status_bucket: BucketStatus.CHECKOUT })
       .query(qb => (qb.whereNotNull('id_paymentmethod')))
       .fetchAll({ withRelated: ['invoices.items.product.images'] });
     if (!buckets.length) return [];
-
-    return buckets.map(bucket => (this.loadDetailTransaction(bucket)));
+    return buckets.map(bucket => (this.loadTransaction(bucket)));
   }
 
   static async detailTransaction(userId, bucketId) {
