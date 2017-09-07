@@ -297,6 +297,7 @@ class ProductModel extends bookshelf.Model {
       const isLike = !!userId && wishlists.some(wishlist => parseNum(wishlist.get('id_users')) === userId
         && parseNum(wishlist.get('id_dropshipper')) === parseNum(product.get('id_dropshipper')));
       product = this.prototype.serialize.call(product);
+      product.id = parseDec(`${product.id}.${product.store_id}`);
       product.image = image ? image.serialize().file : config.defaultImage.product;
       product.count_like = wishlists.length;
       product.count_view = view ? view.serialize().ip.length : 0;
@@ -455,6 +456,8 @@ class ProductModel extends bookshelf.Model {
     rating.quality = parseFloat(this.ratingAvg(rating.quality));
     rating.accuracy = parseFloat(this.ratingAvg(rating.accuracy));
     product = product.serialize();
+    product.id = parseDec(`${product.id}.${storeId}`);
+    product.store_id = storeId;
     product.count_review = reviews.length;
     product.count_like = likes.length;
     product.is_liked = isLiked;
