@@ -62,7 +62,7 @@ class ProductModel extends bookshelf.Model {
     return {
       ...product,
       category_id: this.get('id_kategoriproduk'),
-      store_id: this.get('origin_toko') || this.get('id_toko'),
+      store_id: this.get('id_toko'),
       condition: parseNum(this.get('jenis_produk'), 0),
       description: this.get('deskripsi_produk'),
       attrval: parseNum(this.get('attrval_produk'), 0),
@@ -208,8 +208,8 @@ class ProductModel extends bookshelf.Model {
     const offset = page === 1 ? 0 : (page - 1) * pageSize;
     const self = this;
 
-    const fromProduct = knex.select(['p.*', 'tglstatus_produk as date_created', 't.*', 'p.id_toko as origin_toko',
-      'p.identifier_katalog as identifier_katalog'])
+    const fromProduct = knex.select(['p.*', 'tglstatus_produk as date_created', 't.*',
+      'p.identifier_katalog as identifier_katalog', 'p.count_sold'])
       .select(knex.raw('null as "id_dropshipper"'))
       .from('produk as p')
       .join('toko as t', 'p.id_toko', 't.id_toko')
@@ -217,8 +217,8 @@ class ProductModel extends bookshelf.Model {
 
     return self.addWhereClause(fromProduct, params)
       .union(function () {
-        const fromDropship = this.select(['p.*', 'tglstatus_dropshipper as date_created', 't.*', 'p.id_toko as origin_toko',
-          'd.id_katalog as indentifier_katalog', 'd.id_dropshipper'])
+        const fromDropship = this.select(['p.*', 'tglstatus_dropshipper as date_created', 't.*',
+          'd.id_katalog as indentifier_katalog', 'd.count_sold', 'd.id_dropshipper'])
           .from('dropshipper as d')
           .join('produk as p', 'd.id_produk', 'p.id_produk')
           .join('toko as t', 'd.id_toko', 't.id_toko')
@@ -297,7 +297,7 @@ class ProductModel extends bookshelf.Model {
       const isLike = !!userId && wishlists.some(wishlist => parseNum(wishlist.get('id_users')) === userId
         && parseNum(wishlist.get('id_dropshipper')) === parseNum(product.get('id_dropshipper')));
       product = this.prototype.serialize.call(product);
-      product.id = parseDec(`${product.id}.${product.store_id}`);
+      product.id = parseDec(`${product.id}.${store.id}`);
       product.image = image ? image.serialize().file : config.defaultImage.product;
       product.count_like = wishlists.length;
       product.count_view = view ? view.serialize().ip.length : 0;
