@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { Expedition, ExpeditionService } from './model';
 import { Product } from './../product/model';
 import { NotFoundError } from '../../../common/errors';
+import { getProductAndStore } from '../core/utils';
 
 export const ExpeditionController = {};
 export default { ExpeditionController };
@@ -67,7 +68,8 @@ ExpeditionController.getExpeditionCost = async (req, res, next) => {
  */
 ExpeditionController.getExpeditionCostByProduct = async (req, res, next) => {
   const costs = [];
-  const expeditions = await Product.getExpeditionsById(req.query.product_id);
+  const { productId } = getProductAndStore(req.query.product_id);
+  const expeditions = await Product.getExpeditionsById(productId);
   // eslint-disable-next-line no-restricted-syntax
   for (const val of expeditions) {
     const cost = await Expedition.getCost(val.expedition, val.services, req.query);
