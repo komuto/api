@@ -42,17 +42,20 @@ class InvoiceModel extends bookshelf.Model {
     const invoice = {
       id: this.get('id_invoice'),
       payment_method_id: this.get('id_paymentmethod'),
+      store_id: this.get('id_toko'),
+      store: this.relations.store ? this.related('store').serialize({ favorite: true }) : undefined,
+      shipping: this.relations.shipping ? this.related('shipping') : undefined,
       invoice_number: this.get('no_invoice'),
       total_bill: parseNum(this.get('total_tagihan')),
       total_price: parseNum(this.get('total_harga')),
       status: parseNum(this.get('status_invoice')),
       transaction_status: parseNum(this.get('status_transaksi'), null),
+      created_at: parseDate(this.get('createdate_invoice')),
     };
     if (minimal) return invoice;
     return {
       ...invoice,
       user_id: this.get('id_user'),
-      store_id: this.get('id_toko'),
       bucket_id: this.get('id_bucket'),
       bid_id: this.get('id_bidlelang'),
       shipping_id: this.get('id_pengiriman_produk'),
@@ -62,7 +65,6 @@ class InvoiceModel extends bookshelf.Model {
       admin_cost: this.get('biaya_admin'),
       wallet: this.get('bayar_wallet'),
       promo: this.get('promo'),
-      created_at: parseDate(this.get('createdate_invoice')),
       confirmed_at: parseDate(this.get('confirmation_date')),
       updated_at: parseDate(this.get('updated_at')),
     };
@@ -70,6 +72,14 @@ class InvoiceModel extends bookshelf.Model {
 
   items() {
     return this.hasMany('Item', 'id_invoice');
+  }
+
+  store() {
+    return this.belongsTo('Store', 'id_toko');
+  }
+
+  shipping() {
+    return this.belongsTo('Shipping', 'id_pengiriman_produk');
   }
 
   /**

@@ -2,6 +2,7 @@ import ModelBase from 'bookshelf-modelbase';
 import randomInt from 'random-int';
 import moment from 'moment';
 import _ from 'lodash';
+import Promise from 'bluebird';
 import 'moment-precise-range-plugin';
 import core from '../../core';
 import { getBucketError, getTransactionError } from '../messages';
@@ -9,6 +10,7 @@ import './shipping';
 import { Item } from './item';
 import { PromoType } from './promo';
 import config from './../../../../config';
+import { InvoiceTransactionStatus } from '../../payment/model';
 
 const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -164,19 +166,27 @@ class BucketModel extends bookshelf.Model {
     return { days, hours, minutes, seconds };
   }
 
-  static loadDetailTransaction(bucket) {
-    const { invoices, total_price, time_left } = bucket.related('invoices').reduce((accu, invoice, index) => {
+  static async loadDetailTransaction(bucket) {
+    const {
+      invoices,
+      total_price,
+      time_left,
+    } = await Promise.reduce(bucket.related('invoices').models, async (accu, invoice, index) => {
       const items = invoice.related('items').map((item) => {
         const product = item.related('product');
+        const image = product.related('images').models;
         return {
           ...item.serialize({ minimal: true }),
           product: {
             ...product.serialize({ minimal: true }),
-            image: product.related('images').models[0].serialize().file,
+            image: image.length ? image[0].serialize().file : config.defaultImage.product,
           },
         };
       });
       accu.total_price += parseInt(invoice.get('total_harga'), 10);
+      if (invoice.get('status_transaksi') === InvoiceTransactionStatus.SENDING) {
+        await invoice.load('shipping');
+      }
       accu.invoices.push({ ...invoice.serialize({ minimal: true }), items });
       if (index === 0) accu.time_left = this.getTimeLeft(invoice.get('updated_at'));
       return accu;
@@ -232,7 +242,7 @@ class BucketModel extends bookshelf.Model {
       id_bucket: bucketId,
       status_bucket: BucketStatus.CHECKOUT,
     }).query(qb => (qb.whereNotNull('id_paymentmethod')))
-      .fetch({ withRelated: ['invoices.items.product.images', 'promo'] });
+      .fetch({ withRelated: ['invoices.items.product.images', 'promo', 'invoices.store'] });
     if (!bucket) throw getTransactionError('transaction', 'not_found');
     return this.loadDetailTransaction(bucket);
   }

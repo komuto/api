@@ -1,8 +1,21 @@
 import core from '../../core';
 import { createShippingError, updateShippingError } from './../messages';
 
-const { parseNum } = core.utils;
+const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
+
+export const ShippingSenderStatus = {
+  DEFAULT: 1,
+  ACCEPT: 2,
+  DECLINE: 3,
+  SENT: 4,
+};
+
+export const ShippingReceiverStatus = {
+  DEFAULT: 1,
+  ACCEPT: 2,
+  DECLINE: 3,
+};
 
 class ShippingModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -27,9 +40,17 @@ class ShippingModel extends bookshelf.Model {
       delivery_cost: parseNum(this.get('harga_ongkir')),
       insurance_fee: parseNum(this.get('nilai_asuransi')),
       note: this.get('keterangan'),
-      is_insurance: !!parseNum(this.get('nilai_asuransi')),
+      seller_note: this.get('keterangan_seller'),
+      is_insurance: this.get('is_asuransi'),
       address: this.relations.address ? this.related('address') : undefined,
       expedition_service: this.relations.expeditionService ? this.related('expeditionService') : undefined,
+      airway_bill: this.get('resiresponkirim'),
+      sender_status: parseNum(this.get('statusresponkirim')),
+      sender_status_at: parseDate(this.get('tglstatusresponkirim'), null),
+      sender_status_expired_at: parseDate(this.get('expdateresponkirim'), null),
+      receiver_status: parseNum(this.get('statusresponterima')),
+      receiver_status_at: parseDate(this.get('tglstatusresponterima'), null),
+      receiver_status_expired_at: parseDate(this.get('expdateresponterimabarang'), null),
     };
     if (this.relations.address) delete shipping.address_id;
     if (this.relations.expeditionService) delete shipping.expedition_service_id;
@@ -91,4 +112,4 @@ class ShippingModel extends bookshelf.Model {
 }
 
 export const Shipping = bookshelf.model('Shipping', ShippingModel);
-export default { Shipping };
+export default { Shipping, ShippingSenderStatus, ShippingReceiverStatus };
