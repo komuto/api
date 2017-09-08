@@ -5,10 +5,7 @@ constraints.promo = {
 };
 
 constraints.cart = {
-  product_id: {
-    presence: true,
-    format: /([0-9]{1,10}.[0-9]{1,10})/,
-  },
+  product_id: { presence: true },
   expedition_id: { presence: true, numericality: { onlyInteger: true } },
   expedition_service_id: { presence: true, numericality: { onlyInteger: true } },
   qty: { presence: true, numericality: { onlyInteger: true } },
