@@ -125,7 +125,7 @@ routes.get('/discussions/:id([0-9]{1,10})/comments',
  * POST /discussions/id/comments
  * Create comment
  */
-routes.post('/discussions/:id([0-9]{1,10}.[0-9]{1,10})/comments',
+routes.post('/discussions/:id([0-9]{1,10})/comments',
   auth(),
   validateParam(constraints.comment, true),
   wrap(ProductController.createComment),
