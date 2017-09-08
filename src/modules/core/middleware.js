@@ -163,7 +163,9 @@ export function validateParam(
       // Can the param be empty array or not
       const evaluate = strict ? true : params && params.length > 0;
       if (evaluate) {
-        // TODO: Fix undefined props
+        if (!Object.keys(params).length) {
+          throw new BadRequestError('Invalid parameter');
+        }
         params.forEach((param) => {
           const hasError = validate(param, constraints);
           if (hasError) throw formatError(`Invalid parameter ${prop || ''}`, hasError);
