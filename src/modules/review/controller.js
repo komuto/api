@@ -1,28 +1,8 @@
 import { Review } from './model';
-import { createReviewError } from './messages';
 import { Store } from '../store/model';
-import { Product } from '../product/model';
-import { getNotification, NotificationType } from '../user/model';
-import core from '../core';
-
-const { Notification, sellerNotification } = core;
 
 export const ReviewController = {};
 export default { ReviewController };
-
-ReviewController.createReview = async (req, res, next) => {
-  req.body.user_id = req.user.id;
-  req.body.product_id = req.params.id;
-  if (await Review.getByOtherId(req.user.id, req.params.id)) throw createReviewError('review', 'duplicate');
-  const review = await Review.create(Review.matchDBColumn(req.body));
-  const owner = await Product.getOwner(req.params.id);
-  const notifications = owner.serialize({ notification: true }).notifications;
-  if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && owner.get('reg_token')) {
-    Notification.send(sellerNotification.REVIEW, owner.get('reg_token'));
-  }
-  req.resData = { data: review };
-  return next();
-};
 
 /**
  * Gel all reviews

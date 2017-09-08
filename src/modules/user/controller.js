@@ -382,8 +382,11 @@ UserController.replyMessage = async (req, res, next) => {
   const detailMessage = await DetailMessage.create(data);
   const storeOwner = await User.getById(msg.store.user_id);
   const notifications = storeOwner.serialize({ notification: true }).notifications;
-  if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && storeOwner.get('reg_token')) {
-    Notification.send(sellerNotification.MESSAGE, storeOwner.get('reg_token'), req.params.id);
+  if (storeOwner.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
+    Notification.send(sellerNotification.MESSAGE, {
+      token: storeOwner.get('reg_token'),
+      id: req.params.id,
+    });
   }
   req.resData = { data: detailMessage };
   return next();

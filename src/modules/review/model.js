@@ -3,6 +3,10 @@ import core from '../core';
 import { createReviewError } from './messages';
 import config from '../../../config';
 import { Invoice } from '../payment/model';
+import { Product, Dropship } from '../product/model';
+import { getNotification, NotificationType } from '../user/model';
+
+const { Notification, sellerNotification } = core;
 
 const bookshelf = core.postgres.db;
 const { parseNum, parseDate } = core.utils;
@@ -41,26 +45,6 @@ class ReviewModel extends bookshelf.Model {
 
   product() {
     return this.belongsTo('Product', 'id_produk');
-  }
-
-  /**
-   * Create a new line item
-   * @param {Object} data
-   */
-  static async create(data) {
-    data.tgl_ulasanproduk = moment();
-    return await new this(data).save().catch(() => {
-      throw createReviewError('review', 'error');
-    });
-  }
-
-  /**
-   * Get a line item by id other than primary id
-   * @param userId {integer}
-   * @param productId {integer}
-   */
-  static async getByOtherId(userId, productId) {
-    return await this.where({ id_users: userId, id_produk: productId }).fetch();
   }
 
   /**
@@ -136,6 +120,21 @@ class ReviewModel extends bookshelf.Model {
       });
 
       item.save({ id_ulasanproduk: review.serialize().id }, { patch: true });
+
+      // Send notification to product owner
+      let owner;
+      if (item.serialize().dropshipper_id) {
+        owner = await Dropship.getOwner(item.serialize().dropshipper_id);
+      } else {
+        owner = await Product.getOwner(item.serialize().product_id);
+      }
+      const notifications = owner.serialize({ notification: true }).notifications;
+      if (owner.get('reg_token') && getNotification(notifications, NotificationType.REVIEW)) {
+        Notification.send(sellerNotification.REVIEW, {
+          token: owner.get('reg_token'),
+          id: review.serialize().id,
+        });
+      }
 
       return review;
     }));

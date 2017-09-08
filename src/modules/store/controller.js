@@ -93,8 +93,11 @@ StoreController.createMessage = async (req, res, next) => {
   });
   const detailMessage = await DetailMessage.create(detailMessageObj);
   const notifications = storeOwner.serialize({ notification: true }).notifications;
-  if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && storeOwner.get('reg_token')) {
-    Notification.send(sellerNotification.MESSAGE, storeOwner.get('reg_token'), message.toJSON().id);
+  if (storeOwner.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
+    Notification.send(sellerNotification.MESSAGE, {
+      token: storeOwner.get('reg_token'),
+      id: message.toJSON().id,
+    });
   }
   req.resData = {
     message: 'Message Data',
@@ -294,8 +297,11 @@ StoreController.replyMessage = async (req, res, next) => {
   const detailMessage = await DetailMessage.create(data);
   const buyer = await User.getById(msg.user_id);
   const notifications = buyer.serialize({ notification: true }).notifications;
-  if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && buyer.get('reg_token')) {
-    Notification.send(buyerNotification.MESSAGE, buyer.get('reg_token'), req.params.id);
+  if (buyer.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
+    Notification.send(buyerNotification.MESSAGE, {
+      token: buyer.get('reg_token'),
+      id: req.params.id,
+    });
   }
   req.resData = { data: detailMessage };
   return next();

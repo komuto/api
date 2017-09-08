@@ -192,8 +192,12 @@ ProductController.createDiscussion = async (req, res, next) => {
   });
   const discussion = await Discussion.create(data);
   const notifications = owner.serialize({ notification: true }).notifications;
-  if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && owner.get('reg_token')) {
-    Notification.send(sellerNotification.DISCUSSION, owner.get('reg_token'), discussion.toJSON().id, productId);
+  if (owner.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
+    Notification.send(sellerNotification.DISCUSSION, {
+      token: owner.get('reg_token'),
+      id: discussion.toJSON().id,
+      product_id: productId,
+    });
   }
   req.resData = {
     message: 'Discussion Data',
@@ -225,11 +229,19 @@ ProductController.createComment = async (req, res, next) => {
     const buyer = discussion.related('user');
     notifications = buyer.serialize({ notification: true }).notifications;
 
-    if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && buyer.get('reg_token')) {
-      Notification.send(buyerNotification.DISCUSSION, buyer.get('reg_token'), discussion.toJSON().id, discussion.toJSON().product_id);
+    if (buyer.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
+      Notification.send(buyerNotification.DISCUSSION, {
+        token: buyer.get('reg_token'),
+        id: discussion.toJSON().id,
+        product_id: discussion.toJSON().product_id,
+      });
     }
-  } else if (getNotification(notifications, NotificationType.PRIVATE_MESSAGE) && owner.get('reg_token')) {
-    Notification.send(sellerNotification.DISCUSSION, owner.get('reg_token'), discussion.toJSON().id, discussion.toJSON().product_id);
+  } else if (owner.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
+    Notification.send(sellerNotification.DISCUSSION, {
+      token: owner.get('reg_token'),
+      id: discussion.toJSON().id,
+      product_id: discussion.toJSON().product_id,
+    });
   }
 
   req.resData = {
