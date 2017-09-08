@@ -153,7 +153,7 @@ routes.get('/products/dropship',
  * POST /products/id/dropship
  * Dropship product
  */
-routes.post('/products/:id([0-9]{1,10})/dropship',
+routes.post('/products/:id([0-9]{1,10}.[0-9]{1,10})/dropship',
   auth(),
   validateParam(constraints.dropship, true),
   wrap(ProductController.dropship),

@@ -276,14 +276,15 @@ ProductController.report = async (req, res, next) => {
  * Dropship product
  */
 ProductController.dropship = async (req, res, next) => {
+  const { productId } = getProductAndStore(req.params.id);
   const catalogId = req.body.catalog_id;
   const storeId = await Store.getStoreId(req.user.id);
 
-  const found = await Dropship.findByProductIdAndStoreId(req.params.id, storeId);
+  const found = await Dropship.findByProductIdAndStoreId(productId, storeId);
   if (found) throw addDropshipProductError('product', 'duplicate');
 
   const [product, catalog] = await Promise.all([
-    Product.where({ id_produk: req.params.id }).fetch(),
+    Product.where({ id_produk: productId }).fetch(),
     Catalog.where({ id_katalog: catalogId, id_toko: storeId }).fetch()]);
 
   if (!product.get('is_dropshiper')) throw addDropshipProductError('product', 'product_not_dropship');
@@ -291,7 +292,7 @@ ProductController.dropship = async (req, res, next) => {
   if (product.get('id_toko') === storeId) throw addDropshipProductError('product', 'own_product');
 
   const data = Dropship.matchDBColumn({
-    product_id: req.params.id,
+    product_id: productId,
     catalog_id: catalogId,
     store_id: storeId,
     status: DropshipStatus.SHOW,
