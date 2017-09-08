@@ -18,7 +18,7 @@ routes.get('/reviews/search',
  * GET /products/id/reviews
  * Get all reviews of a product
  */
-routes.get('/products/:id([0-9]{1,10})/reviews',
+routes.get('/products/:id([0-9]{1,10}.[0-9]{1,10})/reviews',
   wrap(ReviewController.getReviews),
   apiResponse());
 
