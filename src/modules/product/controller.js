@@ -30,7 +30,7 @@ import { BadRequestError } from './../../../common/errors';
 import core from '../core';
 
 const { Notification, sellerNotification, buyerNotification } = core;
-const { getProductAndStore } = core.utils;
+const { getProductAndStore, parseDec } = core.utils;
 
 export const ProductController = {};
 export default { ProductController };
@@ -196,7 +196,7 @@ ProductController.createDiscussion = async (req, res, next) => {
     Notification.send(sellerNotification.DISCUSSION, {
       token: owner.get('reg_token'),
       id: discussion.toJSON().id,
-      product_id: productId,
+      product_id: parseDec(req.params.id),
     });
   }
   req.resData = {
@@ -233,14 +233,14 @@ ProductController.createComment = async (req, res, next) => {
       Notification.send(buyerNotification.DISCUSSION, {
         token: buyer.get('reg_token'),
         id: discussion.toJSON().id,
-        product_id: discussion.toJSON().product_id,
+        product_id: parseDec(req.params.id),
       });
     }
   } else if (owner.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
     Notification.send(sellerNotification.DISCUSSION, {
       token: owner.get('reg_token'),
       id: discussion.toJSON().id,
-      product_id: discussion.toJSON().product_id,
+      product_id: parseDec(req.params.id),
     });
   }
 
