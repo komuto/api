@@ -126,6 +126,21 @@ class InvoiceModel extends bookshelf.Model {
     return { ...invoice.serialize(), items };
   }
 
+  static async get(userId, bucketId, id) {
+    const invoice = await this.where({
+      id_invoice: id,
+      id_user: userId,
+      id_bucket: bucketId,
+      status_transaksi: InvoiceTransactionStatus.SENDING,
+    }).fetch({ withRelated: ['items'] });
+    if (!invoice) throw getInvoiceError('invoice', 'not_found');
+    return invoice;
+  }
+
+  static async updateStatus(id, status) {
+    return await this.where({ id_invoice: id }).save({ status_transaksi: status }, { patch: true });
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data

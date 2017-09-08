@@ -6,12 +6,14 @@ import {
   PaymentMethod,
   PaymentConfirmation,
   PaymentConfirmationStatus,
+  Invoice,
+  InvoiceTransactionStatus,
 } from './model';
 import { Bucket, BucketStatus } from './../bucket/model';
 import { BankAccount } from '../bank/model';
 import config from '../../../config';
 import core from '../core';
-import { Invoice } from './model/invoice';
+import { Review } from '../review/model';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -110,6 +112,21 @@ PaymentController.detailInvoice = async (req, res, next) => {
   req.resData = {
     message: 'Invoice Data',
     data: invoice,
+  };
+  return next();
+};
+
+PaymentController.bulkReview = async (req, res, next) => {
+  const reviews = await Review.bulkCreate({
+    user_id: req.user.id,
+    bucket_id: req.params.id,
+    invoice_id: req.params.invoice_id,
+    reviews: req.body,
+  });
+  await Invoice.updateStatus(req.params.invoice_id, InvoiceTransactionStatus.RECEIVED);
+  req.resData = {
+    message: 'Reviews Data',
+    data: reviews,
   };
   return next();
 };

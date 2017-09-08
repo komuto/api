@@ -2,6 +2,7 @@ import moment from 'moment';
 import core from '../core';
 import { createReviewError } from './messages';
 import config from '../../../config';
+import { Invoice } from '../payment/model';
 
 const bookshelf = core.postgres.db;
 const { parseNum, parseDate } = core.utils;
@@ -24,7 +25,13 @@ class ReviewModel extends bookshelf.Model {
       accuracy: parseNum(this.get('akurasiproduk')),
       created_at: parseDate(this.get('tgl_ulasanproduk')),
     };
-    if (!minimal) review.product_id = this.get('id_produk');
+    if (!minimal) {
+      return {
+        ...review,
+        product_id: this.get('id_produk'),
+        dropshipper_id: this.get('id_dropshipper'),
+      };
+    }
     return review;
   }
 
@@ -104,6 +111,37 @@ class ReviewModel extends bookshelf.Model {
   }
 
   /**
+   * Bulk create review
+   * @param {Object} params
+   */
+  static async bulkCreate(params) {
+    const { user_id: userId, bucket_id: bucketId, invoice_id: invoiceId, reviews } = params;
+
+    const invoice = await Invoice.get(userId, bucketId, invoiceId);
+    const items = invoice.related('items');
+
+    return await Promise.all(reviews.map(async (val) => {
+      const item = items.find(o => o.serialize().product_id === val.product_id);
+      if (!item) return null;
+
+      const data = this.matchDBColumn({
+        ...val,
+        user_id: userId,
+        dropshipper_id: item.serialize().dropshipper_id,
+        created_at: moment(),
+      });
+
+      const review = await new this(data).save().catch(() => {
+        throw createReviewError('review', 'error');
+      });
+
+      item.save({ id_ulasanproduk: review.serialize().id }, { patch: true });
+
+      return review;
+    }));
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData
@@ -112,6 +150,7 @@ class ReviewModel extends bookshelf.Model {
     const column = {
       user_id: 'id_users',
       product_id: 'id_produk',
+      dropshipper_id: 'id_dropshipper',
       created_at: 'tgl_ulasanproduk',
       review: 'isi_ulasanproduk',
       quality: 'kualitasproduk',

@@ -41,6 +41,7 @@ class ItemModel extends bookshelf.Model {
       shipping_id: parseNum(this.get('id_pengiriman_produk')),
       shipping: this.relations.shipping ? this.related('shipping').serialize() : undefined,
       dropshipper_id: parseNum(this.get('id_dropshipper'), null),
+      review_id: parseNum(this.get('id_ulasanproduk'), null),
       note: this.get('keteranganopsi_listbucket'),
     };
     if (this.relations.product) delete item.product_id;

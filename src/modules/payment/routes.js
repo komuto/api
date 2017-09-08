@@ -54,4 +54,13 @@ routes.get('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})',
   wrap(PaymentController.detailInvoice),
   apiResponse());
 
+/**
+ * POST bulk review
+ */
+routes.post('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})',
+  auth(),
+  validateParam(constraints.bulkReview, true, null, true),
+  wrap(PaymentController.bulkReview),
+  apiResponse());
+
 export default routes;
