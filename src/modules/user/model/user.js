@@ -321,6 +321,10 @@ class UserModel extends bookshelf.Model {
     }));
   }
 
+  static async updateWallet(id, wallet) {
+    return await this.where({ id_users: id }).save({ saldo_wallet: wallet }, { patch: true });
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data

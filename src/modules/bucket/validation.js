@@ -24,9 +24,12 @@ constraints.cart = {
 };
 
 constraints.checkout = {
-  payment_method_id: {
-    presence: true,
-    numericality: { onlyInteger: true },
+  is_wallet: {
+    presence: false,
+    inclusion: {
+      within: [true, false],
+      message: 'accept only `true` or `false` value',
+    },
   },
 };
 
