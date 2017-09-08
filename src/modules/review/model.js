@@ -3,13 +3,13 @@ import core from '../core';
 import { createReviewError } from './messages';
 import config from '../../../config';
 import { Invoice } from '../payment/model';
-import { Product, Dropship } from '../product/model';
-import { getNotification, NotificationType } from '../user/model';
+import { Product } from '../product/model/product';
+import { Dropship } from '../product/model/dropship';
+import { getNotification, NotificationType } from '../user/model/user';
 
 const { Notification, sellerNotification } = core;
-
 const bookshelf = core.postgres.db;
-const { parseNum, parseDate } = core.utils;
+const { parseNum, parseDate, parseDec } = core.utils;
 
 class ReviewModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -102,6 +102,7 @@ class ReviewModel extends bookshelf.Model {
     const { user_id: userId, bucket_id: bucketId, invoice_id: invoiceId, reviews } = params;
 
     const invoice = await Invoice.get(userId, bucketId, invoiceId);
+    let storeId = invoice.get('id_toko');
     const items = invoice.related('items');
 
     return await Promise.all(reviews.map(async (val) => {
@@ -124,7 +125,10 @@ class ReviewModel extends bookshelf.Model {
       // Send notification to product owner
       let owner;
       if (item.serialize().dropshipper_id) {
-        owner = await Dropship.getOwner(item.serialize().dropshipper_id);
+        const dropship = await Dropship.findById(item.serialize().dropshipper_id);
+        const store = dropship.related('store');
+        storeId = store.get('id_toko');
+        owner = store.related('user');
       } else {
         owner = await Product.getOwner(item.serialize().product_id);
       }
@@ -132,7 +136,7 @@ class ReviewModel extends bookshelf.Model {
       if (owner.get('reg_token') && getNotification(notifications, NotificationType.REVIEW)) {
         Notification.send(sellerNotification.REVIEW, {
           token: owner.get('reg_token'),
-          id: review.serialize().id,
+          product_id: parseDec(`${item.serialize().product_id}.${storeId}`),
         });
       }
 

@@ -54,6 +54,7 @@ class NotificationClass {
   }
 
   static send(notification, params) {
+    console.log(params);
     const { token } = params;
     const payload = this.getPayload(notification, params);
     firebaseadmin.messaging().sendToDevice(token, payload)

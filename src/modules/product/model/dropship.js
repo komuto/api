@@ -66,10 +66,8 @@ class DropshipModel extends bookshelf.Model {
     return await new this({ id_produk: productId, id_toko: storeId }).fetch({ withRelated });
   }
 
-  static async getOwner(id) {
-    const product = await this.where({ id_dropshipper: id }).fetch({ withRelated: ['store.user'] });
-    const store = product.related('store');
-    return store.related('user');
+  static async findById(id) {
+    return await this.where({ id_dropshipper: id }).fetch({ withRelated: ['store.user'] });
   }
 
   /**
