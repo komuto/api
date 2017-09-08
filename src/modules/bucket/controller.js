@@ -6,6 +6,7 @@ import { Invoice, InvoiceStatus, PaymentMethod } from '../payment/model';
 import { getBucketError, getItemError } from './messages';
 import { BadRequestError } from '../../../common/errors';
 import { getProductAndStore } from '../core/utils';
+import { getProductError } from "../product/messages";
 
 export const BucketController = {};
 export default { BucketController };
@@ -109,6 +110,7 @@ BucketController.addToCart = async (req, res, next) => {
   let columns = { bucket_id: bucket.id, product_id: product.id };
   if (product.store_id !== storeId) {
     dropship = await Dropship.findByProductIdAndStoreId(productId, storeId);
+    if (!dropship) throw getProductError('product', 'not_found');
     columns = { ...columns, dropshipper_id: dropship.serialize().id };
   }
 
