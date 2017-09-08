@@ -116,7 +116,8 @@ routes.post('/products/:id([0-9]{1,10}.[0-9]{1,10})/discussions',
  * GET /discussions/id/comments
  * Get all comments of a discussion
  */
-routes.get('/discussions/:id([0-9]{1,10}.[0-9]{1,10})/comments',
+// fix
+routes.get('/discussions/:id([0-9]{1,10})/comments',
   wrap(ProductController.getComments),
   apiResponse());
 

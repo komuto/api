@@ -4,7 +4,7 @@ import { getDiscussionError, createDiscussionError } from './../messages';
 import config from './../../../../config';
 
 const bookshelf = core.postgres.db;
-const { parseDate, parseNum } = core.utils;
+const { parseDate, parseNum, parseDec } = core.utils;
 
 class DiscussionModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -103,8 +103,11 @@ class DiscussionModel extends bookshelf.Model {
       let product = discussion.related('product');
       await product.load({ images: qb => qb.limit(1) });
       const image = product.related('images').models[0];
-      product = product.serialize({ minimal: true });
-      product.image = image ? image.serialize().file : config.defaultImage.product;
+      product = {
+        ...product.serialize({ minimal: true }),
+        id: parseDec(`${product.get('id_produk')}.${product.get('id_toko')}`),
+        image: image ? image.serialize().file : config.defaultImage.product,
+      };
       return {
         ...discussion.serialize({ minimal: true }),
         product,
