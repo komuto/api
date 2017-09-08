@@ -14,7 +14,7 @@ class WishlistModel extends bookshelf.Model {
 
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
-    return 'id_produk';
+    return ['id_users', 'id_produk', 'id_dropshipper'];
   }
 
   products() {
