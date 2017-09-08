@@ -206,9 +206,10 @@ class BucketModel extends bookshelf.Model {
   }
 
   static async listTransactions(userId) {
-    const buckets = await this.where({ id_users: userId, status_bucket: BucketStatus.CHECKOUT })
-      .query(qb => (qb.whereNotNull('id_paymentmethod')))
-      .fetchAll({ withRelated: ['invoices.items.product.images'] });
+    const buckets = await this.where({
+      id_users: userId,
+      status_bucket: BucketStatus.CHECKOUT,
+    }).fetchAll({ withRelated: ['invoices.items.product.images'] });
     if (!buckets.length) return [];
     return buckets.map(bucket => (this.loadDetailTransaction(bucket, false)));
   }
@@ -218,8 +219,7 @@ class BucketModel extends bookshelf.Model {
       id_users: userId,
       id_bucket: bucketId,
       status_bucket: BucketStatus.CHECKOUT,
-    }).query(qb => (qb.whereNotNull('id_paymentmethod')))
-      .fetch({ withRelated: ['invoices.items.product.images', 'promo', 'invoices.store'] });
+    }).fetch({ withRelated: ['invoices.items.product.images', 'promo', 'invoices.store'] });
     if (!bucket) throw getTransactionError('transaction', 'not_found');
     return this.loadDetailTransaction(bucket, true);
   }
