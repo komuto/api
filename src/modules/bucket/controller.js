@@ -6,7 +6,7 @@ import { Invoice, InvoiceStatus, PaymentMethod } from '../payment/model';
 import { getBucketError, getItemError } from './messages';
 import { BadRequestError } from '../../../common/errors';
 import { getProductAndStore } from '../core/utils';
-import { getProductError } from "../product/messages";
+import { getProductError } from '../product/messages';
 
 export const BucketController = {};
 export default { BucketController };

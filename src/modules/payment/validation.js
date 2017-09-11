@@ -21,7 +21,11 @@ constraints.bank = {
 constraints.bulkReview = {
   product_id: {
     presence: true,
-    numericality: { onlyInteger: true },
+    format: {
+      pattern: '[0-9]{1,10}.[0-9]{1,10}',
+      flags: 'i',
+      message: 'not valid',
+    },
   },
   review: { presence: true },
   quality: { presence: true, numericality: true },

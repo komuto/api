@@ -10,6 +10,7 @@ export const errMsg = {
   createReview: {
     title: 'Create review gagal',
     duplicate: 'You have already submitted your review for this product',
+    product_not_found: 'Anda belum membeli produk ini',
     error: 'Gagal menambah review',
   },
 };

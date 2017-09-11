@@ -824,6 +824,19 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
+   * @param productId {int}
+   * @param storeId {int}
+   */
+  static async findProduct(productId, storeId) {
+    const getOwn = this.where({ 'produk.id_produk': productId, 'produk.id_toko': storeId }).fetch();
+    const getDropship = this.query(qb => qb.select(['produk.*', 'id_dropshipper'])
+      .leftJoin('dropshipper as d', 'd.id_produk', 'produk.id_produk')
+      .where({ 'd.id_produk': productId, 'd.id_toko': storeId })).fetch();
+    const [own, dropship] = await Promise.all([getOwn, getDropship]);
+    return own || dropship;
+  }
+
+  /**
    * Transform supplied data properties to match with db column
    * @param {object} data
    * @return {object} newData

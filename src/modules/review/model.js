@@ -9,7 +9,7 @@ import { getNotification, NotificationType } from '../user/model/user';
 
 const { Notification, sellerNotification } = core;
 const bookshelf = core.postgres.db;
-const { parseNum, parseDate, parseDec } = core.utils;
+const { parseNum, parseDate, parseDec, getProductAndStore, matchDB } = core.utils;
 
 class ReviewModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -60,7 +60,7 @@ class ReviewModel extends bookshelf.Model {
     const reviews = await this.query((qb) => {
       if (data.store_id) {
         qb.innerJoin('produk', 'produk.id_produk', 'ulasan_produk.id_produk');
-        qb.where('id_toko', data.store_id);
+        qb.where('ulasan_produk.id_toko', data.store_id);
       }
       if (data.q) qb.whereRaw('LOWER(isi_ulasanproduk) LIKE ?', `%${data.q.toLowerCase()}%`);
       if (data.product_id) qb.where('ulasan_produk.id_produk', data.product_id);
@@ -79,7 +79,7 @@ class ReviewModel extends bookshelf.Model {
         image = image ? image.serialize() : config.defaultImage.product;
         return {
           ...review.serialize(),
-          product: { id: pId, name: pName, image: image.file, store },
+          product: { id: parseDec(`${pId}.${store.id}`), name: pName, image: image.file, store },
           user: { id, name, photo },
         };
       }
@@ -106,11 +106,17 @@ class ReviewModel extends bookshelf.Model {
     const items = invoice.related('items');
 
     return await Promise.all(reviews.map(async (val) => {
-      const item = items.find(o => o.serialize().product_id === val.product_id);
-      if (!item) return null;
+      const { productId, storeId: sId } = getProductAndStore(val.product_id);
+      const product = await Product.findProduct(productId, sId);
+      if (!product) throw createReviewError('product', 'store_not_found');
+      const item = items.find(o => o.get('id_produk') === product.get('id_produk')
+        && o.get('id_dropshipper') === product.get('id_dropshipper'));
+      if (!item) throw createReviewError('product', 'product_not_found');
 
       const data = this.matchDBColumn({
         ...val,
+        product_id: productId,
+        store_id: sId,
         user_id: userId,
         dropshipper_id: item.serialize().dropshipper_id,
         created_at: moment(),
@@ -158,12 +164,9 @@ class ReviewModel extends bookshelf.Model {
       review: 'isi_ulasanproduk',
       quality: 'kualitasproduk',
       accuracy: 'akurasiproduk',
+      store_id: 'id_toko',
     };
-    const newData = {};
-    Object.keys(data).forEach((prop) => {
-      if (column[prop]) newData[column[prop]] = data[prop];
-    });
-    return newData;
+    return matchDB(data, column);
   }
 }
 
