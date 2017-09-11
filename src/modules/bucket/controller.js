@@ -2,11 +2,13 @@ import _ from 'lodash';
 import { Bucket, Promo, Item, Shipping, BucketStatus, PromoType } from './model';
 import { Product, Dropship } from '../product/model';
 import { Expedition } from '../expedition/model';
-import { Invoice, InvoiceStatus, PaymentMethod } from '../payment/model';
+import { Invoice, InvoiceStatus } from '../payment/model';
 import { getBucketError, getItemError } from './messages';
 import { BadRequestError } from '../../../common/errors';
 import { getProductAndStore } from '../core/utils';
 import { getProductError } from '../product/messages';
+import { User } from '../user/model';
+import { TransSummary, SummTransType, TransType, DetailTransSummary } from '../saldo/model';
 
 export const BucketController = {};
 export default { BucketController };
@@ -150,7 +152,10 @@ BucketController.checkout = async (req, res, next) => {
   let items = bucket.related('items');
   if (items.length === 0) throw getBucketError('bucket', 'not_found_items');
 
-  await PaymentMethod.findById(req.body.payment_method_id);
+  let totalPrice = 0;
+  if (req.body.is_wallet) {
+    totalPrice = TransSummary.checkSaldo(req.user, bucket.serialize(), items);
+  }
 
   const groups = _.groupBy(items.models, (val) => {
     val = val.serialize();
@@ -168,13 +173,13 @@ BucketController.checkout = async (req, res, next) => {
     const weight = val.items[0].serialize().weight;
     const deliveryCost = val.items[0].serialize().shipping.delivery_cost / Math.ceil(weight / 1000);
 
-    let totalPrice = 0;
+    let subTotalPrice = 0;
     let adminCost = 0;
     let insuranceFee = 0;
     let totalWeight = 0;
     _.forEach(val.items, (o) => {
       o = o.serialize();
-      totalPrice += o.product.price * o.qty;
+      subTotalPrice += o.product.price * o.qty;
       adminCost += o.additional_cost;
       insuranceFee += o.shipping.insurance_fee;
       totalWeight += o.weight;
@@ -184,11 +189,11 @@ BucketController.checkout = async (req, res, next) => {
     if (bucketObj.promo) {
       if (bucketObj.promo.type === PromoType.NOMINAL) {
         promo = bucketObj.promo.nominal / items.length;
-      } else promo = (totalPrice * bucketObj.promo.percentage) / 100;
+      } else promo = (subTotalPrice * bucketObj.promo.percentage) / 100;
     }
 
     const totalDeliveryCost = deliveryCost * Math.ceil(totalWeight / 1000);
-    totalPrice += (adminCost + insuranceFee + totalDeliveryCost) - promo;
+    subTotalPrice += (adminCost + insuranceFee + totalDeliveryCost) - promo;
 
     const invoiceObj = Invoice.matchDBColumn({
       user_id: req.user.id,
@@ -196,15 +201,15 @@ BucketController.checkout = async (req, res, next) => {
       bucket_id: bucketObj.id,
       bid_id: null,
       shipping_id: val.shipping_id,
-      payment_method_id: req.body.payment_method_id,
+      payment_method_id: null,
       invoice_number: Invoice.generateNumber(),
       remark_cancel: null,
-      bill: totalPrice,
-      total_price: totalPrice,
+      bill: subTotalPrice,
+      total_price: subTotalPrice,
       delivery_cost: totalDeliveryCost,
       insurance_fee: insuranceFee,
       admin_cost: adminCost,
-      wallet: bucketObj.wallet, // need confirmation
+      wallet: 0, // need confirmation
       promo,
       status: InvoiceStatus.UNPAID,
       confirmed_at: null,
@@ -219,11 +224,20 @@ BucketController.checkout = async (req, res, next) => {
     )));
   }));
 
-  await bucket.save({
+  let bucketData = {
     status_bucket: BucketStatus.CHECKOUT,
     tglstatus_bucket: new Date(),
-    id_paymentmethod: req.body.payment_method_id,
-  }, { patch: true });
+  };
+
+  if (req.body.is_wallet) {
+    bucketData = {
+      ...bucketData,
+      bayar_wallet: totalPrice,
+    };
+    await TransSummary.cutSaldo(req.user, totalPrice, bucket.serialize());
+  }
+
+  await bucket.save(bucketData, { patch: true });
   req.resData = { data: bucket };
   return next();
 };

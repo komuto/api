@@ -1,4 +1,9 @@
 import core from '../../core';
+import { BadRequestError } from '../../../../common/errors';
+import { PromoType } from '../../bucket/model';
+import { User } from '../../user/model';
+import { TransType } from './transaction_type';
+import { DetailTransSummary } from './detail_transaction_summary';
 
 const { matchDB, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -68,6 +73,39 @@ class transSummaryModel extends bookshelf.Model {
         bucket_id: detail.get('id_bucket') || null,
       };
     });
+  }
+
+  static checkSaldo(user, bucket, items) {
+    let totalPrice = items.reduce((price, item) => (price += item.serialize().total_price), 0);
+
+    let promo = 0;
+    if (bucket.promo) {
+      if (bucket.promo.type === PromoType.NOMINAL) {
+        promo = bucket.promo.nominal / items.length;
+      } else promo = (totalPrice * bucket.promo.percentage) / 100;
+    }
+
+    totalPrice -= promo;
+    if (user.saldo_wallet < totalPrice) {
+      throw new BadRequestError('Saldo tidak mencukupi');
+    }
+  }
+
+  static async cutSaldo(user, totalPrice, bucket) {
+    await User.updateWallet(user.id, user.saldo_wallet - totalPrice);
+    const type = await TransType.where('kode_tipetransaksi', SummTransType.PAYMENT).fetch();
+    const summary = await this.create(this.matchDBColumn({
+      amount: totalPrice,
+      first_saldo: user.saldo_wallet,
+      last_saldo: user.saldo_wallet - totalPrice,
+      user_id: user.id,
+      type: SummTransType.PAYMENT,
+      remark: type.get('nama_tipetransaksi'),
+    }));
+    await DetailTransSummary.create(DetailTransSummary.matchDBColumn({
+      transaction_summary_id: summary.serialize().id,
+      bucket_id: bucket.id,
+    }));
   }
 
   /**

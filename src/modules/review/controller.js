@@ -1,5 +1,6 @@
 import { Review } from './model';
 import { Store } from '../store/model';
+import { getProductAndStore } from '../core/utils';
 
 export const ReviewController = {};
 export default { ReviewController };
@@ -8,10 +9,11 @@ export default { ReviewController };
  * Gel all reviews
  */
 ReviewController.getReviews = async (req, res, next) => {
+  const { productId = null } = req.params.id ? getProductAndStore(req.params.id) : {};
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const reviews = await Review.getAll(
-    req.params.id ? { product_id: req.params.id } : req.query,
+    productId ? { product_id: productId } : req.query,
     { page, pageSize },
   );
 

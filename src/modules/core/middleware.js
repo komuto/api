@@ -127,7 +127,7 @@ export function winstonLogger() {
  * @param err {object} Error object
  * @param msg {string} Error title
  */
-function formatError(msg, err) {
+export function formatError(msg, err) {
   if (err) return new BadRequestError(msg, err);
   return undefined;
 }
