@@ -8,7 +8,7 @@ import { BadRequestError } from '../../../common/errors';
 import { getProductAndStore } from '../core/utils';
 import { getProductError } from '../product/messages';
 import { User } from '../user/model';
-import { TransSummary, SummTransType, TransType } from '../saldo/model';
+import { TransSummary, SummTransType, TransType, DetailTransSummary } from '../saldo/model';
 
 export const BucketController = {};
 export default { BucketController };
@@ -154,20 +154,7 @@ BucketController.checkout = async (req, res, next) => {
 
   let totalPrice = 0;
   if (req.body.is_wallet) {
-    const bucketObj = bucket.serialize();
-    totalPrice = items.reduce((price, item) => (price += item.serialize().total_price), 0);
-
-    let promo = 0;
-    if (bucketObj.promo) {
-      if (bucketObj.promo.type === PromoType.NOMINAL) {
-        promo = bucketObj.promo.nominal / items.length;
-      } else promo = (totalPrice * bucketObj.promo.percentage) / 100;
-    }
-
-    totalPrice -= promo;
-    if (req.user.saldo_wallet < totalPrice) {
-      throw new BadRequestError('Saldo tidak mencukupi');
-    }
+    totalPrice = TransSummary.checkSaldo(req.user, bucket.serialize(), items);
   }
 
   const groups = _.groupBy(items.models, (val) => {
@@ -247,17 +234,7 @@ BucketController.checkout = async (req, res, next) => {
       ...bucketData,
       bayar_wallet: totalPrice,
     };
-    await User.updateWallet(req.user.id, req.user.saldo_wallet - totalPrice);
-    const type = await TransType.where('kode_tipetransaksi', SummTransType.PAID).fetch();
-    const summary = await TransSummary.create(TransSummary.matchDBColumn({
-      amount: totalPrice,
-      first_saldo: req.user.saldo_wallet,
-      last_saldo: req.user.saldo_wallet - totalPrice,
-      user_id: req.user.id,
-      type: SummTransType.PAID,
-      remark: type.get('nama_tipetransaksi'),
-    }));
-    // TODO: Add detail transaction. (bucket_id)
+    await TransSummary.cutSaldo(req.user, totalPrice, bucket.serialize());
   }
 
   await bucket.save(bucketData, { patch: true });
