@@ -20,6 +20,9 @@ import config from '../../../config';
 import core from '../core';
 import { Review } from '../review/model';
 import { ImageGroup } from '../user/model';
+import nominal from '../../../config/nominal.json';
+import { getNominalError } from './messages';
+import { Store } from '../store/model';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -80,6 +83,30 @@ PaymentController.getSnapToken = async (req, res, next) => {
       gross_amount: total,
     },
     item_details: itemDetails,
+    customer_details: {
+      first_name: firstName,
+      last_name: lastName,
+      email: req.user.email,
+      phone: req.user.phone_number,
+    },
+  };
+  const token = await midtrans.snap.transactions(payload);
+  req.resData = {
+    message: 'Snap Token',
+    data: token.data,
+  };
+  return next();
+};
+
+PaymentController.getSaldoSnapToken = async (req, res, next) => {
+  const found = _.find(nominal, o => o.id === parseInt(req.params.id, 10));
+  if (!found) throw getNominalError('nominal', 'not_found');
+  const { firstName, lastName } = getName(req.user.name);
+  const payload = {
+    transaction_details: {
+      order_id: `TOPUP-${randomInt(10000, 99999)}`,
+      gross_amount: found.amount,
+    },
     customer_details: {
       first_name: firstName,
       last_name: lastName,
@@ -163,6 +190,31 @@ PaymentController.dispute = async (req, res, next) => {
   if (req.body.images) await ImageGroup.bulkCreate(dispute.get('id_dispute'), req.body.images, 'dispute');
   await Invoice.updateStatus(invoice.serialize().id, InvoiceTransactionStatus.PROBLEM);
   req.resData = { data: dispute };
+  return next();
+};
+
+PaymentController.getDisputes = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const disputes = await Dispute.getAll({ id_users: req.user.id }, 'store', page, pageSize);
+  req.resData = {
+    message: 'Dispute Data',
+    meta: { page, limit: pageSize },
+    data: disputes,
+  };
+  return next();
+};
+
+PaymentController.getStoreDisputes = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const storeId = await Store.getStoreId(req.user.id);
+  const disputes = await Dispute.getAll({ id_toko: storeId }, 'user', page, pageSize);
+  req.resData = {
+    message: 'Dispute Data',
+    meta: { page, limit: pageSize },
+    data: disputes,
+  };
   return next();
 };
 

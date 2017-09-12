@@ -373,12 +373,14 @@ ProductController.listStoreCatalogProducts = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const isDropship = req.query.is_dropship ? JSON.parse(req.query.is_dropship) : null;
+  const hidden = req.query.hidden ? JSON.parse(req.query.hidden) : null;
   const products = await Product.storeProducts({
     catalogId,
     storeId,
     page,
     pageSize,
     isDropship,
+    hidden,
   });
   req.resData = {
     message: 'Store Catalog Products Data',

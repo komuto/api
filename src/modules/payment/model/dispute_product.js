@@ -26,6 +26,10 @@ class DisputeProductModel extends bookshelf.Model {
     };
   }
 
+  product() {
+    return this.belongsTo('Product', 'id_produk');
+  }
+
   static async bulkCreate(disputeId, products, items) {
     return await Promise.all(products.map(async (val) => {
       const { productId } = getProductAndStore(val);

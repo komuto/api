@@ -52,6 +52,7 @@ routes.get('/users/store/products/hidden',
  */
 routes.get('/users/store/products/catalogs/:id([0-9]{1,10})/list',
   auth(),
+  validateParam(constraints.listStoreCatalogProducts),
   wrap(ProductController.listStoreCatalogProducts),
   apiResponse());
 
@@ -116,7 +117,6 @@ routes.post('/products/:id([0-9]{1,10}.[0-9]{1,10})/discussions',
  * GET /discussions/id/comments
  * Get all comments of a discussion
  */
-// fix
 routes.get('/discussions/:id([0-9]{1,10})/comments',
   wrap(ProductController.getComments),
   apiResponse());

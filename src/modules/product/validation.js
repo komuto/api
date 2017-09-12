@@ -192,7 +192,24 @@ constraints.listStoreProduct = {
     presence: false,
     inclusion: {
       within: ['true', 'false'],
-      message: 'accept only `true` or `false` value',
+      message: 'accept only boolean',
+    },
+  },
+};
+
+constraints.listStoreCatalogProducts = {
+  hidden: {
+    presence: false,
+    inclusion: {
+      within: ['true', 'false'],
+      message: 'accept only boolean',
+    },
+  },
+  is_dropship: {
+    presence: false,
+    inclusion: {
+      within: ['true', 'false'],
+      message: 'accept only boolean',
     },
   },
 };

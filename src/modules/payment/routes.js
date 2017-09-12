@@ -12,6 +12,11 @@ routes.get('/payments',
   wrap(PaymentController.getSnapToken),
   apiResponse());
 
+routes.get('/saldo/nominal/:id/token',
+  auth(),
+  wrap(PaymentController.getSaldoSnapToken),
+  apiResponse());
+
 /**
  * POST /buckets/id/bank
  * Bank payment method
@@ -73,6 +78,22 @@ routes.post('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})/di
   validateParam(constraints.dispute, true),
   validateParam(constraints.images, true, 'images', true),
   wrap(PaymentController.dispute),
+  apiResponse());
+
+/**
+ * GET list dispute buyer
+ */
+routes.get('/users/disputes',
+  auth(),
+  wrap(PaymentController.getDisputes),
+  apiResponse());
+
+/**
+ * GET list dispute seller
+ */
+routes.get('/users/store/disputes',
+  auth(),
+  wrap(PaymentController.getStoreDisputes),
   apiResponse());
 
 /**
