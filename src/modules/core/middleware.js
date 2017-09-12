@@ -150,12 +150,15 @@ export function formatValidation(rules, msg) {
  * @param isBody {boolean} true evaluate req.body else req.query
  * @param prop {object} name of the array to check
  * @param strict {boolean} need to be available
+ * @param modify {function} modify params before validated
+ * e.g. usage for parsing int to string to validate with regex(format in validatejs)
  */
 export function validateParam(
   constraints,
   isBody = false,
   prop = undefined,
   strict = false,
+  modify = false,
 ) {
   return (req, res, next) => {
     if (prop !== undefined) {
@@ -167,6 +170,7 @@ export function validateParam(
           throw new BadRequestError('Invalid parameter');
         }
         params.forEach((param) => {
+          if (modify) param = modify(param);
           const hasError = validate(param, constraints);
           if (hasError) throw formatError(`Invalid parameter ${prop || ''}`, hasError);
         });

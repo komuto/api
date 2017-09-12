@@ -1,6 +1,6 @@
 import { Review } from './model';
 import { Store } from '../store/model';
-import { getProductAndStore } from "../core/utils";
+import { getProductAndStore } from '../core/utils';
 
 export const ReviewController = {};
 export default { ReviewController };
