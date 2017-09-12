@@ -19,6 +19,11 @@ export const BucketStatus = {
   ADDED: 0,
   CHECKOUT: 1,
   DELETED: 2,
+  WAITING_FOR_PAYMENT: 3,
+  WAITING_FOR_VERIFICATION: 4,
+  EXPIRED: 5,
+  PAYMENT_RECEIVED: 6,
+  CANCEL: 7,
 };
 
 class BucketModel extends bookshelf.Model {
@@ -210,11 +215,9 @@ class BucketModel extends bookshelf.Model {
   }
 
   static async detailTransaction(userId, bucketId) {
-    const bucket = await this.where({
-      id_users: userId,
-      id_bucket: bucketId,
-      status_bucket: BucketStatus.CHECKOUT,
-    }).fetch({ withRelated: ['invoices.items.product.images', 'promo', 'invoices.store'] });
+    const bucket = await this.where({ id_users: userId, id_bucket: bucketId })
+      .query(qb => qb.whereNotIn('status_bucket', [BucketStatus.ADDED, BucketStatus.DELETED]))
+      .fetch({ withRelated: ['invoices.items.product.images', 'promo', 'invoices.store'] });
     if (!bucket) throw getTransactionError('transaction', 'not_found');
     return this.loadDetailTransaction(bucket, true);
   }
