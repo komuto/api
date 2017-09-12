@@ -33,6 +33,7 @@ export const errMsg = {
   createMessage: {
     title: 'Create pesan gagal',
     error: 'Gagal membuat pesan',
+    invoice_not_found: 'Invoice tidak ditemukan',
     own_store: 'Anda tidak bisa mengirim pesan ke toko anda',
   },
   getMessage: {
