@@ -52,7 +52,7 @@ routes.get('/users/store/products/hidden',
  */
 routes.get('/users/store/products/catalogs/:id([0-9]{1,10})/list',
   auth(),
-  validateParam(constraints.listStoreProduct),
+  validateParam(constraints.listStoreCatalogProducts),
   wrap(ProductController.listStoreCatalogProducts),
   apiResponse());
 
