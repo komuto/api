@@ -46,4 +46,6 @@ constraints.dispute = {
   images: { presence: true },
 };
 
+constraints.images = { name: { presence: true } };
+
 export default constraints;

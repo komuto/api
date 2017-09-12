@@ -160,6 +160,7 @@ PaymentController.dispute = async (req, res, next) => {
   const dispute = await Dispute.create(data);
   await DisputeProduct.bulkCreate(dispute.serialize().id, req.body.products, items);
   if (req.body.images) await ImageGroup.bulkCreate(dispute.get('id_dispute'), req.body.images, 'dispute');
+  await Invoice.updateStatus(invoice.serialize().id, InvoiceTransactionStatus.PROBLEM);
   req.resData = { data: dispute };
   return next();
 };

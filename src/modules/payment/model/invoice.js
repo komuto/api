@@ -20,7 +20,7 @@ export const InvoiceTransactionStatus = {
   SENDING: 3,
   RECEIVED: 4,
   PROBLEM: 5,
-  COMPLAINT: 6,
+  COMPLAINT_DONE: 6,
 };
 
 class InvoiceModel extends bookshelf.Model {
