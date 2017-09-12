@@ -1,7 +1,8 @@
 import core from '../../core';
+import config from '../../../../config';
 import { createDisputeError } from '../messages';
 
-const { parseDate, matchDB } = core.utils;
+const { parseDate, matchDB, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
 
 export const DisputeSolutionType = {
@@ -42,15 +43,15 @@ class DisputeModel extends bookshelf.Model {
       id: this.get('id_dispute'),
       user_id: this.get('id_users'),
       store_id: this.get('id_toko'),
+      store: this.relations.store ? this.related('store').serialize({ favorite: true }) : undefined,
       invoice_id: this.get('identifierinvoice_dispute'),
-      invoice_type: this.get('tipeinvoice_dispute'),
-      solution: this.get('solusi_dispute'),
-      problems: this.get('problem_dispute'),
+      solution: parseNum(this.get('solusi_dispute')),
+      problems: this.getProblems(),
       note: this.get('alasan_dispute'),
       dispute_number: this.get('nopelaporan_dispute'),
       remarks: this.get('remarksresult_dispute'),
       status: this.get('status_dispute'),
-      response_status: this.get('responadmin_dispute'),
+      response_status: parseNum(this.get('responadmin_dispute')),
       response_at: parseDate(this.get('tglresponadmin_dispute')),
       created_at: parseDate(this.get('createdate_dispute')),
     };
@@ -60,9 +61,60 @@ class DisputeModel extends bookshelf.Model {
     return this.hasMany('DisputeProduct', 'id_dispute');
   }
 
+  store() {
+    return this.belongsTo('Store', 'id_toko');
+  }
+
   static async create(data) {
     return await new this(data).save().catch(() => {
       throw createDisputeError('dispute', 'error');
+    });
+  }
+
+  getProblems() {
+    let problems = '';
+    this.get('problem_dispute').forEach((val, key) => {
+      if (key !== 0) problems += ', ';
+      switch (val.problem) {
+        case 1:
+          problems += 'Barang tidak sesuai deskripsi';
+          break;
+        case 2:
+          problems += 'Barang rusak';
+          break;
+        case 3:
+          problems += 'Produk tidak lengkap';
+          break;
+        case 4:
+          problems += 'Kurir pengiriman berbeda';
+          break;
+        default:
+          break;
+      }
+    });
+    return problems;
+  }
+
+  static async getAll(where, page, pageSize) {
+    const disputes = await this.where(where).fetchPage({
+      page,
+      pageSize,
+      withRelated: ['disputeProducts.product.images', 'store'],
+    });
+
+    return disputes.map((dispute) => {
+      const products = dispute.related('disputeProducts').map((val) => {
+        const product = val.related('product');
+        const image = product.related('images').models;
+        return {
+          ...product.serialize({ minimal: true }),
+          image: image.length ? image[0].serialize().file : config.defaultImage.product,
+        };
+      });
+      return {
+        ...dispute.serialize(),
+        products,
+      };
     });
   }
 

@@ -20,7 +20,7 @@ import core from '../core';
 import { Review } from '../review/model';
 import { ImageGroup } from '../user/model';
 import nominal from '../../../config/nominal.json';
-import { getNominalError } from "./messages";
+import { getNominalError } from './messages';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -188,6 +188,18 @@ PaymentController.dispute = async (req, res, next) => {
   if (req.body.images) await ImageGroup.bulkCreate(dispute.get('id_dispute'), req.body.images, 'dispute');
   await Invoice.updateStatus(invoice.serialize().id, InvoiceTransactionStatus.PROBLEM);
   req.resData = { data: dispute };
+  return next();
+};
+
+PaymentController.getDisputes = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const disputes = await Dispute.getAll({ id_users: req.user.id }, page, pageSize);
+  req.resData = {
+    message: 'Dispute Data',
+    meta: { page, limit: pageSize },
+    data: disputes,
+  };
   return next();
 };
 

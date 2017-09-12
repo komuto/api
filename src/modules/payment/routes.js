@@ -80,4 +80,12 @@ routes.post('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})/di
   wrap(PaymentController.dispute),
   apiResponse());
 
+/**
+ * GET list dispute
+ */
+routes.get('/users/disputes',
+  auth(),
+  wrap(PaymentController.getDisputes),
+  apiResponse());
+
 export default routes;
