@@ -2,7 +2,7 @@ import core from '../../core';
 import { createCommentError } from './../messages';
 
 const bookshelf = core.postgres.db;
-const { parseDate, parseNum } = core.utils;
+const { parseDate, parseNum, matchDB } = core.utils;
 
 class DetailMessageModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -47,11 +47,7 @@ class DetailMessageModel extends bookshelf.Model {
       content: 'content_messages',
       created_at: 'date_detilmessages',
     };
-    const newData = {};
-    Object.keys(data).forEach((prop) => {
-      if (column[prop]) newData[column[prop]] = data[prop];
-    });
-    return newData;
+    return matchDB(data, column);
   }
 }
 

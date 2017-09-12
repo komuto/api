@@ -55,15 +55,15 @@ constraints.update = {
     numericality: {
       greaterThanOrEqualTo: 1000,
       lessThanOrEqualTo: 9999,
-      message: updateMsg.place_not_valid
-    }
+      message: updateMsg.place_not_valid,
+    },
   },
 };
 
 constraints.updatePhone = {
   phone_number: {
     presence: { message: updateMsg.phone_presence },
-    format: { pattern: /^[0-9]+$/, message: updateMsg.phone_not_valid }
+    format: { pattern: /^[0-9]+$/, message: updateMsg.phone_not_valid },
   },
 };
 

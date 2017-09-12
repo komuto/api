@@ -10,7 +10,7 @@ import {
   validateVerifyPhone,
 } from './middleware';
 import { UserController } from './controller';
-import { controller } from '../OTP';
+import { OTPController } from '../OTP/controller';
 import core from '../core';
 import constraints from './validation';
 import productConstraints from './../product/validation';
@@ -19,7 +19,6 @@ import storeConstraints from './../store/validation';
 const routes = express.Router();
 const { apiResponse, auth, validateParam } = core.middleware;
 const { wrap } = core.utils;
-const { OTPController } = controller;
 
 /**
  * POST /login

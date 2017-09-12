@@ -46,7 +46,7 @@ export const getNotification = (notifications, type) => (
   _.find(notifications, o => o.type === type).is_active
 );
 
-const notificationDefault = [
+const notificationDefault = () => [
   { type: NotificationType.MESSAGE_FROM_ADMIN, is_active: true },
   { type: NotificationType.NEWSLETTER, is_active: true },
   { type: NotificationType.REVIEW, is_active: true },
@@ -118,7 +118,7 @@ class UserModel extends bookshelf.Model {
     if (phone) {
       user.is_phone_verified = this.related('verifyPhone').length !== 0;
     }
-    if (notification) user.notifications = this.get('notifications') || notificationDefault;
+    if (notification) user.notifications = this.get('notifications') || notificationDefault();
     return user;
   }
 
@@ -314,7 +314,7 @@ class UserModel extends bookshelf.Model {
   }
 
   static getNotifications(notifications, marketplaceName) {
-    if (!notifications) notifications = notificationDefault;
+    if (!notifications) notifications = notificationDefault();
     return notifications.map(val => ({
       ...val,
       content: this.getNotificationContent(val.type, marketplaceName),

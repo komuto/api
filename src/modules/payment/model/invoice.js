@@ -75,6 +75,10 @@ class InvoiceModel extends bookshelf.Model {
     return this.hasMany('Item', 'id_invoice');
   }
 
+  item() {
+    return this.hasOne('Item', 'id_invoice');
+  }
+
   store() {
     return this.belongsTo('Store', 'id_toko');
   }
@@ -139,6 +143,10 @@ class InvoiceModel extends bookshelf.Model {
 
   static async updateStatus(id, status) {
     return await this.where({ id_invoice: id }).save({ status_transaksi: status }, { patch: true });
+  }
+
+  static async getWithDropship(id) {
+    return await this.where('id_invoice', id).fetch({ withRelated: ['item.dropship'] });
   }
 
   /**
