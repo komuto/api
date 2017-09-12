@@ -1,6 +1,6 @@
 import core from '../../core';
 import config from '../../../../config';
-import { createDisputeError } from '../messages';
+import { createDisputeError, getDisputeError } from '../messages';
 
 const { parseDate, matchDB, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -46,6 +46,7 @@ class DisputeModel extends bookshelf.Model {
       store_id: this.get('id_toko'),
       store: this.relations.store ? this.related('store').serialize({ favorite: true }) : undefined,
       invoice_id: this.get('identifierinvoice_dispute'),
+      invoice: this.relations.invoice ? this.related('invoice') : undefined,
       solution: parseNum(this.get('solusi_dispute')),
       problems: this.getProblems(),
       note: this.get('alasan_dispute'),
@@ -68,6 +69,14 @@ class DisputeModel extends bookshelf.Model {
 
   user() {
     return this.belongsTo('User', 'id_users');
+  }
+
+  invoice() {
+    return this.belongsTo('Invoice', 'identifierinvoice_dispute');
+  }
+
+  imageGroups() {
+    return this.hasMany('ImageGroup', 'parent_id');
   }
 
   static async create(data) {
@@ -113,20 +122,40 @@ class DisputeModel extends bookshelf.Model {
         withRelated: ['disputeProducts.product.images', relation],
       });
 
-    return disputes.map((dispute) => {
-      const products = dispute.related('disputeProducts').map((val) => {
-        const product = val.related('product');
-        const image = product.related('images').models;
-        return {
-          ...product.serialize({ minimal: true }),
-          image: image.length ? image[0].serialize().file : config.defaultImage.product,
-        };
-      });
+    return disputes.map(dispute => this.detailDispute(dispute));
+  }
+
+  static async getDetail(where, relation) {
+    const dispute = await this.where(where).fetch({
+      withRelated: [
+        'disputeProducts.product.images',
+        'invoice',
+        relation,
+        { imageGroups: qb => qb.where('group', 'dispute') },
+      ],
+    });
+
+    if (!dispute) throw getDisputeError('dispute', 'not_found');
+
+    return {
+      ...this.detailDispute(dispute),
+      proofs: dispute.related('imageGroups'),
+    };
+  }
+
+  static detailDispute(dispute) {
+    const products = dispute.related('disputeProducts').map((val) => {
+      const product = val.related('product');
+      const image = product.related('images').models;
       return {
-        ...dispute.serialize(),
-        products,
+        ...product.serialize({ minimal: true }),
+        image: image.length ? image[0].serialize().file : config.defaultImage.product,
       };
     });
+    return {
+      ...dispute.serialize(),
+      products,
+    };
   }
 
   /**

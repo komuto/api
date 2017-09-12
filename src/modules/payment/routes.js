@@ -90,12 +90,28 @@ routes.get('/users/disputes',
   apiResponse());
 
 /**
+ * GET detail dispute buyer
+ */
+routes.get('/users/disputes/:id([0-9]{1,10})',
+  auth(),
+  wrap(PaymentController.getDispute),
+  apiResponse());
+
+/**
  * GET list dispute seller
  */
 routes.get('/users/store/disputes',
   auth(),
   validateParam(constraints.listDispute),
   wrap(PaymentController.getStoreDisputes),
+  apiResponse());
+
+/**
+ * GET detail dispute seller
+ */
+routes.get('/users/store/disputes/:id([0-9]{1,10})',
+  auth(),
+  wrap(PaymentController.getStoreDispute),
   apiResponse());
 
 export default routes;

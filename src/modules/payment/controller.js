@@ -211,6 +211,16 @@ PaymentController.getDisputes = async (req, res, next) => {
   return next();
 };
 
+PaymentController.getDispute = async (req, res, next) => {
+  const where = { id_users: req.user.id, id_dispute: req.params.id };
+  const dispute = await Dispute.getDetail(where, 'store');
+  req.resData = {
+    message: 'Dispute Data',
+    data: dispute,
+  };
+  return next();
+};
+
 PaymentController.getStoreDisputes = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
@@ -227,6 +237,17 @@ PaymentController.getStoreDisputes = async (req, res, next) => {
     message: 'Dispute Data',
     meta: { page, limit: pageSize },
     data: disputes,
+  };
+  return next();
+};
+
+PaymentController.getStoreDispute = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const where = { id_toko: storeId, id_dispute: req.params.id };
+  const dispute = await Dispute.getDetail(where, 'user');
+  req.resData = {
+    message: 'Dispute Data',
+    data: dispute,
   };
   return next();
 };
