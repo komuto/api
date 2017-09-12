@@ -25,6 +25,9 @@ const getImageType = (body) => {
     case 'resolution':
       body.is_single = false;
       break;
+    case 'dispute':
+      body.is_single = false;
+      break;
     default:
       break;
   }

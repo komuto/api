@@ -7,8 +7,8 @@ constraints.upload = {
   type: {
     presence: true,
     inclusion: {
-      within: ['store', 'product', 'payment', 'profile', 'resolution'],
-      message: 'accept only `store`, `product`, `payment`, `profile`, or `resolution` value',
+      within: ['store', 'product', 'payment', 'profile', 'resolution', 'dispute'],
+      message: 'accept only `store`, `product`, `payment`, `profile`, `resolution`, or `dispute` value',
     },
   },
 };

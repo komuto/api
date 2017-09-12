@@ -27,6 +27,7 @@ def.imageFolder.product = 'produk';
 def.imageFolder.payment = 'payment_confirmation';
 def.imageFolder.profile = 'profile';
 def.imageFolder.resolution = 'resolution';
+def.imageFolder.dispute = 'dispute';
 def.imageFolder.payment_method = 'payment';
 def.imageFolder.bank = 'bank';
 def.defaultImage = {};
