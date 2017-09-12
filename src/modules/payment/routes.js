@@ -81,11 +81,19 @@ routes.post('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})/di
   apiResponse());
 
 /**
- * GET list dispute
+ * GET list dispute buyer
  */
 routes.get('/users/disputes',
   auth(),
   wrap(PaymentController.getDisputes),
+  apiResponse());
+
+/**
+ * GET list dispute seller
+ */
+routes.get('/users/store/disputes',
+  auth(),
+  wrap(PaymentController.getStoreDisputes),
   apiResponse());
 
 export default routes;

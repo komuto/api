@@ -42,6 +42,7 @@ class DisputeModel extends bookshelf.Model {
     return {
       id: this.get('id_dispute'),
       user_id: this.get('id_users'),
+      user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
       store_id: this.get('id_toko'),
       store: this.relations.store ? this.related('store').serialize({ favorite: true }) : undefined,
       invoice_id: this.get('identifierinvoice_dispute'),
@@ -63,6 +64,10 @@ class DisputeModel extends bookshelf.Model {
 
   store() {
     return this.belongsTo('Store', 'id_toko');
+  }
+
+  user() {
+    return this.belongsTo('User', 'id_users');
   }
 
   static async create(data) {
@@ -95,11 +100,11 @@ class DisputeModel extends bookshelf.Model {
     return problems;
   }
 
-  static async getAll(where, page, pageSize) {
+  static async getAll(where, relation, page, pageSize) {
     const disputes = await this.where(where).fetchPage({
       page,
       pageSize,
-      withRelated: ['disputeProducts.product.images', 'store'],
+      withRelated: ['disputeProducts.product.images', relation],
     });
 
     return disputes.map((dispute) => {
