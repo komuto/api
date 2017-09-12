@@ -8,6 +8,7 @@ import {
   Message,
   DetailMessage,
   MessageFlagStatus,
+  MessageType,
   StoreExpedition,
   StoreStatus,
 } from './model';
@@ -16,6 +17,7 @@ import { OTPAddress } from './../OTP/model';
 import { Address } from './../address/model';
 import { User, getNotification, NotificationType } from './../user/model';
 import { OTPAddressEmail } from '../OTP/email';
+import { Invoice } from '../payment/model';
 import config from '../../../config';
 import core from '../core';
 
@@ -71,18 +73,61 @@ StoreController.listFavorites = async (req, res, next) => {
   return next();
 };
 
+const buildMessage = messageType => async (req, res, next) => {
+  const getInvoice = Invoice.getWithDropship(req.params.id);
+  const getStore = Store.getStoreId(req.user.id);
+  const [invoice, storeId] = await Promise.all([getInvoice, getStore]);
+  const resellerStore = Number(invoice.related('item').related('dropship').get('id_toko'));
+  let compareStore;
+  let type;
+  let storeToMessage;
+  if (messageType === 'messageBuyer') {
+    compareStore = invoice.related('item').get('id_dropshipper') === null ? Number(invoice.get('id_toko')) : resellerStore;
+    type = MessageType.SELLER_TO_BUYER;
+    storeToMessage = storeId;
+    req.body.user_id = invoice.get('id_user');
+  } else if (messageType === 'messageSeller') {
+    compareStore = resellerStore;
+    type = MessageType.RESELLER_TO_SELLER;
+    storeToMessage = invoice.get('id_toko');
+  } else if (messageType === 'messageReseller') {
+    compareStore = Number(invoice.get('id_toko'));
+    type = MessageType.SELLER_TO_RESELLER;
+    storeToMessage = resellerStore;
+  }
+  if (compareStore !== storeId) throw createMessageError('invoice', 'invoice_not_found');
+  req.body = {
+    ...req.body,
+    invoice_id: req.params.id,
+    store_id: storeToMessage,
+    type,
+  };
+  return next();
+};
+
+// id_toko on message table is the sender
+StoreController.messageBuyer = buildMessage('messageBuyer');
+// id_user on message table is the sender
+StoreController.messageSeller = buildMessage('messageSeller');
+// id_user on message table is the sender
+StoreController.messageReseller = buildMessage('messageReseller');
+
 StoreController.createMessage = async (req, res, next) => {
-  const store = await Store.findById(req.params.id);
-  const storeOwner = store.related('user');
-  if (storeOwner.get('id_users') === req.user.id) throw createMessageError('store', 'own_store');
+  const findStore = !req.body.invoice_id ? req.params.id : req.body.store_id;
+  const store = !req.body.user_id && await Store.findById(findStore);
+  const storeOwner = store ? store.related('user') : await User.where('id_users', req.body.user_id);
+  if (!req.body.invoice_id && storeOwner.get('id_users') === req.user.id) throw createMessageError('store', 'own_store');
+  const type = req.body.type || MessageType.BUYER_TO_SELLER;
   const messageObj = Message.matchDBColumn({
-    user_id: req.user.id,
-    store_id: req.params.id,
+    user_id: req.body.user_id || req.user.id,
+    store_id: req.body.store_id || req.params.id,
     subject: req.body.subject,
     flag_sender: MessageFlagStatus.UNREAD,
     flag_receiver: MessageFlagStatus.UNREAD,
     flag_sender_at: new Date(),
     flag_receiver_at: new Date(),
+    invoice_id: req.body.invoice_id,
+    type,
   });
   const message = await Message.create(messageObj);
   const detailMessageObj = DetailMessage.matchDBColumn({
@@ -94,7 +139,9 @@ StoreController.createMessage = async (req, res, next) => {
   const detailMessage = await DetailMessage.create(detailMessageObj);
   const notifications = storeOwner.serialize({ notification: true }).notifications;
   if (storeOwner.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
-    Notification.send(sellerNotification.MESSAGE, {
+    const notify = type === MessageType.SELLER_TO_BUYER
+      ? buyerNotification.MESSAGE : sellerNotification.MESSAGE;
+    Notification.send(notify, {
       token: storeOwner.get('reg_token'),
       id: message.toJSON().id,
     });

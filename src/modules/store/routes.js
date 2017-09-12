@@ -61,6 +61,39 @@ routes.post('/stores/:id([0-9]{1,10})/message',
   apiResponse());
 
 /**
+ * POST /invoices/id/buyer/message
+ * Message buyer
+ */
+routes.post('/invoices/:id([0-9]{1,10})/buyer/message',
+  auth(),
+  validateParam(constraints.create_message, true),
+  wrap(StoreController.messageBuyer),
+  wrap(StoreController.createMessage),
+  apiResponse());
+
+/**
+ * POST /invoices/id/seller/message
+ * Message seller
+ */
+routes.post('/invoices/:id([0-9]{1,10})/seller/message',
+  auth(),
+  validateParam(constraints.create_message, true),
+  wrap(StoreController.messageSeller),
+  wrap(StoreController.createMessage),
+  apiResponse());
+
+/**
+ * POST /invoices/id/reseller/message
+ * Message reseller
+ */
+routes.post('/invoices/:id([0-9]{1,10})/reseller/message',
+  auth(),
+  validateParam(constraints.create_message, true),
+  wrap(StoreController.messageReseller),
+  wrap(StoreController.createMessage),
+  apiResponse());
+
+/**
  * POST /users/store/catalogs
  * Create catalog
  */

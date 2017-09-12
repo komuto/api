@@ -2,7 +2,7 @@ import core from '../../core';
 import { createMessageError, getMessageError } from './../messages';
 
 const bookshelf = core.postgres.db;
-const { parseDate, parseNum } = core.utils;
+const { parseDate, parseNum, matchDB } = core.utils;
 
 export const MessageFlagStatus = {
   READ: 1,
@@ -10,6 +10,15 @@ export const MessageFlagStatus = {
   DELETED: 3,
   ARCHIVE: 4,
   PERMANENT_DELETED: 5,
+};
+
+export const MessageType = {
+  COMPLAINT: 1,
+  REVIEW: 2,
+  BUYER_TO_SELLER: 3,
+  SELLER_TO_BUYER: 4,
+  RESELLER_TO_SELLER: 5,
+  SELLER_TO_RESELLER: 6,
 };
 
 class MessageModel extends bookshelf.Model {
@@ -150,6 +159,7 @@ class MessageModel extends bookshelf.Model {
    */
   static matchDBColumn(data) {
     const column = {
+      invoice_id: 'id_invoice',
       store_id: 'id_toko',
       user_id: 'id_users',
       subject: 'subject_messages',
@@ -157,12 +167,9 @@ class MessageModel extends bookshelf.Model {
       flag_receiver: 'flagreceiver_messages',
       flag_sender_at: 'flagsender_date',
       flag_receiver_at: 'flagreceiver_date',
+      type: 'group_message',
     };
-    const newData = {};
-    Object.keys(data).forEach((prop) => {
-      if (column[prop]) newData[column[prop]] = data[prop];
-    });
-    return newData;
+    return matchDB(data, column);
   }
 }
 
