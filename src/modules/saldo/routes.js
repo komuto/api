@@ -27,4 +27,12 @@ routes.get('/users/saldo/history',
   wrap(SaldoController.history),
   apiResponse());
 
+/**
+ * List nominal
+ */
+routes.get('/saldo/nominal',
+  auth(),
+  wrap(SaldoController.nominal),
+  apiResponse());
+
 export default routes;

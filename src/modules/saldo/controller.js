@@ -3,6 +3,7 @@ import { OTPStatus } from '../OTP/model';
 import { Withdraw, TransSummary, TransType, SummTransType } from './model';
 import { User } from '../user/model';
 import { withdrawError } from './messages';
+import nominal from '../../../config/nominal.json';
 
 export const SaldoController = {};
 export default { SaldoController };
@@ -46,6 +47,14 @@ SaldoController.history = async (req, res, next) => {
   req.resData = {
     message: 'History Saldo',
     data: transactions,
+  };
+  return next();
+};
+
+SaldoController.nominal = async (req, res, next) => {
+  req.resData = {
+    message: 'Nominal Saldo Data',
+    data: nominal,
   };
   return next();
 };
