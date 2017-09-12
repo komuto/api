@@ -4,7 +4,7 @@ import core from '../../core';
 import { getInvoiceError, createInvoiceError } from './../messages';
 import config from '../../../../config';
 
-const { parseDate, parseNum } = core.utils;
+const { parseDate, parseNum, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
 
 export const InvoiceStatus = {
@@ -87,6 +87,10 @@ class InvoiceModel extends bookshelf.Model {
     return this.belongsTo('Shipping', 'id_pengiriman_produk');
   }
 
+  buyer() {
+    return this.belongsTo('User', 'id_user');
+  }
+
   static async create(data) {
     return await new this(data).save().catch(() => {
       throw createInvoiceError('invoice', 'error');
@@ -139,6 +143,29 @@ class InvoiceModel extends bookshelf.Model {
     return invoice;
   }
 
+  static async getNewOrders(id) {
+    const invoices = await this.where({
+      status_transaksi: InvoiceTransactionStatus.WAITING,
+      'invoice.id_toko': id })
+      .query(qb => qb.join('listbucket as l', 'l.id_invoice', 'invoice.id_invoice')
+        .leftJoin('dropshipper as d', 'd.id_dropshipper', 'l.id_dropshipper')
+        .orWhere('d.id_toko', id)
+        .andWhere('status_transaksi', InvoiceTransactionStatus.WAITING))
+      .fetchAll({ withRelated: ['items.product.image', 'buyer'] });
+    if (!invoices) return [];
+    return invoices.map((invoice) => {
+      const products = invoice.related('items').map((item) => {
+        const product = item.related('product');
+        const image = product.related('image').serialize().file;
+        return { ...product.serialize({ minimal: true }), image };
+      });
+      const dropship = !!invoice.related('items').models[0].get('id_dropshipper');
+      const user = invoice.related('buyer').serialize({ account: true });
+      invoice = { ...invoice.serialize({ minimal: true }), is_drophship: dropship };
+      return { invoice, products, user };
+    });
+  }
+
   static async updateStatus(id, status) {
     return await this.where({ id_invoice: id }).save({ status_transaksi: status }, { patch: true });
   }
@@ -175,11 +202,7 @@ class InvoiceModel extends bookshelf.Model {
       updated_at: 'updated_at',
       transaction_status: 'status_transaksi',
     };
-    const newData = {};
-    Object.keys(data).forEach((prop) => {
-      if (column[prop]) newData[column[prop]] = data[prop];
-    });
-    return newData;
+    return matchDB(data, column);
   }
 }
 

@@ -75,4 +75,12 @@ routes.post('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})/di
   wrap(PaymentController.dispute),
   apiResponse());
 
+/**
+ * GET new orders
+ */
+routes.get('/new-orders',
+  auth(),
+  wrap(PaymentController.getNewOrders),
+  apiResponse());
+
 export default routes;
