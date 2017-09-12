@@ -28,4 +28,18 @@ constraints.bulkReview = {
   accuracy: { presence: true, numericality: true },
 };
 
+constraints.dispute = {
+  products: { presence: true },
+  problems: { presence: true },
+  solution: {
+    presence: true,
+    inclusion: {
+      within: [1, 2],
+      message: 'accept only 1 (refund), or 2 (exchange)',
+    },
+  },
+  note: { presence: true },
+  images: { presence: true },
+};
+
 export default constraints;

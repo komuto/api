@@ -15,6 +15,10 @@ export const errMsg = {
     title: 'Create invoice gagal',
     error: 'Error create invoice',
   },
+  createDispute: {
+    title: 'Create dispute gagal',
+    error: 'Error create dispute',
+  },
   createPaymentConfirmation: {
     title: 'Create informasi pembayaran gagal',
     error: 'Error create informasi pembayaran',
@@ -28,6 +32,8 @@ export const errMsg = {
 export const getInvoiceError = formatError.bind(errMsg.getInvoice);
 
 export const createInvoiceError = formatError.bind(errMsg.createInvoice);
+
+export const createDisputeError = formatError.bind(errMsg.createDispute);
 
 export const getPaymentError = formatError.bind(errMsg.getPayment);
 

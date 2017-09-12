@@ -63,4 +63,13 @@ routes.post('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})',
   wrap(PaymentController.bulkReview),
   apiResponse());
 
+/**
+ * POST complaint products
+ */
+routes.post('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})/dispute',
+  auth(),
+  validateParam(constraints.dispute, true),
+  wrap(PaymentController.dispute),
+  apiResponse());
+
 export default routes;

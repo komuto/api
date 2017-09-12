@@ -8,12 +8,17 @@ import {
   PaymentConfirmationStatus,
   Invoice,
   InvoiceTransactionStatus,
+  Dispute,
+  DisputeResponseStatus,
+  DisputeStatus,
+  DisputeProduct,
 } from './model';
 import { Bucket, BucketStatus } from './../bucket/model';
 import { BankAccount } from '../bank/model';
 import config from '../../../config';
 import core from '../core';
 import { Review } from '../review/model';
+import { ImageGroup } from '../user/model';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -128,6 +133,34 @@ PaymentController.bulkReview = async (req, res, next) => {
     message: 'Reviews Data',
     data: reviews,
   };
+  return next();
+};
+
+PaymentController.dispute = async (req, res, next) => {
+  const invoice = await Invoice.get(req.user.id, req.params.id, req.params.invoice_id, 'items.product');
+  const items = invoice.related('items').map(item => ({
+    ...item.serialize(),
+    product: item.related('product').serialize(),
+  }));
+  const problems = req.body.problems.map(problem => ({ problem }));
+  const data = Dispute.matchDBColumn({
+    user_id: req.user.id,
+    store_id: invoice.serialize().store_id,
+    invoice_id: invoice.serialize().id,
+    invoice_type: 1, // default
+    solution: req.body.solution,
+    problems,
+    note: req.body.note,
+    dispute_number: `${randomInt(1000, 9999)}-${moment().format('DD/MM/YYYY')}`,
+    status: DisputeStatus.NEW,
+    response_status: DisputeResponseStatus.NO_RESPONSE_YET,
+    response_at: moment(),
+    created_at: moment(),
+  });
+  const dispute = await Dispute.create(data);
+  await DisputeProduct.bulkCreate(dispute.serialize().id, req.body.products, items);
+  if (req.body.images) await ImageGroup.bulkCreate(dispute.get('id_dispute'), req.body.images, 'dispute');
+  req.resData = { data: dispute };
   return next();
 };
 

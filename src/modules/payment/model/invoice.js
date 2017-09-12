@@ -83,9 +83,6 @@ class InvoiceModel extends bookshelf.Model {
     return this.belongsTo('Shipping', 'id_pengiriman_produk');
   }
 
-  /**
-   * Create shipping
-   */
   static async create(data) {
     return await new this(data).save().catch(() => {
       throw createInvoiceError('invoice', 'error');
@@ -126,13 +123,14 @@ class InvoiceModel extends bookshelf.Model {
     return { ...invoice.serialize(), items };
   }
 
-  static async get(userId, bucketId, id) {
+  static async get(userId, bucketId, id, withRelated = 'items') {
+    withRelated = [withRelated];
     const invoice = await this.where({
       id_invoice: id,
       id_user: userId,
       id_bucket: bucketId,
       status_transaksi: InvoiceTransactionStatus.SENDING,
-    }).fetch({ withRelated: ['items'] });
+    }).fetch({ withRelated });
     if (!invoice) throw getInvoiceError('invoice', 'not_found');
     return invoice;
   }

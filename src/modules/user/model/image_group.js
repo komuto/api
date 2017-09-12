@@ -22,11 +22,11 @@ class ImageGroupModel extends bookshelf.Model {
     };
   }
 
-  static async bulkCreate(id, images) {
+  static async bulkCreate(id, images, group = 'resolusi') {
     return await Promise.all(images.map(async image => await new this({
       parent_id: id,
       image: image.name,
-      group: 'resolusi',
+      group,
     }).save()));
   }
 }
