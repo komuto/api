@@ -12,6 +12,11 @@ routes.get('/payments',
   wrap(PaymentController.getSnapToken),
   apiResponse());
 
+routes.get('/saldo/nominal/:id/token',
+  auth(),
+  wrap(PaymentController.getSaldoSnapToken),
+  apiResponse());
+
 /**
  * POST /buckets/id/bank
  * Bank payment method

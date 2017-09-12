@@ -27,6 +27,10 @@ export const errMsg = {
     title: 'Get informasi pembayaran gagal',
     duplicate: 'Duplicate informasi pembayaran',
   },
+  getNominal: {
+    title: 'Get nominal gagal',
+    not_found: 'Nominal tidak ditemukan',
+  },
 };
 
 export const getInvoiceError = formatError.bind(errMsg.getInvoice);
@@ -40,4 +44,6 @@ export const getPaymentError = formatError.bind(errMsg.getPayment);
 export const createPaymentConfirmationError = formatError.bind(errMsg.createPaymentConfirmation);
 
 export const getPaymentConfirmationError = formatError.bind(errMsg.getPaymentConfirmation);
+
+export const getNominalError = formatError.bind(errMsg.getNominal);
 

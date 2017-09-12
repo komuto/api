@@ -19,6 +19,8 @@ import config from '../../../config';
 import core from '../core';
 import { Review } from '../review/model';
 import { ImageGroup } from '../user/model';
+import nominal from '../../../config/nominal.json';
+import { getNominalError } from "./messages";
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -79,6 +81,30 @@ PaymentController.getSnapToken = async (req, res, next) => {
       gross_amount: total,
     },
     item_details: itemDetails,
+    customer_details: {
+      first_name: firstName,
+      last_name: lastName,
+      email: req.user.email,
+      phone: req.user.phone_number,
+    },
+  };
+  const token = await midtrans.snap.transactions(payload);
+  req.resData = {
+    message: 'Snap Token',
+    data: token.data,
+  };
+  return next();
+};
+
+PaymentController.getSaldoSnapToken = async (req, res, next) => {
+  const found = _.find(nominal, o => o.id === parseInt(req.params.id, 10));
+  if (!found) throw getNominalError('nominal', 'not_found');
+  const { firstName, lastName } = getName(req.user.name);
+  const payload = {
+    transaction_details: {
+      order_id: `TOPUP-${randomInt(10000, 99999)}`,
+      gross_amount: found.amount,
+    },
     customer_details: {
       first_name: firstName,
       last_name: lastName,
