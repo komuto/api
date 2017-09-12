@@ -85,6 +85,7 @@ routes.post('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})/di
  */
 routes.get('/users/disputes',
   auth(),
+  validateParam(constraints.listDispute),
   wrap(PaymentController.getDisputes),
   apiResponse());
 
@@ -93,6 +94,7 @@ routes.get('/users/disputes',
  */
 routes.get('/users/store/disputes',
   auth(),
+  validateParam(constraints.listDispute),
   wrap(PaymentController.getStoreDisputes),
   apiResponse());
 

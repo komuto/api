@@ -46,6 +46,16 @@ constraints.dispute = {
   images: { presence: true },
 };
 
+constraints.listDispute = {
+  is_resolved: {
+    presence: false,
+    inclusion: {
+      within: ['true', 'false'],
+      message: 'accept only boolean',
+    },
+  },
+};
+
 constraints.images = { name: { presence: true } };
 
 export default constraints;

@@ -100,12 +100,18 @@ class DisputeModel extends bookshelf.Model {
     return problems;
   }
 
-  static async getAll(where, relation, page, pageSize) {
-    const disputes = await this.where(where).fetchPage({
-      page,
-      pageSize,
-      withRelated: ['disputeProducts.product.images', relation],
-    });
+  static async getAll(params) {
+    const { where, relation, is_resolved: isResolved, page, pageSize } = params;
+    const disputes = await this.where(where)
+      .query((qb) => {
+        if (isResolved) qb.whereNot('responadmin_dispute', DisputeResponseStatus.NO_RESPONSE_YET);
+        else qb.where('responadmin_dispute', DisputeResponseStatus.NO_RESPONSE_YET);
+      })
+      .fetchPage({
+        page,
+        pageSize,
+        withRelated: ['disputeProducts.product.images', relation],
+      });
 
     return disputes.map((dispute) => {
       const products = dispute.related('disputeProducts').map((val) => {
