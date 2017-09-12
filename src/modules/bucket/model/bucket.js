@@ -194,11 +194,7 @@ class BucketModel extends bookshelf.Model {
 
     const response = {
       bucket: bucket.serialize(),
-      summary_invoice: {
-        total_price,
-        status: 1,
-        time_left,
-      },
+      summary_transaction: { total_price, time_left },
     };
 
     if (isDetail) return { ...response, invoices: data };
@@ -206,10 +202,9 @@ class BucketModel extends bookshelf.Model {
   }
 
   static async listTransactions(userId) {
-    const buckets = await this.where({
-      id_users: userId,
-      status_bucket: BucketStatus.CHECKOUT,
-    }).fetchAll({ withRelated: ['invoices.items.product.images'] });
+    const buckets = await this.where({ id_users: userId })
+      .query(qb => qb.whereNot('status_bucket', BucketStatus.ADDED))
+      .fetchAll({ withRelated: ['invoices.items.product.images'] });
     if (!buckets.length) return [];
     return buckets.map(bucket => (this.loadDetailTransaction(bucket, false)));
   }
