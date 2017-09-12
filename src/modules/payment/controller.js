@@ -15,6 +15,7 @@ import {
 } from './model';
 import { Bucket, BucketStatus } from './../bucket/model';
 import { BankAccount } from '../bank/model';
+import { Store } from '../store/model';
 import config from '../../../config';
 import core from '../core';
 import { Review } from '../review/model';
@@ -263,4 +264,14 @@ PaymentController.notification = async (req, res, next) => {
     console.log('\n');
     return next();
   });
+};
+
+PaymentController.getNewOrders = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const invoices = await Invoice.getNewOrders(storeId);
+  req.resData = {
+    message: 'New Orders Data',
+    data: invoices,
+  };
+  return next();
 };

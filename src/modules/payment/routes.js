@@ -114,4 +114,12 @@ routes.get('/users/store/disputes/:id([0-9]{1,10})',
   wrap(PaymentController.getStoreDispute),
   apiResponse());
 
+/**
+ * GET new orders
+ */
+routes.get('/new-orders',
+  auth(),
+  wrap(PaymentController.getNewOrders),
+  apiResponse());
+
 export default routes;

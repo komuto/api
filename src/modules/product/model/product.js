@@ -97,6 +97,10 @@ class ProductModel extends bookshelf.Model {
     return this.hasMany('ImageProduct', 'id_produk', 'id_produk');
   }
 
+  image() {
+    return this.hasOne('ImageProduct', 'id_produk');
+  }
+
   /**
    * Add relation to Category
    */
