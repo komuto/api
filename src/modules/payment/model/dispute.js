@@ -209,12 +209,18 @@ class DisputeModel extends bookshelf.Model {
   }
 
   static async updateAirwayBill(where, airwayBill) {
-    const dispute = await this.where(where).fetch({ withRelated: ['message'] });
+    const dispute = await this.where(where).fetch();
     if (!dispute) throw getDisputeError('dispute', 'not_found');
     return await dispute.save({
       noresi_dispute: airwayBill,
       status_dispute: DisputeStatus.SEND_BY_SELLER,
     }, { patch: true });
+  }
+
+  static async updateStatus(where, status) {
+    const dispute = await this.where(where).fetch();
+    if (!dispute) throw getDisputeError('dispute', 'not_found');
+    return await dispute.save({ status_dispute: status }, { patch: true });
   }
 
   /**

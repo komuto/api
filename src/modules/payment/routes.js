@@ -108,6 +108,14 @@ routes.post('/users/disputes/:id([0-9]{1,10})/discussions',
   apiResponse());
 
 /**
+ * PUT buyer - product has been received
+ */
+routes.put('/users/disputes/:id([0-9]{1,10})/received',
+  auth(),
+  wrap(PaymentController.confirmDispute),
+  apiResponse());
+
+/**
  * GET list dispute seller
  */
 routes.get('/users/store/disputes',
@@ -140,6 +148,14 @@ routes.put('/users/store/disputes/:id([0-9]{1,10})/airway-bill',
   auth(),
   validateParam(constraints.airwayBill, true),
   wrap(PaymentController.updateAirwayBill),
+  apiResponse());
+
+/**
+ * PUT seller - product has been received
+ */
+routes.put('/users/store/disputes/:id([0-9]{1,10})/received',
+  auth(),
+  wrap(PaymentController.confirmStoreDispute),
   apiResponse());
 
 /**
