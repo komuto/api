@@ -22,7 +22,6 @@ import { Review } from '../review/model';
 import { ImageGroup } from '../user/model';
 import nominal from '../../../config/nominal.json';
 import { getNominalError } from './messages';
-import { Store } from '../store/model';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -222,6 +221,15 @@ PaymentController.getDispute = async (req, res, next) => {
   return next();
 };
 
+PaymentController.createDisputeDiscussion = async (req, res, next) => {
+  const where = { id_users: req.user.id, id_dispute: req.params.id };
+  const message = await Dispute.createDiscussion(where, req.user.id, req.body.content);
+  req.resData = {
+    data: message,
+  };
+  return next();
+};
+
 PaymentController.getStoreDisputes = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
@@ -249,6 +257,16 @@ PaymentController.getStoreDispute = async (req, res, next) => {
   req.resData = {
     message: 'Dispute Data',
     data: dispute,
+  };
+  return next();
+};
+
+PaymentController.createStoreDisputeDiscussion = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const where = { id_toko: storeId, id_dispute: req.params.id };
+  const message = await Dispute.createDiscussion(where, req.user.id, req.body.content);
+  req.resData = {
+    data: message,
   };
   return next();
 };

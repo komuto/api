@@ -168,6 +168,7 @@ class MessageModel extends bookshelf.Model {
       flag_sender_at: 'flagsender_date',
       flag_receiver_at: 'flagreceiver_date',
       type: 'group_message',
+      parent_id: 'parent_id',
     };
     return matchDB(data, column);
   }

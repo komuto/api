@@ -1,6 +1,8 @@
 import core from '../../core';
 import config from '../../../../config';
 import { createDisputeError, getDisputeError } from '../messages';
+import { Message, MessageFlagStatus, MessageType } from '../../store/model/message';
+import { DetailMessage } from '../../store/model/detail_message';
 
 const { parseDate, matchDB, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -171,6 +173,38 @@ class DisputeModel extends bookshelf.Model {
       ...dispute.serialize(),
       products,
     };
+  }
+
+  static async createDiscussion(where, userId, content) {
+    const dispute = await this.where(where).fetch({ withRelated: ['message'] });
+    if (!dispute) throw getDisputeError('dispute', 'not_found');
+
+    let messageId;
+    const message = dispute.related('message');
+    if (!message.serialize().id) {
+      const messageObj = Message.matchDBColumn({
+        user_id: dispute.serialize().user_id,
+        store_id: dispute.serialize().store_id,
+        subject: '',
+        flag_sender: MessageFlagStatus.UNREAD,
+        flag_receiver: MessageFlagStatus.UNREAD,
+        flag_sender_at: new Date(),
+        flag_receiver_at: new Date(),
+        type: MessageType.COMPLAINT,
+        parent_id: dispute.serialize().id,
+      });
+      const newMessage = await Message.create(messageObj);
+      messageId = newMessage.serialize().id;
+    } else {
+      messageId = message.serialize().id;
+    }
+    const detailMessageObj = DetailMessage.matchDBColumn({
+      message_id: messageId,
+      user_id: userId,
+      content,
+      created_at: new Date(),
+    });
+    return await DetailMessage.create(detailMessageObj);
   }
 
   /**
