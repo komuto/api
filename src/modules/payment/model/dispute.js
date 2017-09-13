@@ -79,6 +79,10 @@ class DisputeModel extends bookshelf.Model {
     return this.hasMany('ImageGroup', 'parent_id');
   }
 
+  message() {
+    return this.morphOne('Message', 'group', ['group_message', 'parent_id'], 1);
+  }
+
   static async create(data) {
     return await new this(data).save().catch(() => {
       throw createDisputeError('dispute', 'error');
@@ -132,14 +136,25 @@ class DisputeModel extends bookshelf.Model {
         'invoice',
         relation,
         { imageGroups: qb => qb.where('group', 'dispute') },
+        'message.store',
+        'message.detailMessages.user',
       ],
     });
 
     if (!dispute) throw getDisputeError('dispute', 'not_found');
 
+    const message = dispute.related('message');
+    const discussions = message.related('detailMessages').map((msg) => {
+      msg = msg.serialize();
+      const store = message.serialize().store;
+      msg.store = (store.user_id === msg.user.id) ? store : null;
+      return msg;
+    });
+
     return {
       ...this.detailDispute(dispute),
       proofs: dispute.related('imageGroups'),
+      discussions,
     };
   }
 
