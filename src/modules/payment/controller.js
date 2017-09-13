@@ -296,7 +296,7 @@ PaymentController.notification = async (req, res, next) => {
 
 PaymentController.getNewOrders = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const invoices = await Invoice.getInvoiceList(storeId, InvoiceTransactionStatus.WAITING);
+  const invoices = await Invoice.getOrders(storeId, InvoiceTransactionStatus.WAITING);
   req.resData = {
     message: 'New Orders Data',
     data: invoices,
@@ -304,9 +304,10 @@ PaymentController.getNewOrders = async (req, res, next) => {
   return next();
 };
 
-PaymentController.getOrderDetail = async (req, res, next) => {
+PaymentController.getNewOrderDetail = async (req, res, next) => {
   const store = await Store.where('id_users', req.user.id).fetch();
-  const invoice = await Invoice.getOrderDetail(req.params.id, store);
+  const invoice = await Invoice
+    .getOrderDetail(req.params.id, store, InvoiceTransactionStatus.WAITING);
   req.resData = {
     message: 'New Orders Data',
     data: invoice,
@@ -316,10 +317,21 @@ PaymentController.getOrderDetail = async (req, res, next) => {
 
 PaymentController.getProcessingOrders = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const invoices = await Invoice.getInvoiceList(storeId, InvoiceTransactionStatus.PROCEED);
+  const invoices = await Invoice.getOrders(storeId, InvoiceTransactionStatus.PROCEED);
   req.resData = {
     message: 'Processing Orders Data',
     data: invoices,
+  };
+  return next();
+};
+
+PaymentController.getProcessingOrderDetail = async (req, res, next) => {
+  const store = await Store.where('id_users', req.user.id).fetch();
+  const invoice = await Invoice
+    .getOrderDetail(req.params.id, store, InvoiceTransactionStatus.PROCEED);
+  req.resData = {
+    message: 'New Orders Data',
+    data: invoice,
   };
   return next();
 };

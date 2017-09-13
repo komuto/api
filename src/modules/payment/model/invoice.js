@@ -159,7 +159,7 @@ class InvoiceModel extends bookshelf.Model {
    * @param id {int} store id
    * @param invoiceStatus {int}
    */
-  static async getInvoiceList(id, invoiceStatus) {
+  static async getOrders(id, invoiceStatus) {
     const invoices = await this.where({
       status_transaksi: invoiceStatus,
       'invoice.id_toko': id })
@@ -185,10 +185,11 @@ class InvoiceModel extends bookshelf.Model {
   /**
    * @param id {int} invoice id
    * @param store {object}
+   * @param invoiceStatus {int}
    */
-  static async getOrderDetail(id, store) {
+  static async getOrderDetail(id, store, invoiceStatus) {
     const storeId = store.get('id_toko');
-    const invoice = await this.where({ status_transaksi: InvoiceTransactionStatus.WAITING,
+    const invoice = await this.where({ status_transaksi: invoiceStatus,
       'invoice.id_invoice': id,
       'invoice.id_toko': storeId })
       .query(qb => qb.select(['invoice.*', 'd.id_toko as store_dropship_id'])
@@ -196,7 +197,7 @@ class InvoiceModel extends bookshelf.Model {
         .leftJoin('dropshipper as d', 'd.id_dropshipper', 'l.id_dropshipper')
         .orWhere('d.id_toko', storeId)
         .where({ 'invoice.id_invoice': id,
-          status_transaksi: InvoiceTransactionStatus.WAITING }))
+          status_transaksi: invoiceStatus }))
       .fetch({ withRelated: ['items.product.image',
         { 'store.user.address': qb => qb.where('alamat_originjual', 1) },
         'buyer',

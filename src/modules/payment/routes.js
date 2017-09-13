@@ -155,7 +155,7 @@ routes.get('/new-orders',
  */
 routes.get('/invoices/:id([0-9]{1,10})/new-order-detail',
   auth(),
-  wrap(PaymentController.getOrderDetail),
+  wrap(PaymentController.getNewOrderDetail),
   apiResponse());
 
 /**
