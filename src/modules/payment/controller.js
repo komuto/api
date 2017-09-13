@@ -22,7 +22,6 @@ import { Review } from '../review/model';
 import { ImageGroup } from '../user/model';
 import nominal from '../../../config/nominal.json';
 import { getNominalError } from './messages';
-import { Store } from '../store/model';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -234,6 +233,16 @@ PaymentController.notification = async (req, res, next) => {
 PaymentController.getNewOrders = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const invoices = await Invoice.getNewOrders(storeId);
+  req.resData = {
+    message: 'New Orders Data',
+    data: invoices,
+  };
+  return next();
+};
+
+PaymentController.getOrderDetail = async (req, res, next) => {
+  const store = await Store.where('id_users', req.user.id).fetch();
+  const invoices = await Invoice.getOrderDetail(req.params.id, store);
   req.resData = {
     message: 'New Orders Data',
     data: invoices,

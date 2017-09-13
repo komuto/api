@@ -104,4 +104,12 @@ routes.get('/new-orders',
   wrap(PaymentController.getNewOrders),
   apiResponse());
 
+/**
+ * GET order detail
+ */
+routes.get('/invoices/:id([0-9]{1,10})/order-detail',
+  auth(),
+  wrap(PaymentController.getOrderDetail),
+  apiResponse());
+
 export default routes;

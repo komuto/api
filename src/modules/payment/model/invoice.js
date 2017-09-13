@@ -2,6 +2,7 @@ import moment from 'moment';
 import randomInt from 'random-int';
 import core from '../../core';
 import { getInvoiceError, createInvoiceError } from './../messages';
+import { Store } from '../../store/model/store';
 import config from '../../../../config';
 
 const { parseDate, parseNum, matchDB } = core.utils;
@@ -39,13 +40,13 @@ class InvoiceModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = false } = {}) {
+  serialize({ minimal = false, orderDetail = false } = {}) {
     const invoice = {
       id: this.get('id_invoice'),
       payment_method_id: this.get('id_paymentmethod'),
       store_id: this.get('id_toko'),
       store: this.relations.store ? this.related('store').serialize({ favorite: true }) : undefined,
-      shipping: this.relations.shipping ? this.related('shipping') : undefined,
+      shipping: this.relations.shipping ? this.related('shipping').serialize() : undefined,
       invoice_number: this.get('no_invoice'),
       total_bill: parseNum(this.get('total_tagihan')),
       total_price: parseNum(this.get('total_harga')),
@@ -53,6 +54,17 @@ class InvoiceModel extends bookshelf.Model {
       transaction_status: parseNum(this.get('status_transaksi'), null),
       created_at: parseDate(this.get('createdate_invoice')),
     };
+    if (orderDetail) {
+      const shipping = invoice.shipping;
+      invoice.delivery_cost = parseNum(this.get('biaya_ongkir'));
+      invoice.insurance_fee = parseNum(this.get('biaya_asuransi'));
+      invoice.expedition = shipping.expedition_service;
+      invoice.is_insurance = shipping.is_insurance;
+      invoice.note = shipping.note;
+      invoice.seller_note = shipping.seller_note;
+      invoice.shipping = undefined;
+      invoice.store = undefined;
+    }
     if (minimal) return invoice;
     return {
       ...invoice,
@@ -143,6 +155,9 @@ class InvoiceModel extends bookshelf.Model {
     return invoice;
   }
 
+  /**
+   * @param id {int} store id
+   */
   static async getNewOrders(id) {
     const invoices = await this.where({
       status_transaksi: InvoiceTransactionStatus.WAITING,
@@ -164,6 +179,65 @@ class InvoiceModel extends bookshelf.Model {
       invoice = { ...invoice.serialize({ minimal: true }), is_drophship: dropship };
       return { invoice, products, user };
     });
+  }
+
+  /**
+   * @param id {int} invoice id
+   * @param store {object}
+   */
+  static async getOrderDetail(id, store) {
+    const storeId = store.get('id_toko');
+    const invoice = await this.where({ status_transaksi: InvoiceTransactionStatus.WAITING,
+      'invoice.id_invoice': id,
+      'invoice.id_toko': storeId })
+      .query(qb => qb.select(['invoice.*', 'd.id_toko as store_dropship_id'])
+        .join('listbucket as l', 'l.id_invoice', 'invoice.id_invoice')
+        .leftJoin('dropshipper as d', 'd.id_dropshipper', 'l.id_dropshipper')
+        .orWhere('d.id_toko', storeId)
+        .where({ 'invoice.id_invoice': id,
+          status_transaksi: InvoiceTransactionStatus.WAITING }))
+      .fetch({ withRelated: ['items.product.image',
+        { 'store.user.address': qb => qb.where('alamat_originjual', 1) },
+        'buyer',
+        'shipping.address',
+        'shipping.expeditionService.expedition'] });
+    if (!invoice) return false;
+    const storeDropshipId = invoice.get('store_dropship_id');
+    const getBuyer = storeDropshipId && storeId === invoice.get('id_toko') ? false : invoice.load('buyer');
+    let getStore;
+    if (storeDropshipId) {
+      // If we are the reseller then use the store in the argument
+      getStore = storeDropshipId !== storeId ? Store.where('id_toko', storeDropshipId).fetch() : Promise.resolve(store);
+    }
+    const getBuyerAddress = invoice.related('shipping').related('address').load(['province', 'district', 'subDistrict', 'village']);
+    const seller = invoice.related('store').related('user');
+    const getSellerAddress = seller.related('address').load(['province', 'district', 'subDistrict', 'village']);
+    const items = invoice.related('items').map((item) => {
+      const product = item.related('product');
+      const image = product.related('image').serialize().file;
+      item = item.serialize({ minimal: true, note: true });
+      return { ...item, product: { ...product.serialize({ minimal: true }), image } };
+    });
+    const [buyerAddress, sellerAddress, user]
+      = await Promise.all([getBuyerAddress, getSellerAddress, getBuyer]);
+    const buyer = user ? invoice.related('buyer').serialize({ orderDetail: true })
+      // exclude buyer if we are the original seller
+      : { id: null, name: null, photo: null, phone_number: null };
+    const result = {
+      invoice: invoice.serialize({ minimal: true, orderDetail: true }),
+      items,
+      buyer: { ...buyer, address: buyerAddress.serialize({ full: true }) },
+      seller: { ...seller.serialize({ orderDetail: true }),
+        address: sellerAddress.serialize({ full: true }) },
+    };
+    if (storeDropshipId) {
+      const dropshipStore = await getStore;
+      const resellerStore = dropshipStore.serialize({ favorite: true });
+      // include reseller logo if we are the original seller
+      resellerStore.logo = Number(storeDropshipId) === Number(storeId) ? null : resellerStore.logo;
+      result.reseller = { store: resellerStore };
+    }
+    return result;
   }
 
   static async updateStatus(id, status) {

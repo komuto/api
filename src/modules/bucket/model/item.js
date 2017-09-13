@@ -23,7 +23,7 @@ class ItemModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = false } = {}) {
+  serialize({ minimal = false, note = false } = {}) {
     let item = {
       id: this.get('id_listbucket'),
       qty: this.get('qty_listbucket'),
@@ -31,6 +31,7 @@ class ItemModel extends bookshelf.Model {
       additional_cost: parseNum(this.get('biayatambahan_listbucket')),
       total_price: parseNum(this.get('hargatotal_listbucket')),
     };
+    if (note) item.note = this.get('keteranganopsi_listbucket');
     if (minimal) return item;
     item = {
       ...item,
