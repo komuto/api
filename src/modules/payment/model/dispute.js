@@ -54,6 +54,7 @@ class DisputeModel extends bookshelf.Model {
       note: this.get('alasan_dispute'),
       dispute_number: this.get('nopelaporan_dispute'),
       remarks: this.get('remarksresult_dispute'),
+      airway_bill: this.get('noresi_dispute'),
       status: this.get('status_dispute'),
       response_status: parseNum(this.get('responadmin_dispute')),
       response_at: parseDate(this.get('tglresponadmin_dispute')),
@@ -205,6 +206,15 @@ class DisputeModel extends bookshelf.Model {
       created_at: new Date(),
     });
     return await DetailMessage.create(detailMessageObj);
+  }
+
+  static async updateAirwayBill(where, airwayBill) {
+    const dispute = await this.where(where).fetch({ withRelated: ['message'] });
+    if (!dispute) throw getDisputeError('dispute', 'not_found');
+    return await dispute.save({
+      noresi_dispute: airwayBill,
+      status_dispute: DisputeStatus.SEND_BY_SELLER,
+    }, { patch: true });
   }
 
   /**

@@ -134,6 +134,15 @@ routes.post('/users/store/disputes/:id([0-9]{1,10})/discussions',
   apiResponse());
 
 /**
+ * PUT update airway bill
+ */
+routes.put('/users/store/disputes/:id([0-9]{1,10})/airway-bill',
+  auth(),
+  validateParam(constraints.airwayBill, true),
+  wrap(PaymentController.updateAirwayBill),
+  apiResponse());
+
+/**
  * GET new orders
  */
 routes.get('/new-orders',

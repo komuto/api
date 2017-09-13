@@ -58,4 +58,6 @@ constraints.listDispute = {
 
 constraints.images = { name: { presence: true } };
 
+constraints.airwayBill = { airway_bill: { presence: true } };
+
 export default constraints;

@@ -271,6 +271,16 @@ PaymentController.createStoreDisputeDiscussion = async (req, res, next) => {
   return next();
 };
 
+PaymentController.updateAirwayBill = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const where = { id_toko: storeId, id_dispute: req.params.id };
+  const dispute = await Dispute.updateAirwayBill(where, req.body.airway_bill);
+  req.resData = {
+    data: dispute,
+  };
+  return next();
+};
+
 PaymentController.notification = async (req, res, next) => {
   let data = '';
   req.on('data', (chunk) => { data += chunk; });
