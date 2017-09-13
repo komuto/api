@@ -195,7 +195,14 @@ PaymentController.dispute = async (req, res, next) => {
 PaymentController.getDisputes = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const disputes = await Dispute.getAll({ id_users: req.user.id }, 'store', page, pageSize);
+  const isResolved = req.query.is_resolved ? JSON.parse(req.query.is_resolved) : false;
+  const disputes = await Dispute.getAll({
+    where: { id_users: req.user.id },
+    relation: 'store',
+    is_resolved: isResolved,
+    page,
+    pageSize,
+  });
   req.resData = {
     message: 'Dispute Data',
     meta: { page, limit: pageSize },
@@ -204,15 +211,72 @@ PaymentController.getDisputes = async (req, res, next) => {
   return next();
 };
 
+PaymentController.getDispute = async (req, res, next) => {
+  const where = { id_users: req.user.id, id_dispute: req.params.id };
+  const dispute = await Dispute.getDetail(where, 'store');
+  req.resData = {
+    message: 'Dispute Data',
+    data: dispute,
+  };
+  return next();
+};
+
+PaymentController.createDisputeDiscussion = async (req, res, next) => {
+  const where = { id_users: req.user.id, id_dispute: req.params.id };
+  const message = await Dispute.createDiscussion(where, req.user.id, req.body.content);
+  req.resData = {
+    data: message,
+  };
+  return next();
+};
+
 PaymentController.getStoreDisputes = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const isResolved = req.query.is_resolved ? JSON.parse(req.query.is_resolved) : false;
   const storeId = await Store.getStoreId(req.user.id);
-  const disputes = await Dispute.getAll({ id_toko: storeId }, 'user', page, pageSize);
+  const disputes = await Dispute.getAll({
+    where: { id_toko: storeId },
+    relation: 'user',
+    is_resolved: isResolved,
+    page,
+    pageSize,
+  });
   req.resData = {
     message: 'Dispute Data',
     meta: { page, limit: pageSize },
     data: disputes,
+  };
+  return next();
+};
+
+PaymentController.getStoreDispute = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const where = { id_toko: storeId, id_dispute: req.params.id };
+  const dispute = await Dispute.getDetail(where, 'user');
+  req.resData = {
+    message: 'Dispute Data',
+    data: dispute,
+  };
+  return next();
+};
+
+PaymentController.createStoreDisputeDiscussion = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const where = { id_toko: storeId, id_dispute: req.params.id };
+  const message = await Dispute.createDiscussion(where, req.user.id, req.body.content);
+  req.resData = {
+    data: message,
+  };
+  return next();
+};
+
+PaymentController.updateAirwayBill = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const where = { id_toko: storeId, id_dispute: req.params.id };
+  const dispute = await Dispute.updateAirwayBill(where, req.body.airway_bill);
+  req.resData = {
+    data: dispute,
   };
   return next();
 };

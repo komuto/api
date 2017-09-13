@@ -31,6 +31,10 @@ export const errMsg = {
     title: 'Get nominal gagal',
     not_found: 'Nominal tidak ditemukan',
   },
+  getDispute: {
+    title: 'Get komplain gagal',
+    not_found: 'Komplain tidak ditemukan',
+  },
 };
 
 export const getInvoiceError = formatError.bind(errMsg.getInvoice);
@@ -38,6 +42,8 @@ export const getInvoiceError = formatError.bind(errMsg.getInvoice);
 export const createInvoiceError = formatError.bind(errMsg.createInvoice);
 
 export const createDisputeError = formatError.bind(errMsg.createDispute);
+
+export const getDisputeError = formatError.bind(errMsg.getDispute);
 
 export const getPaymentError = formatError.bind(errMsg.getPayment);
 

@@ -2,6 +2,7 @@ import express from 'express';
 import { PaymentController } from './controller';
 import core from '../core';
 import constraints from './validation';
+import storeConstraints from './../store/validation';
 
 const routes = express.Router();
 const { wrap } = core.utils;
@@ -85,7 +86,25 @@ routes.post('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})/di
  */
 routes.get('/users/disputes',
   auth(),
+  validateParam(constraints.listDispute),
   wrap(PaymentController.getDisputes),
+  apiResponse());
+
+/**
+ * GET detail dispute buyer
+ */
+routes.get('/users/disputes/:id([0-9]{1,10})',
+  auth(),
+  wrap(PaymentController.getDispute),
+  apiResponse());
+
+/**
+ * POST create/reply user dispute discussions
+ */
+routes.post('/users/disputes/:id([0-9]{1,10})/discussions',
+  auth(),
+  validateParam(storeConstraints.reply_message, true),
+  wrap(PaymentController.createDisputeDiscussion),
   apiResponse());
 
 /**
@@ -93,7 +112,34 @@ routes.get('/users/disputes',
  */
 routes.get('/users/store/disputes',
   auth(),
+  validateParam(constraints.listDispute),
   wrap(PaymentController.getStoreDisputes),
+  apiResponse());
+
+/**
+ * GET detail dispute seller
+ */
+routes.get('/users/store/disputes/:id([0-9]{1,10})',
+  auth(),
+  wrap(PaymentController.getStoreDispute),
+  apiResponse());
+
+/**
+ * POST create/reply store dispute discussions
+ */
+routes.post('/users/store/disputes/:id([0-9]{1,10})/discussions',
+  auth(),
+  validateParam(storeConstraints.reply_message, true),
+  wrap(PaymentController.createStoreDisputeDiscussion),
+  apiResponse());
+
+/**
+ * PUT update airway bill
+ */
+routes.put('/users/store/disputes/:id([0-9]{1,10})/airway-bill',
+  auth(),
+  validateParam(constraints.airwayBill, true),
+  wrap(PaymentController.updateAirwayBill),
   apiResponse());
 
 /**

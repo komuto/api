@@ -35,7 +35,8 @@ class DetailMessageModel extends bookshelf.Model {
    * @param data
    */
   static async create(data) {
-    return await new this(data).save().catch(() => {
+    return await new this(data).save().catch((e) => {
+      console.log(e);
       throw createCommentError('comment', 'error');
     });
   }
