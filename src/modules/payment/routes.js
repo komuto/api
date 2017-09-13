@@ -153,9 +153,17 @@ routes.get('/new-orders',
 /**
  * GET order detail
  */
-routes.get('/invoices/:id([0-9]{1,10})/order-detail',
+routes.get('/invoices/:id([0-9]{1,10})/new-order-detail',
   auth(),
   wrap(PaymentController.getOrderDetail),
+  apiResponse());
+
+/**
+ * GET processing orders
+ */
+routes.get('/processing-orders',
+  auth(),
+  wrap(PaymentController.getProcessingOrders),
   apiResponse());
 
 export default routes;

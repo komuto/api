@@ -157,15 +157,16 @@ class InvoiceModel extends bookshelf.Model {
 
   /**
    * @param id {int} store id
+   * @param invoiceStatus {int}
    */
-  static async getNewOrders(id) {
+  static async getInvoiceList(id, invoiceStatus) {
     const invoices = await this.where({
-      status_transaksi: InvoiceTransactionStatus.WAITING,
+      status_transaksi: invoiceStatus,
       'invoice.id_toko': id })
       .query(qb => qb.join('listbucket as l', 'l.id_invoice', 'invoice.id_invoice')
         .leftJoin('dropshipper as d', 'd.id_dropshipper', 'l.id_dropshipper')
         .orWhere('d.id_toko', id)
-        .andWhere('status_transaksi', InvoiceTransactionStatus.WAITING))
+        .andWhere('status_transaksi', invoiceStatus))
       .fetchAll({ withRelated: ['items.product.image', 'buyer'] });
     if (!invoices) return [];
     return invoices.map((invoice) => {
@@ -175,7 +176,7 @@ class InvoiceModel extends bookshelf.Model {
         return { ...product.serialize({ minimal: true }), image };
       });
       const dropship = !!invoice.related('items').models[0].get('id_dropshipper');
-      const user = invoice.related('buyer').serialize({ account: true });
+      const user = invoice.related('buyer').serialize({ orderDetail: true });
       invoice = { ...invoice.serialize({ minimal: true }), is_drophship: dropship };
       return { invoice, products, user };
     });
