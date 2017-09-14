@@ -166,4 +166,12 @@ routes.get('/processing-orders',
   wrap(PaymentController.getProcessingOrders),
   apiResponse());
 
+/**
+ * GET processing order detail
+ */
+routes.get('/invoices/:id([0-9]{1,10})/processing-order-detail',
+  auth(),
+  wrap(PaymentController.getProcessingOrderDetail),
+  apiResponse());
+
 export default routes;

@@ -21,7 +21,7 @@ import core from '../core';
 import { Review } from '../review/model';
 import { ImageGroup } from '../user/model';
 import nominal from '../../../config/nominal.json';
-import { getNominalError } from './messages';
+import { getNominalError, getInvoiceError } from './messages';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -308,8 +308,9 @@ PaymentController.getNewOrderDetail = async (req, res, next) => {
   const store = await Store.where('id_users', req.user.id).fetch();
   const invoice = await Invoice
     .getOrderDetail(req.params.id, store, InvoiceTransactionStatus.WAITING);
+  if (!invoice) throw getInvoiceError('invoice', 'not_found');
   req.resData = {
-    message: 'New Orders Data',
+    message: 'New Order Detail Data',
     data: invoice,
   };
   return next();
@@ -329,8 +330,9 @@ PaymentController.getProcessingOrderDetail = async (req, res, next) => {
   const store = await Store.where('id_users', req.user.id).fetch();
   const invoice = await Invoice
     .getOrderDetail(req.params.id, store, InvoiceTransactionStatus.PROCEED);
+  if (!invoice) throw getInvoiceError('invoice', 'not_found');
   req.resData = {
-    message: 'New Orders Data',
+    message: 'Processing Order Detail Data',
     data: invoice,
   };
   return next();
