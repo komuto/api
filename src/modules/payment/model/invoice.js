@@ -62,6 +62,7 @@ class InvoiceModel extends bookshelf.Model {
       invoice.is_insurance = shipping.is_insurance;
       invoice.note = shipping.note;
       invoice.seller_note = shipping.seller_note;
+      invoice.confirmed_at = parseDate(this.get('confirmation_date'));
       invoice.shipping = undefined;
       invoice.store = undefined;
     }

@@ -27,11 +27,6 @@ class ShippingModel extends bookshelf.Model {
     return 'id_pengiriman_produk';
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  get hasTimestamps() {
-    return false;
-  }
-
   serialize() {
     const shipping = {
       id: parseNum(this.get('id_pengiriman_produk')),
@@ -102,6 +97,7 @@ class ShippingModel extends bookshelf.Model {
       delivery_cost: 'harga_ongkir',
       insurance_fee: 'nilai_asuransi',
       note: 'keterangan',
+      airway_bill: 'resiresponkirim',
     };
     const newData = {};
     Object.keys(data).forEach((prop) => {

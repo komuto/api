@@ -43,6 +43,11 @@ export const errMsg = {
     title: 'Tolak order gagal',
     not_found: 'Order tidak ditemukan',
   },
+  inputBill: {
+    title: 'Input resi gagal',
+    not_found: 'Order tidak ditemukan',
+    error: 'Input resi gagal',
+  },
 };
 
 export const getInvoiceError = formatError.bind(errMsg.getInvoice);
@@ -55,3 +60,4 @@ export const getPaymentConfirmationError = formatError.bind(errMsg.getPaymentCon
 export const getNominalError = formatError.bind(errMsg.getNominal);
 export const acceptOrderError = formatError.bind(errMsg.acceptOrder);
 export const rejectOrderError = formatError.bind(errMsg.rejectOrder);
+export const inputBillError = formatError.bind(errMsg.inputBill);

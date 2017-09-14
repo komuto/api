@@ -183,11 +183,20 @@ routes.put('/invoices/:id([0-9]{1,10})/accept',
   apiResponse());
 
 /**
- * PUT REJECT order
+ * PUT reject order
  */
 routes.put('/invoices/:id([0-9]{1,10})/reject',
   auth(),
   wrap(PaymentController.rejectOrder),
+  apiResponse());
+
+/**
+ * PUT input airway bill
+ */
+routes.put('/invoices/:id([0-9]{1,10})/airway-bill',
+  auth(),
+  validateParam(constraints.airwayBill, true),
+  wrap(PaymentController.inputAirwayBill),
   apiResponse());
 
 export default routes;

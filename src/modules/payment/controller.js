@@ -13,7 +13,7 @@ import {
   DisputeStatus,
   DisputeProduct,
 } from './model';
-import { Bucket, BucketStatus } from './../bucket/model';
+import { Bucket, BucketStatus, Shipping } from './../bucket/model';
 import { BankAccount } from '../bank/model';
 import { Store } from '../store/model';
 import config from '../../../config';
@@ -21,7 +21,7 @@ import core from '../core';
 import { Review } from '../review/model';
 import { ImageGroup } from '../user/model';
 import nominal from '../../../config/nominal.json';
-import { getNominalError, getInvoiceError, acceptOrderError, rejectOrderError } from './messages';
+import { getNominalError, getInvoiceError, acceptOrderError, rejectOrderError, inputBillError } from './messages';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -361,5 +361,20 @@ PaymentController.rejectOrder = async (req, res, next) => {
   if (!invoice) throw rejectOrderError('order', 'not_found');
   await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.REJECTED)
     .catch();
+  return next();
+};
+
+PaymentController.inputAirwayBill = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const invoice = await Invoice.where({
+    id_invoice: req.params.id,
+    status_transaksi: InvoiceTransactionStatus.PROCEED,
+    id_toko: storeId,
+  }).fetch();
+  if (!invoice) throw inputBillError('order', 'not_found');
+  await Shipping.where('id_pengiriman_produk', invoice.get('id_pengiriman_produk'))
+    .save({ resiresponkirim: req.body.airway_bill }, { require: true, patch: true })
+    .catch(() => { throw inputBillError('input', 'error'); });
+  await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.SENDING);
   return next();
 };
