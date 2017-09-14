@@ -174,4 +174,20 @@ routes.get('/invoices/:id([0-9]{1,10})/processing-order-detail',
   wrap(PaymentController.getProcessingOrderDetail),
   apiResponse());
 
+/**
+ * PUT accept order
+ */
+routes.put('/invoices/:id([0-9]{1,10})/accept',
+  auth(),
+  wrap(PaymentController.acceptOrder),
+  apiResponse());
+
+/**
+ * PUT REJECT order
+ */
+routes.put('/invoices/:id([0-9]{1,10})/reject',
+  auth(),
+  wrap(PaymentController.rejectOrder),
+  apiResponse());
+
 export default routes;

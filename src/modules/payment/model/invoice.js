@@ -243,7 +243,10 @@ class InvoiceModel extends bookshelf.Model {
   }
 
   static async updateStatus(id, status) {
-    return await this.where({ id_invoice: id }).save({ status_transaksi: status }, { patch: true });
+    const now = moment();
+    const data = { status_transaksi: status, updated_at: now };
+    if (status === InvoiceTransactionStatus.PROCEED) data.confirmation_date = now;
+    return await this.where({ id_invoice: id }).save(data, { patch: true });
   }
 
   static async getWithDropship(id) {

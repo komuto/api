@@ -21,7 +21,7 @@ import core from '../core';
 import { Review } from '../review/model';
 import { ImageGroup } from '../user/model';
 import nominal from '../../../config/nominal.json';
-import { getNominalError, getInvoiceError } from './messages';
+import { getNominalError, getInvoiceError, acceptOrderError, rejectOrderError } from './messages';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -335,5 +335,31 @@ PaymentController.getProcessingOrderDetail = async (req, res, next) => {
     message: 'Processing Order Detail Data',
     data: invoice,
   };
+  return next();
+};
+
+PaymentController.acceptOrder = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const invoice = await Invoice.where({
+    id_invoice: req.params.id,
+    status_transaksi: InvoiceTransactionStatus.WAITING,
+    id_toko: storeId,
+  }).fetch();
+  if (!invoice) throw acceptOrderError('order', 'not_found');
+  await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.PROCEED)
+    .catch();
+  return next();
+};
+
+PaymentController.rejectOrder = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const invoice = await Invoice.where({
+    id_invoice: req.params.id,
+    status_transaksi: InvoiceTransactionStatus.WAITING,
+    id_toko: storeId,
+  }).fetch();
+  if (!invoice) throw rejectOrderError('order', 'not_found');
+  await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.REJECTED)
+    .catch();
   return next();
 };
