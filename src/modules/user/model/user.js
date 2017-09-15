@@ -78,6 +78,7 @@ class UserModel extends bookshelf.Model {
               account = false,
               phone = false,
               notification = false,
+              orderDetail = false,
             } = {}) {
     let user = {
       id: this.get('id_users'),
@@ -85,11 +86,17 @@ class UserModel extends bookshelf.Model {
       photo: this.get('pathfoto_users')
         ? core.imagePath(IMAGE_PATH, this.get('pathfoto_users'))
         : config.defaultImage.user,
-      gender: this.get('jeniskelamin_users') === 'L' ? 'male' : 'female',
-      place_of_birth: defaultNull(this.get('kota_lahir')),
-      date_of_birth: parseDate(this.get('tgl_lahir'), null),
+      phone_number: defaultNull(this.get('nohp_users')),
     };
-    if (account) return user;
+    if (orderDetail) return user;
+    if (account) {
+      return {
+        ...user,
+        gender: this.get('jeniskelamin_users') === 'L' ? 'male' : 'female',
+        place_of_birth: defaultNull(this.get('kota_lahir')),
+        date_of_birth: parseDate(this.get('tgl_lahir'), null),
+      };
+    }
     user = {
       ...user,
       marketplace_id: defaultNull(this.get('id_marketplaceuser')),
@@ -126,14 +133,18 @@ class UserModel extends bookshelf.Model {
    * Add relation to Store
    */
   store() {
-    return this.hasOne('Store', 'id_users', 'id_users');
+    return this.hasOne('Store', 'id_users');
   }
 
   /**
    * Add relation to Address
    */
   addresses() {
-    return this.hasMany('Address', 'id_users', 'id_users');
+    return this.hasMany('Address', 'id_users');
+  }
+
+  address() {
+    return this.hasOne('Address', 'id_users');
   }
 
   /**

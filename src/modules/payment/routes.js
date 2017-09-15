@@ -167,4 +167,53 @@ routes.get('/new-orders',
   wrap(PaymentController.getNewOrders),
   apiResponse());
 
+/**
+ * GET order detail
+ */
+routes.get('/invoices/:id([0-9]{1,10})/new-order-detail',
+  auth(),
+  wrap(PaymentController.getNewOrderDetail),
+  apiResponse());
+
+/**
+ * GET processing orders
+ */
+routes.get('/processing-orders',
+  auth(),
+  wrap(PaymentController.getProcessingOrders),
+  apiResponse());
+
+/**
+ * GET processing order detail
+ */
+routes.get('/invoices/:id([0-9]{1,10})/processing-order-detail',
+  auth(),
+  wrap(PaymentController.getProcessingOrderDetail),
+  apiResponse());
+
+/**
+ * PUT accept order
+ */
+routes.put('/invoices/:id([0-9]{1,10})/accept',
+  auth(),
+  wrap(PaymentController.acceptOrder),
+  apiResponse());
+
+/**
+ * PUT reject order
+ */
+routes.put('/invoices/:id([0-9]{1,10})/reject',
+  auth(),
+  wrap(PaymentController.rejectOrder),
+  apiResponse());
+
+/**
+ * PUT input airway bill
+ */
+routes.put('/invoices/:id([0-9]{1,10})/airway-bill',
+  auth(),
+  validateParam(constraints.airwayBill, true),
+  wrap(PaymentController.inputAirwayBill),
+  apiResponse());
+
 export default routes;

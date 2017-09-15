@@ -13,14 +13,26 @@ class AddressModel extends bookshelf.Model {
     return 'id_alamatuser';
   }
 
-  serialize() {
-    return {
+  serialize({ full = false } = {}) {
+    const address = {
       id: this.get('id_alamatuser'),
+      postal_code: this.get('kodepos_user'),
+      address: this.get('alamat_user'),
+    };
+    if (full) {
+      return {
+        ...address,
+        province: this.related('province'),
+        district: this.related('district'),
+        subdistrict: this.related('subDistrict'),
+        village: this.related('village'),
+      };
+    }
+    return {
+      ...address,
       name: this.get('nama_penerima'),
       email: this.get('email_penerima'),
       phone_number: this.get('tlp_penerima'),
-      postal_code: this.get('kodepos_user'),
-      address: this.get('alamat_user'),
       alias_address: this.get('alamat_alias'),
       is_primary_address: this.get('alamat_primary') === '1',
       is_sale_address: this.get('alamat_originjual') === '1',

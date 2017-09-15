@@ -13,7 +13,7 @@ import {
   DisputeStatus,
   DisputeProduct,
 } from './model';
-import { Bucket, BucketStatus } from './../bucket/model';
+import { Bucket, BucketStatus, Shipping } from './../bucket/model';
 import { BankAccount } from '../bank/model';
 import { Store } from '../store/model';
 import config from '../../../config';
@@ -21,7 +21,7 @@ import core from '../core';
 import { Review } from '../review/model';
 import { ImageGroup } from '../user/model';
 import nominal from '../../../config/nominal.json';
-import { getNominalError } from './messages';
+import { getNominalError, getInvoiceError, acceptOrderError, rejectOrderError, inputBillError } from './messages';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -304,10 +304,85 @@ PaymentController.notification = async (req, res, next) => {
 
 PaymentController.getNewOrders = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const invoices = await Invoice.getNewOrders(storeId);
+  const invoices = await Invoice.getOrders(storeId, InvoiceTransactionStatus.WAITING);
   req.resData = {
     message: 'New Orders Data',
     data: invoices,
   };
+  return next();
+};
+
+PaymentController.getNewOrderDetail = async (req, res, next) => {
+  const store = await Store.where('id_users', req.user.id).fetch();
+  const invoice = await Invoice
+    .getOrderDetail(req.params.id, store, InvoiceTransactionStatus.WAITING);
+  if (!invoice) throw getInvoiceError('invoice', 'not_found');
+  req.resData = {
+    message: 'New Order Detail Data',
+    data: invoice,
+  };
+  return next();
+};
+
+PaymentController.getProcessingOrders = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const invoices = await Invoice.getOrders(storeId, InvoiceTransactionStatus.PROCEED);
+  req.resData = {
+    message: 'Processing Orders Data',
+    data: invoices,
+  };
+  return next();
+};
+
+PaymentController.getProcessingOrderDetail = async (req, res, next) => {
+  const store = await Store.where('id_users', req.user.id).fetch();
+  const invoice = await Invoice
+    .getOrderDetail(req.params.id, store, InvoiceTransactionStatus.PROCEED);
+  if (!invoice) throw getInvoiceError('invoice', 'not_found');
+  req.resData = {
+    message: 'Processing Order Detail Data',
+    data: invoice,
+  };
+  return next();
+};
+
+PaymentController.acceptOrder = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const invoice = await Invoice.where({
+    id_invoice: req.params.id,
+    status_transaksi: InvoiceTransactionStatus.WAITING,
+    id_toko: storeId,
+  }).fetch();
+  if (!invoice) throw acceptOrderError('order', 'not_found');
+  await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.PROCEED)
+    .catch();
+  return next();
+};
+
+PaymentController.rejectOrder = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const invoice = await Invoice.where({
+    id_invoice: req.params.id,
+    status_transaksi: InvoiceTransactionStatus.WAITING,
+    id_toko: storeId,
+  }).fetch();
+  if (!invoice) throw rejectOrderError('order', 'not_found');
+  await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.REJECTED)
+    .catch();
+  return next();
+};
+
+PaymentController.inputAirwayBill = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const invoice = await Invoice.where({
+    id_invoice: req.params.id,
+    status_transaksi: InvoiceTransactionStatus.PROCEED,
+    id_toko: storeId,
+  }).fetch();
+  if (!invoice) throw inputBillError('order', 'not_found');
+  await Shipping.where('id_pengiriman_produk', invoice.get('id_pengiriman_produk'))
+    .save({ resiresponkirim: req.body.airway_bill }, { require: true, patch: true })
+    .catch(() => { throw inputBillError('input', 'error'); });
+  await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.SENDING);
   return next();
 };
