@@ -141,7 +141,7 @@ class ReviewModel extends bookshelf.Model {
       storeId = store.get('id_toko');
       owner = store.related('user');
     } else {
-      owner = await Product.getOwner(item.serialize().product_id);
+      owner = await Product.getOwner(product.id);
     }
     const notifications = owner.serialize({ notification: true }).notifications;
     if (owner.get('reg_token') && getNotification(notifications, NotificationType.REVIEW)) {

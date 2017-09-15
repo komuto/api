@@ -12,9 +12,8 @@ export const errMsg = {
     duplicate: 'You have already submitted your review for this product',
     product_not_found: 'Anda belum membeli produk ini',
     error: 'Gagal menambah review',
+    disable: 'Anda tidak bisa menambah review',
   },
 };
-
-export const getReviewError = formatError.bind(errMsg.getReview);
 
 export const createReviewError = formatError.bind(errMsg.createReview);

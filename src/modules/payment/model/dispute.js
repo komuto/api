@@ -5,12 +5,8 @@ import { createDisputeError, getDisputeError } from '../messages';
 import { Message, MessageFlagStatus, MessageType } from '../../store/model/message';
 import { DetailMessage } from '../../store/model/detail_message';
 import { createReviewError } from '../../review/messages';
-import { Dropship } from "../../product/model/dropship";
-import { Product } from "../../product/model/product";
-import { NotificationType } from "../../user/model/user";
-import { Notification, sellerNotification } from "../../core/notification";
-import { parseDec } from "../../core/utils";
-import { Review } from "../../review/model";
+import { Review } from '../../review/model';
+import { InvoiceTransactionStatus } from './invoice';
 
 const { parseDate, matchDB, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -187,29 +183,58 @@ class DisputeModel extends bookshelf.Model {
   }
 
   static async bulkReviewProducts(id, userId, reviews) {
-    const dispute = await this.where({
-      id_dispute: id,
-      id_users: userId,
-      status_dispute: DisputeStatus.SEND_BY_SELLER,
-    }).fetch({ withRelated: ['invoice.items.product'] });
+    const dispute = await this.where({ id_dispute: id, id_users: userId })
+      .fetch({ withRelated: ['invoice.items.product', 'disputeProducts'] });
 
     if (!dispute) throw getDisputeError('dispute', 'not_found');
 
     const invoice = dispute.related('invoice');
-    const products = invoice.related('items').map(item => item.related('product').serialize({ minimal: true }));
+    const disputeObj = dispute.serialize();
+    let newReviews;
+    let status = DisputeStatus.RECEIVE_BY_USER;
 
-    products.forEach((product) => {
-      const found = _.find(reviews, o => o.product_id === product.id);
-      if (!found) throw createReviewError('review', 'error');
-    });
+    if (
+      disputeObj.solution === DisputeSolutionType.EXCHANGE &&
+      disputeObj.status === DisputeStatus.SEND_BY_SELLER
+    ) {
+      invoice.related('items').forEach((item) => {
+        const found = _.find(reviews, o => o.product_id === item.get('id_produk'));
+        if (!found) throw createReviewError('review', 'error');
+      });
 
-    const newReviews = await Promise.all(invoice.related('items').map(async (item) => {
-      const product = item.related('product').serialize();
-      const val = _.find(reviews, o => o.product_id === product.id);
-      return await Review.create(item, product, userId, val);
-    }));
+      newReviews = await Promise.all(invoice.related('items').map(async (item) => {
+        const product = item.related('product').serialize();
+        const val = _.find(reviews, o => o.product_id === product.id);
+        return await Review.create(item, product, userId, val);
+      }));
+    } else if (
+      disputeObj.solution === DisputeSolutionType.REFUND &&
+      disputeObj.response_status === DisputeResponseStatus.BUYER_WIN &&
+      disputeObj.status !== DisputeStatus.CLOSED
+    ) {
+      dispute.related('disputeProducts').forEach((dp) => {
+        const found = _.find(reviews, o => o.product_id === dp.get('id_produk'));
+        if (!found) throw createReviewError('review', 'error');
+      });
+      status = DisputeStatus.CLOSED;
 
-    await dispute.save({ status_dispute: DisputeStatus.RECEIVE_BY_USER }, { patch: true });
+      newReviews = await Promise.all(dispute.related('disputeProducts').map(async (dp) => {
+        const item = _.find(invoice.related('items').models, o => o.get('id_produk') === dp.get('id_produk'));
+        const product = item.related('product').serialize();
+        const val = _.find(reviews, o => o.product_id === product.id);
+        return await Review.create(item, product, userId, val);
+      }));
+    } else {
+      throw createReviewError('review', 'disable');
+    }
+
+    await Promise.all([
+      dispute.save({ status_dispute: status }, { patch: true }),
+      invoice.save({
+        status_transaksi: InvoiceTransactionStatus.COMPLAINT_DONE,
+        updated_at: new Date(),
+      }, { patch: true }),
+    ]);
 
     return newReviews;
   }
