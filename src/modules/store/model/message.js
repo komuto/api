@@ -14,11 +14,10 @@ export const MessageFlagStatus = {
 
 export const MessageType = {
   COMPLAINT: 1,
-  REVIEW: 2,
-  BUYER_TO_SELLER: 3,
-  SELLER_TO_BUYER: 4,
-  RESELLER_TO_SELLER: 5,
-  SELLER_TO_RESELLER: 6,
+  BUYER_TO_SELLER: 2,
+  SELLER_TO_BUYER: 3,
+  RESELLER_TO_SELLER: 4,
+  SELLER_TO_RESELLER: 5,
 };
 
 class MessageModel extends bookshelf.Model {
