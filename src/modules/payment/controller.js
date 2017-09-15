@@ -229,8 +229,7 @@ PaymentController.createDisputeDiscussion = async (req, res, next) => {
 };
 
 PaymentController.confirmDispute = async (req, res, next) => {
-  const where = { id_users: req.user.id, id_dispute: req.params.id };
-  const dispute = await Dispute.updateStatus(where, DisputeStatus.RECEIVE_BY_USER);
+  const dispute = await Dispute.bulkReviewProducts(req.params.id, req.user.id, req.body);
   req.resData = { data: dispute };
   return next();
 };

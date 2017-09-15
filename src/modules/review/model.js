@@ -102,7 +102,6 @@ class ReviewModel extends bookshelf.Model {
     const { user_id: userId, bucket_id: bucketId, invoice_id: invoiceId, reviews } = params;
 
     const invoice = await Invoice.get(userId, bucketId, invoiceId);
-    let storeId = invoice.get('id_toko');
     const items = invoice.related('items');
 
     return await Promise.all(reviews.map(async (val) => {
@@ -113,41 +112,46 @@ class ReviewModel extends bookshelf.Model {
         && o.get('id_dropshipper') === product.get('id_dropshipper'));
       if (!item) throw createReviewError('product', 'product_not_found');
 
-      const data = this.matchDBColumn({
-        ...val,
-        product_id: productId,
-        store_id: sId,
-        user_id: userId,
-        dropshipper_id: item.serialize().dropshipper_id,
-        created_at: moment(),
-      });
-
-      const review = await new this(data).save().catch(() => {
-        throw createReviewError('review', 'error');
-      });
-
-      item.save({ id_ulasanproduk: review.serialize().id }, { patch: true });
-
-      // Send notification to product owner
-      let owner;
-      if (item.serialize().dropshipper_id) {
-        const dropship = await Dropship.findById(item.serialize().dropshipper_id);
-        const store = dropship.related('store');
-        storeId = store.get('id_toko');
-        owner = store.related('user');
-      } else {
-        owner = await Product.getOwner(item.serialize().product_id);
-      }
-      const notifications = owner.serialize({ notification: true }).notifications;
-      if (owner.get('reg_token') && getNotification(notifications, NotificationType.REVIEW)) {
-        Notification.send(sellerNotification.REVIEW, {
-          token: owner.get('reg_token'),
-          product_id: parseDec(`${item.serialize().product_id}.${storeId}`),
-        });
-      }
-
-      return review;
+      return await this.create(item, product.serialize(), userId, val);
     }));
+  }
+
+  static async create(item, product, userId, val) {
+    let storeId = product.store_id;
+    const data = this.matchDBColumn({
+      ...val,
+      product_id: product.id,
+      store_id: storeId,
+      user_id: userId,
+      dropshipper_id: item.serialize().dropshipper_id,
+      created_at: moment(),
+    });
+
+    const review = await new this(data).save().catch(() => {
+      throw createReviewError('review', 'error');
+    });
+
+    item.save({ id_ulasanproduk: review.serialize().id }, { patch: true });
+
+    // Send notification to product owner
+    let owner;
+    if (item.serialize().dropshipper_id) {
+      const dropship = await Dropship.findById(item.serialize().dropshipper_id);
+      const store = dropship.related('store');
+      storeId = store.get('id_toko');
+      owner = store.related('user');
+    } else {
+      owner = await Product.getOwner(item.serialize().product_id);
+    }
+    const notifications = owner.serialize({ notification: true }).notifications;
+    if (owner.get('reg_token') && getNotification(notifications, NotificationType.REVIEW)) {
+      Notification.send(sellerNotification.REVIEW, {
+        token: owner.get('reg_token'),
+        product_id: parseDec(`${item.serialize().product_id}.${storeId}`),
+      });
+    }
+
+    return review;
   }
 
   /**

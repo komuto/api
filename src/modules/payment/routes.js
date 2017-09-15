@@ -108,10 +108,11 @@ routes.post('/users/disputes/:id([0-9]{1,10})/discussions',
   apiResponse());
 
 /**
- * PUT buyer - product has been received
+ * POST buyer - product has been received
  */
-routes.put('/users/disputes/:id([0-9]{1,10})/received',
+routes.post('/users/disputes/:id([0-9]{1,10})/received',
   auth(),
+  validateParam(constraints.disputeBulkReview, true, null, true),
   wrap(PaymentController.confirmDispute),
   apiResponse());
 
