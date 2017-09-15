@@ -1,8 +1,16 @@
+import _ from 'lodash';
 import core from '../../core';
 import config from '../../../../config';
 import { createDisputeError, getDisputeError } from '../messages';
 import { Message, MessageFlagStatus, MessageType } from '../../store/model/message';
 import { DetailMessage } from '../../store/model/detail_message';
+import { createReviewError } from '../../review/messages';
+import { Dropship } from "../../product/model/dropship";
+import { Product } from "../../product/model/product";
+import { NotificationType } from "../../user/model/user";
+import { Notification, sellerNotification } from "../../core/notification";
+import { parseDec } from "../../core/utils";
+import { Review } from "../../review/model";
 
 const { parseDate, matchDB, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -136,7 +144,7 @@ class DisputeModel extends bookshelf.Model {
     const dispute = await this.where(where).fetch({
       withRelated: [
         'disputeProducts.product.images',
-        'invoice',
+        'invoice.items.product',
         relation,
         { imageGroups: qb => qb.where('group', 'dispute') },
         'message.store',
@@ -154,9 +162,11 @@ class DisputeModel extends bookshelf.Model {
       return msg;
     });
 
+    const invoice = dispute.related('invoice');
     return {
       ...this.detailDispute(dispute),
       proofs: dispute.related('imageGroups'),
+      products: invoice.related('items').map(item => item.related('product').serialize({ minimal: true })),
       discussions,
     };
   }
@@ -172,8 +182,36 @@ class DisputeModel extends bookshelf.Model {
     });
     return {
       ...dispute.serialize(),
-      products,
+      dispute_products: products,
     };
+  }
+
+  static async bulkReviewProducts(id, userId, reviews) {
+    const dispute = await this.where({
+      id_dispute: id,
+      id_users: userId,
+      status_dispute: DisputeStatus.SEND_BY_SELLER,
+    }).fetch({ withRelated: ['invoice.items.product'] });
+
+    if (!dispute) throw getDisputeError('dispute', 'not_found');
+
+    const invoice = dispute.related('invoice');
+    const products = invoice.related('items').map(item => item.related('product').serialize({ minimal: true }));
+
+    products.forEach((product) => {
+      const found = _.find(reviews, o => o.product_id === product.id);
+      if (!found) throw createReviewError('review', 'error');
+    });
+
+    const newReviews = await Promise.all(invoice.related('items').map(async (item) => {
+      const product = item.related('product').serialize();
+      const val = _.find(reviews, o => o.product_id === product.id);
+      return await Review.create(item, product, userId, val);
+    }));
+
+    await dispute.save({ status_dispute: DisputeStatus.RECEIVE_BY_USER }, { patch: true });
+
+    return newReviews;
   }
 
   static async createDiscussion(where, userId, content) {
@@ -209,12 +247,18 @@ class DisputeModel extends bookshelf.Model {
   }
 
   static async updateAirwayBill(where, airwayBill) {
-    const dispute = await this.where(where).fetch({ withRelated: ['message'] });
+    const dispute = await this.where(where).fetch();
     if (!dispute) throw getDisputeError('dispute', 'not_found');
     return await dispute.save({
       noresi_dispute: airwayBill,
       status_dispute: DisputeStatus.SEND_BY_SELLER,
     }, { patch: true });
+  }
+
+  static async updateStatus(where, status) {
+    const dispute = await this.where(where).fetch();
+    if (!dispute) throw getDisputeError('dispute', 'not_found');
+    return await dispute.save({ status_dispute: status }, { patch: true });
   }
 
   /**

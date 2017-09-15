@@ -224,9 +224,13 @@ PaymentController.getDispute = async (req, res, next) => {
 PaymentController.createDisputeDiscussion = async (req, res, next) => {
   const where = { id_users: req.user.id, id_dispute: req.params.id };
   const message = await Dispute.createDiscussion(where, req.user.id, req.body.content);
-  req.resData = {
-    data: message,
-  };
+  req.resData = { data: message };
+  return next();
+};
+
+PaymentController.confirmDispute = async (req, res, next) => {
+  const dispute = await Dispute.bulkReviewProducts(req.params.id, req.user.id, req.body);
+  req.resData = { data: dispute };
   return next();
 };
 
@@ -265,9 +269,7 @@ PaymentController.createStoreDisputeDiscussion = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const where = { id_toko: storeId, id_dispute: req.params.id };
   const message = await Dispute.createDiscussion(where, req.user.id, req.body.content);
-  req.resData = {
-    data: message,
-  };
+  req.resData = { data: message };
   return next();
 };
 
@@ -275,9 +277,15 @@ PaymentController.updateAirwayBill = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const where = { id_toko: storeId, id_dispute: req.params.id };
   const dispute = await Dispute.updateAirwayBill(where, req.body.airway_bill);
-  req.resData = {
-    data: dispute,
-  };
+  req.resData = { data: dispute };
+  return next();
+};
+
+PaymentController.confirmStoreDispute = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const where = { id_toko: storeId, id_dispute: req.params.id };
+  const dispute = await Dispute.updateStatus(where, DisputeStatus.RECEIVE_BY_SELLER);
+  req.resData = { data: dispute };
   return next();
 };
 

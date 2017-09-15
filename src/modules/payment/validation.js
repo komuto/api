@@ -32,6 +32,13 @@ constraints.bulkReview = {
   accuracy: { presence: true, numericality: true },
 };
 
+constraints.disputeBulkReview = {
+  product_id: { presence: true, numericality: true },
+  review: { presence: true },
+  quality: { presence: true, numericality: true },
+  accuracy: { presence: true, numericality: true },
+};
+
 constraints.dispute = {
   products: { presence: true },
   problems: { presence: true },
