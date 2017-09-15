@@ -40,9 +40,11 @@ class ProductModel extends bookshelf.Model {
     return 'id_produk';
   }
 
-  serialize({ minimal = false, wishlist = false } = {}) {
+  serialize({ minimal = false, wishlist = false, alterId = false } = {}) {
     const product = {
-      id: this.get('id_produk'),
+      id: !alterId ? this.get('id_produk') : parseDec(`${this.get('id_produk')}.` +
+        // if alterId is number then use that instead of id_toko
+        `${(typeof alterId === 'number' && alterId) || this.get('id_toko')}`),
       name: this.get('nama_produk'),
       slug: slug(this.get('nama_produk'), { lower: true, charmap: '' }),
       price: parseDec(this.get('harga_produk')),

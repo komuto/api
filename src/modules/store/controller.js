@@ -126,7 +126,7 @@ StoreController.createMessage = async (req, res, next) => {
     flag_receiver: MessageFlagStatus.UNREAD,
     flag_sender_at: new Date(),
     flag_receiver_at: new Date(),
-    invoice_id: req.body.invoice_id,
+    parent_id: req.body.invoice_id,
     type,
   });
   const message = await Message.create(messageObj);

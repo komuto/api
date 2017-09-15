@@ -195,10 +195,11 @@ class CatalogModel extends bookshelf.Model {
           : {
             store_id: product.id_toko,
             name: product.nama_toko,
-            commission: MasterFee.calculateCommissionByFees(
-              masterFee,
-              parseNum(product.harga_produk),
-              ),
+            commission: {
+              nominal: MasterFee.calculateCommissionByFees(masterFee, Number(product.harga_produk)),
+              percent: MasterFee
+                .calculateCommissionByFees(masterFee, Number(product.harga_produk), true),
+            },
           };
         // Provide this.get() utility for serialize
         Object.setPrototypeOf(product, getter);

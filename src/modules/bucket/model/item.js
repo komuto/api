@@ -92,7 +92,7 @@ class ItemModel extends bookshelf.Model {
       store = item.related('dropship').related('store');
     }
 
-    product = product.serialize({ minimal: true });
+    product = product.serialize({ minimal: true, alterId: store.get('id_toko') });
     product.image = images.length ? images[0].file : config.defaultImage.product;
     product.store = store;
     product.location = { district: districtStore };
