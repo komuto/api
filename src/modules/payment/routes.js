@@ -192,11 +192,19 @@ routes.get('/invoices/:id([0-9]{1,10})/processing-order-detail',
   apiResponse());
 
 /**
- * GET processing orders
+ * GET sales
  */
 routes.get('/sales',
   auth(),
   wrap(PaymentController.getSales),
+  apiResponse());
+
+/**
+ * GET sale detail
+ */
+routes.get('/invoices/:id([0-9]{1,10})/sale-detail',
+  auth(),
+  wrap(PaymentController.getSaleDetail),
   apiResponse());
 
 /**

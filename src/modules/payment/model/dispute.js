@@ -54,7 +54,7 @@ class DisputeModel extends bookshelf.Model {
       invoice_id: this.get('identifierinvoice_dispute'),
       invoice: this.relations.invoice ? this.related('invoice') : undefined,
       solution: parseNum(this.get('solusi_dispute')),
-      problems: this.getProblems(),
+      problems: this.get('problem_dispute') ? this.getProblems() : null,
       note: this.get('alasan_dispute'),
       dispute_number: this.get('nopelaporan_dispute'),
       remarks: this.get('remarksresult_dispute'),

@@ -104,6 +104,10 @@ class InvoiceModel extends bookshelf.Model {
     return this.belongsTo('User', 'id_user');
   }
 
+  dispute() {
+    return this.hasOne('Dispute', 'identifierinvoice_dispute');
+  }
+
   static async create(data) {
     return await new this(data).save().catch(() => {
       throw createInvoiceError('invoice', 'error');
@@ -167,13 +171,14 @@ class InvoiceModel extends bookshelf.Model {
     if (invoiceStatus) where = { ...where, status_transaksi: invoiceStatus };
     const invoices = await this.where(where)
       .query((qb) => {
+        if (!invoiceStatus) {
+          qb.whereNotIn('status_transaksi', [InvoiceTransactionStatus.WAITING, InvoiceTransactionStatus.PROCEED]);
+          qb.whereNotNull('status_transaksi');
+        }
         qb.join('listbucket as l', 'l.id_invoice', 'invoice.id_invoice')
           .leftJoin('dropshipper as d', 'd.id_dropshipper', 'l.id_dropshipper')
           .orWhere('d.id_toko', id)
           .andWhere('status_transaksi', invoiceStatus);
-        if (!invoiceStatus) {
-          qb.whereNotIn('status_transaksi', [InvoiceTransactionStatus.WAITING, InvoiceTransactionStatus.PROCEED]);
-        }
       })
       .fetchPage({ page, pageSize, withRelated: ['items.product.image', 'buyer'] });
     if (!invoices) return [];
@@ -193,24 +198,37 @@ class InvoiceModel extends bookshelf.Model {
   /**
    * @param id {int} invoice id
    * @param store {object}
-   * @param invoiceStatus {int}
+   * @param invoiceStatus {object}
    */
-  static async getOrderDetail(id, store, invoiceStatus) {
+  static async getOrderDetail(id, store, invoiceStatus = null) {
     const storeId = store.get('id_toko');
-    const invoice = await this.where({ status_transaksi: invoiceStatus,
-      'invoice.id_invoice': id,
-      'invoice.id_toko': storeId })
-      .query(qb => qb.select(['invoice.*', 'd.id_toko as store_dropship_id'])
-        .join('listbucket as l', 'l.id_invoice', 'invoice.id_invoice')
-        .leftJoin('dropshipper as d', 'd.id_dropshipper', 'l.id_dropshipper')
-        .orWhere('d.id_toko', storeId)
-        .where({ 'invoice.id_invoice': id,
-          status_transaksi: invoiceStatus }))
-      .fetch({ withRelated: ['items.product.image',
-        { 'store.user.address': qb => qb.where('alamat_originjual', 1) },
-        'buyer',
-        'shipping.address',
-        'shipping.expeditionService.expedition'] });
+    let where = { 'invoice.id_invoice': id };
+    const related = [
+      'items.product.image',
+      { 'store.user.address': qb => qb.where('alamat_originjual', 1) },
+      'buyer',
+      'shipping.address',
+      'shipping.expeditionService.expedition',
+    ];
+    if (invoiceStatus) {
+      where = { ...where, status_transaksi: invoiceStatus };
+    } else {
+      related.push('items.review');
+      related.push('dispute');
+    }
+    const invoice = await this.where({ ...where, 'invoice.id_toko': storeId })
+      .query((qb) => {
+        if (!invoiceStatus) {
+          qb.whereNotIn('status_transaksi', [InvoiceTransactionStatus.WAITING, InvoiceTransactionStatus.PROCEED]);
+          qb.whereNotNull('status_transaksi');
+        }
+        qb.select(['invoice.*', 'd.id_toko as store_dropship_id'])
+          .join('listbucket as l', 'l.id_invoice', 'invoice.id_invoice')
+          .leftJoin('dropshipper as d', 'd.id_dropshipper', 'l.id_dropshipper')
+          .orWhere('d.id_toko', storeId)
+          .where(where);
+      })
+      .fetch({ withRelated: related });
     if (!invoice) return false;
     const storeDropshipId = invoice.get('store_dropship_id');
     const getBuyer = storeDropshipId && storeId === invoice.get('id_toko') ? false : invoice.load('buyer');
@@ -225,11 +243,23 @@ class InvoiceModel extends bookshelf.Model {
     const items = invoice.related('items').map((item) => {
       const product = item.related('product');
       const image = product.related('image').serialize().file;
+      let review = item.related('review');
+      review = review.serialize().id ? review : null;
       item = item.serialize({ minimal: true, note: true });
-      return { ...item, product: { ...product.serialize({ minimal: true }), image } };
+      item = { ...item, product: { ...product.serialize({ minimal: true }), image } };
+      if (!invoiceStatus) {
+        item = {
+          ...item,
+          review: invoice.get('status_transaksi') === InvoiceTransactionStatus.RECEIVED ? review : null,
+        };
+      }
+      return item;
     });
-    const [buyerAddress, sellerAddress, user]
-      = await Promise.all([getBuyerAddress, getSellerAddress, getBuyer]);
+    const [buyerAddress, sellerAddress, user] = await Promise.all([
+      getBuyerAddress,
+      getSellerAddress,
+      getBuyer,
+    ]);
     const buyer = user ? invoice.related('buyer').serialize({ orderDetail: true })
       // exclude buyer if we are the original seller
       : { id: null, name: null, photo: null, phone_number: null };
@@ -237,8 +267,10 @@ class InvoiceModel extends bookshelf.Model {
       invoice: invoice.serialize({ minimal: true, orderDetail: true }),
       items,
       buyer: { ...buyer, address: buyerAddress.serialize({ full: true }) },
-      seller: { ...seller.serialize({ orderDetail: true }),
-        address: sellerAddress.serialize({ full: true }) },
+      seller: {
+        ...seller.serialize({ orderDetail: true }),
+        address: sellerAddress.serialize({ full: true }),
+      },
     };
     if (storeDropshipId) {
       const dropshipStore = await getStore;
@@ -246,6 +278,17 @@ class InvoiceModel extends bookshelf.Model {
       // include reseller logo if we are the original seller
       resellerStore.logo = Number(storeDropshipId) === Number(storeId) ? null : resellerStore.logo;
       result.reseller = { store: resellerStore };
+    }
+    if (!invoiceStatus) {
+      const shipping = invoice.related('shipping').serialize();
+      delete shipping.address;
+      delete shipping.expedition_service;
+      const dispute = invoice.related('dispute').serialize();
+      return {
+        ...result,
+        shipping,
+        dispute: dispute.id ? dispute : null,
+      };
     }
     return result;
   }

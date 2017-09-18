@@ -376,6 +376,17 @@ PaymentController.getSales = async (req, res, next) => {
   return next();
 };
 
+PaymentController.getSaleDetail = async (req, res, next) => {
+  const store = await Store.where('id_users', req.user.id).fetch();
+  const invoice = await Invoice.getOrderDetail(req.params.id, store);
+  if (!invoice) throw getInvoiceError('invoice', 'not_found');
+  req.resData = {
+    message: 'Sale Detail Data',
+    data: invoice,
+  };
+  return next();
+};
+
 PaymentController.acceptOrder = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const invoice = await Invoice.where({

@@ -72,6 +72,13 @@ class ItemModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to review
+   */
+  review() {
+    return this.belongsTo('Review', 'id_ulasanproduk');
+  }
+
+  /**
    * Get item by bucket_id and product_id
    */
   static async get(where) {
