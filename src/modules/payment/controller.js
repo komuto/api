@@ -121,6 +121,7 @@ PaymentController.getSaldoSnapToken = async (req, res, next) => {
   return next();
 };
 
+// TODO: Add pagination
 PaymentController.listTransactions = async (req, res, next) => {
   const buckets = await Bucket.listTransactions(req.user.id);
   req.resData = {
@@ -303,10 +304,18 @@ PaymentController.notification = async (req, res, next) => {
 };
 
 PaymentController.getNewOrders = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const storeId = await Store.getStoreId(req.user.id);
-  const invoices = await Invoice.getOrders(storeId, InvoiceTransactionStatus.WAITING);
+  const invoices = await Invoice.getOrders(
+    storeId,
+    InvoiceTransactionStatus.WAITING,
+    page,
+    pageSize,
+    );
   req.resData = {
     message: 'New Orders Data',
+    meta: { page, limit: pageSize },
     data: invoices,
   };
   return next();
@@ -325,10 +334,18 @@ PaymentController.getNewOrderDetail = async (req, res, next) => {
 };
 
 PaymentController.getProcessingOrders = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const storeId = await Store.getStoreId(req.user.id);
-  const invoices = await Invoice.getOrders(storeId, InvoiceTransactionStatus.PROCEED);
+  const invoices = await Invoice.getOrders(
+    storeId,
+    InvoiceTransactionStatus.PROCEED,
+    page,
+    pageSize,
+    );
   req.resData = {
     message: 'Processing Orders Data',
+    meta: { page, limit: pageSize },
     data: invoices,
   };
   return next();
@@ -342,6 +359,19 @@ PaymentController.getProcessingOrderDetail = async (req, res, next) => {
   req.resData = {
     message: 'Processing Order Detail Data',
     data: invoice,
+  };
+  return next();
+};
+
+PaymentController.getSales = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const storeId = await Store.getStoreId(req.user.id);
+  const invoices = await Invoice.getOrders(storeId, null, page, pageSize);
+  req.resData = {
+    message: 'Sales Data',
+    meta: { page, limit: pageSize },
+    data: invoices,
   };
   return next();
 };

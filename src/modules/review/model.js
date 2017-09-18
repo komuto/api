@@ -99,6 +99,7 @@ class ReviewModel extends bookshelf.Model {
    * @param {Object} params
    */
   static async bulkCreate(params) {
+    // TODO: Update shipping status
     const { user_id: userId, bucket_id: bucketId, invoice_id: invoiceId, reviews } = params;
 
     const invoice = await Invoice.get(userId, bucketId, invoiceId);

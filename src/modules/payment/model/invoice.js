@@ -159,16 +159,23 @@ class InvoiceModel extends bookshelf.Model {
   /**
    * @param id {int} store id
    * @param invoiceStatus {int}
+   * @param page {int}
+   * @param pageSize {int}
    */
-  static async getOrders(id, invoiceStatus) {
-    const invoices = await this.where({
-      status_transaksi: invoiceStatus,
-      'invoice.id_toko': id })
-      .query(qb => qb.join('listbucket as l', 'l.id_invoice', 'invoice.id_invoice')
-        .leftJoin('dropshipper as d', 'd.id_dropshipper', 'l.id_dropshipper')
-        .orWhere('d.id_toko', id)
-        .andWhere('status_transaksi', invoiceStatus))
-      .fetchAll({ withRelated: ['items.product.image', 'buyer'] });
+  static async getOrders(id, invoiceStatus, page, pageSize) {
+    let where = { 'invoice.id_toko': id };
+    if (invoiceStatus) where = { ...where, status_transaksi: invoiceStatus };
+    const invoices = await this.where(where)
+      .query((qb) => {
+        qb.join('listbucket as l', 'l.id_invoice', 'invoice.id_invoice')
+          .leftJoin('dropshipper as d', 'd.id_dropshipper', 'l.id_dropshipper')
+          .orWhere('d.id_toko', id)
+          .andWhere('status_transaksi', invoiceStatus);
+        if (!invoiceStatus) {
+          qb.whereNotIn('status_transaksi', [InvoiceTransactionStatus.WAITING, InvoiceTransactionStatus.PROCEED]);
+        }
+      })
+      .fetchPage({ page, pageSize, withRelated: ['items.product.image', 'buyer'] });
     if (!invoices) return [];
     return invoices.map((invoice) => {
       const products = invoice.related('items').map((item) => {
