@@ -3,15 +3,15 @@ import core from '../../core';
 const { parseNum, parseDate, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
 
-class BucketModel extends bookshelf.Model {
+class RefundModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
-    return 'bucket';
+    return 'bucket_refund';
   }
 
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
-    return 'id_bucket';
+    return 'id_refund';
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -20,20 +20,14 @@ class BucketModel extends bookshelf.Model {
   }
 
   serialize() {
-    const bucket = {
-      id: this.get('id_bucket'),
-      user_id: this.get('id_users'),
-      promo_id: this.get('id_promo'),
-      promo: this.relations.promo ? this.related('promo').serialize() : null,
-      payment_method_id: this.get('id_paymentmethod'),
-      unique_code: this.get('kode_unik'),
-      order_at: parseDate(this.get('tgl_orderbucket')),
-      wallet: parseNum(this.get('bayar_wallet')),
-      status: parseNum(this.get('status_bucket')),
-      status_at: parseDate(this.get('tglstatus_bucket')),
+    return {
+      id: this.get('id_refund'),
+      bucket_id: this.get('id_users'),
+      invoice_id: this.get('id_promo'),
+      dispute_id: this.get('id_promo'),
+      refund_number: this.get(''),
+      total: this.get(''),
     };
-    if (this.relations.promo) delete bucket.promo_id;
-    return bucket;
   }
 
   /**
@@ -63,5 +57,5 @@ class BucketModel extends bookshelf.Model {
   }
 }
 
-export const Bucket = bookshelf.model('Bucket', BucketModel);
-export default { Bucket };
+export const Refund = bookshelf.model('Bucket', RefundModel);
+export default { Refund };
