@@ -2,7 +2,7 @@ import { BankAccount } from '../bank/model';
 import { OTPStatus } from '../OTP/model';
 import { Withdraw, TransSummary, TransType, SummTransType } from './model';
 import { User } from '../user/model';
-import { withdrawError } from './messages';
+import { withdrawError, transDetailError } from './messages';
 import nominal from '../../../config/nominal.json';
 
 export const SaldoController = {};
@@ -59,3 +59,32 @@ SaldoController.nominal = async (req, res, next) => {
   return next();
 };
 
+SaldoController.historyDetail = async (req, res, next) => {
+  const transaction = await TransSummary.where({ id_summarytransaksi: req.params.id,
+    id_users: req.user.id }).fetch();
+  if (!transaction) throw transDetailError('transaction', 'not_found');
+  req.body.transType = transaction.get('kode_summarytransaksi');
+  req.body.transaction = transaction;
+  return next();
+};
+
+// SaldoController.sellingTrans = async (req, res, next) => {
+//   if (req.body.transType !== SummTransType.SELLING) return next();
+//
+// }
+
+// SaldoController.paymentTrans = async (req, res, next) => {
+//   if (req.body.transType !== SummTransType.PAYMENT) return next();
+//
+// }
+
+SaldoController.withdrawTrans = async (req, res, next) => {
+  if (req.body.transType !== SummTransType.WITHDRAW) return next();
+  const transaction = await req.body.transaction.load('summaryable.bankAccount.bank');
+  const bankAccount = transaction.related('summaryable').related('bankAccount').serialize({ minimal: true });
+  bankAccount.bank = bankAccount.bank.serialize({ minimal: true });
+  bankAccount.bankId = undefined;
+  const data = { transaction: transaction.serialize({ minimal: true }), bankAccount };
+  req.resData = { message: 'Withdraw Transaction Data', data };
+  return next();
+};

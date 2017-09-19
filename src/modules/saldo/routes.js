@@ -28,6 +28,15 @@ routes.get('/users/saldo/history',
   apiResponse());
 
 /**
+ * History saldo detail
+ */
+routes.get('/users/saldo/history/:id([0-9]{1,10})/',
+  auth(),
+  wrap(SaldoController.historyDetail),
+  wrap(SaldoController.withdrawTrans),
+  apiResponse());
+
+/**
  * List nominal
  */
 routes.get('/saldo/nominal',
