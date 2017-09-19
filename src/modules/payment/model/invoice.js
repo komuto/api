@@ -51,7 +51,7 @@ class InvoiceModel extends bookshelf.Model {
       total_bill: parseNum(this.get('total_tagihan')),
       total_price: parseNum(this.get('total_harga')),
       status: parseNum(this.get('status_invoice')),
-      transaction_status: parseNum(this.get('status_transaksi'), null),
+      transaction_status: this.get('status_transaksi') === 0 ? 0 : parseNum(this.get('status_transaksi'), null),
       created_at: parseDate(this.get('createdate_invoice')),
     };
     if (orderDetail) {
