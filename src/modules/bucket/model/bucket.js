@@ -9,9 +9,8 @@ import './shipping';
 import { Item } from './item';
 import { PromoType } from './promo';
 import config from './../../../../config';
-import { Wishlist } from "../../user/model/wishlist";
 
-const { parseNum, parseDate } = core.utils;
+const { parseNum, parseDate, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
 bookshelf.plugin(ModelBase.pluggable);
 
@@ -303,11 +302,7 @@ class BucketModel extends bookshelf.Model {
       status: 'status_bucket',
       status_at: 'tglstatus_bucket',
     };
-    const newData = {};
-    Object.keys(data).forEach((prop) => {
-      if (column[prop]) newData[column[prop]] = data[prop];
-    });
-    return newData;
+    return matchDB(data, column);
   }
 }
 
