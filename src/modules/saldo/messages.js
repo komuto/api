@@ -14,6 +14,11 @@ export const errMsg = {
     otp_not_found: 'Kode otp salah atau expired',
     not_number: 'harus angka',
   },
+  transDetail: {
+    title: 'Lihat detail transaksi gagal',
+    not_found: 'Transaksi tidak ditemukan',
+  },
 };
 
 export const withdrawError = formatError.bind(errMsg.withdrawMsg);
+export const transDetailError = formatError.bind(errMsg.transDetail);

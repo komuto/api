@@ -5,7 +5,7 @@ import { User } from '../../user/model';
 import { TransType } from './transaction_type';
 import { DetailTransSummary } from './detail_transaction_summary';
 
-const { matchDB, parseNum } = core.utils;
+const { matchDB, parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
 
 export const SummTransType = {
@@ -32,14 +32,19 @@ class transSummaryModel extends bookshelf.Model {
     return ['tgl_summarytransaksi', 'tglstatus_summarytransaksi'];
   }
 
-  serialize() {
-    return {
+  serialize({ minimal = false} = {}) {
+    const trans = {
       id: this.get('id_summarytransaksi'),
-      user_id: parseNum(this.get('id_users')),
       amount: parseNum(this.get('nominal_summarytransaksi')),
+      trans_type: this.get('kode_summarytransaksi'),
+      date: parseDate(this.get('tgl_summarytransaksi')),
+    };
+    if (minimal) return trans;
+    return {
+      ...trans,
+      user_id: parseNum(this.get('id_users')),
       first_saldo: parseNum(this.get('saldo_awal')),
       last_saldo: parseNum(this.get('saldo_akhir')),
-      type: this.get('kode_summarytransaksi'),
       remark: this.get('remark'),
     };
   }
@@ -49,6 +54,10 @@ class transSummaryModel extends bookshelf.Model {
    */
   detailTransSummary() {
     return this.hasOne('DetailTransSummary', 'id_summarytransaksi', 'id_summarytransaksi');
+  }
+
+  summaryable() {
+    return this.morphTo('summaryable', 'Bucket', 'Invoice', 'Withdraw');
   }
 
   /**

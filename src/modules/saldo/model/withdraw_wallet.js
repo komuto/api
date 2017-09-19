@@ -14,6 +14,10 @@ class WithdrawModel extends bookshelf.Model {
     return ['tanggal'];
   }
 
+  bankAccount() {
+    return this.belongsTo('BankAccount', 'id_rekeninguser');
+  }
+
   /**
    * Create a new line item
    * @param {Object} data

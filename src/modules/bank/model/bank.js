@@ -22,10 +22,14 @@ class BankModel extends bookshelf.Model {
     return 'id_masterbank';
   }
 
-  serialize() {
-    return {
+  serialize({ minimal = false } = {}) {
+    const bank = {
       id: this.get('id_masterbank'),
       name: this.get('nama_masterbank'),
+    };
+    if (minimal) return bank;
+    return {
+      ...bank,
       code: this.get('kode_masterbank'),
       status: this.get('status_masterbank'),
       status_at: moment(this.get('tglstatus_masterbank')).unix(),
