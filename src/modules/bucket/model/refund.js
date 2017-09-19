@@ -1,7 +1,9 @@
 import core from '../../core';
 
-const { parseNum, parseDate, matchDB } = core.utils;
+const { parseDate, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
+
+export const RefundStatus = { PROCEED: 1, SUCCESS: 2 };
 
 class RefundModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -16,25 +18,24 @@ class RefundModel extends bookshelf.Model {
 
   // eslint-disable-next-line class-methods-use-this
   get hasTimestamps() {
-    return false;
+    return ['create_at'];
   }
 
   serialize() {
     return {
       id: this.get('id_refund'),
-      bucket_id: this.get('id_users'),
-      invoice_id: this.get('id_promo'),
-      dispute_id: this.get('id_promo'),
-      refund_number: this.get(''),
-      total: this.get(''),
+      bucket_id: this.get('id_bucket'),
+      invoice_id: this.get('id_invoice'),
+      dispute_id: this.get('id_dispute'),
+      refund_number: this.get('no_refund'),
+      total: this.get('total_refund'),
+      status: this.get('status_refund'),
+      created_at: parseDate(this.get('create_at')),
     };
   }
 
-  /**
-   * Add relation to item
-   */
-  items() {
-    return this.hasMany('Item', 'id_bucket');
+  static async create(data) {
+    return await new this(data).save();
   }
 
   /**
@@ -44,18 +45,15 @@ class RefundModel extends bookshelf.Model {
    */
   static matchDBColumn(data) {
     const column = {
-      user_id: 'id_users',
-      promo_id: 'id_promo',
-      order_at: 'tgl_orderbucket',
-      wallet: 'bayar_wallet',
-      unique_code: 'kode_unik',
-      payment_method_id: 'id_paymentmethod',
-      status: 'status_bucket',
-      status_at: 'tglstatus_bucket',
+      bucket_id: 'id_bucket',
+      invoice_id: 'id_invoice',
+      dispute_id: 'id_dispute',
+      refund_number: 'no_refund',
+      total: 'total_refund',
+      status: 'status_refund',
     };
     return matchDB(data, column);
   }
 }
 
-export const Refund = bookshelf.model('Bucket', RefundModel);
-export default { Refund };
+export const Refund = bookshelf.model('Refund', RefundModel);

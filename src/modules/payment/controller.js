@@ -12,8 +12,9 @@ import {
   DisputeResponseStatus,
   DisputeStatus,
   DisputeProduct,
+  DisputeSolutionType,
 } from './model';
-import { Bucket, BucketStatus, Shipping } from './../bucket/model';
+import { Bucket, BucketStatus, Shipping, Refund, RefundStatus, RefundItem } from './../bucket/model';
 import { BankAccount } from '../bank/model';
 import { Store } from '../store/model';
 import config from '../../../config';
@@ -28,7 +29,7 @@ const midtrans = new Midtrans({
   serverKey: config.midtrans.serverKey,
   isProduction: config.midtrans.isProduction,
 });
-const { getName } = core.utils;
+const { getName, getProductAndStore } = core.utils;
 
 export const PaymentController = {};
 export default { PaymentController };
@@ -166,20 +167,22 @@ PaymentController.bulkReview = async (req, res, next) => {
 
 PaymentController.dispute = async (req, res, next) => {
   const invoice = await Invoice.get(req.user.id, req.params.id, req.params.invoice_id, 'items.product');
+  const invoiceObj = invoice.serialize();
   const items = invoice.related('items').map(item => ({
     ...item.serialize(),
     product: item.related('product').serialize(),
   }));
   const problems = req.body.problems.map(problem => ({ problem }));
+  const disputeNumber = `${randomInt(1000, 9999)}-${moment().format('DD/MM/YYYY')}`;
   const data = Dispute.matchDBColumn({
     user_id: req.user.id,
-    store_id: invoice.serialize().store_id,
-    invoice_id: invoice.serialize().id,
+    store_id: invoiceObj.store_id,
+    invoice_id: invoiceObj.id,
     invoice_type: 1, // default
     solution: req.body.solution,
     problems,
     note: req.body.note,
-    dispute_number: `${randomInt(1000, 9999)}-${moment().format('DD/MM/YYYY')}`,
+    dispute_number: disputeNumber,
     status: DisputeStatus.NEW,
     response_status: DisputeResponseStatus.NO_RESPONSE_YET,
     response_at: moment(),
@@ -188,7 +191,26 @@ PaymentController.dispute = async (req, res, next) => {
   const dispute = await Dispute.create(data);
   await DisputeProduct.bulkCreate(dispute.serialize().id, req.body.products, items);
   if (req.body.images) await ImageGroup.bulkCreate(dispute.get('id_dispute'), req.body.images, 'dispute');
-  await Invoice.updateStatus(invoice.serialize().id, InvoiceTransactionStatus.PROBLEM);
+  if (req.body.solution === DisputeSolutionType.REFUND) {
+    let totalRefund = 0;
+    req.body.products.forEach(async (val) => {
+      const { productId } = getProductAndStore(val);
+      const item = _.find(items, o => o.product.id === productId);
+      if (!item) return;
+      totalRefund += item.product.price;
+    });
+    const refundData = Refund.matchDBColumn({
+      bucket_id: invoiceObj.bucket_id,
+      invoice_id: invoiceObj.id,
+      dispute_id: dispute.serialize().id,
+      refund_number: `RF${disputeNumber}`,
+      total: totalRefund,
+      status: RefundStatus.PROCEED,
+    });
+    const refund = await Refund.create(refundData);
+    await RefundItem.bulkCreate(refund.serialize().id, req.body.products, items);
+  }
+  await Invoice.updateStatus(invoiceObj.id, InvoiceTransactionStatus.PROBLEM);
   req.resData = { data: dispute };
   return next();
 };
