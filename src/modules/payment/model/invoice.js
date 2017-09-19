@@ -129,7 +129,7 @@ class InvoiceModel extends bookshelf.Model {
       id_invoice: id,
       id_user: userId,
       id_bucket: bucketId,
-    }).fetch({ withRelated: ['items.product.images', 'store', 'shipping'] });
+    }).fetch({ withRelated: ['items.product.images', 'store', 'shipping.address'] });
 
     if (!invoice) throw getInvoiceError('invoice', 'not_found');
 
@@ -137,7 +137,7 @@ class InvoiceModel extends bookshelf.Model {
       const product = item.related('product');
       const image = product.related('images').models;
       return {
-        ...item.serialize({ minimal: true }),
+        ...item.serialize({ note: true }),
         product: {
           ...product.serialize({ minimal: true }),
           image: image.length ? image[0].serialize().file : config.defaultImage.product,
