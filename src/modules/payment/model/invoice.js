@@ -231,7 +231,7 @@ class InvoiceModel extends bookshelf.Model {
       .fetch({ withRelated: related });
     if (!invoice) return false;
     const storeDropshipId = invoice.get('store_dropship_id');
-    const getBuyer = storeDropshipId && storeId === invoice.get('id_toko') ? false : invoice.load('buyer');
+    const getBuyer = invoice.load('buyer');
     let getStore;
     if (storeDropshipId) {
       // If we are the reseller then use the store in the argument
@@ -255,14 +255,12 @@ class InvoiceModel extends bookshelf.Model {
       }
       return item;
     });
-    const [buyerAddress, sellerAddress, user] = await Promise.all([
+    const [buyerAddress, sellerAddress] = await Promise.all([
       getBuyerAddress,
       getSellerAddress,
       getBuyer,
     ]);
-    const buyer = user ? invoice.related('buyer').serialize({ orderDetail: true })
-      // exclude buyer if we are the original seller
-      : { id: null, name: null, photo: null, phone_number: null };
+    const buyer = invoice.related('buyer').serialize({ orderDetail: true });
     const result = {
       invoice: invoice.serialize({ minimal: true, orderDetail: true }),
       items,
@@ -273,11 +271,15 @@ class InvoiceModel extends bookshelf.Model {
       },
     };
     if (storeDropshipId) {
+      const isReseller = Number(storeDropshipId) === Number(storeId);
       const dropshipStore = await getStore;
       const resellerStore = dropshipStore.serialize({ favorite: true });
       // include reseller logo if we are the original seller
-      resellerStore.logo = Number(storeDropshipId) === Number(storeId) ? null : resellerStore.logo;
+      resellerStore.logo = isReseller ? null : resellerStore.logo;
       result.reseller = { store: resellerStore };
+      result.invoice.type = isReseller ? 'reseller' : 'seller';
+    } else {
+      result.invoice.type = 'buyer';
     }
     if (!invoiceStatus) {
       const shipping = invoice.related('shipping').serialize();
