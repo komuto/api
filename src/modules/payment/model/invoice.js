@@ -129,7 +129,7 @@ class InvoiceModel extends bookshelf.Model {
       id_invoice: id,
       id_user: userId,
       id_bucket: bucketId,
-    }).fetch({ withRelated: ['items.product.images', 'store', 'shipping.address'] });
+    }).fetch({ withRelated: ['items.product.images', 'store', 'shipping.address', 'shipping.expeditionService.expedition'] });
 
     if (!invoice) throw getInvoiceError('invoice', 'not_found');
 
