@@ -294,6 +294,10 @@ class BucketModel extends bookshelf.Model {
     }, 0);
   }
 
+  static async updateStatus(id, status) {
+    return await this.where({ id_bucket: id }).save({ status_bucket: status }, { patch: true });
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data

@@ -319,11 +319,16 @@ PaymentController.confirmStoreDispute = async (req, res, next) => {
 PaymentController.notification = async (req, res, next) => {
   let data = '';
   req.on('data', (chunk) => { data += chunk; });
-  req.on('end', () => {
+  req.on('end', async () => {
     req.body = data ? JSON.parse(data) : {};
     if (typeof req.body === 'string') req.body = JSON.parse(req.body);
+    const bucketId = req.body.order_id.split('-')[1];
+    const status = req.body.status_code === '200' ? BucketStatus.PAYMENT_RECEIVED : BucketStatus.WAITING_FOR_VERIFICATION;
+    const bucket = await Bucket.updateStatus(bucketId, status);
     console.log('\n=== MIDTRANS ===');
     console.log(req.body);
+    console.log('\n');
+    console.log(bucket.serialize());
     console.log('\n');
     return next();
   });
