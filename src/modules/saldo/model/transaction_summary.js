@@ -32,16 +32,12 @@ class transSummaryModel extends bookshelf.Model {
     return ['tgl_summarytransaksi', 'tglstatus_summarytransaksi'];
   }
 
-  serialize({ minimal = false} = {}) {
-    const trans = {
+  serialize() {
+    return {
       id: this.get('id_summarytransaksi'),
       amount: parseNum(this.get('nominal_summarytransaksi')),
       trans_type: this.get('kode_summarytransaksi'),
       date: parseDate(this.get('tgl_summarytransaksi')),
-    };
-    if (minimal) return trans;
-    return {
-      ...trans,
       user_id: parseNum(this.get('id_users')),
       first_saldo: parseNum(this.get('saldo_awal')),
       last_saldo: parseNum(this.get('saldo_akhir')),

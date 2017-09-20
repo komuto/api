@@ -171,6 +171,7 @@ class InvoiceModel extends bookshelf.Model {
     if (invoiceStatus) where = { ...where, status_transaksi: invoiceStatus };
     const invoices = await this.where(where)
       .query((qb) => {
+        qb.distinct();
         if (!invoiceStatus) {
           qb.whereNotIn('status_transaksi', [InvoiceTransactionStatus.WAITING, InvoiceTransactionStatus.PROCEED]);
           qb.whereNotNull('status_transaksi');
@@ -188,9 +189,12 @@ class InvoiceModel extends bookshelf.Model {
         const image = product.related('image').serialize().file;
         return { ...product.serialize({ minimal: true }), image };
       });
-      const dropship = !!invoice.related('items').models[0].get('id_dropshipper');
+      const isDropship = !!invoice.related('items').models[0].get('id_dropshipper');
       const user = invoice.related('buyer').serialize({ orderDetail: true });
-      invoice = { ...invoice.serialize({ minimal: true }), is_drophship: dropship };
+      invoice = invoice.serialize({ minimal: true });
+      if (!isDropship) invoice.type = 'buyer';
+      else if (Number(id) === Number(invoice.store_id)) invoice.type = 'seller';
+      else invoice.type = 'reseller';
       return { invoice, products, user };
     });
   }
