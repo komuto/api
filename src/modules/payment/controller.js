@@ -125,9 +125,12 @@ PaymentController.getSaldoSnapToken = async (req, res, next) => {
 
 // TODO: Add pagination
 PaymentController.listTransactions = async (req, res, next) => {
-  const buckets = await Bucket.listTransactions(req.user.id);
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const buckets = await Bucket.listTransactions(req.user.id, page, pageSize);
   req.resData = {
     message: 'Transactions Data',
+    meta: { page, limit: pageSize },
     data: buckets,
   };
   return next();
