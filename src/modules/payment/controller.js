@@ -66,7 +66,7 @@ PaymentController.viaBank = async (req, res, next) => {
 };
 
 PaymentController.getSnapToken = async (req, res, next) => {
-  const bucket = await Bucket.getDetail(req.user.id);
+  const bucket = await Bucket.getDetail(req.user.id, req.params.id);
   let total = 0;
   const itemDetails = bucket.items.map((item) => {
     total += item.total_price;
@@ -80,7 +80,7 @@ PaymentController.getSnapToken = async (req, res, next) => {
   const { firstName, lastName } = getName(req.user.name);
   const payload = {
     transaction_details: {
-      order_id: `ORDER-${randomInt(10000, 99999)}`,
+      order_id: `ORDER-${bucket.id}`,
       gross_amount: total,
     },
     item_details: itemDetails,

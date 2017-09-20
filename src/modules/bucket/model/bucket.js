@@ -90,8 +90,16 @@ class BucketModel extends bookshelf.Model {
   /**
    * Get detail bucket
    */
-  static async getDetail(userId) {
-    const bucket = await this.where({ id_users: userId, status_bucket: BucketStatus.ADDED }).fetch({
+  static async getDetail(userId, bucketId = null) {
+    let where = { id_users: userId, status_bucket: BucketStatus.ADDED };
+    if (bucketId) {
+      where = {
+        ...where,
+        id_bucket: bucketId,
+        status_bucket: BucketStatus.WAITING_FOR_PAYMENT,
+      };
+    }
+    const bucket = await this.where(where).fetch({
       withRelated: [
         'promo',
         { 'items.product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
