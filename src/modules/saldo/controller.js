@@ -102,3 +102,15 @@ SaldoController.getTopupStatus = async (req, res, next) => {
   };
   return next();
 };
+
+SaldoController.getWithdrawStatus = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const withdraw = await Withdraw.get(req.user.id, page, pageSize);
+  req.resData = {
+    message: 'Withdraw Data',
+    meta: { page, limit: pageSize },
+    data: withdraw,
+  };
+  return next();
+};

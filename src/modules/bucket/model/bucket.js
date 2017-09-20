@@ -90,19 +90,29 @@ class BucketModel extends bookshelf.Model {
   /**
    * Get detail bucket
    */
-  static async getDetail(userId) {
-    const bucket = await this.where({ id_users: userId, status_bucket: BucketStatus.ADDED }).fetch({
-      withRelated: [
-        'promo',
-        { 'items.product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
-        'items.product.store.user.addresses.district',
-        'items.product.expeditionServices.expedition',
-        'items.shipping.address.province',
-        'items.shipping.address.district',
-        'items.shipping.address.subDistrict',
-        'items.shipping.expeditionService.expedition',
-      ],
-    });
+  static async getDetail(userId, bucketId = null) {
+    let where = { id_users: userId };
+    if (bucketId) {
+      where = { ...where, id_bucket: bucketId };
+    } else {
+      where = { ...where, status_bucket: BucketStatus.ADDED };
+    }
+    const bucket = await this.where(where)
+      .query((qb) => {
+        if (bucketId) qb.whereIn('status_bucket', [BucketStatus.ADDED, BucketStatus.WAITING_FOR_PAYMENT]);
+      })
+      .fetch({
+        withRelated: [
+          'promo',
+          { 'items.product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
+          'items.product.store.user.addresses.district',
+          'items.product.expeditionServices.expedition',
+          'items.shipping.address.province',
+          'items.shipping.address.district',
+          'items.shipping.address.subDistrict',
+          'items.shipping.expeditionService.expedition',
+        ],
+      });
     if (!bucket) throw getBucketError('bucket', 'not_found');
     const items = await Promise.all(bucket.related('items').map(async item => await Item.loadDetailItem(item)));
     return { ...bucket.serialize(), items };
@@ -205,10 +215,10 @@ class BucketModel extends bookshelf.Model {
     return { ...response, products: data };
   }
 
-  static async listTransactions(userId) {
+  static async listTransactions(userId, page, pageSize) {
     const buckets = await this.where({ id_users: userId })
-      .query(qb => qb.whereNot('status_bucket', BucketStatus.ADDED))
-      .fetchAll({ withRelated: ['invoices.items.product.images'] });
+      .query(qb => qb.whereNotIn('status_bucket', [BucketStatus.ADDED, BucketStatus.DELETED, BucketStatus.CANCEL]))
+      .fetchPage({ page, pageSize, withRelated: ['invoices.items.product.images'] });
     if (!buckets.length) return [];
     return buckets.map(bucket => (this.loadDetailTransaction(bucket, false)));
   }
@@ -284,6 +294,10 @@ class BucketModel extends bookshelf.Model {
 
       return sum + totalPrice;
     }, 0);
+  }
+
+  static async updateStatus(id, status) {
+    return await this.where({ id_bucket: id }).save({ status_bucket: status }, { patch: true });
   }
 
   /**

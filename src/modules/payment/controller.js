@@ -23,6 +23,7 @@ import { Review } from '../review/model';
 import { ImageGroup } from '../user/model';
 import nominal from '../../../config/nominal.json';
 import { getNominalError, getInvoiceError, acceptOrderError, rejectOrderError, inputBillError } from './messages';
+import { getStoreError } from './../store/messages';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -65,7 +66,7 @@ PaymentController.viaBank = async (req, res, next) => {
 };
 
 PaymentController.getSnapToken = async (req, res, next) => {
-  const bucket = await Bucket.getDetail(req.user.id);
+  const bucket = await Bucket.getDetail(req.user.id, req.params.id);
   let total = 0;
   const itemDetails = bucket.items.map((item) => {
     total += item.total_price;
@@ -79,7 +80,7 @@ PaymentController.getSnapToken = async (req, res, next) => {
   const { firstName, lastName } = getName(req.user.name);
   const payload = {
     transaction_details: {
-      order_id: `ORDER-${randomInt(10000, 99999)}`,
+      order_id: `ORDER-${bucket.id}`,
       gross_amount: total,
     },
     item_details: itemDetails,
@@ -124,9 +125,12 @@ PaymentController.getSaldoSnapToken = async (req, res, next) => {
 
 // TODO: Add pagination
 PaymentController.listTransactions = async (req, res, next) => {
-  const buckets = await Bucket.listTransactions(req.user.id);
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const buckets = await Bucket.listTransactions(req.user.id, page, pageSize);
   req.resData = {
     message: 'Transactions Data',
+    meta: { page, limit: pageSize },
     data: buckets,
   };
   return next();
@@ -315,11 +319,29 @@ PaymentController.confirmStoreDispute = async (req, res, next) => {
 PaymentController.notification = async (req, res, next) => {
   let data = '';
   req.on('data', (chunk) => { data += chunk; });
-  req.on('end', () => {
+  req.on('end', async () => {
     req.body = data ? JSON.parse(data) : {};
     if (typeof req.body === 'string') req.body = JSON.parse(req.body);
+    const bucketId = req.body.order_id.split('-')[1];
+    let status;
+    switch (req.body.status_code) {
+      case '200':
+        status = BucketStatus.PAYMENT_RECEIVED;
+        break;
+      case '201':
+        status = BucketStatus.WAITING_FOR_VERIFICATION;
+        break;
+      case '202':
+        status = BucketStatus.EXPIRED;
+        break;
+      default:
+        break;
+    }
+    const bucket = await Bucket.updateStatus(bucketId, status);
     console.log('\n=== MIDTRANS ===');
     console.log(req.body);
+    console.log('\n');
+    console.log(bucket.serialize());
     console.log('\n');
     return next();
   });
@@ -400,6 +422,7 @@ PaymentController.getSales = async (req, res, next) => {
 
 PaymentController.getSaleDetail = async (req, res, next) => {
   const store = await Store.where('id_users', req.user.id).fetch();
+  if (!store) throw getStoreError('store', 'not_found');
   const invoice = await Invoice.getOrderDetail(req.params.id, store);
   if (!invoice) throw getInvoiceError('invoice', 'not_found');
   req.resData = {

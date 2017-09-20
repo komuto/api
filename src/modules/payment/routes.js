@@ -8,7 +8,7 @@ const routes = express.Router();
 const { wrap } = core.utils;
 const { apiResponse, auth, validateParam } = core.middleware;
 
-routes.get('/payments',
+routes.get('/transactions/:id([0-9]{1,10})/token',
   auth(),
   wrap(PaymentController.getSnapToken),
   apiResponse());

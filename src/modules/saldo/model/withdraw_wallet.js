@@ -1,7 +1,13 @@
 import core from '../../core';
 
-const { matchDB } = core.utils;
+const { matchDB, parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
+
+export const WithdrawStatus = {
+  WAITING: 0,
+  SUCCESS: 1,
+  FAILED: 2,
+};
 
 class WithdrawModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -14,8 +20,25 @@ class WithdrawModel extends bookshelf.Model {
     return ['tanggal'];
   }
 
+  serialize() {
+    return {
+      id: parseNum(this.get('id')),
+      user_id: parseNum(this.get('id_users')),
+      marketplace_id: this.get('id_marketplaceuser'),
+      bank_account_id: parseNum(this.get('id_rekeninguser')),
+      bank_account: this.relations.bankAccount ? this.related('bankAccount') : undefined,
+      amount: this.get('amount'),
+      status: parseNum(this.get('status')),
+      created_at: parseDate(this.get('tanggal')),
+    };
+  }
+
   bankAccount() {
     return this.belongsTo('BankAccount', 'id_rekeninguser');
+  }
+
+  static async get(userId, page, pageSize) {
+    return await new this({ id_users: userId }).fetchPage({ page, pageSize, withRelated: ['bankAccount.bank'] });
   }
 
   /**
@@ -34,14 +57,14 @@ class WithdrawModel extends bookshelf.Model {
    */
   static matchDBColumn(data) {
     const column = {
-      amount: 'amount',
-      bank_account_id: 'id_rekeninguser',
-      marketplace_id: 'id_marketplaceuser',
       user_id: 'id_users',
+      marketplace_id: 'id_marketplaceuser',
+      bank_account_id: 'id_rekeninguser',
+      amount: 'amount',
     };
     return matchDB(data, column);
   }
 }
 
 export const Withdraw = bookshelf.model('Withdraw', WithdrawModel);
-export default { Withdraw };
+export default { Withdraw, WithdrawStatus };

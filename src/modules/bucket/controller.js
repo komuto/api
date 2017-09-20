@@ -225,7 +225,7 @@ BucketController.checkout = async (req, res, next) => {
   }));
 
   let bucketData = {
-    status_bucket: BucketStatus.CHECKOUT,
+    status_bucket: BucketStatus.WAITING_FOR_PAYMENT,
     tglstatus_bucket: new Date(),
   };
 
