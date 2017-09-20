@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import moment from 'moment';
 import randomInt from 'random-int';
 import core from '../../core';
@@ -157,7 +158,10 @@ class InvoiceModel extends bookshelf.Model {
     if (dispute) {
       dispute = {
         ...dispute.serialize(),
-        dispute_products: dispute.related('disputeProducts'),
+        dispute_products: dispute.related('disputeProducts').map((val) => {
+          const item = _.find(items, o => o.product.id === val.get('id_produk'));
+          return { ...val.serialize(), product: item.product };
+        }),
       };
     }
 
