@@ -45,7 +45,7 @@ class DisputeModel extends bookshelf.Model {
   }
 
   serialize() {
-    return {
+    const dispute = {
       id: this.get('id_dispute'),
       user_id: this.get('id_users'),
       user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
@@ -64,6 +64,13 @@ class DisputeModel extends bookshelf.Model {
       response_at: parseDate(this.get('tglresponadmin_dispute')),
       created_at: parseDate(this.get('createdate_dispute')),
     };
+    if (this.relations.refund) {
+      return {
+        ...dispute,
+        refund: this.related('refund').get('id_refund') ? this.related('refund') : null,
+      };
+    }
+    return dispute;
   }
 
   disputeProducts() {
@@ -88,6 +95,10 @@ class DisputeModel extends bookshelf.Model {
 
   message() {
     return this.morphOne('Message', 'group', ['group_message', 'parent_id'], 1);
+  }
+
+  refund() {
+    return this.hasOne('Refund', 'id_dispute');
   }
 
   static async create(data) {
@@ -145,6 +156,7 @@ class DisputeModel extends bookshelf.Model {
         { imageGroups: qb => qb.where('group', 'dispute') },
         'message.store',
         'message.detailMessages.user',
+        'refund',
       ],
     });
 

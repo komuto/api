@@ -2,6 +2,8 @@ import { Bucket, BucketStatus } from './bucket';
 import { Item } from './item';
 import { Promo, PromoStatus, PromoType } from './promo';
 import { Shipping, ShippingSenderStatus, ShippingReceiverStatus } from './shipping';
+import { Refund, RefundStatus } from './refund';
+import { RefundItem } from './refund_item';
 
 export default {
   Bucket,
@@ -13,4 +15,7 @@ export default {
   PromoType,
   ShippingSenderStatus,
   ShippingReceiverStatus,
+  Refund,
+  RefundStatus,
+  RefundItem,
 };

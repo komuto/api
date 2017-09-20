@@ -1,6 +1,6 @@
 import { BankAccount } from '../bank/model';
 import { OTPStatus } from '../OTP/model';
-import { Withdraw, TransSummary, TransType, SummTransType } from './model';
+import { Withdraw, Topup, TransSummary, TransType, SummTransType } from './model';
 import { User } from '../user/model';
 import { withdrawError, transDetailError } from './messages';
 import nominal from '../../../config/nominal.json';
@@ -86,5 +86,17 @@ SaldoController.withdrawTrans = async (req, res, next) => {
   bankAccount.bankId = undefined;
   const data = { transaction: transaction.serialize(), bankAccount };
   req.resData = { message: 'Withdraw Transaction Data', data };
+  return next();
+};
+
+SaldoController.getTopupStatus = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const topup = await Topup.get(req.user.id, page, pageSize);
+  req.resData = {
+    message: 'Topup Data',
+    meta: { page, limit: pageSize },
+    data: topup,
+  };
   return next();
 };

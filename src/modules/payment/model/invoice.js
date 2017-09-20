@@ -51,7 +51,7 @@ class InvoiceModel extends bookshelf.Model {
       total_bill: parseNum(this.get('total_tagihan')),
       total_price: parseNum(this.get('total_harga')),
       status: parseNum(this.get('status_invoice')),
-      transaction_status: parseNum(this.get('status_transaksi'), null),
+      transaction_status: this.get('status_transaksi') === 0 ? 0 : parseNum(this.get('status_transaksi'), null),
       created_at: parseDate(this.get('createdate_invoice')),
     };
     if (orderDetail) {
@@ -129,7 +129,7 @@ class InvoiceModel extends bookshelf.Model {
       id_invoice: id,
       id_user: userId,
       id_bucket: bucketId,
-    }).fetch({ withRelated: ['items.product.images', 'store', 'shipping.address'] });
+    }).fetch({ withRelated: ['items.product.images', 'store', 'shipping.address', 'shipping.expeditionService.expedition'] });
 
     if (!invoice) throw getInvoiceError('invoice', 'not_found');
 

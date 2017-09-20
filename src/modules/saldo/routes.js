@@ -20,6 +20,14 @@ routes.post('/users/saldo/withdraw',
   apiResponse());
 
 /**
+ * Get topup status
+ */
+routes.get('/users/saldo/topup',
+  auth(),
+  wrap(SaldoController.getTopupStatus),
+  apiResponse());
+
+/**
  * History saldo
  */
 routes.get('/users/saldo/history',
