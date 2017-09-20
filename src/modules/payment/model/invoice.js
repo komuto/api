@@ -129,7 +129,15 @@ class InvoiceModel extends bookshelf.Model {
       id_invoice: id,
       id_user: userId,
       id_bucket: bucketId,
-    }).fetch({ withRelated: ['items.product.images', 'store', 'shipping.address', 'shipping.expeditionService.expedition'] });
+    }).fetch({
+      withRelated: [
+        'items.product.images',
+        'store',
+        'shipping.address',
+        'shipping.expeditionService.expedition',
+        'dispute.disputeProducts',
+      ],
+    });
 
     if (!invoice) throw getInvoiceError('invoice', 'not_found');
 
@@ -145,7 +153,15 @@ class InvoiceModel extends bookshelf.Model {
       };
     });
 
-    return { ...invoice.serialize(), items };
+    let dispute = invoice.related('dispute').get('id_dispute') ? invoice.related('dispute') : null;
+    if (dispute) {
+      dispute = {
+        ...dispute.serialize(),
+        dispute_products: dispute.related('disputeProducts'),
+      };
+    }
+
+    return { ...invoice.serialize(), items, dispute };
   }
 
   static async get(userId, bucketId, id, withRelated = 'items') {
