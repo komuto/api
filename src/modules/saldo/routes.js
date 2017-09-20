@@ -10,6 +10,22 @@ const { apiResponse, auth, validateParam } = core.middleware;
 const { wrap } = core.utils;
 
 /**
+ * Get topup status
+ */
+routes.get('/users/saldo/topup',
+  auth(),
+  wrap(SaldoController.getTopupStatus),
+  apiResponse());
+
+/**
+ * Get withdraw status
+ */
+routes.get('/users/saldo/withdraw',
+  auth(),
+  wrap(SaldoController.getWithdrawStatus),
+  apiResponse());
+
+/**
  * Withdraw wallet
  */
 routes.post('/users/saldo/withdraw',
@@ -17,14 +33,6 @@ routes.post('/users/saldo/withdraw',
   validateParam(constraints.withdraw, true),
   wrap(OTPController.verifyOTPBankCode(withdrawError('otp_code', 'otp_not_found'))),
   wrap(SaldoController.withdrawWallet),
-  apiResponse());
-
-/**
- * Get topup status
- */
-routes.get('/users/saldo/topup',
-  auth(),
-  wrap(SaldoController.getTopupStatus),
   apiResponse());
 
 /**
