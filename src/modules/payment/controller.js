@@ -323,7 +323,20 @@ PaymentController.notification = async (req, res, next) => {
     req.body = data ? JSON.parse(data) : {};
     if (typeof req.body === 'string') req.body = JSON.parse(req.body);
     const bucketId = req.body.order_id.split('-')[1];
-    const status = req.body.status_code === '200' ? BucketStatus.PAYMENT_RECEIVED : BucketStatus.WAITING_FOR_VERIFICATION;
+    let status;
+    switch (req.body.status_code) {
+      case '200':
+        status = BucketStatus.PAYMENT_RECEIVED;
+        break;
+      case '201':
+        status = BucketStatus.WAITING_FOR_VERIFICATION;
+        break;
+      case '202':
+        status = BucketStatus.EXPIRED;
+        break;
+      default:
+        break;
+    }
     const bucket = await Bucket.updateStatus(bucketId, status);
     console.log('\n=== MIDTRANS ===');
     console.log(req.body);
