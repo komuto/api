@@ -23,6 +23,7 @@ import { Review } from '../review/model';
 import { ImageGroup } from '../user/model';
 import nominal from '../../../config/nominal.json';
 import { getNominalError, getInvoiceError, acceptOrderError, rejectOrderError, inputBillError } from './messages';
+import { getStoreError } from './../store/messages';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -400,6 +401,7 @@ PaymentController.getSales = async (req, res, next) => {
 
 PaymentController.getSaleDetail = async (req, res, next) => {
   const store = await Store.where('id_users', req.user.id).fetch();
+  if (!store) throw getStoreError('store', 'not_found');
   const invoice = await Invoice.getOrderDetail(req.params.id, store);
   if (!invoice) throw getInvoiceError('invoice', 'not_found');
   req.resData = {
