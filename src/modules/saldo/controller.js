@@ -71,7 +71,7 @@ SaldoController.historyDetail = async (req, res, next) => {
 // SaldoController.sellingTrans = async (req, res, next) => {
 //   if (req.body.transType !== SummTransType.SELLING) return next();
 //
-// }
+// };
 
 // SaldoController.paymentTrans = async (req, res, next) => {
 //   if (req.body.transType !== SummTransType.PAYMENT) return next();
@@ -84,7 +84,7 @@ SaldoController.withdrawTrans = async (req, res, next) => {
   const bankAccount = transaction.related('summaryable').related('bankAccount').serialize({ minimal: true });
   bankAccount.bank = bankAccount.bank.serialize({ minimal: true });
   bankAccount.bankId = undefined;
-  const data = { transaction: transaction.serialize({ minimal: true }), bankAccount };
+  const data = { transaction: transaction.serialize(), bankAccount };
   req.resData = { message: 'Withdraw Transaction Data', data };
   return next();
 };
