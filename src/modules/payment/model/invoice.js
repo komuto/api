@@ -40,13 +40,13 @@ class InvoiceModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = false, orderDetail = false } = {}) {
+  serialize({ minimal = false, orderDetail = false, shippingMin = false } = {}) {
     const invoice = {
       id: this.get('id_invoice'),
       payment_method_id: this.get('id_paymentmethod'),
       store_id: this.get('id_toko'),
       store: this.relations.store ? this.related('store').serialize({ favorite: true }) : undefined,
-      shipping: this.relations.shipping ? this.related('shipping').serialize() : undefined,
+      shipping: this.relations.shipping ? this.related('shipping').serialize({ minimal: shippingMin }) : undefined,
       invoice_number: this.get('no_invoice'),
       total_bill: parseNum(this.get('total_tagihan')),
       total_price: parseNum(this.get('total_harga')),

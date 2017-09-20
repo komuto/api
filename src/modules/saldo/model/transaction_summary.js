@@ -113,6 +113,39 @@ class transSummaryModel extends bookshelf.Model {
     }));
   }
 
+  async getPaymentDetail() {
+    await this.load(['summaryable.promo',
+      'summaryable.invoices.shipping.address',
+      'summaryable.invoices.items.product.image']);
+    const bucket = this.related('summaryable');
+    const invoices = bucket.related('invoices');
+    const getRelations = { address: [], store: [], expedition: [] };
+    const items = invoices.map((invoice) => {
+      // eager load other relations
+      const shipping = invoice.related('shipping');
+      const getFullAddress = shipping.related('address').load(['province', 'district', 'subDistrict', 'village']);
+      getRelations.address.push(getFullAddress);
+      getRelations.store.push(invoice.load('store'));
+      getRelations.expedition.push(shipping.load('expeditionService.expedition'));
+      return invoice.related('items').map((item) => {
+        const product = item.related('product');
+        const image = product.related('image').serialize().file;
+        item = item.serialize({ minimal: true, note: true });
+        item.product = { ...product.serialize({ minimal: true }), image };
+        return item;
+      });
+    });
+    const orders = await Promise.all(invoices.map(async (invoice, idx) => {
+      const { address, store, expedition } = getRelations;
+      await Promise.all([address[idx], store[idx], expedition[idx]]);
+      return {
+        invoice: invoice.serialize({ minimal: true, shippingMin: true }),
+        items: items[idx],
+      };
+    }));
+    return { transaction: this.serialize(), bucket: bucket.serialize(), orders };
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data

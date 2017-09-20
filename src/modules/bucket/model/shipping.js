@@ -27,18 +27,22 @@ class ShippingModel extends bookshelf.Model {
     return 'id_pengiriman_produk';
   }
 
-  serialize() {
+  serialize({ minimal = false } = {}) {
     const shipping = {
       id: parseNum(this.get('id_pengiriman_produk')),
-      expedition_service_id: this.get('id_ekspedisiservice'),
-      address_id: this.get('id_alamatuser'),
       delivery_cost: parseNum(this.get('harga_ongkir')),
       insurance_fee: parseNum(this.get('nilai_asuransi')),
+      is_insurance: this.get('is_asuransi'),
+      address: this.relations.address ? this.related('address').serialize({ full: minimal }) : undefined,
+      expedition_service: this.relations.expeditionService ? this.related('expeditionService') : undefined,
+    };
+    if (minimal) return shipping;
+    return {
+      ...shipping,
+      expedition_service_id: this.relations.expeditionService ? undefined : this.get('id_ekspedisiservice'),
+      address_id: this.relations.address ? undefined : this.get('id_alamatuser'),
       note: this.get('keterangan'),
       seller_note: this.get('keterangan_seller'),
-      is_insurance: this.get('is_asuransi'),
-      address: this.relations.address ? this.related('address') : undefined,
-      expedition_service: this.relations.expeditionService ? this.related('expeditionService') : undefined,
       airway_bill: this.get('resiresponkirim'),
       sender_status: parseNum(this.get('statusresponkirim')),
       sender_status_at: parseDate(this.get('tglstatusresponkirim'), null),
@@ -47,9 +51,6 @@ class ShippingModel extends bookshelf.Model {
       receiver_status_at: parseDate(this.get('tglstatusresponterima'), null),
       receiver_status_expired_at: parseDate(this.get('expdateresponterimabarang'), null),
     };
-    if (this.relations.address) delete shipping.address_id;
-    if (this.relations.expeditionService) delete shipping.expedition_service_id;
-    return shipping;
   }
 
   /**

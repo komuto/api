@@ -73,10 +73,12 @@ SaldoController.historyDetail = async (req, res, next) => {
 //
 // };
 
-// SaldoController.paymentTrans = async (req, res, next) => {
-//   if (req.body.transType !== SummTransType.PAYMENT) return next();
-//
-// }
+SaldoController.paymentTrans = async (req, res, next) => {
+  if (req.body.transType !== SummTransType.PAYMENT) return next();
+  const data = await req.body.transaction.getPaymentDetail();
+  req.resData = { message: 'Payment Transaction Data', data };
+  return next();
+};
 
 SaldoController.withdrawTrans = async (req, res, next) => {
   if (req.body.transType !== SummTransType.WITHDRAW) return next();

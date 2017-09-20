@@ -1,5 +1,9 @@
 import core from '../../core';
 import { getAddressError } from './../messages';
+import { Province } from './province';
+import { District } from './district';
+import { SubDistrict } from './sub_district';
+import { Village } from './village';
 
 const bookshelf = core.postgres.db;
 
@@ -22,10 +26,10 @@ class AddressModel extends bookshelf.Model {
     if (full) {
       return {
         ...address,
-        province: this.related('province'),
-        district: this.related('district'),
-        subdistrict: this.related('subDistrict'),
-        village: this.related('village'),
+        province: this.relations.province ? this.related('province') : undefined,
+        district: this.relations.district ? this.related('district') : undefined,
+        subdistrict: this.relations.subDistrict ? this.related('subDistrict') : undefined,
+        village: this.relations.village ? this.related('village') : undefined,
       };
     }
     return {
