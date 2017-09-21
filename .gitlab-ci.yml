@@ -1,0 +1,9 @@
+stages:
+  - deploy
+
+deploy_job:
+  stage: deploy
+  script:
+    - chmod +x ./deploy.sh
+    - ./deploy.sh
+  when: always
