@@ -198,7 +198,9 @@ class BucketModel extends bookshelf.Model {
       });
       accu.total_price += parseInt(invoice.get('total_harga'), 10);
       if (isDetail) {
-        accu.data.push({ ...invoice.serialize({ minimal: true }), items });
+        const invoiceObj = { ...invoice.serialize({ minimal: true }), items };
+        invoiceObj.shipping = invoiceObj.shipping ? invoiceObj.shipping : null;
+        accu.data.push(invoiceObj);
       } else {
         accu.data.push(...items);
       }
