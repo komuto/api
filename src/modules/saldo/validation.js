@@ -22,4 +22,16 @@ constraints.withdraw = {
   },
 };
 
+constraints.history = {
+  filter: {
+    presence: false,
+    format: {
+      pattern: /^((commission|sale|refund|topup|buy|withdraw)+,)*(commission|sale|refund|topup|buy|withdraw)+$/,
+      message: 'accept only `commission`, `sale`, `refund`, `topup`, `buy`, and `withdraw` value. Separated by comma',
+    },
+  },
+  start_at: { presence: false },
+  end_at: { presence: false },
+};
+
 export default constraints;

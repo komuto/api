@@ -33,7 +33,9 @@ SaldoController.withdrawWallet = async (req, res, next) => {
   const updateSaldo = User.where({ id_users: id })
     .save({ saldo_wallet: remainingSaldo }, { patch: true });
   const changeOTPStatus = req.otp.save({ status: OTPStatus.USED }, { patch: true })
-    .catch(() => { throw new Error('otp'); });
+    .catch(() => {
+      throw new Error('otp');
+    });
   await Promise.all([createWithdraw, createSummary, updateSaldo, changeOTPStatus])
     .catch((e) => {
       // If unable to update otp status then swallow the error
@@ -43,9 +45,49 @@ SaldoController.withdrawWallet = async (req, res, next) => {
 };
 
 SaldoController.history = async (req, res, next) => {
-  const transactions = await TransSummary.get(req.user.id);
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  let filters = req.query.filter;
+  if (filters) {
+    filters = filters.split(',').reduce((result, type) => {
+      switch (type) {
+        case 'commission':
+          result.push(SummTransType.FEE);
+          break;
+        case 'sale':
+          result.push(SummTransType.SELLING);
+          break;
+        case 'refund':
+          result.push(SummTransType.REFUND);
+          break;
+        case 'topup':
+          result.push(SummTransType.TOPUP);
+          break;
+        case 'buy':
+          result.push(SummTransType.PAYMENT);
+          break;
+        case 'withdraw':
+          result.push(SummTransType.WITHDRAW);
+          break;
+        default:
+          break;
+      }
+      return result;
+    }, []);
+  }
+
+  const transactions = await TransSummary.get(
+    req.user.id, {
+      filters,
+      start_at: req.query.start_at,
+      end_at: req.query.end_at,
+    },
+    page,
+    pageSize,
+  );
   req.resData = {
     message: 'History Saldo',
+    meta: { page, limit: pageSize },
     data: transactions,
   };
   return next();
@@ -60,8 +102,10 @@ SaldoController.nominal = async (req, res, next) => {
 };
 
 SaldoController.historyDetail = async (req, res, next) => {
-  const transaction = await TransSummary.where({ id_summarytransaksi: req.params.id,
-    id_users: req.user.id }).fetch();
+  const transaction = await TransSummary.where({
+    id_summarytransaksi: req.params.id,
+    id_users: req.user.id,
+  }).fetch();
   if (!transaction) throw transDetailError('transaction', 'not_found');
   req.body.transType = transaction.get('kode_summarytransaksi');
   req.body.transaction = transaction;
