@@ -53,7 +53,7 @@ class transSummaryModel extends bookshelf.Model {
   }
 
   summaryable() {
-    return this.morphTo('summaryable', 'Bucket', 'Invoice', 'Withdraw');
+    return this.morphTo('summaryable', 'Bucket', 'Invoice', 'Withdraw', 'Topup');
   }
 
   /**

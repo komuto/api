@@ -1,6 +1,6 @@
 import { BankAccount } from '../bank/model';
 import { OTPStatus } from '../OTP/model';
-import { Withdraw, Topup, TransSummary, TransType, SummTransType } from './model';
+import { Withdraw, Topup, TransSummary, TransType, SummTransType, TopupStatus } from './model';
 import { User } from '../user/model';
 import { withdrawError, transDetailError } from './messages';
 import nominal from '../../../config/nominal.json';
@@ -77,6 +77,20 @@ SaldoController.paymentTrans = async (req, res, next) => {
   if (req.body.transType !== SummTransType.PAYMENT) return next();
   const data = await req.body.transaction.getPaymentDetail();
   req.resData = { message: 'Payment Transaction Data', data };
+  return next();
+};
+
+SaldoController.topupTrans = async (req, res, next) => {
+  if (req.body.transType !== SummTransType.TOPUP) return next();
+  const transaction = await req.body.transaction.load([
+    { summaryable: qb => qb.where({ status: TopupStatus.SUCCESS })},
+    'summaryable.paymentMethod',
+    'summaryable.topupConf',
+  ]);
+  const method = transaction.related('summaryable').related('paymentMethod').get('nama_paymentmethod');
+  const amount = transaction.related('summaryable').related('topupConf').get('amount');
+  const data = { ...transaction.serialize(), transfer_amount: amount, payment_method: method };
+  req.resData = { message: 'Topup Transaction Data', data };
   return next();
 };
 
