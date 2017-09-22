@@ -5,8 +5,9 @@ import core from '../../core';
 import { getInvoiceError, createInvoiceError } from './../messages';
 import { Store } from '../../store/model/store';
 import config from '../../../../config';
+import { Dropship } from '../../product/model';
 
-const { parseDate, parseNum, matchDB } = core.utils;
+const { parseDate, parseNum, matchDB, getProductAndStore, parseDec } = core.utils;
 const bookshelf = core.postgres.db;
 
 export const InvoiceStatus = {
@@ -142,13 +143,22 @@ class InvoiceModel extends bookshelf.Model {
 
     if (!invoice) throw getInvoiceError('invoice', 'not_found');
 
-    const items = invoice.related('items').map((item) => {
+    let storeId = invoice.get('id_toko');
+    let items = invoice.related('items');
+    const firstItem = items.models[0].serialize();
+    if (firstItem.dropshipper_id) {
+      const dropship = await Dropship.where('id_dropshipper', firstItem.dropshipper_id).fetch();
+      storeId = dropship.serialize().store_id;
+    }
+
+    items = items.map((item) => {
       const product = item.related('product');
       const image = product.related('images').models;
       return {
         ...item.serialize({ note: true }),
         product: {
           ...product.serialize({ minimal: true }),
+          id: parseDec(`${product.get('id_produk')}.${storeId}`),
           image: image.length ? image[0].serialize().file : config.defaultImage.product,
         },
       };
@@ -159,7 +169,10 @@ class InvoiceModel extends bookshelf.Model {
       dispute = {
         ...dispute.serialize(),
         dispute_products: dispute.related('disputeProducts').map((val) => {
-          const item = _.find(items, o => o.product.id === val.get('id_produk'));
+          const item = _.find(items, (o) => {
+            const { productId } = getProductAndStore(o.product.id);
+            return productId === val.get('id_produk');
+          });
           return { ...val.serialize(), product: item.product };
         }),
       };
