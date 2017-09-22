@@ -114,9 +114,13 @@ class transSummaryModel extends bookshelf.Model {
     }));
   }
 
-  async getSellingDetail() {
+  /**
+   * @param id {int} store id
+   */
+  async getSellingDetail(id) {
     await this.load('summaryable.items.product.image');
     let invoice = this.related('summaryable');
+    const isReseller = invoice.get('id_toko') !== id;
     const getBuyer = invoice.load('buyer');
     const items = invoice.related('items').map((item) => {
       const product = item.related('product').serialize({ minimal: true });
@@ -124,8 +128,18 @@ class transSummaryModel extends bookshelf.Model {
       return { item, product };
     });
     const transaction = this.serialize();
-    const nominal = Number(invoice.get('total_tagihan')) - transaction.amount;
-    const percent = (nominal / transaction.amount) * 100;
+    const totalBill = Number(invoice.get('total_tagihan'));
+    let nominal;
+    let percent;
+    if (!isReseller) {
+      nominal = totalBill - transaction.amount;
+      percent = (nominal / totalBill) * 100;
+      transaction.type = 'seller';
+    } else {
+      nominal = transaction.amount;
+      percent = (nominal / totalBill) * 100;
+      transaction.type = 'reseller';
+    }
     await getBuyer;
     const buyer = invoice.related('buyer').serialize({ orderDetail: true });
     invoice = { ...invoice.serialize({ orderDetail: true }), items };

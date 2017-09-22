@@ -2,6 +2,7 @@ import { BankAccount } from '../bank/model';
 import { OTPStatus } from '../OTP/model';
 import { Withdraw, Topup, TransSummary, TransType, SummTransType, TopupStatus } from './model';
 import { User } from '../user/model';
+import { Store } from '../store/model';
 import { withdrawError, transDetailError } from './messages';
 import nominal from '../../../config/nominal.json';
 
@@ -70,7 +71,8 @@ SaldoController.historyDetail = async (req, res, next) => {
 
 SaldoController.sellingTrans = async (req, res, next) => {
   if (req.body.transType !== SummTransType.SELLING) return next();
-  const data = await req.body.transaction.getSellingDetail();
+  const storeId = await Store.getStoreId(req.user.id);
+  const data = await req.body.transaction.getSellingDetail(storeId);
   req.resData = { message: 'Selling Transaction Data', data };
   return next();
 };
