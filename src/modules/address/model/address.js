@@ -1,9 +1,5 @@
 import core from '../../core';
 import { getAddressError } from './../messages';
-import { Province } from './province';
-import { District } from './district';
-import { SubDistrict } from './sub_district';
-import { Village } from './village';
 
 const bookshelf = core.postgres.db;
 
