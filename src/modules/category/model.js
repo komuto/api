@@ -49,7 +49,8 @@ class CategoryModel extends bookshelf.Model {
 
   async parents() {
     let category = this;
-    const parents = [];
+    const name = category.serialize().name;
+    let parents = [];
 
     while (category.serialize().parent_id) {
       const parentId = category.serialize().parent_id;
@@ -60,7 +61,10 @@ class CategoryModel extends bookshelf.Model {
       }
     }
 
-    return parents;
+    parents = parents.reverse();
+    const names = _.reduce(parents, (res, parent) => (res += `${parent.name} / `), '');
+
+    return { name: names + name, parents };
   }
 
 

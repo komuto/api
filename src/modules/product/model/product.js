@@ -575,10 +575,11 @@ class ProductModel extends bookshelf.Model {
     } else wholesaler = [];
 
     let category = product.related('category');
-    const parents = await category.parents();
+    const { parents, name } = await category.parents();
     category = {
       ...category.serialize(),
-      parents: parents.reverse(),
+      full_name: name,
+      parents,
     };
     const images = product.related('images');
     const expeditionServices = product.related('expeditionServices').map((service) => {
