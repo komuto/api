@@ -5,7 +5,7 @@ import core from '../../core';
 import { getInvoiceError, createInvoiceError } from './../messages';
 import { Store } from '../../store/model/store';
 import config from '../../../../config';
-import { Dropship } from '../../product/model';
+import { Dropship } from '../../product/model/dropship';
 
 const { parseDate, parseNum, matchDB, getProductAndStore, parseDec } = core.utils;
 const bookshelf = core.postgres.db;
