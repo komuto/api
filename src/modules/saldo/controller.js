@@ -68,10 +68,12 @@ SaldoController.historyDetail = async (req, res, next) => {
   return next();
 };
 
-// SaldoController.sellingTrans = async (req, res, next) => {
-//   if (req.body.transType !== SummTransType.SELLING) return next();
-//
-// };
+SaldoController.sellingTrans = async (req, res, next) => {
+  if (req.body.transType !== SummTransType.SELLING) return next();
+  const data = await req.body.transaction.getSellingDetail();
+  req.resData = { message: 'Selling Transaction Data', data };
+  return next();
+};
 
 SaldoController.paymentTrans = async (req, res, next) => {
   if (req.body.transType !== SummTransType.PAYMENT) return next();

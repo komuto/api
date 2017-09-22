@@ -4,6 +4,7 @@ import { PromoType } from '../../bucket/model';
 import { User } from '../../user/model';
 import { TransType } from './transaction_type';
 import { DetailTransSummary } from './detail_transaction_summary';
+import { MasterFee } from '../../product/model';
 
 const { matchDB, parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -113,6 +114,24 @@ class transSummaryModel extends bookshelf.Model {
     }));
   }
 
+  async getSellingDetail() {
+    await this.load('summaryable.items.product.image');
+    let invoice = this.related('summaryable');
+    const getBuyer = invoice.load('buyer');
+    const items = invoice.related('items').map((item) => {
+      const product = item.related('product').serialize({ minimal: true });
+      item = item.serialize({ minimal: true });
+      return { item, product };
+    });
+    const transaction = this.serialize();
+    const nominal = Number(invoice.get('total_tagihan')) - transaction.amount;
+    const percent = (nominal / transaction.amount) * 100;
+    await getBuyer;
+    const buyer = invoice.related('buyer').serialize({ orderDetail: true });
+    invoice = { ...invoice.serialize({ orderDetail: true }), items };
+    return { transaction, commission: { nominal, percent }, buyer, invoice };
+  }
+
   async getPaymentDetail() {
     await this.load(['summaryable.promo',
       'summaryable.invoices.shipping.address',
@@ -128,11 +147,9 @@ class transSummaryModel extends bookshelf.Model {
       getRelations.store.push(invoice.load('store'));
       getRelations.expedition.push(shipping.load('expeditionService.expedition'));
       return invoice.related('items').map((item) => {
-        const product = item.related('product');
-        const image = product.related('image').serialize().file;
+        const product = item.related('product').serialize({ minimal: true });
         item = item.serialize({ minimal: true, note: true });
-        item.product = { ...product.serialize({ minimal: true }), image };
-        return item;
+        return { item, product };
       });
     });
     const orders = await Promise.all(invoices.map(async (invoice, idx) => {

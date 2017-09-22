@@ -59,10 +59,12 @@ class InvoiceModel extends bookshelf.Model {
       const shipping = invoice.shipping;
       invoice.delivery_cost = parseNum(this.get('biaya_ongkir'));
       invoice.insurance_fee = parseNum(this.get('biaya_asuransi'));
-      invoice.expedition = shipping.expedition_service;
-      invoice.is_insurance = shipping.is_insurance;
-      invoice.note = shipping.note;
-      invoice.seller_note = shipping.seller_note;
+      if (shipping) {
+        invoice.expedition = shipping.expedition_service;
+        invoice.is_insurance = shipping.is_insurance;
+        invoice.note = shipping.note;
+        invoice.seller_note = shipping.seller_note;
+      }
       invoice.confirmed_at = parseDate(this.get('confirmation_date'));
       invoice.shipping = undefined;
       invoice.store = undefined;

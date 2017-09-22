@@ -54,6 +54,8 @@ class ProductModel extends bookshelf.Model {
       is_dropship: this.get('is_dropshiper'),
       weight: this.get('berat_produk'),
       stock: this.get('stock_produk'),
+      image: !this.relations.image ? null
+        : this.related('image').serialize().file,
     };
     if (wishlist) {
       product.is_liked = true;
