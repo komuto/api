@@ -226,7 +226,15 @@ class BucketModel extends bookshelf.Model {
   static async detailTransaction(userId, bucketId) {
     const bucket = await this.where({ id_users: userId, id_bucket: bucketId })
       .query(qb => qb.whereNotIn('status_bucket', [BucketStatus.ADDED, BucketStatus.DELETED]))
-      .fetch({ withRelated: ['invoices.items.product.images', 'promo', 'invoices.store'] });
+      .fetch({
+        withRelated: [
+          'invoices.items.product.images',
+          'promo',
+          'invoices.store',
+          'invoices.shipping.address',
+          'invoices.shipping.expeditionService.expedition',
+        ],
+      });
     if (!bucket) throw getTransactionError('transaction', 'not_found');
     return this.loadDetailTransaction(bucket, true);
   }
