@@ -21,17 +21,24 @@ class RefundModel extends bookshelf.Model {
     return ['create_at'];
   }
 
-  serialize() {
-    return {
+  serialize({ minimal = false } = {}) {
+    const refund = {
       id: this.get('id_refund'),
+      refund_number: this.get('no_refund'),
+      created_at: parseDate(this.get('create_at')),
+    };
+    if (minimal) return refund;
+    return {
       bucket_id: this.get('id_bucket'),
       invoice_id: this.get('id_invoice'),
       dispute_id: this.get('id_dispute'),
-      refund_number: this.get('no_refund'),
       total: this.get('total_refund'),
       status: this.get('status_refund'),
-      created_at: parseDate(this.get('create_at')),
     };
+  }
+
+  items() {
+    return this.hasMany('RefundItem', 'id_refund');
   }
 
   static async create(data) {

@@ -18,6 +18,7 @@ import { Review } from '../../review/model';
 const { parseNum, parseDec, parseDate, getter, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
 const knex = bookshelf.knex;
+const IMAGE_PATH = config.imageFolder.product;
 
 export const ProductStatus = {
   HIDE: 0, // Gudangkan
@@ -55,7 +56,7 @@ class ProductModel extends bookshelf.Model {
       weight: this.get('berat_produk'),
       stock: this.get('stock_produk'),
       image: !this.relations.image ? null
-        : this.related('image').serialize().file,
+        : core.imagePath(IMAGE_PATH, this.related('image').get('file_gambarproduk')),
     };
     if (wishlist) {
       product.is_liked = true;

@@ -1,8 +1,10 @@
 import _ from 'lodash';
 import core from '../../core';
+import config from './../../../../config';
 
 const { matchDB, getProductAndStore } = core.utils;
 const bookshelf = core.postgres.db;
+const IMAGE_PATH = config.imageFolder.product;
 
 class RefundItemModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -19,17 +21,27 @@ class RefundItemModel extends bookshelf.Model {
     return false;
   }
 
-  serialize() {
-    return {
+  serialize({ minimal = false } = {}) {
+    const item = {
       id: this.get('id_refund_item'),
-      refund_id: this.get('id_refund'),
-      item_id: this.get('id_bucket_list'),
       product_id: this.get('id_produk'),
       product_name: this.get('nama_produk'),
+      product_image: !this.relations.image ? undefined
+        : core.imagePath(IMAGE_PATH, this.related('image').get('file_gambarproduk')),
+    };
+    if (minimal) return item;
+    return {
+      ...item,
+      refund_id: this.get('id_refund'),
+      item_id: this.get('id_bucket_list'),
       product_price: this.get('harga_produk'),
       qty: this.get('qty'),
       total: this.get('total_harga'),
     };
+  }
+
+  image() {
+    return this.hasOne('ImageProduct', 'id_produk', 'id_produk');
   }
 
   static async bulkCreate(refundId, products, items) {

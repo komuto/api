@@ -4,7 +4,6 @@ import { PromoType } from '../../bucket/model';
 import { User } from '../../user/model';
 import { TransType } from './transaction_type';
 import { DetailTransSummary } from './detail_transaction_summary';
-import { MasterFee } from '../../product/model';
 
 const { matchDB, parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -54,7 +53,7 @@ class transSummaryModel extends bookshelf.Model {
   }
 
   summaryable() {
-    return this.morphTo('summaryable', 'Bucket', 'Invoice', 'Withdraw', 'Topup');
+    return this.morphTo('summaryable', 'Bucket', 'Invoice', 'Withdraw', 'Topup', 'Refund');
   }
 
   /**
@@ -118,7 +117,7 @@ class transSummaryModel extends bookshelf.Model {
    * @param id {int} store id
    */
   async getSellingDetail(id) {
-    await this.load('summaryable.items.product.image');
+    await this.load({ 'summaryable.items.product.image': qb => qb.orderBy('id_gambarproduk') });
     let invoice = this.related('summaryable');
     const isReseller = invoice.get('id_toko') !== id;
     const getBuyer = invoice.load('buyer');
@@ -149,7 +148,7 @@ class transSummaryModel extends bookshelf.Model {
   async getPaymentDetail() {
     await this.load(['summaryable.promo',
       'summaryable.invoices.shipping.address',
-      'summaryable.invoices.items.product.image']);
+      { 'summaryable.invoices.items.product.image': qb => qb.orderBy('id_gambarproduk') }]);
     const bucket = this.related('summaryable');
     const invoices = bucket.related('invoices');
     const getRelations = { address: [], store: [], expedition: [] };

@@ -53,6 +53,7 @@ routes.get('/users/saldo/history/:id([0-9]{1,10})/',
   wrap(SaldoController.paymentTrans),
   wrap(SaldoController.topupTrans),
   wrap(SaldoController.withdrawTrans),
+  SaldoController.refundTrans,
   apiResponse());
 
 /**

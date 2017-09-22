@@ -109,6 +109,17 @@ SaldoController.withdrawTrans = async (req, res, next) => {
   return next();
 };
 
+SaldoController.refundTrans = async (req, res, next) => {
+  if (req.body.transType !== SummTransType.REFUND) return next();
+  const transaction = await req.body.transaction.load({ 'summaryable.items.image': qb => qb.orderBy('id_gambarproduk') });
+  const refund = transaction.related('summaryable');
+  const items = refund.related('items').map(item => item.serialize({ minimal: true }));
+  const data = { transaction: transaction.serialize(),
+    refund: { ...refund.serialize({ minimal: true }), items } };
+  req.resData = { message: 'Refund Transaction Data', data };
+  return next();
+};
+
 SaldoController.getTopupStatus = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
