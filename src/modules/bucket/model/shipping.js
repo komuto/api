@@ -33,7 +33,7 @@ class ShippingModel extends bookshelf.Model {
       delivery_cost: parseNum(this.get('harga_ongkir')),
       insurance_fee: parseNum(this.get('nilai_asuransi')),
       is_insurance: this.get('is_asuransi'),
-      address: this.relations.address ? this.related('address') : undefined,
+      address: this.relations.address ? this.related('address').serialize({ full: minimal }) : undefined,
       expedition_service: this.relations.expeditionService ? this.related('expeditionService') : undefined,
     };
     if (minimal) return shipping;
