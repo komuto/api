@@ -40,6 +40,7 @@ routes.post('/users/saldo/withdraw',
  */
 routes.get('/users/saldo/history',
   auth(),
+  validateParam(constraints.history),
   wrap(SaldoController.history),
   apiResponse());
 

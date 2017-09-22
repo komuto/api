@@ -1,9 +1,11 @@
+import moment from 'moment';
 import core from '../../core';
 import { BadRequestError } from '../../../../common/errors';
 import { PromoType } from '../../bucket/model';
 import { User } from '../../user/model';
 import { TransType } from './transaction_type';
 import { DetailTransSummary } from './detail_transaction_summary';
+import { getHistoryError } from '../messages';
 
 const { matchDB, parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -12,6 +14,7 @@ export const SummTransType = {
   PAYMENT: 'PAID',
   REFUND: 'RFND',
   SELLING: 'SELL',
+  FEE: 'SFEE',
   TOPUP: 'TPUP',
   WITHDRAW: 'WTHD',
 };
@@ -69,8 +72,21 @@ class transSummaryModel extends bookshelf.Model {
     return new this(data).save();
   }
 
-  static async get(userId) {
-    const transactions = await this.where('id_users', userId).fetchAll({ withRelated: 'detailTransSummary' });
+  static async get(userId, params, page, pageSize) {
+    const { filters } = params;
+    let { start_at: startAt, end_at: endAt } = params;
+    startAt = moment.unix(startAt);
+    endAt = moment.unix(endAt);
+    if (!startAt.isValid() || !endAt.isValid()) {
+      throw getHistoryError('date', 'invalid_date');
+    }
+    const transactions = await this.where('id_users', userId)
+      .query((qb) => {
+        if (filters) qb.whereIn('kode_summarytransaksi', filters);
+        if (startAt) qb.where('tgl_summarytransaksi', '>=', startAt);
+        if (endAt) qb.where('tgl_summarytransaksi', '<', endAt);
+      })
+      .fetchPage({ page, pageSize, withRelated: 'detailTransSummary' });
     return transactions.map((transaction) => {
       const detail = transaction.related('detailTransSummary');
       return {

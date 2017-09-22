@@ -104,13 +104,14 @@ class ItemModel extends bookshelf.Model {
     product.store = store;
     product.location = { district: districtStore };
     product.expeditions = expeditions;
-    shipping = shipping.serialize();
+    const address = shipping.related('address');
 
-    const province = shipping.address.related('province');
-    const district = shipping.address.related('district');
-    const subDistrict = shipping.address.related('subDistrict');
+    const province = address.related('province');
+    const district = address.related('district');
+    const subDistrict = address.related('subDistrict');
+    shipping = shipping.serialize();
     shipping.address = {
-      ...shipping.address.serialize(),
+      ...address.serialize(),
       province,
       district,
       subDistrict,

@@ -47,6 +47,27 @@ class CategoryModel extends bookshelf.Model {
     return this.hasMany('Category', 'parentid_kategoriproduk', 'id_kategoriproduk');
   }
 
+  async parents() {
+    let category = this;
+    const name = category.serialize().name;
+    let parents = [];
+
+    while (category.serialize().parent_id) {
+      const parentId = category.serialize().parent_id;
+      category = await CategoryModel.where('id_kategoriproduk', parentId).fetch();
+
+      if (category) {
+        parents.push(category.serialize());
+      }
+    }
+
+    parents = parents.reverse();
+    const names = _.reduce(parents, (res, parent) => (res += `${parent.name} / `), '');
+
+    return { name: names + name, parents };
+  }
+
+
   /**
    * Get categories by condition
    * @param {Object} condition

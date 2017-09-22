@@ -198,7 +198,9 @@ class BucketModel extends bookshelf.Model {
       });
       accu.total_price += parseInt(invoice.get('total_harga'), 10);
       if (isDetail) {
-        accu.data.push({ ...invoice.serialize({ minimal: true }), items });
+        const invoiceObj = { ...invoice.serialize({ minimal: true }), items };
+        invoiceObj.shipping = invoiceObj.shipping ? invoiceObj.shipping : null;
+        accu.data.push(invoiceObj);
       } else {
         accu.data.push(...items);
       }
@@ -226,8 +228,22 @@ class BucketModel extends bookshelf.Model {
   static async detailTransaction(userId, bucketId) {
     const bucket = await this.where({ id_users: userId, id_bucket: bucketId })
       .query(qb => qb.whereNotIn('status_bucket', [BucketStatus.ADDED, BucketStatus.DELETED]))
-      .fetch({ withRelated: ['invoices.items.product.images', 'promo', 'invoices.store'] });
+      .fetch();
     if (!bucket) throw getTransactionError('transaction', 'not_found');
+    const status = bucket.serialize().status;
+    if (status === BucketStatus.ADDED || status === BucketStatus.WAITING_FOR_PAYMENT) {
+      await Promise.all([
+        bucket.load([
+          'invoices.items.product.images',
+          'promo',
+          'invoices.store',
+          'invoices.shipping.address',
+          'invoices.shipping.expeditionService.expedition',
+        ]),
+      ]);
+    } else {
+      await Promise.all([bucket.load(['invoices.items.product.images', 'promo', 'invoices.store'])]);
+    }
     return this.loadDetailTransaction(bucket, true);
   }
 

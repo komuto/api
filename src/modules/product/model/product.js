@@ -537,6 +537,10 @@ class ProductModel extends bookshelf.Model {
     };
   }
 
+  // static async getCategories(category) {
+  //
+  // }
+
   /**
    * Get product with its relation
    * @param productId {integer} product id
@@ -573,7 +577,13 @@ class ProductModel extends bookshelf.Model {
       wholesaler = product.related('wholesale').serialize();
     } else wholesaler = [];
 
-    const category = product.related('category');
+    let category = product.related('category');
+    const { parents, name } = await category.parents();
+    category = {
+      ...category.serialize(),
+      full_name: name,
+      parents,
+    };
     const images = product.related('images');
     const expeditionServices = product.related('expeditionServices').map((service) => {
       const expedition = service.related('expedition');

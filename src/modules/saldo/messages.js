@@ -18,7 +18,14 @@ export const errMsg = {
     title: 'Lihat detail transaksi gagal',
     not_found: 'Transaksi tidak ditemukan',
   },
+  getHistory: {
+    title: 'Get history saldo gagal',
+    invalid_date: 'Invalid date',
+  },
 };
 
 export const withdrawError = formatError.bind(errMsg.withdrawMsg);
+
 export const transDetailError = formatError.bind(errMsg.transDetail);
+
+export const getHistoryError = formatError.bind(errMsg.getHistory);
