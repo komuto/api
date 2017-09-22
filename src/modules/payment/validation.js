@@ -22,7 +22,7 @@ constraints.bulkReview = {
   product_id: {
     presence: true,
     format: {
-      pattern: '[0-9]{1,10}',
+      pattern: '[0-9]{1,10}.[0-9]{1,10}',
       flags: 'i',
       message: 'not valid',
     },
