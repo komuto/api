@@ -463,9 +463,9 @@ PaymentController.inputAirwayBill = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const invoice = await Invoice.where({
     id_invoice: req.params.id,
-    status_transaksi: InvoiceTransactionStatus.PROCEED,
     id_toko: storeId,
-  }).fetch();
+  }).query(qb => qb.whereIn('status_transaksi', [InvoiceTransactionStatus.PROCEED,
+    InvoiceTransactionStatus.SENDING])).fetch();
   if (!invoice) throw inputBillError('order', 'not_found');
   await Shipping.where('id_pengiriman_produk', invoice.get('id_pengiriman_produk'))
     .save({ resiresponkirim: req.body.airway_bill }, { require: true, patch: true })

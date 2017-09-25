@@ -55,7 +55,7 @@ class ProductModel extends bookshelf.Model {
       is_dropship: this.get('is_dropshiper'),
       weight: this.get('berat_produk'),
       stock: this.get('stock_produk'),
-      image: !this.relations.image ? null
+      image: !this.relations || !this.relations.image ? undefined
         : core.imagePath(IMAGE_PATH, this.related('image').get('file_gambarproduk')),
     };
     if (wishlist) {
@@ -585,10 +585,7 @@ class ProductModel extends bookshelf.Model {
       parents,
     };
     const images = product.related('images');
-    const expeditionServices = product.related('expeditionServices').map((service) => {
-      const expedition = service.related('expedition');
-      return `${expedition.serialize().name} ${service.serialize().name}`;
-    });
+    const expeditionServices = product.related('expeditionServices').map(service => service.serialize({ fullName: true }));
     let catalog;
     if (isDropship) {
       catalog = dropship.get('id_katalog') ? dropship.related('catalog') : null;
