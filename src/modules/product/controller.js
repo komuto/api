@@ -22,7 +22,7 @@ import {
   getCatalogProductsError,
   addDropshipProductError,
   errMsg,
-  createDiscussionError,
+  createDiscussionError, getDropshipProductError,
 } from './messages';
 import { ReportEmail } from './email';
 import config from './../../../config';
@@ -302,6 +302,17 @@ ProductController.dropship = async (req, res, next) => {
     message: 'Dropship Data',
     data: dropship,
   };
+  return next();
+};
+
+/**
+ * Delete dropship product
+ */
+ProductController.deleteDropship = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const dropship = await Dropship.findByProductIdAndStoreId(req.params.id, storeId);
+  if (!dropship) throw getDropshipProductError('product', 'not_found');
+  await dropship.destroy();
   return next();
 };
 

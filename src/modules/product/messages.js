@@ -48,6 +48,10 @@ export const errMsg = {
     product_not_dropship: 'Produk tidak bisa dijadikan dropship',
     duplicate: 'Produk sudah ada di daftar dropship',
   },
+  getDropshipProducts: {
+    title: 'Get produk dropship gagal',
+    not_found: 'Produk tidak ditemukan',
+  },
   getFee: {
     title: 'Get master fee gagal',
     not_found: 'Fee tidak ditemukan',
@@ -71,5 +75,7 @@ export const getCatalogProductsError = formatError.bind(errMsg.getCatalogProduct
 export const updateProductError = formatError.bind(errMsg.updateProduct);
 
 export const addDropshipProductError = formatError.bind(errMsg.addDropshipProducts);
+
+export const getDropshipProductError = formatError.bind(errMsg.getDropshipProducts);
 
 export const getFeeError = formatError.bind(errMsg.getFee);

@@ -161,6 +161,15 @@ routes.post('/products/:id([0-9]{1,10}.[0-9]{1,10})/dropship',
   apiResponse());
 
 /**
+ * DELETE /users/store/products/id
+ * Delete dropship product
+ */
+routes.delete('/users/store/products/:id([0-9]{1,10})',
+  auth(),
+  wrap(ProductController.deleteDropship),
+  apiResponse());
+
+/**
  * POST /users/store/products/hides
  * Hide products
  */
