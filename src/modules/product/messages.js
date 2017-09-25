@@ -41,16 +41,20 @@ export const errMsg = {
     title: 'Get catalog products gagal',
     not_found: 'Katalog tidak ditemukan',
   },
-  addDropshipProducts: {
+  addDropshipProduct: {
     title: 'Gagal menambah product dropship',
     own_product: 'Tidak bisa menambah produk sendiri',
     catalog_not_found: 'Katalog tidak ditemukan',
     product_not_dropship: 'Produk tidak bisa dijadikan dropship',
     duplicate: 'Produk sudah ada di daftar dropship',
   },
-  getDropshipProducts: {
+  getDropshipProduct: {
     title: 'Get produk dropship gagal',
     not_found: 'Produk tidak ditemukan',
+  },
+  deleteDropshipProduct: {
+    title: 'Hapus produk dropship gagal',
+    error: 'Produk gagak dihapus',
   },
   getFee: {
     title: 'Get master fee gagal',
@@ -74,8 +78,10 @@ export const getCatalogProductsError = formatError.bind(errMsg.getCatalogProduct
 
 export const updateProductError = formatError.bind(errMsg.updateProduct);
 
-export const addDropshipProductError = formatError.bind(errMsg.addDropshipProducts);
+export const addDropshipProductError = formatError.bind(errMsg.addDropshipProduct);
 
-export const getDropshipProductError = formatError.bind(errMsg.getDropshipProducts);
+export const getDropshipProductError = formatError.bind(errMsg.getDropshipProduct);
+
+export const deleteDropshipProductError = formatError.bind(errMsg.deleteDropshipProduct);
 
 export const getFeeError = formatError.bind(errMsg.getFee);

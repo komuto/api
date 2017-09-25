@@ -22,7 +22,7 @@ import {
   getCatalogProductsError,
   addDropshipProductError,
   errMsg,
-  createDiscussionError, getDropshipProductError,
+  createDiscussionError, getDropshipProductError, deleteDropshipProductError,
 } from './messages';
 import { ReportEmail } from './email';
 import config from './../../../config';
@@ -312,7 +312,7 @@ ProductController.deleteDropship = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const dropship = await Dropship.findByProductIdAndStoreId(req.params.id, storeId);
   if (!dropship) throw getDropshipProductError('product', 'not_found');
-  await dropship.destroy();
+  await dropship.destroy().catch(() => { throw deleteDropshipProductError('product', 'error'); });
   return next();
 };
 
