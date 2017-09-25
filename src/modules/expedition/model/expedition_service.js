@@ -14,7 +14,7 @@ class ServiceModel extends bookshelf.Model {
     return 'id_ekspedisiservice';
   }
 
-  serialize({ minimal = true } = {}) {
+  serialize({ minimal = true, fullName = false } = {}) {
     const service = {
       id: this.get('id_ekspedisiservice'),
       name: this.get('nama_ekspedisiservice'),
@@ -22,10 +22,15 @@ class ServiceModel extends bookshelf.Model {
       logo: this.get('logo_path'),
       is_checked: false,
     };
+    if (fullName) {
+      service.full_name = !this.relations.expedition ? undefined :
+          `${this.related('expedition').get('nama_ekspedisi')} ${service.name}`;
+      return service;
+    }
     if (minimal) {
       return {
         ...service,
-        expedition: this.relations.expedition ? this.related('expedition') : undefined,
+        expedition: this.relations.expedition ? this.related('expedition').serialize({ minimal }) : undefined,
       };
     }
     return {

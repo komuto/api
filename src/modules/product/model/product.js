@@ -585,10 +585,7 @@ class ProductModel extends bookshelf.Model {
       parents,
     };
     const images = product.related('images');
-    const expeditionServices = product.related('expeditionServices').map((service) => {
-      const expedition = service.related('expedition');
-      return `${expedition.serialize().name} ${service.serialize().name}`;
-    });
+    const expeditionServices = product.related('expeditionServices').map(service => service.serialize({ fullName: true }));
     let catalog;
     if (isDropship) {
       catalog = dropship.get('id_katalog') ? dropship.related('catalog') : null;
