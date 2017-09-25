@@ -55,7 +55,7 @@ class ProductModel extends bookshelf.Model {
       is_dropship: this.get('is_dropshiper'),
       weight: this.get('berat_produk'),
       stock: this.get('stock_produk'),
-      image: !this.relations.image ? null
+      image: !this.relations || !this.relations.image ? undefined
         : core.imagePath(IMAGE_PATH, this.related('image').get('file_gambarproduk')),
     };
     if (wishlist) {
