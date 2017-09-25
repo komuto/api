@@ -200,23 +200,30 @@ class InvoiceModel extends bookshelf.Model {
    * @param invoiceStatus {int}
    * @param page {int}
    * @param pageSize {int}
+   * @param isJoin {boolean}
    */
-  static async getOrders(id, invoiceStatus, page, pageSize) {
+  static async getOrders(id, invoiceStatus, page, pageSize, isJoin) {
     let where = { 'invoice.id_toko': id };
     if (invoiceStatus) where = { ...where, status_transaksi: invoiceStatus };
-    const invoices = await this.where(where)
-      .query((qb) => {
-        qb.distinct();
-        if (!invoiceStatus) {
-          qb.whereNotIn('status_transaksi', [InvoiceTransactionStatus.WAITING, InvoiceTransactionStatus.PROCEED]);
-          qb.whereNotNull('status_transaksi');
-        }
+    const invoices = await this.query((qb) => {
+      if (!isJoin) qb.where(where);
+      qb.distinct();
+      if (!invoiceStatus) {
+        qb.whereNotIn('status_transaksi', [InvoiceTransactionStatus.WAITING, InvoiceTransactionStatus.PROCEED]);
+        qb.whereNotNull('status_transaksi');
+      }
+      if (isJoin) {
+        qb.join('listbucket as l', 'l.id_invoice', 'invoice.id_invoice')
+          .innerJoin('dropshipper as d', 'd.id_dropshipper', 'l.id_dropshipper')
+          .andWhere('d.id_toko', id);
+      } else if (isJoin === undefined) {
         qb.join('listbucket as l', 'l.id_invoice', 'invoice.id_invoice')
           .leftJoin('dropshipper as d', 'd.id_dropshipper', 'l.id_dropshipper')
           .orWhere('d.id_toko', id)
           .andWhere('status_transaksi', invoiceStatus);
-      })
-      .fetchPage({ page, pageSize, withRelated: ['items.product.image', 'buyer'] });
+      }
+    }).fetchPage({ page, pageSize, withRelated: ['items.product.image', 'buyer'] });
+
     if (!invoices) return [];
     return invoices.map((invoice) => {
       const products = invoice.related('items').map((item) => {

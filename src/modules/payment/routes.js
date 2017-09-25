@@ -196,6 +196,7 @@ routes.get('/invoices/:id([0-9]{1,10})/processing-order-detail',
  */
 routes.get('/sales',
   auth(),
+  validateParam(constraints.sales),
   wrap(PaymentController.getSales),
   apiResponse());
 

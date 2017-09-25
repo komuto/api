@@ -67,4 +67,14 @@ constraints.images = { name: { presence: true } };
 
 constraints.airwayBill = { airway_bill: { presence: true } };
 
+constraints.sales = {
+  is_dropship: {
+    presence: false,
+    inclusion: {
+      within: ['true', 'false'],
+      message: 'accept only boolean',
+    },
+  },
+};
+
 export default constraints;

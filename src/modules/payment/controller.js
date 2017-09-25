@@ -411,7 +411,8 @@ PaymentController.getSales = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const storeId = await Store.getStoreId(req.user.id);
-  const invoices = await Invoice.getOrders(storeId, null, page, pageSize);
+  const isJoin = req.query.is_dropship ? JSON.parse(req.query.is_dropship) : false;
+  const invoices = await Invoice.getOrders(storeId, null, page, pageSize, isJoin);
   req.resData = {
     message: 'Sales Data',
     meta: { page, limit: pageSize },
