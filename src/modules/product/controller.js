@@ -82,10 +82,10 @@ ProductController.index = async (req, res, next) => {
  * Get search result
  */
 ProductController.search = async (req, res, next) => {
-  const results = await Product.search(req.query.q);
+  const results = await Product.search(req.query.q, req.marketplace.id);
   req.resData = {
     message: 'Products Search Result',
-    data: results,
+    data: results.map(val => ({ name: val.get('nama_produk') })),
   };
   return next();
 };
