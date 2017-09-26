@@ -4,6 +4,7 @@ stages:
 deploy_job:
   stage: deploy
   script:
+    - whoami
     - chmod +x ./deploy.sh
     - ./deploy.sh
   when: always
