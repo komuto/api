@@ -316,6 +316,24 @@ class BucketModel extends bookshelf.Model {
     return await this.where({ id_bucket: id }).save({ status_bucket: status }, { patch: true });
   }
 
+  static async midtransNotification(id, body) {
+    let status;
+    switch (body.status_code) {
+      case '200':
+        status = BucketStatus.PAYMENT_RECEIVED;
+        break;
+      case '201':
+        status = BucketStatus.WAITING_FOR_VERIFICATION;
+        break;
+      case '202':
+        status = BucketStatus.EXPIRED;
+        break;
+      default:
+        break;
+    }
+    return await this.updateStatus(id, status);
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data

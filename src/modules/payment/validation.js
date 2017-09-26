@@ -77,4 +77,14 @@ constraints.sales = {
   },
 };
 
+constraints.saldoToken = {
+  platform: {
+    presence: true,
+    inclusion: {
+      within: ['web', 'pwa', 'apps'],
+      message: 'accept only `web`, `pwa`, or `apps`',
+    },
+  },
+};
+
 export default constraints;

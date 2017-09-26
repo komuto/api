@@ -15,6 +15,7 @@ routes.get('/transactions/:id([0-9]{1,10})/token',
 
 routes.get('/saldo/nominal/:id/token',
   auth(),
+  validateParam(constraints.saldoToken),
   wrap(PaymentController.getSaldoSnapToken),
   apiResponse());
 
