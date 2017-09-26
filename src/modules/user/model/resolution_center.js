@@ -49,7 +49,7 @@ class ResolutionCenterModel extends bookshelf.Model {
   }
 
   imageGroups() {
-    return this.hasMany('ImageGroup', 'parent_id');
+    return this.morphMany('ImageGroup', 'group', ['group', 'parent_id'], 'resolusi');
   }
 
   static async get(id, isClosed, page, pageSize) {
@@ -63,11 +63,7 @@ class ResolutionCenterModel extends bookshelf.Model {
 
   static async getDetail(id, resolutionId) {
     return await this.where({ id_users: id, id_rescenter: resolutionId })
-      .fetch({
-        withRelated: [
-          { imageGroups: qb => qb.where('group', 'resolusi') },
-        ],
-      });
+      .fetch({ withRelated: ['imageGroups'] });
   }
 
   static async create(data) {

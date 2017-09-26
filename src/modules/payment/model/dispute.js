@@ -90,7 +90,7 @@ class DisputeModel extends bookshelf.Model {
   }
 
   imageGroups() {
-    return this.hasMany('ImageGroup', 'parent_id');
+    return this.morphMany('ImageGroup', 'group', ['group', 'parent_id'], 'dispute');
   }
 
   message() {
@@ -153,7 +153,7 @@ class DisputeModel extends bookshelf.Model {
         'disputeProducts.product.images',
         'invoice.items.product',
         relation,
-        { imageGroups: qb => qb.where('group', 'dispute') },
+        'imageGroups',
         'message.store',
         'message.detailMessages.user',
         'refund',
