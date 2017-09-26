@@ -16,6 +16,13 @@ class ImageProductModel extends bookshelf.Model {
     return 'id_gambarproduk';
   }
 
+  initialize() {
+    // Set order by to always based on id_gambarproduk asc when fetching
+    this.on('fetching', (model, columns, options) => {
+      options.query.orderBy('id_gambarproduk');
+    }, this);
+  }
+
   serialize() {
     return {
       id: this.get('id_gambarproduk'),
