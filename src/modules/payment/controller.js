@@ -103,10 +103,17 @@ PaymentController.getSnapToken = async (req, res, next) => {
 PaymentController.getSaldoSnapToken = async (req, res, next) => {
   const found = _.find(nominal, o => o.id === parseInt(req.params.id, 10));
   if (!found) throw getNominalError('nominal', 'not_found');
+  const data = Topup.matchDBColumn({
+    user_id: req.user.id,
+    payment_method_id: 1, // default value
+    amount: found.amount,
+    device: req.query.platform,
+  });
+  const topup = await Topup.create(data);
   const { firstName, lastName } = getName(req.user.name);
   const payload = {
     transaction_details: {
-      order_id: `TOPUP-${randomInt(10000, 99999)}`,
+      order_id: `TOPUP-${topup.get('id')}`,
       gross_amount: found.amount,
     },
     customer_details: {
