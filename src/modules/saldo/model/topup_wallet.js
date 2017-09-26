@@ -44,6 +44,28 @@ class TopupModel extends bookshelf.Model {
     return await new this({ id_users: userId }).fetchPage({ page, pageSize });
   }
 
+  static async updateStatus(id, status) {
+    return await this.where({ id }).save({ status }, { patch: true });
+  }
+
+  static async midtransNotification(id, body) {
+    let status;
+    switch (body.status_code) {
+      case '200':
+        status = TopupStatus.SUCCESS;
+        break;
+      case '201':
+        status = TopupStatus.WAITING;
+        break;
+      case '202':
+        status = TopupStatus.FAILED;
+        break;
+      default:
+        break;
+    }
+    return await this.updateStatus(id, status);
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data

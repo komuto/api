@@ -24,6 +24,7 @@ import { ImageGroup } from '../user/model';
 import nominal from '../../../config/nominal.json';
 import { getNominalError, getInvoiceError, acceptOrderError, rejectOrderError, inputBillError } from './messages';
 import { getStoreError } from './../store/messages';
+import { Topup } from '../saldo/model';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -123,7 +124,6 @@ PaymentController.getSaldoSnapToken = async (req, res, next) => {
   return next();
 };
 
-// TODO: Add pagination
 PaymentController.listTransactions = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
@@ -322,26 +322,17 @@ PaymentController.notification = async (req, res, next) => {
   req.on('end', async () => {
     req.body = data ? JSON.parse(data) : {};
     if (typeof req.body === 'string') req.body = JSON.parse(req.body);
-    const bucketId = req.body.order_id.split('-')[1];
-    let status;
-    switch (req.body.status_code) {
-      case '200':
-        status = BucketStatus.PAYMENT_RECEIVED;
-        break;
-      case '201':
-        status = BucketStatus.WAITING_FOR_VERIFICATION;
-        break;
-      case '202':
-        status = BucketStatus.EXPIRED;
-        break;
-      default:
-        break;
+    const [type, id] = req.body.order_id.split('-');
+    if (type === 'ORDER') {
+      const bucket = await Bucket.midtransNotification(id, req.body);
+      console.log(type, bucket.serialize());
+    } else {
+      const topup = await Topup.midtransNotification(id, req.body);
+      console.log(type, topup.serialize());
     }
-    const bucket = await Bucket.updateStatus(bucketId, status);
     console.log('\n=== MIDTRANS ===');
     console.log(req.body);
     console.log('\n');
-    console.log(bucket.serialize());
     console.log('\n');
     return next();
   });
