@@ -77,7 +77,7 @@ constraints.sales = {
   },
 };
 
-constraints.saldoToken = {
+constraints.getToken = {
   platform: {
     presence: true,
     inclusion: {

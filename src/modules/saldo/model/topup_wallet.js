@@ -28,7 +28,7 @@ class TopupModel extends bookshelf.Model {
       payment_method_id: this.get('id_paymentmethod'),
       amount: this.get('amount'),
       status: parseNum(this.get('status'), 0),
-      device: this.get('device'),
+      platform: this.get('platform'),
       created_at: parseDate(this.get('datecreated')),
     };
   }
@@ -79,7 +79,7 @@ class TopupModel extends bookshelf.Model {
       payment_method_id: 'id_paymentmethod',
       amount: 'amount',
       status: 'status',
-      device: 'device',
+      platform: 'platform',
       created_at: 'datecreated',
     };
     return matchDB(data, column);

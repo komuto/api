@@ -45,12 +45,14 @@ class BucketModel extends bookshelf.Model {
     const bucket = {
       id: this.get('id_bucket'),
       user_id: this.get('id_users'),
+      marketplace_id: this.get('id_marketplaceuser'),
       promo_id: this.get('id_promo'),
       promo: this.relations.promo ? this.related('promo').serialize() : null,
       payment_method_id: this.get('id_paymentmethod'),
       unique_code: this.get('kode_unik'),
       order_at: parseDate(this.get('tgl_orderbucket')),
       wallet: parseNum(this.get('bayar_wallet')),
+      platform: this.get('platform'),
       status: parseNum(this.get('status_bucket')),
       status_at: parseDate(this.get('tglstatus_bucket')),
     };
@@ -90,7 +92,7 @@ class BucketModel extends bookshelf.Model {
   /**
    * Get detail bucket
    */
-  static async getDetail(userId, bucketId = null) {
+  static async getDetail(userId, bucketId = null, platform = null) {
     let where = { id_users: userId };
     if (bucketId) {
       where = { ...where, id_bucket: bucketId };
@@ -114,6 +116,7 @@ class BucketModel extends bookshelf.Model {
         ],
       });
     if (!bucket) throw getBucketError('bucket', 'not_found');
+    if (platform) bucket.save({ platform }, { patch: true });
     const items = await Promise.all(bucket.related('items').map(async item => await Item.loadDetailItem(item)));
     return { ...bucket.serialize(), items };
   }
@@ -349,6 +352,7 @@ class BucketModel extends bookshelf.Model {
       payment_method_id: 'id_paymentmethod',
       status: 'status_bucket',
       status_at: 'tglstatus_bucket',
+      platform: 'platform',
     };
     return matchDB(data, column);
   }
