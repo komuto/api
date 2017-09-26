@@ -430,10 +430,13 @@ UserController.saveNotifications = async (req, res, next) => {
  * Get Resolutions
  */
 UserController.getResolutions = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const isClosed = req.query.is_closed ? JSON.parse(req.query.is_closed) : false;
-  const resolutions = await ResolutionCenter.get(req.user.id, isClosed);
+  const resolutions = await ResolutionCenter.get(req.user.id, isClosed, page, pageSize);
   req.resData = {
     message: 'Resolution Data',
+    meta: { page, limit: pageSize },
     data: resolutions.map(val => val.serialize({ minimal: true })),
   };
   return next();

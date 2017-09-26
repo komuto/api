@@ -52,13 +52,13 @@ class ResolutionCenterModel extends bookshelf.Model {
     return this.hasMany('ImageGroup', 'parent_id');
   }
 
-  static async get(id, isClosed) {
+  static async get(id, isClosed, page, pageSize) {
     return await this.where({ id_users: id })
       .query((qb) => {
         if (isClosed) qb.where('status_ticket_rescenter', 0);
         else qb.whereNot('status_ticket_rescenter', 0);
       })
-      .fetchAll();
+      .fetchPage({ page, pageSize });
   }
 
   static async getDetail(id, resolutionId) {
