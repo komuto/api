@@ -133,7 +133,7 @@ class transSummaryModel extends bookshelf.Model {
    * @param id {int} store id
    */
   async getSellingDetail(id) {
-    await this.load({ 'summaryable.items.product.image': qb => qb.orderBy('id_gambarproduk') });
+    await this.load('summaryable.items.product.image');
     let invoice = this.related('summaryable');
     const isReseller = invoice.get('id_toko') !== id;
     const getBuyer = invoice.load('buyer');
@@ -164,7 +164,7 @@ class transSummaryModel extends bookshelf.Model {
   async getPaymentDetail() {
     await this.load(['summaryable.promo',
       'summaryable.invoices.shipping.address',
-      { 'summaryable.invoices.items.product.image': qb => qb.orderBy('id_gambarproduk') }]);
+      'summaryable.invoices.items.product.image']);
     const bucket = this.related('summaryable');
     const invoices = bucket.related('invoices');
     const getRelations = { address: [], store: [], expedition: [] };

@@ -627,13 +627,7 @@ class ProductModel extends bookshelf.Model {
   static async getExpeditionsById(id) {
     const product = await this.where({ id_produk: id }).fetch({ withRelated: ['expeditionServices.expedition'] });
     let services = product.related('expeditionServices');
-    services = services.map((val) => {
-      const service = val.serialize();
-      return {
-        ...service,
-        expedition: service.expedition.serialize(),
-      };
-    });
+    services = services.map(service => service.serialize());
 
     const groups = _.groupBy(services, val => (val.expedition.name));
 
