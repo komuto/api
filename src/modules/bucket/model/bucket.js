@@ -177,7 +177,7 @@ class BucketModel extends bookshelf.Model {
   static getTimeLeft(maxTime) {
     // TODO: Get from global parameter
     const maxPaymentDate = moment(maxTime).add(2, 'days');
-    if (moment().isAfter(maxPaymentDate)) return 0;
+    if (moment().isAfter(maxPaymentDate)) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
     const { days, hours, minutes, seconds } = moment.preciseDiff(maxPaymentDate, moment(), true);
     return { days, hours, minutes, seconds };
   }
