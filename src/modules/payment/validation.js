@@ -53,6 +53,24 @@ constraints.dispute = {
   images: { presence: true },
 };
 
+constraints.products = {
+  products: {
+    presence: true,
+    format: {
+      pattern: '[0-9]{1,10}.[0-9]{1,10}',
+      flags: 'i',
+      message: 'not valid',
+    },
+  },
+};
+
+constraints.problems = {
+  problems: {
+    presence: true,
+    numericality: { onlyInteger: true },
+  },
+};
+
 constraints.listDispute = {
   is_resolved: {
     presence: false,

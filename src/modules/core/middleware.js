@@ -148,7 +148,9 @@ export function formatValidation(rules, msg) {
  * Validate parameters
  * @param constraints {object}
  * @param isBody {boolean} true evaluate req.body else req.query
- * @param prop {object} name of the array to check
+ * When prop is present isBody checks whether the array should contain object or not
+ * true must the array values are objects, false primitives
+ * @param prop {string} name of the array to check
  * @param strict {boolean} need to be available
  * @param modify {function} modify params before validated
  * e.g. usage for parsing int to string to validate with regex(format in validatejs)
@@ -163,24 +165,26 @@ export function validateParam(
   return (req, res, next) => {
     if (prop !== undefined) {
       const params = prop ? req.body[prop] : req.body;
+      if (params.length === 0 && !strict) return next();
       // Can the param be empty array or not
       const evaluate = strict ? true : params && params.length > 0;
       if (evaluate) {
-        if (!Object.keys(params).length) {
-          throw new BadRequestError('Invalid parameter');
+        if (params.length === 0) {
+          const hasError = validate({}, constraints);
+          throw new BadRequestError('Invalid parameter', hasError);
         }
+        const propName = Object.keys(constraints)[0];
         params.forEach((param) => {
           if (modify) param = modify(param);
+          if (!isBody) param = { [propName]: param };
           const hasError = validate(param, constraints);
-          if (hasError) throw formatError(`Invalid parameter ${prop || ''}`, hasError);
+          if (hasError) throw new BadRequestError(`Invalid parameter ${prop || ''}`, hasError);
         });
       }
     } else {
       const hasError = validate(isBody ? req.body : req.query, constraints);
       if (hasError) {
-        const err = new BadRequestError('Invalid parameter');
-        err.data = hasError;
-        return next(err);
+        return next(new BadRequestError('Invalid parameter', hasError));
       }
     }
     return next();

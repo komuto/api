@@ -116,7 +116,7 @@ routes.get('/users/wishlist',
 */
 routes.put('/users/store/expeditions',
   auth(),
-  validateParam(productConstraints.updateExpeditions, false, null, true),
+  validateParam(productConstraints.updateExpeditions, true, null, true),
   wrap(UserController.updateExpeditions),
   apiResponse());
 
@@ -322,7 +322,7 @@ routes.get('/users/resolutions/:id([0-9]{1,10})',
 routes.post('/users/resolutions',
   auth(),
   validateParam(constraints.createResolution, true),
-  // TODO: Images validation
+  validateParam(constraints.resolutionImage, true, 'images', false),
   wrap(UserController.createResolution),
   apiResponse());
 

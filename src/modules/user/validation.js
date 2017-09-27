@@ -123,7 +123,10 @@ constraints.createResolution = {
   },
   title: { presence: true },
   message: { presence: true },
-  images: { presence: false },
+};
+
+constraints.resolutionImage = {
+  name: { presence: true },
 };
 
 constraints.replyResolution = { message: { presence: true } };
