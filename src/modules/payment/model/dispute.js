@@ -28,7 +28,7 @@ export const DisputeStatus = {
   SEND_BY_BUYER: 3,
   RECEIVE_BY_SELLER: 4,
   SEND_BY_SELLER: 5,
-  RECEIVE_BY_USER: 6,
+  RECEIVE_BY_BUYER: 6,
   PROCESS_OF_REFUND: 7,
   CLOSED: 8,
 };
@@ -203,7 +203,7 @@ class DisputeModel extends bookshelf.Model {
     const invoice = dispute.related('invoice');
     const disputeObj = dispute.serialize();
     let newReviews;
-    let status = DisputeStatus.RECEIVE_BY_USER;
+    let status = DisputeStatus.RECEIVE_BY_BUYER;
 
     if (
       disputeObj.solution === DisputeSolutionType.EXCHANGE &&
@@ -284,7 +284,9 @@ class DisputeModel extends bookshelf.Model {
   }
 
   static async updateAirwayBill(where, airwayBill) {
-    const dispute = await this.where(where).fetch();
+    const dispute = await this.where(where)
+      .query(qb => qb.whereNotIn('status_dispute', [DisputeStatus.RECEIVE_BY_BUYER, DisputeStatus.CLOSED]))
+      .fetch();
     if (!dispute) throw getDisputeError('dispute', 'not_found');
     return await dispute.save({
       noresi_dispute: airwayBill,
