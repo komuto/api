@@ -88,7 +88,7 @@ routes.post('/checkout',
  */
 routes.put('/buckets',
   auth(),
-  validateParam(constraints.bulkUpdate, false, 'items', false),
+  validateParam(constraints.bulkUpdate, true, 'items', false),
   wrap(BucketController.bulkUpdate),
   apiResponse());
 

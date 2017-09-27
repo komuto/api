@@ -77,7 +77,9 @@ routes.post('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})',
  */
 routes.post('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})/dispute',
   auth(),
-  // TODO: Add validation products & problems
+  validateParam(constraints.products, false, 'products', true,
+    param => String(param)),
+  validateParam(constraints.problems, false, 'problems', true),
   validateParam(constraints.dispute, true),
   validateParam(constraints.images, true, 'images', true),
   wrap(PaymentController.dispute),
