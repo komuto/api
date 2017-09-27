@@ -17,7 +17,7 @@ SaldoController.withdrawWallet = async (req, res, next) => {
   const bankAccount = await BankAccount.getBankAccount(bank_account_id, id);
   if (!bankAccount) throw withdrawError('bank_account', 'bank_account_not_found');
   const remainingSaldo = saldo - amount;
-  const createWithdraw = Withdraw.create(Withdraw.matchDBColumn({
+  const withdraw = await Withdraw.create(Withdraw.matchDBColumn({
     amount,
     bank_account_id,
     user_id: id,
@@ -30,6 +30,8 @@ SaldoController.withdrawWallet = async (req, res, next) => {
     user_id: id,
     type: SummTransType.WITHDRAW,
     remark,
+    summaryable_type: 'withdraw_wallet',
+    summaryable_id: withdraw.get('id'),
   }));
   const updateSaldo = User.where({ id_users: id })
     .save({ saldo_wallet: remainingSaldo }, { patch: true });
@@ -37,7 +39,7 @@ SaldoController.withdrawWallet = async (req, res, next) => {
     .catch(() => {
       throw new Error('otp');
     });
-  await Promise.all([createWithdraw, createSummary, updateSaldo, changeOTPStatus])
+  await Promise.all([createSummary, updateSaldo, changeOTPStatus])
     .catch((e) => {
       // If unable to update otp status then swallow the error
       if (e.message !== 'otp') throw withdrawError('withdraw', 'title');
