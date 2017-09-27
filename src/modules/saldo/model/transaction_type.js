@@ -19,6 +19,11 @@ class TransTypeModel extends bookshelf.Model {
       type_name: this.get('nama_tipetransaksi'),
     };
   }
+
+  static async getType(type) {
+    const transType = await this.where('kode_tipetransaksi', type).fetch();
+    return transType.get('nama_tipetransaksi');
+  }
 }
 
 export const TransType = bookshelf.model('TransType', TransTypeModel);

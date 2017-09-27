@@ -49,6 +49,7 @@ class TopupModel extends bookshelf.Model {
     return await this.where({ id }).save({ status }, { patch: true });
   }
 
+  // TODO: Add summary transaction
   static async midtransNotification(id, body) {
     let status;
     switch (body.status_code) {
