@@ -110,22 +110,22 @@ class transSummaryModel extends bookshelf.Model {
     if (user.saldo_wallet < totalPrice) {
       throw new BadRequestError('Saldo tidak mencukupi');
     }
+
+    return totalPrice;
   }
 
   static async cutSaldo(user, totalPrice, bucket) {
     await User.updateWallet(user.id, user.saldo_wallet - totalPrice);
-    const type = await TransType.where('kode_tipetransaksi', SummTransType.PAYMENT).fetch();
-    const summary = await this.create(this.matchDBColumn({
+    const remark = await TransType.getRemark(SummTransType.PAYMENT);
+    await this.create(this.matchDBColumn({
       amount: totalPrice,
       first_saldo: user.saldo_wallet,
       last_saldo: user.saldo_wallet - totalPrice,
       user_id: user.id,
       type: SummTransType.PAYMENT,
-      remark: type.get('nama_tipetransaksi'),
-    }));
-    await DetailTransSummary.create(DetailTransSummary.matchDBColumn({
-      transaction_summary_id: summary.serialize().id,
-      bucket_id: bucket.id,
+      remark,
+      summaryable_type: 'bucket',
+      summaryable_id: bucket.id,
     }));
   }
 
@@ -206,6 +206,8 @@ class transSummaryModel extends bookshelf.Model {
       user_id: 'id_users',
       type: 'kode_summarytransaksi',
       remark: 'remark',
+      summaryable_type: 'summaryable_type',
+      summaryable_id: 'summaryable_id',
     };
     return matchDB(data, column);
   }

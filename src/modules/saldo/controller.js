@@ -10,7 +10,7 @@ export const SaldoController = {};
 export default { SaldoController };
 
 SaldoController.withdrawWallet = async (req, res, next) => {
-  const getType = TransType.getType(SummTransType.WITHDRAW);
+  const getRemark = TransType.getRemark(SummTransType.WITHDRAW);
   const { amount, bank_account_id } = req.body;
   const { id, saldo_wallet: saldo } = req.user;
   if (amount > saldo) throw withdrawError('amount', 'not_enough');
@@ -22,14 +22,14 @@ SaldoController.withdrawWallet = async (req, res, next) => {
     bank_account_id,
     user_id: id,
   }));
-  const type = await getType;
+  const remark = await getRemark;
   const createSummary = TransSummary.create(TransSummary.matchDBColumn({
     amount,
     first_saldo: saldo,
     last_saldo: remainingSaldo,
     user_id: id,
     type: SummTransType.WITHDRAW,
-    remark: type,
+    remark,
   }));
   const updateSaldo = User.where({ id_users: id })
     .save({ saldo_wallet: remainingSaldo }, { patch: true });

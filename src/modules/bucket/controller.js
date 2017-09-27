@@ -7,8 +7,7 @@ import { getBucketError, getItemError } from './messages';
 import { BadRequestError } from '../../../common/errors';
 import { getProductAndStore } from '../core/utils';
 import { getProductError } from '../product/messages';
-import { User } from '../user/model';
-import { TransSummary, SummTransType, TransType, DetailTransSummary } from '../saldo/model';
+import { TransSummary } from '../saldo/model';
 
 export const BucketController = {};
 export default { BucketController };
