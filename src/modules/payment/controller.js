@@ -25,6 +25,7 @@ import nominal from '../../../config/nominal.json';
 import { getNominalError, getInvoiceError, acceptOrderError, rejectOrderError, inputBillError } from './messages';
 import { getStoreError } from './../store/messages';
 import { Topup } from '../saldo/model';
+import { BadRequestError } from './../../../common/errors';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -70,10 +71,11 @@ PaymentController.getSnapToken = async (req, res, next) => {
   const bucket = await Bucket.getDetail(req.user.id, req.params.id, req.query.platform);
   let total = 0;
   const itemDetails = bucket.items.map((item) => {
-    total += item.total_price;
+    const itemPrice = Math.floor(item.total_price / item.qty);
+    total += itemPrice * item.qty;
     return {
       id: `ITEM-${item.id}`,
-      price: item.total_price / item.qty,
+      price: itemPrice,
       quantity: item.qty,
       name: item.product.name,
     };
@@ -92,7 +94,9 @@ PaymentController.getSnapToken = async (req, res, next) => {
       phone: req.user.phone_number,
     },
   };
-  const token = await midtrans.snap.transactions(payload);
+  const token = await midtrans.snap.transactions(payload).catch(() => {
+    throw new BadRequestError('Midtrans error');
+  });
   req.resData = {
     message: 'Snap Token',
     data: token.data,
