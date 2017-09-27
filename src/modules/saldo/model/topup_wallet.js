@@ -1,4 +1,7 @@
 import core from '../../core';
+import { SummTransType, TransSummary } from "./transaction_summary";
+import { TransType } from "./transaction_type";
+import { User } from "../../user/model/user";
 
 const { matchDB, parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -49,7 +52,6 @@ class TopupModel extends bookshelf.Model {
     return await this.where({ id }).save({ status }, { patch: true });
   }
 
-  // TODO: Add summary transaction
   static async midtransNotification(id, body) {
     let status;
     switch (body.status_code) {
@@ -65,7 +67,22 @@ class TopupModel extends bookshelf.Model {
       default:
         break;
     }
-    return await this.updateStatus(id, status);
+    const topup = await this.updateStatus(id, status);
+    const [remark, user] = await Promise.all([
+      TransType.getRemark(SummTransType.TOPUP),
+      User.where('id_users', topup.get('id_users')).fetch(),
+    ]);
+    await TransSummary.create(TransSummary.matchDBColumn({
+      amount: topup.get('amount'),
+      first_saldo: user.get('saldo_wallet'),
+      last_saldo: user.get('saldo_wallet') - topup.get('amount'),
+      user_id: id,
+      type: SummTransType.TOPUP,
+      remark,
+      summaryable_type: 'topup_wallet',
+      summaryable_id: topup.get('id'),
+    }));
+    return topup;
   }
 
   /**
