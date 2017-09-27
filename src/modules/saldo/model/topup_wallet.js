@@ -1,7 +1,7 @@
 import core from '../../core';
-import { SummTransType, TransSummary } from "./transaction_summary";
-import { TransType } from "./transaction_type";
-import { User } from "../../user/model/user";
+import { SummTransType, TransSummary } from './transaction_summary';
+import { TransType } from './transaction_type';
+import { User } from '../../user/model/user';
 
 const { matchDB, parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
