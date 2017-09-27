@@ -72,8 +72,10 @@ class MessageModel extends bookshelf.Model {
    * @param id
    * @param type
    * @param isArchived
+   * @param page
+   * @param pageSize
    */
-  static async getById(id, type, isArchived = false) {
+  static async getById(id, type, isArchived = false, page, pageSize) {
     const where = type === 'store' ? { id_toko: id } : { id_users: id };
     const column = type === 'store' ? 'flagreceiver_messages' : 'flagsender_messages';
     const messages = await this.where(where)
@@ -87,8 +89,9 @@ class MessageModel extends bookshelf.Model {
         } else {
           qb.whereNot(column, MessageFlagStatus.ARCHIVE);
         }
+        qb.whereNull('group_message');
       })
-      .fetchAll({ withRelated: ['store'] });
+      .fetchPage({ page, pageSize, withRelated: ['store'] });
     return await Promise.all(messages.map(async (message) => {
       await message.load({ detailMessages: qb => qb.limit(1) });
       const detail = message.related('detailMessages').models[0];
@@ -112,7 +115,10 @@ class MessageModel extends bookshelf.Model {
     else where.id_users = typeId;
 
     let message = await this.where(where)
-      .query(qb => qb.whereNot(column, MessageFlagStatus.PERMANENT_DELETED))
+      .query((qb) => {
+        qb.whereNot(column, MessageFlagStatus.PERMANENT_DELETED);
+        qb.whereNull('group_message');
+      })
       .fetch({ withRelated: ['store', 'detailMessages.user'] });
     if (!message) throw getMessageError('message', 'not_found');
 

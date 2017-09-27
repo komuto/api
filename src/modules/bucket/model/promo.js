@@ -29,7 +29,7 @@ class PromoModel extends bookshelf.Model {
   serialize() {
     return {
       id: this.get('id_promo'),
-      marketplace_user_id: this.get('id_marketplaceuser'),
+      marketplace_id: this.get('id_marketplaceuser'),
       promo_code: this.get('kode_promo'),
       type: parseNum(this.get('jenis_promo')),
       percentage: this.get('persentase_promo'),

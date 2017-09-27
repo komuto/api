@@ -287,11 +287,14 @@ StoreController.updateStore = async (req, res, next) => {
  * Get Messages
  */
 StoreController.getMessages = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const storeId = await Store.getStoreId(req.user.id);
   const isArchived = req.query.is_archived ? req.query.is_archived : false;
-  const messages = await Message.getById(storeId, 'store', JSON.parse(isArchived));
+  const messages = await Message.getById(storeId, 'store', JSON.parse(isArchived), page, pageSize);
   req.resData = {
     message: 'Message Data',
+    meta: { page, limit: pageSize },
     data: messages,
   };
   return next();

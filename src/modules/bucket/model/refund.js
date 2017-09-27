@@ -29,6 +29,7 @@ class RefundModel extends bookshelf.Model {
     };
     if (minimal) return refund;
     return {
+      ...refund,
       bucket_id: this.get('id_bucket'),
       invoice_id: this.get('id_invoice'),
       dispute_id: this.get('id_dispute'),

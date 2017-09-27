@@ -31,7 +31,7 @@ class BankAccountModel extends bookshelf.Model {
     if (minimal) return bank;
     return {
       ...bank,
-      marketplace_user_id: this.get('id_marketplaceuser'),
+      marketplace_id: this.get('id_marketplaceuser'),
       bank_branch_office_name: this.get('cabang_bankrekeninguser'),
       is_primary: parseNum(this.get('primary_rekening')) === BankAccountStatus.PRIMARY,
     };
@@ -57,7 +57,7 @@ class BankAccountModel extends bookshelf.Model {
   static async checkKomutoAccount(id) {
     const bankAccount = await this.where({ id_rekeninguser: id }).fetch();
     if (!bankAccount) throw getAccountError('account', 'not_found');
-    if (bankAccount.serialize().marketplace_user_id !== 0) {
+    if (bankAccount.serialize().marketplace_id !== 0) {
       throw getAccountError('account', 'not_komuto');
     }
     return bankAccount;

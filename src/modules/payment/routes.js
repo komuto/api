@@ -10,12 +10,13 @@ const { apiResponse, auth, validateParam } = core.middleware;
 
 routes.get('/transactions/:id([0-9]{1,10})/token',
   auth(),
+  validateParam(constraints.getToken),
   wrap(PaymentController.getSnapToken),
   apiResponse());
 
 routes.get('/saldo/nominal/:id/token',
   auth(),
-  validateParam(constraints.saldoToken),
+  validateParam(constraints.getToken),
   wrap(PaymentController.getSaldoSnapToken),
   apiResponse());
 

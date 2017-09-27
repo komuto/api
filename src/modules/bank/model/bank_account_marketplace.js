@@ -23,7 +23,7 @@ class BankAccountMarketplaceModel extends bookshelf.Model {
   serialize() {
     return {
       id: this.get('id_rekeningmp'),
-      marketplace_user_id: this.get('id_marketplaceuser'),
+      marketplace_id: this.get('id_marketplaceuser'),
       user_id: this.get('id_users'),
       bank_name: this.get('nama_bankrekeningmp'),
       holder_name: this.get('nama_pemilikrekeningmp'),

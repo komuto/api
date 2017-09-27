@@ -321,10 +321,13 @@ class ProductModel extends bookshelf.Model {
   /**
    * Get search result
    */
-  static async search(query = null) {
+  static async search(query, marketplaceId) {
     return await this.query((qb) => {
       qb.select('nama_produk');
       qb.groupBy('nama_produk');
+      qb.innerJoin('toko as t', 't.id_toko', 'produk.id_toko');
+      qb.innerJoin('users as u', 'u.id_users', 't.id_users');
+      qb.where('u.id_marketplaceuser', marketplaceId);
       qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
       qb.limit(8);
     }).fetchAll();
@@ -536,10 +539,6 @@ class ProductModel extends bookshelf.Model {
       expeditions,
     };
   }
-
-  // static async getCategories(category) {
-  //
-  // }
 
   /**
    * Get product with its relation
@@ -785,7 +784,8 @@ class ProductModel extends bookshelf.Model {
     });
     const dataExpeditions = await Expedition.query(qb => qb.whereIn('id_ekspedisi', expeditionIds))
       .fetchAll({
-        withRelated: [{ services: qb => qb.whereNotIn('id_ekspedisiservice', expeditionServiceIds) }] });
+        withRelated: [{ services: qb => qb.whereNotIn('id_ekspedisiservice', expeditionServiceIds) }],
+      });
     dataExpeditions.each((val) => {
       const expedition = _.find(expeditions, { id: val.serialize().id });
       const services = val.related('services').map((o) => {
