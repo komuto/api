@@ -92,9 +92,9 @@ ProductController.search = async (req, res, next) => {
 
 ProductController.getProduct = async (req, res, next) => {
   const { productId, storeId } = getProductAndStore(req.params.id);
-  const product = await Product.getFullProduct(productId, storeId, req.user.id);
+  const { product, idDropship } = await Product.getFullProduct(productId, storeId, req.user.id);
   if (!product) throw getProductError('product', 'not_found');
-  View.store(productId, requestIp.getClientIp(req));
+  View.store(productId, requestIp.getClientIp(req), idDropship);
   req.resData = {
     message: 'Product Detail Data',
     data: product,
