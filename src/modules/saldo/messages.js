@@ -17,6 +17,7 @@ export const errMsg = {
   transDetail: {
     title: 'Lihat detail transaksi gagal',
     not_found: 'Transaksi tidak ditemukan',
+    transaction_corrupted: 'Data transaksi tidak lengkap',
   },
   getHistory: {
     title: 'Get history saldo gagal',
@@ -25,7 +26,5 @@ export const errMsg = {
 };
 
 export const withdrawError = formatError.bind(errMsg.withdrawMsg);
-
 export const transDetailError = formatError.bind(errMsg.transDetail);
-
 export const getHistoryError = formatError.bind(errMsg.getHistory);
