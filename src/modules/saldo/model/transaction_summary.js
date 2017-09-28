@@ -138,7 +138,7 @@ class transSummaryModel extends bookshelf.Model {
     const getBuyer = invoice.load('buyer');
     const items = invoice.related('items').map((item) => {
       const product = item.related('product').serialize({ minimal: true });
-      item = item.serialize({ minimal: true });
+      item = item.serialize({ minimal: true, note: true });
       return { item, product };
     });
     const transaction = this.serialize();

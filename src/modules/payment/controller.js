@@ -321,8 +321,7 @@ PaymentController.updateAirwayBill = async (req, res, next) => {
 
 PaymentController.confirmStoreDispute = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const where = { id_toko: storeId, id_dispute: req.params.id };
-  const dispute = await Dispute.updateStatus(where, DisputeStatus.RECEIVE_BY_SELLER);
+  const dispute = await Dispute.storeReceived(req.params.id, storeId);
   req.resData = { data: dispute };
   return next();
 };
