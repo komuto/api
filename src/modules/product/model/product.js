@@ -166,6 +166,10 @@ class ProductModel extends bookshelf.Model {
     return this.belongsTo('Brand', 'identifier_brand');
   }
 
+  dropship() {
+    return this.hasOne('Dropship', 'id_produk');
+  }
+
   /**
    * Get product by id
    */
@@ -420,11 +424,11 @@ class ProductModel extends bookshelf.Model {
   static async getFullProduct(productId, storeId, userId) {
     let dropship;
     let isDropshipped = false;
+    let getViewDropship = false;
     const related = [
       'category',
       'images',
       'discussions',
-      'view',
       'expeditionServices.expedition',
       'store',
       { expeditionServices: qb => qb.where('status_detilekspedisiproduk', ProductExpeditionStatus.USED) },
@@ -437,9 +441,10 @@ class ProductModel extends bookshelf.Model {
       if (!dropship) return false;
       isDropshipped = true;
     }
+    const idDropship = isDropshipped ? dropship.get('id_dropshipper') : undefined;
 
     let getReviews = Review.where({ id_produk: productId,
-      id_dropshipper: !isDropshipped ? null : dropship.get('id_dropshipper') }).fetchAll({ withRelated: 'user' });
+      id_dropshipper: !isDropshipped ? null : idDropship }).fetchAll({ withRelated: 'user' });
 
     // Eager load other products so it doesn't block other process by not awaiting directly
     const getOtherProds = this.query((qb) => {
@@ -456,10 +461,13 @@ class ProductModel extends bookshelf.Model {
 
     let getStore;
     if (!isDropshipped) {
-      const load = [{ 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) }];
+      const load = [{ 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) }, 'view'];
       if (userId) load.push('store.favoriteStores');
       getStore = product.load(load);
-    } else getStore = false;
+    } else {
+      getStore = false;
+      getViewDropship = product.load({ view: qb => qb.where('id_dropshipper', idDropship) });
+    }
     let getWholesaler = !product.get('is_grosir') ? false
       : product.load('wholesale').catch(() => { throw getProductError('product', 'error'); });
     const category = product.related('category').serialize();
@@ -501,6 +509,7 @@ class ProductModel extends bookshelf.Model {
     rating.quality = parseFloat(this.ratingAvg(rating.quality));
     rating.accuracy = parseFloat(this.ratingAvg(rating.accuracy));
     const { count_like, is_liked } = this.loadLikesDropship(userId, likes, dropship);
+    await getViewDropship;
     product = {
       ...product.serialize(),
       store_id: storeId,
@@ -510,6 +519,7 @@ class ProductModel extends bookshelf.Model {
       count_discussion: discussions.length,
     };
     product.id = parseDec(`${product.id}.${storeId}`);
+    product.count_sold = isDropshipped ? parseNum(dropship.get('count_sold')) : product.count_sold;
 
     otherProds = otherProds.map((otherProduct, index) => {
       const { count_like: cl, is_liked: il }
@@ -527,17 +537,19 @@ class ProductModel extends bookshelf.Model {
     });
 
     return {
-      product,
-      category,
-      store,
-      location,
-      images,
-      reviews,
-      rating,
-      wholesaler,
-      other_products: otherProds,
-      expeditions,
-    };
+      product: {
+        product,
+        category,
+        store,
+        location,
+        images,
+        reviews,
+        rating,
+        wholesaler,
+        other_products: otherProds,
+        expeditions,
+      },
+      idDropship };
   }
 
   /**

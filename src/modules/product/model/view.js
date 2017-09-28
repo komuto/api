@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import core from '../../core';
 
 const bookshelf = core.postgres.db;
@@ -22,17 +21,18 @@ class ViewModel extends bookshelf.Model {
     };
   }
 
-  static async store(id, ip) {
-    const view = await this.where({ id_produk: id }).fetch();
+  static async store(id, ip, idDropship) {
+    const where = { id_produk: id };
+    if (idDropship) where.id_dropshipper = idDropship;
+    const view = await this.where(where).fetch();
     if (!view) {
-      return await new this({
-        id_produk: id,
-        ip: [{ ip }],
-      }).save();
+      const save = { id_produk: id, ip: [{ ip }] };
+      if (idDropship) save.id_dropshipper = idDropship;
+      return await new this(save).save();
     }
-    const ips = view.serialize().ip;
-    const found = _.find(ips, o => (o.ip === ip));
-    if (found !== undefined) return view;
+    const ips = view.get('ip');
+    const found = ips.some(vIp => vIp.ip === ip);
+    if (found) return view;
     ips.push({ ip });
     return await view.save({ ip: ips }, { patch: true });
   }

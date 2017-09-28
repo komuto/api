@@ -89,14 +89,13 @@ class UserModel extends bookshelf.Model {
       phone_number: defaultNull(this.get('nohp_users')),
     };
     if (orderDetail) return user;
-    if (account) {
-      return {
-        ...user,
-        gender: this.get('jeniskelamin_users') === 'L' ? 'male' : 'female',
-        place_of_birth: defaultNull(this.get('kota_lahir')),
-        date_of_birth: parseDate(this.get('tgl_lahir'), null),
-      };
-    }
+    user = {
+      ...user,
+      gender: this.get('jeniskelamin_users') === 'L' ? 'male' : 'female',
+      place_of_birth: defaultNull(this.get('kota_lahir')),
+      date_of_birth: parseDate(this.get('tgl_lahir'), null),
+    };
+    if (account) return user;
     user = {
       ...user,
       marketplace_id: defaultNull(this.get('id_marketplaceuser')),
