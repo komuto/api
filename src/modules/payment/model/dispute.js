@@ -294,10 +294,14 @@ class DisputeModel extends bookshelf.Model {
     }, { patch: true });
   }
 
-  static async updateStatus(where, status) {
-    const dispute = await this.where(where).fetch();
+  static async storeReceived(id, storeId) {
+    const dispute = await this.where({
+      id_toko: storeId,
+      id_dispute: id,
+      status_dispute: DisputeStatus.NEW,
+    }).fetch({ withRelated: ['disputeProducts', 'invoice.items'] });
     if (!dispute) throw getDisputeError('dispute', 'not_found');
-    return await dispute.save({ status_dispute: status }, { patch: true });
+    return await dispute.save({ status_dispute: DisputeStatus.RECEIVE_BY_SELLER }, { patch: true });
   }
 
   /**
