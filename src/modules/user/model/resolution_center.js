@@ -11,7 +11,18 @@ export const ResolutionCenterStatus = {
   WAIT_TO_REPLY: 2,
 };
 
-// TODO: Add topic and priority variable
+export const ResolutionTopic = {
+  GENERAL: 0,
+  INFO: 1,
+  TRANSACTION: 2,
+  ETC: 3,
+};
+
+export const ResolutionPriority = {
+  LOW: 0,
+  MEDIUM: 1,
+  HIGH: 2,
+};
 
 class ResolutionCenterModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -126,4 +137,4 @@ class ResolutionCenterModel extends bookshelf.Model {
 }
 
 export const ResolutionCenter = bookshelf.model('ResolutionCenter', ResolutionCenterModel);
-export default { ResolutionCenter, ResolutionCenterStatus };
+export default { ResolutionCenter, ResolutionCenterStatus, ResolutionTopic, ResolutionPriority };
