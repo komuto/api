@@ -153,7 +153,7 @@ class BucketModel extends bookshelf.Model {
    */
   static async getForCheckout(userId) {
     const bucket = await this.where({ id_users: userId, status_bucket: BucketStatus.ADDED }).fetch({
-      withRelated: ['promo', 'items.product', 'items.shipping'],
+      withRelated: ['promo', 'items.product', 'items.shipping', 'items.dropship'],
     });
     if (!bucket) throw getBucketError('bucket', 'not_found');
     return bucket;

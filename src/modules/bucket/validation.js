@@ -23,16 +23,6 @@ constraints.cart = {
   destination_ro_id: { presence: true, numericality: { onlyInteger: true } },
 };
 
-constraints.checkout = {
-  is_wallet: {
-    presence: false,
-    inclusion: {
-      within: [true, false],
-      message: 'accept only `true` or `false` value',
-    },
-  },
-};
-
 constraints.bulkUpdate = {
   id: { presence: true, numericality: { onlyInteger: true } },
   expedition_id: { presence: false, numericality: { onlyInteger: true } },

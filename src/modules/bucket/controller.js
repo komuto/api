@@ -155,35 +155,34 @@ BucketController.getItem = async (req, res, next) => {
 
 BucketController.checkout = async (req, res, next) => {
   const bucket = await Bucket.getForCheckout(req.user.id);
-  let items = bucket.related('items');
+  const items = bucket.related('items');
   if (items.length === 0) throw getBucketError('bucket', 'not_found_items');
 
-  let totalPrice = 0;
-  if (req.body.is_wallet) {
-    totalPrice = TransSummary.checkSaldo(req.user, bucket.serialize(), items);
-  }
-
   const groups = _.groupBy(items.models, (val) => {
-    val = val.serialize();
-    return `${val.product.store_id}#${val.shipping.address_id}#${val.shipping.expedition_service_id}`;
+    const { product, shipping, dropship = {} } = val.serialize();
+    const id = dropship.store_id || '';
+    return `${product.store_id}#${shipping.address_id}#${shipping.expedition_service_id}#${id}`;
   });
 
-  items = _.map(groups, group => ({
+  const itemGroups = _.map(groups, group => ({
     shipping_id: group[0].serialize().shipping.id,
     store_id: group[0].serialize().product.store_id,
     items: group,
   }));
 
-  await Promise.all(items.map(async (val) => {
-    const bucketObj = bucket.serialize();
-    const weight = val.items[0].serialize().weight;
-    const deliveryCost = val.items[0].serialize().shipping.delivery_cost / Math.ceil(weight / 1000);
+  const bucketObj = bucket.serialize();
+  let totalPrice = 0;
+
+  await Promise.all(itemGroups.map(async (group) => {
+    const firstItem = group.items[0].serialize();
+    const weight = firstItem.weight;
+    const deliveryCost = firstItem.shipping.delivery_cost / Math.ceil(weight / 1000);
 
     let subTotalPrice = 0;
     let adminCost = 0;
     let insuranceFee = 0;
     let totalWeight = 0;
-    _.forEach(val.items, (o) => {
+    _.forEach(group.items, (o) => {
       o = o.serialize();
       subTotalPrice += o.product.price * o.qty;
       adminCost += o.additional_cost;
@@ -191,22 +190,16 @@ BucketController.checkout = async (req, res, next) => {
       totalWeight += o.weight;
     });
 
-    let promo = 0;
-    if (bucketObj.promo) {
-      if (bucketObj.promo.type === PromoType.NOMINAL) {
-        promo = bucketObj.promo.nominal / items.length;
-      } else promo = (subTotalPrice * bucketObj.promo.percentage) / 100;
-    }
-
     const totalDeliveryCost = deliveryCost * Math.ceil(totalWeight / 1000);
-    subTotalPrice += (adminCost + insuranceFee + totalDeliveryCost) - promo;
+    subTotalPrice += adminCost + insuranceFee + totalDeliveryCost;
+    totalPrice += subTotalPrice;
 
     const invoiceObj = Invoice.matchDBColumn({
       user_id: req.user.id,
-      store_id: val.store_id,
+      store_id: group.store_id,
       bucket_id: bucketObj.id,
       bid_id: null,
-      shipping_id: val.shipping_id,
+      shipping_id: group.shipping_id,
       payment_method_id: null,
       invoice_number: Invoice.generateNumber(),
       remark_cancel: null,
@@ -216,7 +209,6 @@ BucketController.checkout = async (req, res, next) => {
       insurance_fee: insuranceFee,
       admin_cost: adminCost,
       wallet: 0, // need confirmation
-      promo,
       status: InvoiceStatus.UNPAID,
       confirmed_at: null,
       created_at: new Date(),
@@ -225,23 +217,25 @@ BucketController.checkout = async (req, res, next) => {
 
     const invoice = await Invoice.create(invoiceObj);
 
-    await Promise.all(val.items.map(async item => (
-      await item.save({ id_invoice: invoice.serialize().id }, { patch: true })
+    await Promise.all(group.items.map(item => (
+      item.save({ id_invoice: invoice.serialize().id }, { patch: true })
     )));
   }));
 
-  let bucketData = {
+  let promo = 0;
+  if (bucketObj.promo) {
+    if (bucketObj.promo.type === PromoType.NOMINAL) {
+      promo = bucketObj.promo.nominal;
+    } else promo = (totalPrice * bucketObj.promo.percentage) / 100;
+  }
+  totalPrice -= promo;
+  totalPrice += bucketObj.unique_code;
+
+  const bucketData = {
     status_bucket: BucketStatus.WAITING_FOR_PAYMENT,
     tglstatus_bucket: new Date(),
+    total_tagihan: totalPrice,
   };
-
-  if (req.body.is_wallet) {
-    bucketData = {
-      ...bucketData,
-      bayar_wallet: totalPrice,
-    };
-    await TransSummary.cutSaldo(req.user, totalPrice, bucket.serialize());
-  }
 
   await bucket.save(bucketData, { patch: true });
   req.resData = { data: bucket };

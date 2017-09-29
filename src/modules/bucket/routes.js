@@ -79,8 +79,7 @@ routes.get('/users/bucket/items/:id([0-9]{1,10})',
  */
 routes.post('/checkout',
   auth(),
-  validateParam(constraints.checkout, true),
-  wrap(BucketController.checkout),
+  BucketController.checkout,
   apiResponse());
 
 /**

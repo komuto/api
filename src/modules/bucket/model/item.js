@@ -41,12 +41,14 @@ class ItemModel extends bookshelf.Model {
       invoice_id: this.get('id_invoice'),
       shipping_id: parseNum(this.get('id_pengiriman_produk')),
       shipping: this.relations.shipping ? this.related('shipping').serialize() : undefined,
+      dropship: this.relations.dropship ? this.related('dropship').serialize() : undefined,
       dropshipper_id: parseNum(this.get('id_dropshipper'), null),
       review_id: parseNum(this.get('id_ulasanproduk'), null),
       note: this.get('keteranganopsi_listbucket'),
     };
     if (this.relations.product) delete item.product_id;
     if (this.relations.shipping) delete item.shipping_id;
+    if (this.relations.dropship) delete item.dropshipper_id;
     return item;
   }
 
