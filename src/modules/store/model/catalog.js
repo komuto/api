@@ -5,7 +5,7 @@ import { ProductStatus, Product, ImageProduct, MasterFee } from '../../product/m
 
 const bookshelf = core.postgres.db;
 const knex = core.postgres.knex;
-const { parseDate, defaultNull, parseNum, getter } = core.utils;
+const { parseDate, defaultNull, getter } = core.utils;
 
 class CatalogModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
