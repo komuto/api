@@ -224,6 +224,7 @@ class BucketModel extends bookshelf.Model {
   static async listTransactions(userId, page, pageSize) {
     const buckets = await this.where({ id_users: userId })
       .query(qb => qb.whereNotIn('status_bucket', [BucketStatus.ADDED, BucketStatus.DELETED, BucketStatus.CANCEL]))
+      .orderBy('tgl_orderbucket', 'desc')
       .fetchPage({ page, pageSize, withRelated: ['invoices.items.product.images'] });
     if (!buckets.length) return [];
     return buckets.map(bucket => (this.loadDetailTransaction(bucket, false)));
