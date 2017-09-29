@@ -11,6 +11,8 @@ export const ResolutionCenterStatus = {
   WAIT_TO_REPLY: 2,
 };
 
+// TODO: Add topic and priority variable
+
 class ResolutionCenterModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {

@@ -76,6 +76,7 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
     address_id: body.address_id,
     delivery_cost: delivery.cost,
     insurance_fee: insuranceCost,
+    is_insurance: body.is_insurance,
     note: null,
   });
 
