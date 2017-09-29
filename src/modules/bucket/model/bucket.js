@@ -9,6 +9,7 @@ import './shipping';
 import { Item } from './item';
 import { PromoType } from './promo';
 import config from './../../../../config';
+import { InvoiceStatus, InvoiceTransactionStatus } from '../../payment/model';
 
 const { parseNum, parseDate, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
@@ -316,20 +317,39 @@ class BucketModel extends bookshelf.Model {
   }
 
   static async updateStatus(id, status) {
-    return await this.where({ id_bucket: id }).save({ status_bucket: status }, { patch: true });
+    const bucket = await this.where({ id_bucket: id }).fetch({ withRelated: ['invoices'] });
+    if (status.invoice !== BucketStatus.UNPAID) {
+      await Promise.all(bucket.related('invoices').map(async invoice => await invoice.save({
+        status_invoice: status.invoice,
+        status_transaksi: status.transaction,
+      }, { patch: true })));
+    }
+    return await bucket.save({ status_bucket: status.bucket }, { patch: true });
   }
 
   static async midtransNotification(id, body) {
     let status;
     switch (body.status_code) {
       case '200':
-        status = BucketStatus.PAYMENT_RECEIVED;
+        status = {
+          bucket: BucketStatus.PAYMENT_RECEIVED,
+          invoice: InvoiceStatus.PAID,
+          transaction: InvoiceTransactionStatus.WAITING,
+        };
         break;
       case '201':
-        status = BucketStatus.WAITING_FOR_VERIFICATION;
+        status = {
+          bucket: BucketStatus.WAITING_FOR_VERIFICATION,
+          invoice: InvoiceStatus.UNPAID,
+          transaction: null,
+        };
         break;
       case '202':
-        status = BucketStatus.EXPIRED;
+        status = {
+          bucket: BucketStatus.EXPIRED,
+          invoice: InvoiceStatus.FAILED,
+          transaction: null,
+        };
         break;
       default:
         break;

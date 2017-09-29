@@ -333,12 +333,20 @@ PaymentController.notification = async (req, res, next) => {
     req.body = data ? JSON.parse(data) : {};
     if (typeof req.body === 'string') req.body = JSON.parse(req.body);
     const [type, id] = req.body.order_id.split('-');
-    if (type === 'ORDER') {
-      const bucket = await Bucket.midtransNotification(id, req.body);
-      console.log(type, bucket.serialize());
-    } else {
-      const topup = await Topup.midtransNotification(id, req.body);
-      console.log(type, topup.serialize());
+    try {
+      if (type === 'ORDER') {
+        const bucket = await Bucket.midtransNotification(id, req.body);
+        console.log(type, bucket.serialize());
+      } else {
+        const topup = await Topup.midtransNotification(id, req.body);
+        console.log(type, topup.serialize());
+      }
+    } catch (e) {
+      req.resData = {
+        code: 400,
+        status: false,
+        message: 'Something went wrong',
+      };
     }
     console.log('\n=== MIDTRANS ===');
     console.log(req.body);
