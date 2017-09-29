@@ -3,7 +3,7 @@ import { Bucket, Promo, Item, Shipping, BucketStatus, PromoType } from './model'
 import { Product, Dropship } from '../product/model';
 import { Expedition } from '../expedition/model';
 import { Invoice, InvoiceStatus } from '../payment/model';
-import { getBucketError, getItemError } from './messages';
+import { addCartError, getBucketError, getItemError } from './messages';
 import { BadRequestError } from '../../../common/errors';
 import { getProductAndStore } from '../core/utils';
 import { getProductError } from '../product/messages';
@@ -76,6 +76,7 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
     address_id: body.address_id,
     delivery_cost: delivery.cost,
     insurance_fee: insuranceCost,
+    is_insurance: body.is_insurance,
     note: null,
   });
 
@@ -96,7 +97,8 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
     note: body.note,
     additional_cost: 0, // admin cost
     weight: product.weight * body.qty,
-    total_price: (product.price * body.qty) + delivery.cost + insuranceCost,
+    total_price: (product.price * product.discount ? product.discount : 1 * body.qty)
+    + delivery.cost + insuranceCost,
   });
   return await Item.updateInsert(where, _.assign(itemObj, where));
 };
@@ -107,6 +109,8 @@ BucketController.addToCart = async (req, res, next) => {
   const { productId, storeId } = getProductAndStore(req.body.product_id);
   let product = Product.findById(productId);
   [bucket, product] = await Promise.all([bucket, product]);
+
+  if (req.body.qty > product.stock) throw addCartError('cart', 'stock');
 
   let columns = { bucket_id: bucket.id, product_id: product.id };
   if (product.store_id !== storeId) {

@@ -321,8 +321,7 @@ PaymentController.updateAirwayBill = async (req, res, next) => {
 
 PaymentController.confirmStoreDispute = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const where = { id_toko: storeId, id_dispute: req.params.id };
-  const dispute = await Dispute.updateStatus(where, DisputeStatus.RECEIVE_BY_SELLER);
+  const dispute = await Dispute.storeReceived(req.params.id, storeId);
   req.resData = { data: dispute };
   return next();
 };
@@ -331,15 +330,23 @@ PaymentController.notification = async (req, res, next) => {
   let data = '';
   req.on('data', (chunk) => { data += chunk; });
   req.on('end', async () => {
-    req.body = data ? JSON.parse(data) : {};
-    if (typeof req.body === 'string') req.body = JSON.parse(req.body);
-    const [type, id] = req.body.order_id.split('-');
-    if (type === 'ORDER') {
-      const bucket = await Bucket.midtransNotification(id, req.body);
-      console.log(type, bucket.serialize());
-    } else {
-      const topup = await Topup.midtransNotification(id, req.body);
-      console.log(type, topup.serialize());
+    try {
+      req.body = data ? JSON.parse(data) : {};
+      if (typeof req.body === 'string') req.body = JSON.parse(req.body);
+      const [type, id] = req.body.order_id.split('-');
+      if (type === 'ORDER') {
+        const bucket = await Bucket.midtransNotification(id, req.body);
+        console.log(type, bucket.serialize());
+      } else {
+        const topup = await Topup.midtransNotification(id, req.body);
+        console.log(type, topup.serialize());
+      }
+    } catch (e) {
+      req.resData = {
+        code: 400,
+        status: false,
+        message: 'Something went wrong',
+      };
     }
     console.log('\n=== MIDTRANS ===');
     console.log(req.body);

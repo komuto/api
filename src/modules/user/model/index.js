@@ -1,7 +1,7 @@
 import { User, UserStatus, NotificationType, getNotification } from './user';
 import { UserToken, TokenStatus, TokenType } from './user_token';
 import { Wishlist, WishlistStatus } from './wishlist';
-import { ResolutionCenter, ResolutionCenterStatus } from './resolution_center';
+import { ResolutionCenter, ResolutionCenterStatus, ResolutionTopic, ResolutionPriority } from './resolution_center';
 import { ImageGroup } from './image_group';
 
 export default { User,
@@ -15,6 +15,8 @@ export default { User,
   getNotification,
   ResolutionCenter,
   ResolutionCenterStatus,
+  ResolutionTopic,
+  ResolutionPriority,
   ImageGroup,
 };
 

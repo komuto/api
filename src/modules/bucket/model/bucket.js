@@ -9,6 +9,8 @@ import './shipping';
 import { Item } from './item';
 import { PromoType } from './promo';
 import config from './../../../../config';
+import { InvoiceStatus, InvoiceTransactionStatus } from '../../payment/model';
+import { Dropship } from "../../product/model/dropship";
 
 const { parseNum, parseDate, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
@@ -223,6 +225,7 @@ class BucketModel extends bookshelf.Model {
   static async listTransactions(userId, page, pageSize) {
     const buckets = await this.where({ id_users: userId })
       .query(qb => qb.whereNotIn('status_bucket', [BucketStatus.ADDED, BucketStatus.DELETED, BucketStatus.CANCEL]))
+      .orderBy('tgl_orderbucket', 'desc')
       .fetchPage({ page, pageSize, withRelated: ['invoices.items.product.images'] });
     if (!buckets.length) return [];
     return buckets.map(bucket => (this.loadDetailTransaction(bucket, false)));
@@ -315,26 +318,69 @@ class BucketModel extends bookshelf.Model {
     }, 0);
   }
 
-  static async updateStatus(id, status) {
-    return await this.where({ id_bucket: id }).save({ status_bucket: status }, { patch: true });
+  static async updateStatus(id, status, related) {
+    const bucket = await this.where({ id_bucket: id }).fetch({ withRelated: [related] });
+    if (status.invoice !== BucketStatus.UNPAID) {
+      await Promise.all(bucket.related('invoices').map(async (invoice) => {
+        if (status.invoice === InvoiceStatus.PAID) {
+          await Promise.all(invoice.related('items').map(async (item) => {
+            const product = item.related('product');
+            const { stock, count_sold: sold } = product.serialize();
+            const qty = item.serialize().qty;
+            let updateSold = sold + qty;
+            if (item.get('id_dropshipper')) {
+              updateSold = sold;
+              const dropshipper = await Dropship.where({ id_dropshipper: item.get('id_dropshipper') }).fetch();
+              await dropshipper.save({
+                count_sold: dropshipper.serialize().count_sold + qty,
+              }, { patch: true });
+            }
+            return await product.save({
+              stock_produk: stock - qty,
+              count_sold: updateSold,
+            }, { patch: true });
+          }));
+        }
+
+        return await invoice.save({
+          status_invoice: status.invoice,
+          status_transaksi: status.transaction,
+        }, { patch: true });
+      }));
+    }
+    return await bucket.save({ status_bucket: status.bucket }, { patch: true });
   }
 
   static async midtransNotification(id, body) {
     let status;
+    let related = 'invoices';
     switch (body.status_code) {
       case '200':
-        status = BucketStatus.PAYMENT_RECEIVED;
+        status = {
+          bucket: BucketStatus.PAYMENT_RECEIVED,
+          invoice: InvoiceStatus.PAID,
+          transaction: InvoiceTransactionStatus.WAITING,
+        };
+        related = 'invoices.items.product';
         break;
       case '201':
-        status = BucketStatus.WAITING_FOR_VERIFICATION;
+        status = {
+          bucket: BucketStatus.WAITING_FOR_VERIFICATION,
+          invoice: InvoiceStatus.UNPAID,
+          transaction: null,
+        };
         break;
       case '202':
-        status = BucketStatus.EXPIRED;
+        status = {
+          bucket: BucketStatus.EXPIRED,
+          invoice: InvoiceStatus.FAILED,
+          transaction: null,
+        };
         break;
       default:
         break;
     }
-    return await this.updateStatus(id, status);
+    return await this.updateStatus(id, status, related);
   }
 
   /**

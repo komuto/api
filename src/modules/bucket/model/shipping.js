@@ -99,6 +99,7 @@ class ShippingModel extends bookshelf.Model {
       insurance_fee: 'nilai_asuransi',
       note: 'keterangan',
       airway_bill: 'resiresponkirim',
+      is_insurance: 'is_asuransi',
     };
     const newData = {};
     Object.keys(data).forEach((prop) => {

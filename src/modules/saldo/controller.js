@@ -2,7 +2,6 @@ import { BankAccount } from '../bank/model';
 import { OTPStatus } from '../OTP/model';
 import { Withdraw, Topup, TransSummary, TransType, SummTransType, TopupStatus } from './model';
 import { User } from '../user/model';
-import { Store } from '../store/model';
 import { withdrawError, transDetailError } from './messages';
 import nominal from '../../../config/nominal.json';
 
@@ -116,16 +115,19 @@ SaldoController.historyDetail = async (req, res, next) => {
 };
 
 SaldoController.sellingTrans = async (req, res, next) => {
-  if (req.body.transType !== SummTransType.SELLING) return next();
-  const storeId = await Store.getStoreId(req.user.id);
-  const data = await req.body.transaction.getSellingDetail(storeId);
-  req.resData = { message: 'Selling Transaction Data', data };
+  const type = req.body.transType;
+  if (type !== SummTransType.SELLING && type !== SummTransType.FEE) return next();
+  const data = await req.body.transaction.getSellingDetail(type)
+    .catch(() => { throw transDetailError('transaction', 'transaction_corrupted'); });
+  const message = type === SummTransType.SELLING ? 'Selling Transaction Data' : 'Commission Transaction Data';
+  req.resData = { message, data };
   return next();
 };
 
 SaldoController.paymentTrans = async (req, res, next) => {
   if (req.body.transType !== SummTransType.PAYMENT) return next();
-  const data = await req.body.transaction.getPaymentDetail();
+  const data = await req.body.transaction.getPaymentDetail()
+    .catch(() => { throw transDetailError('transaction', 'transaction_corrupted'); });
   req.resData = { message: 'Payment Transaction Data', data };
   return next();
 };
@@ -133,12 +135,18 @@ SaldoController.paymentTrans = async (req, res, next) => {
 SaldoController.topupTrans = async (req, res, next) => {
   if (req.body.transType !== SummTransType.TOPUP) return next();
   const transaction = await req.body.transaction.load([
-    { summaryable: qb => qb.where({ status: TopupStatus.SUCCESS })},
+    { summaryable: qb => qb.where({ status: TopupStatus.SUCCESS }) },
     'summaryable.paymentMethod',
     'summaryable.topupConf',
   ]);
-  const method = transaction.related('summaryable').related('paymentMethod').get('nama_paymentmethod');
-  const amount = transaction.related('summaryable').related('topupConf').get('amount');
+  let method;
+  let amount;
+  try {
+    method = transaction.related('summaryable').related('paymentMethod').get('nama_paymentmethod');
+    amount = transaction.related('summaryable').related('topupConf').get('amount');
+  } catch (e) {
+    throw transDetailError('transaction', 'transaction_corrupted');
+  }
   const data = { ...transaction.serialize(), transfer_amount: amount, payment_method: method };
   req.resData = { message: 'Topup Transaction Data', data };
   return next();
@@ -147,7 +155,12 @@ SaldoController.topupTrans = async (req, res, next) => {
 SaldoController.withdrawTrans = async (req, res, next) => {
   if (req.body.transType !== SummTransType.WITHDRAW) return next();
   const transaction = await req.body.transaction.load('summaryable.bankAccount.bank');
-  const bankAccount = transaction.related('summaryable').related('bankAccount').serialize({ minimal: true });
+  let bankAccount;
+  try {
+    bankAccount = transaction.related('summaryable').related('bankAccount').serialize({ minimal: true });
+  } catch (e) {
+    throw transDetailError('transaction', 'transaction_corrupted');
+  }
   bankAccount.bank = bankAccount.bank.serialize({ minimal: true });
   bankAccount.bankId = undefined;
   const data = { transaction: transaction.serialize(), bankAccount };
@@ -158,11 +171,24 @@ SaldoController.withdrawTrans = async (req, res, next) => {
 SaldoController.refundTrans = async (req, res, next) => {
   if (req.body.transType !== SummTransType.REFUND) return next();
   const transaction = await req.body.transaction.load({ 'summaryable.items.image': qb => qb.orderBy('id_gambarproduk') });
-  const refund = transaction.related('summaryable');
-  const items = refund.related('items').map(item => item.serialize({ minimal: true }));
+  let refund;
+  let items;
+  try {
+    refund = transaction.related('summaryable');
+    items = refund.related('items').map(item => item.serialize({ minimal: true }));
+  } catch (e) {
+    throw transDetailError('transaction', 'transaction_corrupted');
+  }
   const data = { transaction: transaction.serialize(),
     refund: { ...refund.serialize({ minimal: true }), items } };
   req.resData = { message: 'Refund Transaction Data', data };
+  return next();
+};
+
+SaldoController.endTrans = (req, res, next) => {
+  if (!req.resData) {
+    throw transDetailError('transaction', 'not_found');
+  }
   return next();
 };
 

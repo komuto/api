@@ -130,31 +130,22 @@ class transSummaryModel extends bookshelf.Model {
   }
 
   /**
-   * @param id {int} store id
+   * @param type {string} transaction type
    */
-  async getSellingDetail(id) {
+  async getSellingDetail(type) {
     await this.load('summaryable.items.product.image');
     let invoice = this.related('summaryable');
-    const isReseller = invoice.get('id_toko') !== id;
     const getBuyer = invoice.load('buyer');
     const items = invoice.related('items').map((item) => {
       const product = item.related('product').serialize({ minimal: true });
-      item = item.serialize({ minimal: true });
+      item = item.serialize({ minimal: true, note: true });
       return { item, product };
     });
     const transaction = this.serialize();
     const totalBill = Number(invoice.get('total_tagihan'));
-    let nominal;
-    let percent;
-    if (!isReseller) {
-      nominal = totalBill - transaction.amount;
-      percent = (nominal / totalBill) * 100;
-      transaction.type = 'seller';
-    } else {
-      nominal = transaction.amount;
-      percent = (nominal / totalBill) * 100;
-      transaction.type = 'reseller';
-    }
+    const amount = transaction.amount;
+    const nominal = type === SummTransType.SELLING ? totalBill - amount : amount;
+    const percent = (nominal / totalBill) * 100;
     await getBuyer;
     const buyer = invoice.related('buyer').serialize({ orderDetail: true });
     invoice = { ...invoice.serialize({ orderDetail: true }), items };

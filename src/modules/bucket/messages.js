@@ -28,6 +28,10 @@ export const errMsg = {
     title: 'Update shipping gagal',
     error: 'Gagal mengubah shipping',
   },
+  addCart: {
+    title: 'Tambah barang gagal',
+    stock: 'Stok tidak tersedia',
+  },
 };
 
 export const getBucketError = formatError.bind(errMsg.getBucket);
@@ -41,3 +45,5 @@ export const getPromoError = formatError.bind(errMsg.getPromo);
 export const createShippingError = formatError.bind(errMsg.createShipping);
 
 export const updateShippingError = formatError.bind(errMsg.updateShipping);
+
+export const addCartError = formatError.bind(errMsg.addCart);
