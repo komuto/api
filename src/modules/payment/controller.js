@@ -330,10 +330,10 @@ PaymentController.notification = async (req, res, next) => {
   let data = '';
   req.on('data', (chunk) => { data += chunk; });
   req.on('end', async () => {
-    req.body = data ? JSON.parse(data) : {};
-    if (typeof req.body === 'string') req.body = JSON.parse(req.body);
-    const [type, id] = req.body.order_id.split('-');
     try {
+      req.body = data ? JSON.parse(data) : {};
+      if (typeof req.body === 'string') req.body = JSON.parse(req.body);
+      const [type, id] = req.body.order_id.split('-');
       if (type === 'ORDER') {
         const bucket = await Bucket.midtransNotification(id, req.body);
         console.log(type, bucket.serialize());

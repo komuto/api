@@ -26,6 +26,7 @@ class DropshipModel extends bookshelf.Model {
       product_id: parseNum(this.get('id_produk')),
       catalog_id: this.get('id_katalog'),
       store_id: this.get('id_toko'),
+      count_sold: parseNum(this.get('count_sold')),
       status: parseNum(this.get('status_dropshipper')),
       status_at: parseDate(this.get('tglstatus_dropshipper')),
       created_at: parseDate(this.get('createdate_dropshipper')),

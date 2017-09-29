@@ -10,6 +10,7 @@ import { Item } from './item';
 import { PromoType } from './promo';
 import config from './../../../../config';
 import { InvoiceStatus, InvoiceTransactionStatus } from '../../payment/model';
+import { Dropship } from "../../product/model/dropship";
 
 const { parseNum, parseDate, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
@@ -317,19 +318,42 @@ class BucketModel extends bookshelf.Model {
     }, 0);
   }
 
-  static async updateStatus(id, status) {
-    const bucket = await this.where({ id_bucket: id }).fetch({ withRelated: ['invoices'] });
+  static async updateStatus(id, status, related) {
+    const bucket = await this.where({ id_bucket: id }).fetch({ withRelated: [related] });
     if (status.invoice !== BucketStatus.UNPAID) {
-      await Promise.all(bucket.related('invoices').map(async invoice => await invoice.save({
-        status_invoice: status.invoice,
-        status_transaksi: status.transaction,
-      }, { patch: true })));
+      await Promise.all(bucket.related('invoices').map(async (invoice) => {
+        if (status.invoice === InvoiceStatus.PAID) {
+          await Promise.all(invoice.related('items').map(async (item) => {
+            const product = item.related('product');
+            const { stock, count_sold: sold } = product.serialize();
+            const qty = item.serialize().qty;
+            let updateSold = sold + qty;
+            if (item.get('id_dropshipper')) {
+              updateSold = sold;
+              const dropshipper = await Dropship.where({ id_dropshipper: item.get('id_dropshipper') }).fetch();
+              await dropshipper.save({
+                count_sold: dropshipper.serialize().count_sold + qty,
+              }, { patch: true });
+            }
+            return await product.save({
+              stock_produk: stock - qty,
+              count_sold: updateSold,
+            }, { patch: true });
+          }));
+        }
+
+        return await invoice.save({
+          status_invoice: status.invoice,
+          status_transaksi: status.transaction,
+        }, { patch: true });
+      }));
     }
     return await bucket.save({ status_bucket: status.bucket }, { patch: true });
   }
 
   static async midtransNotification(id, body) {
     let status;
+    let related = 'invoices';
     switch (body.status_code) {
       case '200':
         status = {
@@ -337,6 +361,7 @@ class BucketModel extends bookshelf.Model {
           invoice: InvoiceStatus.PAID,
           transaction: InvoiceTransactionStatus.WAITING,
         };
+        related = 'invoices.items.product';
         break;
       case '201':
         status = {
@@ -355,7 +380,7 @@ class BucketModel extends bookshelf.Model {
       default:
         break;
     }
-    return await this.updateStatus(id, status);
+    return await this.updateStatus(id, status, related);
   }
 
   /**
