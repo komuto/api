@@ -66,9 +66,14 @@ BucketController.getCost = async (body, product) => {
 
 BucketController.saveCart = async (bucket, body, product, item, where) => {
   let insuranceCost = 0;
+
+  if (product.is_discount) {
+    product.price -= product.price * (product.discount / 100);
+  }
+
   if (body.is_insurance) {
     const expedition = await Expedition.findById(body.expedition_id);
-    insuranceCost = ((product.price * body.qty) * expedition.insurance_fee) / 100;
+    insuranceCost = product.price * body.qty * (expedition.insurance_fee / 100);
   }
 
   const delivery = await BucketController.getCost(body, product);
@@ -91,10 +96,6 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
   } else {
     const shipping = await Shipping.create(shippingObj);
     shippingId = shipping.id;
-  }
-
-  if (product.is_discount) {
-    product.price -= product.price * (product.discount / 100);
   }
 
   const itemObj = Item.matchDBColumn({
