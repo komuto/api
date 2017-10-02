@@ -93,14 +93,17 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
     shippingId = shipping.id;
   }
 
+  if (product.is_discount) {
+    product.price -= product.price * (product.discount / 100);
+  }
+
   const itemObj = Item.matchDBColumn({
     shipping_id: shippingId,
     qty: body.qty,
     note: body.note,
     additional_cost: 0, // admin cost
     weight: product.weight * body.qty,
-    total_price: (product.price * product.discount ? product.discount : 1 * body.qty)
-    + delivery.cost + insuranceCost,
+    total_price: (product.price * body.qty) + delivery.cost + insuranceCost,
   });
   return await Item.updateInsert(where, _.assign(itemObj, where));
 };
