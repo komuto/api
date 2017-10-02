@@ -69,24 +69,12 @@ PaymentController.viaBank = async (req, res, next) => {
 
 PaymentController.getSnapToken = async (req, res, next) => {
   const bucket = await Bucket.getDetail(req.user.id, req.params.id, req.query.platform);
-  let total = 0;
-  const itemDetails = bucket.items.map((item) => {
-    const itemPrice = Math.floor(item.total_price / item.qty);
-    total += itemPrice * item.qty;
-    return {
-      id: `ITEM-${item.id}`,
-      price: itemPrice,
-      quantity: item.qty,
-      name: item.product.name,
-    };
-  });
   const { firstName, lastName } = getName(req.user.name);
   const payload = {
     transaction_details: {
       order_id: `ORDER-${bucket.id}`,
-      gross_amount: total,
+      gross_amount: bucket.total_bill,
     },
-    item_details: itemDetails,
     customer_details: {
       first_name: firstName,
       last_name: lastName,
