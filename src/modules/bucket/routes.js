@@ -91,7 +91,7 @@ routes.put('/buckets',
   wrap(BucketController.bulkUpdate),
   apiResponse());
 
-routes.put('/buckets/:id([0-9]{1,10})/balance-payment',
+routes.put('/transactions/:id([0-9]{1,10})/balance-payment',
   auth(),
   wrap(BucketController.balancePayment),
   apiResponse());
