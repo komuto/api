@@ -92,7 +92,7 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
   }
 
   if (product.is_discount) {
-    product.price -= product.price * product.discount;
+    product.price -= product.price * (product.discount / 100);
   }
 
   const itemObj = Item.matchDBColumn({
