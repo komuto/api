@@ -32,7 +32,11 @@ class WishlistModel extends bookshelf.Model {
     }).fetch();
 
     if (wishlist) {
-      wishlist.destroy();
+      await this.where({
+        id_produk: id,
+        id_users: userId,
+        id_dropshipper: dropshipperId,
+      }).destroy();
       return false;
     }
 
