@@ -32,18 +32,18 @@ export const errMsg = {
     title: 'Tambah barang gagal',
     stock: 'Stok tidak tersedia',
   },
+  balancePayment: {
+    title: 'Gagal membayar dengan balance',
+    not_enough: 'Balance tidak mencukupi',
+    not_found: 'Transaksi tidak ditemukan',
+  },
 };
 
 export const getBucketError = formatError.bind(errMsg.getBucket);
-
 export const getTransactionError = formatError.bind(errMsg.getTransaction);
-
 export const getItemError = formatError.bind(errMsg.getItem);
-
 export const getPromoError = formatError.bind(errMsg.getPromo);
-
 export const createShippingError = formatError.bind(errMsg.createShipping);
-
 export const updateShippingError = formatError.bind(errMsg.updateShipping);
-
 export const addCartError = formatError.bind(errMsg.addCart);
+export const paymentError = formatError.bind(errMsg.balancePayment);

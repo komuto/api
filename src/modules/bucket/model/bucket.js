@@ -10,7 +10,7 @@ import { Item } from './item';
 import { PromoType } from './promo';
 import config from './../../../../config';
 import { InvoiceStatus, InvoiceTransactionStatus } from '../../payment/model';
-import { Dropship } from "../../product/model/dropship";
+import { Dropship } from '../../product/model/dropship';
 
 const { parseNum, parseDate, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
