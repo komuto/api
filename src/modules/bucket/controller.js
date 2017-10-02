@@ -1,13 +1,15 @@
 import _ from 'lodash';
+import moment from 'moment';
 import { Bucket, Promo, Item, Shipping, BucketStatus, PromoType } from './model';
 import { Product, Dropship } from '../product/model';
 import { Expedition } from '../expedition/model';
-import { Invoice, InvoiceStatus } from '../payment/model';
-import { addCartError, getBucketError, getItemError } from './messages';
+import { Invoice, InvoiceStatus, InvoiceTransactionStatus } from '../payment/model';
+import { User } from '../user/model';
+import { Preference } from '../preference/model';
+import { addCartError, getBucketError, getItemError, paymentError } from './messages';
 import { BadRequestError } from '../../../common/errors';
 import { getProductAndStore } from '../core/utils';
 import { getProductError } from '../product/messages';
-import { TransSummary } from '../saldo/model';
 
 export const BucketController = {};
 export default { BucketController };
@@ -259,5 +261,29 @@ BucketController.bulkUpdate = async (req, res, next) => {
     message: 'Items Data',
     data: items,
   };
+  return next();
+};
+
+BucketController.balancePayment = async (req, res, next) => {
+  const now = moment();
+  const getBucket = Bucket.where({ id_bucket: req.params.id,
+    id_users: req.user.id,
+    status_bucket: BucketStatus.WAITING_FOR_PAYMENT }).fetch();
+  const getPref = Preference.where('namavar_globalparam', Preference.matchKey('payment')).fetch();
+  const [bucket, pref] = await Promise.all([getBucket, getPref]);
+  const expired = moment(bucket.get('tglstatus_bucket')).add(pref.get('value1_globalparam'), 'days');
+  if (!bucket || now > expired) throw paymentError('transaction', 'not_found');
+  const bill = Number(bucket.get('total_tagihan'));
+  const saldo = req.user.saldo_wallet - bill;
+  if (saldo < 0) throw paymentError('saldo', 'not_enough');
+
+  await bucket.save({ status_bucket: BucketStatus.PAYMENT_RECEIVED,
+    tglstatus_bucket: now,
+    bayar_wallet: bill }, { patch: true });
+  await Invoice.where('id_bucket', bucket.get('id_bucket'))
+    .save({ status_invoice: InvoiceStatus.PAID,
+      updated_at: now,
+      status_transaksi: InvoiceTransactionStatus.WAITING }, { patch: true });
+  await User.where('id_users', req.user.id).save({ saldo_wallet: saldo }, { patch: true });
   return next();
 };

@@ -39,6 +39,7 @@ class PreferenceModel extends bookshelf.Model {
     const variable = {
       otp_address: 'masa_aktif_kode_otpaddress',
       otp_hp: 'masa_aktif_kode_otphp',
+      payment: 'limit_respon_pembayaran',
     };
     return variable[key];
   }
