@@ -131,4 +131,14 @@ constraints.resolutionImage = {
 
 constraints.replyResolution = { message: { presence: true } };
 
+constraints.wishlist = {
+  sort: {
+    presence: false,
+    inclusion: {
+      within: ['newest', 'cheapest', 'expensive', 'selling'],
+      message: 'accept only `newest`, `cheapest`, `expensive`, or `selling` value',
+    },
+  },
+};
+
 export default constraints;

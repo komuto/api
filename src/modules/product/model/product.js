@@ -264,7 +264,7 @@ class ProductModel extends bookshelf.Model {
         sort = { column: 'count_sold', by: 'desc' };
         break;
       default:
-        sort = { column: 'date_created', by: 'desc ' };
+        sort = { column: 'date_created_produk', by: 'desc' };
     }
 
     other = other.split(',').reduce((result, type) => {

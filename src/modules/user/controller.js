@@ -12,6 +12,7 @@ import {
   ResolutionCenter,
   ResolutionCenterStatus,
   ImageGroup,
+  Wishlist,
 } from './model';
 import { UserEmail } from './email';
 import config from '../../../config';
@@ -234,9 +235,13 @@ UserController.resetPassword = async (req, res, next) => {
  * Get wishlist
  */
 UserController.getWishlist = async (req, res, next) => {
-  const products = await User.getWishlist(req.user.id);
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const params = { sort: req.query.sort };
+  const products = await Wishlist.get(req.user.id, params, page, pageSize);
   req.resData = {
     message: 'Products Wishlist Data',
+    meta: { page, limit: pageSize },
     data: products,
   };
   return next();
