@@ -2,11 +2,10 @@ import moment from 'moment';
 import core from '../../core';
 import { Wishlist } from '../../user/model/wishlist';
 import { Address } from '../../address/model';
-import { Product, ProductStatus } from '../../product/model';
+import { Product } from '../../product/model';
 
 const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
-const knex = bookshelf.knex;
 
 export const FavoriteStoreStatus = {
   OFF: 0,

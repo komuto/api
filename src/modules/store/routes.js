@@ -17,12 +17,11 @@ routes.get('/stores/:id([0-9]{1,10})',
   apiResponse());
 
 /**
- * POST /stores/id/favorite
- * Make a store favorite
+ * Favorite or delete store
  */
-routes.post('/stores/:id([0-9]{1,10})/favorite',
+routes.put('/stores/:id([0-9]{1,10})/favorite',
   auth(),
-  wrap(StoreController.makeFavorite),
+  wrap(StoreController.favorite),
   apiResponse());
 
 /**
