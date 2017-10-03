@@ -26,7 +26,7 @@ class FavoriteStoreModel extends bookshelf.Model {
   user() {
     return this.belongsTo('User', 'id_users');
   }
-
+/**/
   store() {
     return this.belongsTo('Store', 'referred_toko');
   }
