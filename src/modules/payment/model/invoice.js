@@ -352,6 +352,18 @@ class InvoiceModel extends bookshelf.Model {
     return await this.where('id_invoice', id).fetch({ withRelated: ['item.dropship'] });
   }
 
+  static async getCount(storeId, status = null) {
+    const count = await this.where('id_toko', storeId).query((qb) => {
+      if (status) {
+        qb.where('status_transaksi', status);
+      } else {
+        qb.whereNotIn('status_transaksi', [InvoiceTransactionStatus.WAITING, InvoiceTransactionStatus.PROCEED]);
+        qb.whereNotNull('status_transaksi');
+      }
+    }).count();
+    return parseNum(count);
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data

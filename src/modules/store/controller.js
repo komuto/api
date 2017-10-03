@@ -17,7 +17,7 @@ import { OTPAddress } from './../OTP/model';
 import { Address } from './../address/model';
 import { User, getNotification, NotificationType } from './../user/model';
 import { OTPAddressEmail } from '../OTP/email';
-import { Invoice } from '../payment/model';
+import { Invoice, InvoiceTransactionStatus } from '../payment/model';
 import config from '../../../config';
 import core from '../core';
 
@@ -359,5 +359,29 @@ StoreController.replyMessage = async (req, res, next) => {
     });
   }
   req.resData = { data: detailMessage };
+  return next();
+};
+
+/**
+ * Get page
+ */
+StoreController.getPage = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const [newOrders, processing, sale] = await Promise.all([
+    Invoice.getCount(storeId, InvoiceTransactionStatus.WAITING),
+    Invoice.getCount(storeId, InvoiceTransactionStatus.PROCEED),
+    Invoice.getCount(storeId),
+  ]);
+
+  req.resData = {
+    message: 'Store Page',
+    data: {
+      sales: {
+        new_orders: newOrders,
+        processing_orders: processing,
+        sale,
+      },
+    },
+  };
   return next();
 };
