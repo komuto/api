@@ -49,7 +49,9 @@ class TopupModel extends bookshelf.Model {
   }
 
   static async updateStatus(id, status) {
-    return await this.where({ id }).save({ status }, { patch: true });
+    const topup = await this.where({ id }).fetch();
+    topup.save({ status }, { patch: true });
+    return topup;
   }
 
   static async midtransNotification(id, body) {
@@ -72,16 +74,20 @@ class TopupModel extends bookshelf.Model {
       TransType.getRemark(SummTransType.TOPUP),
       User.where('id_users', topup.get('id_users')).fetch(),
     ]);
+    const saldo = user.serialize().saldo_wallet;
+    const amount = topup.serialize().amount;
+    const updateSaldo = saldo + amount;
     await TransSummary.create(TransSummary.matchDBColumn({
-      amount: topup.get('amount'),
-      first_saldo: user.get('saldo_wallet'),
-      last_saldo: user.get('saldo_wallet') - topup.get('amount'),
+      amount,
+      first_saldo: saldo,
+      last_saldo: updateSaldo,
       user_id: id,
       type: SummTransType.TOPUP,
       remark,
       summaryable_type: 'topup_wallet',
       summaryable_id: topup.get('id'),
     }));
+    await user.save({ saldo_wallet: updateSaldo }, { patch: true });
     return topup;
   }
 

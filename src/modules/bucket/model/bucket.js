@@ -52,6 +52,7 @@ class BucketModel extends bookshelf.Model {
       promo: this.relations.promo ? this.related('promo').serialize() : null,
       payment_method_id: this.get('id_paymentmethod'),
       unique_code: this.get('kode_unik'),
+      total_bill: parseNum(this.get('total_tagihan')),
       order_at: parseDate(this.get('tgl_orderbucket')),
       wallet: parseNum(this.get('bayar_wallet')),
       platform: this.get('platform'),
@@ -101,22 +102,21 @@ class BucketModel extends bookshelf.Model {
     } else {
       where = { ...where, status_bucket: BucketStatus.ADDED };
     }
+    const related = [
+      'promo',
+      { 'items.product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
+      'items.product.store.user.addresses.district',
+      'items.product.expeditionServices.expedition',
+      'items.shipping.address.province',
+      'items.shipping.address.district',
+      'items.shipping.address.subDistrict',
+      'items.shipping.expeditionService.expedition',
+    ];
     const bucket = await this.where(where)
       .query((qb) => {
         if (bucketId) qb.whereIn('status_bucket', [BucketStatus.ADDED, BucketStatus.WAITING_FOR_PAYMENT]);
       })
-      .fetch({
-        withRelated: [
-          'promo',
-          { 'items.product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
-          'items.product.store.user.addresses.district',
-          'items.product.expeditionServices.expedition',
-          'items.shipping.address.province',
-          'items.shipping.address.district',
-          'items.shipping.address.subDistrict',
-          'items.shipping.expeditionService.expedition',
-        ],
-      });
+      .fetch({ withRelated: bucketId ? [] : related });
     if (!bucket) throw getBucketError('bucket', 'not_found');
     if (platform) bucket.save({ platform }, { patch: true });
     const items = await Promise.all(bucket.related('items').map(async item => await Item.loadDetailItem(item)));
