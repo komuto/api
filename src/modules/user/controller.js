@@ -237,7 +237,7 @@ UserController.resetPassword = async (req, res, next) => {
 UserController.getWishlist = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const params = { sort: req.query.sort };
+  const params = { sort: req.query.sort, query: req.query.q };
   const products = await Wishlist.get(req.user.id, params, page, pageSize);
   req.resData = {
     message: 'Products Wishlist Data',

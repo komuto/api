@@ -51,6 +51,7 @@ class WishlistModel extends bookshelf.Model {
   }
 
   static async get(userId, params, page, pageSize) {
+    const { query } = params;
     let { sort } = params;
 
     switch (sort) {
@@ -73,8 +74,10 @@ class WishlistModel extends bookshelf.Model {
 
     const wishlists = await this.where('id_users', userId)
       .query((qb) => {
-        if (sort) {
-          qb.join('produk as p', 'p.id_produk', 'wishlist.id_produk').orderBy(sort.column, sort.by);
+        if (query || sort) {
+          qb.join('produk as p', 'p.id_produk', 'wishlist.id_produk');
+          if (sort) qb.orderBy(sort.column, sort.by);
+          if (query) qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
         } else {
           qb.orderBy('tglstatus_wishlist', 'desc');
         }

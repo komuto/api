@@ -132,6 +132,7 @@ constraints.resolutionImage = {
 constraints.replyResolution = { message: { presence: true } };
 
 constraints.wishlist = {
+  q: { presence: false },
   sort: {
     presence: false,
     inclusion: {
