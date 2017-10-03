@@ -53,7 +53,7 @@ class FavoriteStoreModel extends bookshelf.Model {
       return Product.getStoreProducts(storeId, 3);
     });
 
-    let addresses = [];
+    const addresses = [];
     const getLikes = [];
     const stores = await Promise.all(favorites.models.map(async (favorite, idx) => {
       const store = favorite.related('store');
@@ -62,23 +62,24 @@ class FavoriteStoreModel extends bookshelf.Model {
         id_produk: product.get('id_produk'),
         id_dropshipper: parseNum(product.get('id_dropshipper')) || null,
       }).fetchAll());
-      getLikes.push(like);
+      getLikes[idx] = like;
       const userId = store.related('user').get('id_users');
+      // Get province
       addresses.push(Address.getStoreAddress(userId));
       return {
         store: store.serialize({ favorite: true }),
         products,
       };
     }));
-    // Get province name
-    addresses = await Promise.all(addresses);
+
     return Promise.all(stores.map(async (store, idx) => {
-      const likes = await Promise.all(getLikes[idx]);
-      store.products = store.products.map((product, key) => {
-        const { is_liked, count_like } = Product.loadLikesDropship(id, likes[key], product);
+      store.products = await Promise.all(store.products.map(async (product, key) => {
+        const likes = await getLikes[idx][key];
+        const { is_liked, count_like } = Product.loadLikesDropship(id, likes, product);
         return { ...product.serialize({ minimal: true, alterId: true }), is_liked, count_like };
-      });
-      store.store.province = addresses[idx].related('province').serialize();
+      }));
+      const address = await addresses[idx];
+      store.store.province = address.related('province').serialize();
       return store;
     }));
   }
