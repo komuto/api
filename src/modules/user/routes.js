@@ -107,6 +107,7 @@ routes.put('/users/password',
  */
 routes.get('/users/wishlist',
   auth(),
+  validateParam(constraints.wishlist),
   wrap(UserController.getWishlist),
   apiResponse());
 

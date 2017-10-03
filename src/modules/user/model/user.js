@@ -7,7 +7,6 @@ import config from '../../../../config';
 import core from '../../core';
 import { model as addressModel } from '../../address';
 import { OTPHPStatus, OTPAddressStatus } from '../../OTP/model';
-import { ResolutionCenter } from './resolution_center';
 
 const { defaultNull, parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -146,13 +145,6 @@ class UserModel extends bookshelf.Model {
     return this.hasOne('Address', 'id_users');
   }
 
-  /**
-   * Add relation to Product
-   */
-  wishlistProducts() {
-    return this.hasMany('Product', 'id_users').through('Wishlist', 'id_produk', 'id_users', 'id_produk');
-  }
-
   birthPlace() {
     return this.belongsTo('District', 'kota_lahir');
   }
@@ -260,24 +252,6 @@ class UserModel extends bookshelf.Model {
     const store = user.related('store').serialize({ verified: true });
     user = user.serialize({ birth: true, phone: true });
     return { user, store };
-  }
-
-  static async getWishlist(id) {
-    const user = await this.where('id_users', id).fetch({
-      withRelated: [
-        'wishlistProducts.store',
-        'wishlistProducts.images',
-        'wishlistProducts.likes',
-      ],
-    });
-    const products = user.related('wishlistProducts');
-    return products.map((product) => {
-      const store = product.related('store');
-      const images = product.related('images');
-      const countLike = product.related('likes').length;
-      product = { ...product.serialize({ minimal: true, wishlist: true }), count_like: countLike };
-      return { product, store, images };
-    });
   }
 
   /**
