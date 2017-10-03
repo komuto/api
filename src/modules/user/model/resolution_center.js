@@ -71,6 +71,7 @@ class ResolutionCenterModel extends bookshelf.Model {
         if (isClosed) qb.where('status_ticket_rescenter', 0);
         else qb.whereNot('status_ticket_rescenter', 0);
       })
+      .orderBy('tglstatus_ticket_rescenter', 'desc')
       .fetchPage({ page, pageSize });
   }
 
