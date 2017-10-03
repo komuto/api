@@ -412,6 +412,30 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
+   * @param id {int} store id
+   * @param limit {int}
+   * @param productWhere {function} add where clause to product query
+   * @param dropshipWhere {function} add where clause to dropship query
+   */
+  static async getStoreProducts(id, limit, productWhere = false, dropshipWhere = false) {
+    return await this.query((qb) => {
+      qb.select(['*', 'tglstatus_produk as date_created', 'id_toko']);
+      qb.select(knex.raw('null as "id_dropshipper"'));
+      qb.where('produk.id_toko', id).andWhere('status_produk', ProductStatus.SHOW);
+      if (productWhere) productWhere(qb);
+      qb.union(function () {
+        this.select(['p.*', 'd.tglstatus_dropshipper as date_created', 'd.id_toko', 'id_dropshipper'])
+          .from('produk as p')
+          .leftJoin('dropshipper as d', 'd.id_produk', 'p.id_produk')
+          .where('d.id_toko', id);
+        if (dropshipWhere) dropshipWhere(this);
+      });
+      qb.orderBy('date_created', 'desc');
+      qb.limit(limit);
+    }).fetchAll({ withRelated: 'image' });
+  }
+
+  /**
    * Get product with its relation
    * @param productId {integer} product id
    * @param storeId {integer} store id
@@ -443,17 +467,9 @@ class ProductModel extends bookshelf.Model {
       id_dropshipper: !isDropshipped ? null : idDropship }).fetchAll({ withRelated: 'user' });
 
     // Eager load other products so it doesn't block other process by not awaiting directly
-    const getOtherProds = this.query((qb) => {
-      qb.select(['produk.*', 'd.id_dropshipper']);
-      qb.select(knex.raw('COALESCE(d.tglstatus_dropshipper, tglstatus_produk) as date_created, ' +
-      'COALESCE(d.id_toko, produk.id_toko) as id_toko'));
-      qb.leftJoin('dropshipper as d', 'd.id_produk', 'produk.id_produk');
-      qb.where('produk.id_toko', storeId).whereNot('produk.id_produk', productId)
-        .andWhere('status_produk', ProductStatus.SHOW).whereNull('d.id_dropshipper');
-      qb.orWhere('d.id_toko', storeId).whereNot('d.id_produk', productId);
-      qb.orderBy('date_created', 'desc');
-      qb.limit(3);
-    }).fetchAll({ withRelated: [{ images: qb => qb.limit(1) }] });
+    const getOtherProds = this.getStoreProducts(storeId, 3,
+      qb => qb.whereNot('produk.id_produk', productId),
+      qb => qb.whereNot('d.id_produk', productId));
 
     let getStore;
     if (!isDropshipped) {
