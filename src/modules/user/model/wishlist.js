@@ -17,10 +17,6 @@ class WishlistModel extends bookshelf.Model {
     return ['id_users', 'id_produk', 'id_dropshipper'];
   }
 
-  products() {
-    return this.hasMany('Product', 'id_produk');
-  }
-
   /**
    * Add to wishlist
    */
