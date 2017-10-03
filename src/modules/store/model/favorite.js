@@ -2,11 +2,10 @@ import moment from 'moment';
 import core from '../../core';
 import { Wishlist } from '../../user/model/wishlist';
 import { Address } from '../../address/model';
-import { Product, ProductStatus } from '../../product/model';
+import { Product } from '../../product/model';
 
 const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
-const knex = bookshelf.knex;
 
 export const FavoriteStoreStatus = {
   OFF: 0,
@@ -41,12 +40,19 @@ class FavoriteStoreModel extends bookshelf.Model {
   /**
    * Get list of favorite store with its products
    * @param id {integer} user id
+   * @param query {string}
    * @param pageSize {integer} limit
    * @param page {integer}
    */
-  static async getListFavoriteStore(id, pageSize, page) {
-    const favorites = await this.where('id_users', id)
-      .fetchPage({ pageSize, page, withRelated: ['store.user'] });
+  static async getListFavoriteStore(id, query, pageSize, page) {
+    const favorites = await this.query((qb) => {
+      qb.where('toko_favorit.id_users', id);
+      if (query) {
+        qb.join('toko as t', 't.id_toko', 'toko_favorit.referred_toko');
+        qb.whereRaw('LOWER(nama_toko) LIKE ?', `%${query.toLowerCase()}%`);
+      }
+    }).fetchPage({ pageSize, page, withRelated: ['store.user'] });
+
     const getProducts = favorites.models.map((favorite) => {
       const store = favorite.related('store');
       const storeId = store.get('id_toko');
