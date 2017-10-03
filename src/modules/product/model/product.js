@@ -166,10 +166,6 @@ class ProductModel extends bookshelf.Model {
     return this.belongsTo('Brand', 'identifier_brand');
   }
 
-  dropship() {
-    return this.hasOne('Dropship', 'id_produk');
-  }
-
   /**
    * Get product by id
    */
