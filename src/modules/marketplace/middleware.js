@@ -14,8 +14,9 @@ export function verify() {
       req.marketplace = marketplace.serialize();
       next();
     } catch (e) {
-      const err = new Error('Path Not Found');
-      err.httpStatus = 404;
+      const msg = e.code === 'ECONNREFUSED' ? 'Database down' : 'Path Not Found';
+      const err = new Error(msg);
+      err.httpStatus = e.code === 'ECONNREFUSED' ? 500 : 404;
       next(err);
     }
   };
