@@ -254,15 +254,6 @@ class BucketModel extends bookshelf.Model {
   }
 
   /**
-   * Add promo
-   * @param bucketId
-   * @param promoId
-   */
-  static async addPromo(bucketId, promoId) {
-    return await this.where({ id_bucket: bucketId }).save({ id_promo: promoId }, { patch: true });
-  }
-
-  /**
    * Cancel promo
    * @param bucketId
    */

@@ -1,6 +1,7 @@
 import moment from 'moment';
 import core from '../../core';
-import { getPromoError } from './../messages';
+import { addPromoError } from './../messages';
+import { BucketStatus } from './bucket';
 
 const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -43,13 +44,17 @@ class PromoModel extends bookshelf.Model {
 
   /**
    * Get promo
+   * @param code {string} promo code
+   * @param id {int} marketplace id
    */
-  static async get(code) {
+  static async get(code, id) {
     const promo = await this.query((qb) => {
-      qb.whereRaw('LOWER(kode_promo) LIKE ?', `%${code.toLowerCase()}%`);
+      qb.where('kode_promo', code);
+      qb.where('id_marketplaceuser', id);
+      qb.where('kuota_promo', '>', 0);
       qb.where('expdate_promo', '>=', moment());
     }).fetch();
-    if (!promo) throw getPromoError('promo', 'not_found');
+    if (!promo) throw addPromoError('promo', 'not_found');
     return promo;
   }
 }
