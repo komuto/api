@@ -165,7 +165,7 @@ export function validateParam(
   return (req, res, next) => {
     if (prop !== undefined) {
       const params = prop ? req.body[prop] : req.body;
-      if (params.length === 0 && !strict) return next();
+      if (params && params.length === 0 && !strict) return next();
       // Can the param be empty array or not
       const evaluate = strict ? true : params && params.length > 0;
       if (evaluate) {

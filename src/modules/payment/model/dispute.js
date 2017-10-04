@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import moment from 'moment';
 import core from '../../core';
 import config from '../../../../config';
 import { createDisputeError, getDisputeError } from '../messages';
@@ -7,6 +8,7 @@ import { DetailMessage } from '../../store/model/detail_message';
 import { createReviewError } from '../../review/messages';
 import { Review } from '../../review/model';
 import { InvoiceTransactionStatus } from './invoice';
+import { Preference } from '../../preference/model';
 
 const { parseDate, matchDB, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -170,9 +172,16 @@ class DisputeModel extends bookshelf.Model {
       return msg;
     });
 
+    let limitSend = null;
+    if (dispute.get('status_dispute') === DisputeStatus.NEW) {
+      limitSend = await Preference.get('send_product');
+      limitSend = moment(dispute.get('createdate_dispute')).add(limitSend.value, 'd').unix();
+    }
+
     const invoice = dispute.related('invoice');
     return {
       ...this.detailDispute(dispute),
+      limit_send_product: limitSend,
       proofs: dispute.related('imageGroups'),
       products: invoice.related('items').map(item => item.related('product').serialize({ minimal: true })),
       discussions,

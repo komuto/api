@@ -26,7 +26,7 @@ class FavoriteStoreModel extends bookshelf.Model {
   user() {
     return this.belongsTo('User', 'id_users');
   }
-
+/**/
   store() {
     return this.belongsTo('Store', 'referred_toko');
   }
@@ -40,12 +40,19 @@ class FavoriteStoreModel extends bookshelf.Model {
   /**
    * Get list of favorite store with its products
    * @param id {integer} user id
+   * @param query {string}
    * @param pageSize {integer} limit
    * @param page {integer}
    */
-  static async getListFavoriteStore(id, pageSize, page) {
-    const favorites = await this.where('id_users', id)
-      .fetchPage({ pageSize, page, withRelated: ['store.user'] });
+  static async getListFavoriteStore(id, query, pageSize, page) {
+    const favorites = await this.query((qb) => {
+      qb.where('toko_favorit.id_users', id);
+      if (query) {
+        qb.join('toko as t', 't.id_toko', 'toko_favorit.referred_toko');
+        qb.whereRaw('LOWER(nama_toko) LIKE ?', `%${query.toLowerCase()}%`);
+      }
+    }).fetchPage({ pageSize, page, withRelated: ['store.user'] });
+
     const getProducts = favorites.models.map((favorite) => {
       const store = favorite.related('store');
       const storeId = store.get('id_toko');

@@ -32,7 +32,7 @@ def.imageFolder.payment_method = 'payment';
 def.imageFolder.bank = 'bank';
 def.defaultImage = {};
 def.defaultImage.user = 'https://www.juptr.io/images/default-user.png';
-def.defaultImage.product = 'https://188.166.246.46/uploads/produk/noimage.png';
+def.defaultImage.product = 'https://komutodev.aptmi.com/uploads/produk/noimage.png';
 
 def.cdnPath = 'http://cdn.localhost.com';
 
@@ -78,7 +78,7 @@ def.url = (dir = '/') => {
 // komuto url & email
 def.komutoUrl = 'http://api.komutodev.aptmi.com/komuto-api/';
 def.frontendKomuto = 'https://komuto.skyshi.com';
-def.assetUrl = 'http://188.166.246.46';
+def.assetUrl = 'https://komutodev.aptmi.com';
 def.komutoEmail = 'developer@skyshi.com';
 
 // OTP sms

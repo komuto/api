@@ -209,4 +209,13 @@ routes.post('/users/store/messages/:id([0-9]{1,10})',
   wrap(StoreController.replyMessage),
   apiResponse());
 
+/**
+ * GET /pages/store
+ * Store page
+ */
+routes.get('/pages/store',
+  auth(),
+  wrap(StoreController.getPage),
+  apiResponse());
+
 export default routes;

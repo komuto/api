@@ -77,7 +77,7 @@ routes.get('/users/bucket/items/:id([0-9]{1,10})',
  */
 routes.post('/checkout',
   auth(),
-  BucketController.checkout,
+  wrap(BucketController.checkout),
   apiResponse());
 
 /**

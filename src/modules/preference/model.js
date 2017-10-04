@@ -40,6 +40,7 @@ class PreferenceModel extends bookshelf.Model {
       otp_address: 'masa_aktif_kode_otpaddress',
       otp_hp: 'masa_aktif_kode_otphp',
       payment: 'limit_respon_pembayaran',
+      send_product: 'limit_kirimbarang_refund',
     };
     return variable[key];
   }

@@ -31,7 +31,7 @@ import midtrans from './modules/midtrans';
 
 const app = express();
 
-core.cacheClear();
+// core.cacheClear();
 
 app.use(core.middleware.winstonLogger());
 

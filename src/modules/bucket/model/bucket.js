@@ -98,7 +98,7 @@ class BucketModel extends bookshelf.Model {
   static async getDetail(userId, bucketId = null, platform = null) {
     let where = { id_users: userId };
     if (bucketId) {
-      where = { ...where, id_bucket: bucketId };
+      where = { ...where, id_bucket: bucketId, status_bucket: BucketStatus.WAITING_FOR_PAYMENT };
     } else {
       where = { ...where, status_bucket: BucketStatus.ADDED };
     }
@@ -112,11 +112,7 @@ class BucketModel extends bookshelf.Model {
       'items.shipping.address.subDistrict',
       'items.shipping.expeditionService.expedition',
     ];
-    const bucket = await this.where(where)
-      .query((qb) => {
-        if (bucketId) qb.whereIn('status_bucket', [BucketStatus.ADDED, BucketStatus.WAITING_FOR_PAYMENT]);
-      })
-      .fetch({ withRelated: bucketId ? [] : related });
+    const bucket = await this.where(where).fetch({ withRelated: bucketId ? [] : related });
     if (!bucket) throw getBucketError('bucket', 'not_found');
     if (platform) bucket.save({ platform }, { patch: true });
     const items = await Promise.all(bucket.related('items').map(async item => await Item.loadDetailItem(item)));

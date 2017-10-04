@@ -90,7 +90,7 @@ routes.post('/products',
  * GET /products/id/wishlist
  * Add to wishlist
  */
-routes.get('/products/:id([0-9]{1,10}.[0-9]{1,10})/wishlist',
+routes.put('/products/:id([0-9]{1,10}.[0-9]{1,10})/wishlist',
   auth(),
   wrap(ProductController.addWishlist),
   apiResponse());

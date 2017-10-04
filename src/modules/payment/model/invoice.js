@@ -222,7 +222,9 @@ class InvoiceModel extends bookshelf.Model {
           .orWhere('d.id_toko', id)
           .andWhere('status_transaksi', invoiceStatus);
       }
-    }).fetchPage({ page, pageSize, withRelated: ['items.product.image', 'buyer'] });
+    })
+      .orderBy('updated_at', 'desc')
+      .fetchPage({ page, pageSize, withRelated: ['items.product.image', 'buyer'] });
 
     if (!invoices) return [];
     return invoices.map((invoice) => {
@@ -350,6 +352,18 @@ class InvoiceModel extends bookshelf.Model {
 
   static async getWithDropship(id) {
     return await this.where('id_invoice', id).fetch({ withRelated: ['item.dropship'] });
+  }
+
+  static async getCount(storeId, status = null) {
+    const count = await this.where('id_toko', storeId).query((qb) => {
+      if (status) {
+        qb.where('status_transaksi', status);
+      } else {
+        qb.whereNotIn('status_transaksi', [InvoiceTransactionStatus.WAITING, InvoiceTransactionStatus.PROCEED]);
+        qb.whereNotNull('status_transaksi');
+      }
+    }).count();
+    return parseNum(count);
   }
 
   /**

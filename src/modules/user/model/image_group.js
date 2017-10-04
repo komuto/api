@@ -1,6 +1,22 @@
 import core from '../../core';
+import config from '../../../../config';
 
 const bookshelf = core.postgres.db;
+
+const getImage = (group, image) => {
+  let path;
+  switch (group) {
+    case 'resolusi':
+      path = config.imageFolder.resolution;
+      break;
+    case 'dispute':
+      path = config.imageFolder.dispute;
+      break;
+    default:
+      break;
+  }
+  return core.imagePath(path, image);
+};
 
 class ImageGroupModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -17,7 +33,7 @@ class ImageGroupModel extends bookshelf.Model {
     return {
       id: this.get('id_image'),
       parent_id: this.get('parent_id'),
-      image: this.get('image'),
+      image: getImage(this.get('group'), this.get('image')),
       group: this.get('group'),
     };
   }

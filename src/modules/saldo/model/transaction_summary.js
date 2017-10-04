@@ -4,7 +4,6 @@ import { BadRequestError } from '../../../../common/errors';
 import { PromoType } from '../../bucket/model';
 import { User } from '../../user/model';
 import { TransType } from './transaction_type';
-import { DetailTransSummary } from './detail_transaction_summary';
 import { getHistoryError } from '../messages';
 
 const { matchDB, parseNum, parseDate } = core.utils;
@@ -75,10 +74,12 @@ class transSummaryModel extends bookshelf.Model {
   static async get(userId, params, page, pageSize) {
     const { filters } = params;
     let { start_at: startAt, end_at: endAt } = params;
-    startAt = moment.unix(startAt);
-    endAt = moment.unix(endAt);
-    if (!startAt.isValid() || !endAt.isValid()) {
-      throw getHistoryError('date', 'invalid_date');
+    if (startAt) {
+      startAt = moment.unix(startAt);
+      endAt = moment.unix(endAt);
+      if (!startAt.isValid() || !endAt.isValid()) {
+        throw getHistoryError('date', 'invalid_date');
+      }
     }
     const transactions = await this.where('id_users', userId)
       .query((qb) => {
@@ -86,6 +87,7 @@ class transSummaryModel extends bookshelf.Model {
         if (startAt) qb.where('tgl_summarytransaksi', '>=', startAt);
         if (endAt) qb.where('tgl_summarytransaksi', '<', endAt);
       })
+      .orderBy('tgl_summarytransaksi', 'desc')
       .fetchPage({ page, pageSize, withRelated: 'detailTransSummary' });
     return transactions.map((transaction) => {
       const detail = transaction.related('detailTransSummary');

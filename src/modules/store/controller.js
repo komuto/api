@@ -17,7 +17,7 @@ import { OTPAddress } from './../OTP/model';
 import { Address } from './../address/model';
 import { User, getNotification, NotificationType } from './../user/model';
 import { OTPAddressEmail } from '../OTP/email';
-import { Invoice } from '../payment/model';
+import { Invoice, InvoiceTransactionStatus } from '../payment/model';
 import config from '../../../config';
 import core from '../core';
 
@@ -63,7 +63,12 @@ StoreController.favorite = async (req, res, next) => {
 StoreController.listFavorites = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const favorites = await FavoriteStore.getListFavoriteStore(req.user.id, pageSize, page);
+  const favorites = await FavoriteStore.getListFavoriteStore(
+    req.user.id,
+    req.query.q,
+    pageSize,
+    page,
+  );
 
   req.resData = {
     message: 'Favorite store',
@@ -354,5 +359,29 @@ StoreController.replyMessage = async (req, res, next) => {
     });
   }
   req.resData = { data: detailMessage };
+  return next();
+};
+
+/**
+ * Get page
+ */
+StoreController.getPage = async (req, res, next) => {
+  const storeId = await Store.getStoreId(req.user.id);
+  const [newOrders, processing, sale] = await Promise.all([
+    Invoice.getCount(storeId, InvoiceTransactionStatus.WAITING),
+    Invoice.getCount(storeId, InvoiceTransactionStatus.PROCEED),
+    Invoice.getCount(storeId),
+  ]);
+
+  req.resData = {
+    message: 'Store Page',
+    data: {
+      sales: {
+        new_order: newOrders,
+        processing_order: processing,
+        sale,
+      },
+    },
+  };
   return next();
 };
