@@ -4,7 +4,6 @@ import { BadRequestError } from '../../../../common/errors';
 import { PromoType } from '../../bucket/model';
 import { User } from '../../user/model';
 import { TransType } from './transaction_type';
-import { DetailTransSummary } from './detail_transaction_summary';
 import { getHistoryError } from '../messages';
 
 const { matchDB, parseNum, parseDate } = core.utils;
