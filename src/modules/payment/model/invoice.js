@@ -222,7 +222,9 @@ class InvoiceModel extends bookshelf.Model {
           .orWhere('d.id_toko', id)
           .andWhere('status_transaksi', invoiceStatus);
       }
-    }).fetchPage({ page, pageSize, withRelated: ['items.product.image', 'buyer'] });
+    })
+      .orderBy('updated_at', 'desc')
+      .fetchPage({ page, pageSize, withRelated: ['items.product.image', 'buyer'] });
 
     if (!invoices) return [];
     return invoices.map((invoice) => {
