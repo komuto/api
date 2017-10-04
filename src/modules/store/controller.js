@@ -377,8 +377,8 @@ StoreController.getPage = async (req, res, next) => {
     message: 'Store Page',
     data: {
       sales: {
-        new_orders: newOrders,
-        processing_orders: processing,
+        new_order: newOrders,
+        processing_order: processing,
         sale,
       },
     },
