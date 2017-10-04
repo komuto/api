@@ -16,9 +16,11 @@ export const errMsg = {
     title: 'Get item gagal',
     not_found: 'Item tidak ditemukan',
   },
-  getPromo: {
-    title: 'Get promo gagal',
+  addPromo: {
+    title: 'Gunakan promo gagal',
+    not_enough: 'Total belanja tidak mencapai minimal promo',
     not_found: 'Promo tidak ditemukan atau sudah tidak valid',
+    used: 'Promo sudah terpakai',
   },
   createShipping: {
     title: 'Create shipping gagal',
@@ -42,7 +44,7 @@ export const errMsg = {
 export const getBucketError = formatError.bind(errMsg.getBucket);
 export const getTransactionError = formatError.bind(errMsg.getTransaction);
 export const getItemError = formatError.bind(errMsg.getItem);
-export const getPromoError = formatError.bind(errMsg.getPromo);
+export const addPromoError = formatError.bind(errMsg.addPromo);
 export const createShippingError = formatError.bind(errMsg.createShipping);
 export const updateShippingError = formatError.bind(errMsg.updateShipping);
 export const addCartError = formatError.bind(errMsg.addCart);

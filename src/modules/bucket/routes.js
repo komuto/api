@@ -18,20 +18,18 @@ routes.get('/buckets/count',
   apiResponse());
 
 /**
- * GET /buckets/promo
- * Get promo
+ * Add promo
  */
-routes.get('/buckets/promo',
+routes.post('/buckets/promo',
   auth(),
-  validateParam(constraints.promo),
-  wrap(BucketController.getPromo),
+  validateParam(constraints.promo, true),
+  wrap(BucketController.addPromo),
   apiResponse());
 
 /**
- * GET /buckets/promo/cancel
  * Cancel promo
  */
-routes.get('/buckets/promo/cancel',
+routes.delete('/buckets/promo/cancel',
   auth(),
   wrap(BucketController.cancelPromo),
   apiResponse());

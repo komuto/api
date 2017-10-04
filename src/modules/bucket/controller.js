@@ -6,7 +6,7 @@ import { Expedition } from '../expedition/model';
 import { Invoice, InvoiceStatus, InvoiceTransactionStatus } from '../payment/model';
 import { User } from '../user/model';
 import { Preference } from '../preference/model';
-import { addCartError, getBucketError, getItemError, paymentError } from './messages';
+import { addCartError, getBucketError, getItemError, paymentError, addPromoError } from './messages';
 import { BadRequestError } from '../../../common/errors';
 import { getProductAndStore } from '../core/utils';
 import { getProductError } from '../product/messages';
@@ -23,10 +23,24 @@ BucketController.getCount = async (req, res, next) => {
   return next();
 };
 
-BucketController.getPromo = async (req, res, next) => {
-  const bucket = await Bucket.get(req.user.id);
-  const promo = await Promo.get(req.query.code);
-  await Bucket.addPromo(bucket.serialize().id, promo.serialize().id);
+BucketController.addPromo = async (req, res, next) => {
+  const getBucket = Bucket.get(req.user.id);
+  const getPromo = Promo.get(req.body.code, req.user.marketplace_id);
+  const [bucket, promo] = await Promise.all([getBucket, getPromo]);
+  if (Number(promo.get('min_belanja')) > Number(bucket.get('total_tagihan'))) {
+    throw addPromoError('total', 'not_enough');
+  }
+  const checkBucket = await Bucket.query(qb => qb.where('id_users', req.user.id)
+      .where('id_promo', promo.get('id_promo'))
+      .where('tglstatus_bucket', '>=', promo.get('startdate_promo'))
+      .whereIn('status_bucket', [
+        BucketStatus.CHECKOUT,
+        BucketStatus.WAITING_FOR_PAYMENT,
+        BucketStatus.WAITING_FOR_VERIFICATION,
+        BucketStatus.PAYMENT_RECEIVED,
+      ])).fetch();
+  if (checkBucket) throw addPromoError('promo', 'used');
+  await bucket.save({ id_promo: promo.get('id_promo') }, { patch: true });
   req.resData = {
     message: 'Promo Data',
     data: promo,
