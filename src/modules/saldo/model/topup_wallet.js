@@ -2,6 +2,7 @@ import core from '../../core';
 import { SummTransType, TransSummary } from './transaction_summary';
 import { TransType } from './transaction_type';
 import { User } from '../../user/model/user';
+import { TransactionLog } from '../../payment/model';
 
 const { matchDB, parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -58,18 +59,36 @@ class TopupModel extends bookshelf.Model {
     let status;
     switch (body.status_code) {
       case '200':
-        status = TopupStatus.SUCCESS;
+        status = {
+          topup: TopupStatus.SUCCESS,
+          log: 'success',
+        };
         break;
       case '201':
-        status = TopupStatus.WAITING;
+        status = {
+          topup: TopupStatus.WAITING,
+          log: 'pending',
+        };
         break;
       case '202':
-        status = TopupStatus.FAILED;
+        status = {
+          topup: TopupStatus.FAILED,
+          log: 'denied',
+        };
         break;
       default:
         break;
     }
-    const topup = await this.updateStatus(id, status);
+
+    TransactionLog.create({
+      order_id: id,
+      transaction_name: 'TOPUP',
+      payment_method: 'midtrans',
+      response_data: body,
+      status: status.log,
+    });
+
+    const topup = await this.updateStatus(id, status.topup);
     const [remark, user] = await Promise.all([
       TransType.getRemark(SummTransType.TOPUP),
       User.where('id_users', topup.get('id_users')).fetch(),

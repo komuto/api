@@ -3,6 +3,7 @@ import { PaymentMethod, PaymentMethodStatus, PaymentMethodType } from './payment
 import { PaymentConfirmation, PaymentConfirmationStatus } from './payment_confirmation';
 import { Dispute, DisputeStatus, DisputeSolutionType, DisputeResponseStatus } from './dispute';
 import { DisputeProduct } from './dispute_product';
+import { TransactionLog } from './transaction_log';
 
 export default {
   Invoice,
@@ -18,4 +19,5 @@ export default {
   DisputeSolutionType,
   DisputeResponseStatus,
   DisputeProduct,
+  TransactionLog,
 };

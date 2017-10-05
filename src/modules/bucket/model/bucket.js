@@ -9,7 +9,7 @@ import './shipping';
 import { Item } from './item';
 import { PromoType } from './promo';
 import config from './../../../../config';
-import { InvoiceStatus, InvoiceTransactionStatus } from '../../payment/model';
+import { InvoiceStatus, InvoiceTransactionStatus, TransactionLog } from '../../payment/model';
 import { Dropship } from '../../product/model/dropship';
 
 const { parseNum, parseDate, matchDB } = core.utils;
@@ -354,6 +354,7 @@ class BucketModel extends bookshelf.Model {
           bucket: BucketStatus.PAYMENT_RECEIVED,
           invoice: InvoiceStatus.PAID,
           transaction: InvoiceTransactionStatus.WAITING,
+          log: 'success',
         };
         related = ['invoices.items.product', 'promo'];
         break;
@@ -362,6 +363,7 @@ class BucketModel extends bookshelf.Model {
           bucket: BucketStatus.WAITING_FOR_VERIFICATION,
           invoice: InvoiceStatus.UNPAID,
           transaction: null,
+          log: 'pending',
         };
         break;
       case '202':
@@ -369,11 +371,21 @@ class BucketModel extends bookshelf.Model {
           bucket: BucketStatus.EXPIRED,
           invoice: InvoiceStatus.FAILED,
           transaction: null,
+          log: 'denied',
         };
         break;
       default:
         break;
     }
+
+    TransactionLog.create({
+      order_id: id,
+      transaction_name: 'ORDER',
+      payment_method: 'midtrans',
+      response_data: body,
+      status: status.log,
+    });
+
     return await this.updateStatus(id, status, related);
   }
 
