@@ -122,7 +122,10 @@ class ExpeditionModel extends bookshelf.Model {
     const result = JSON.parse(res).rajaongkir.results[0];
     const results = [];
     _.forEach(result.costs.reverse(), (cost) => {
-      const found = _.find(services, { name: cost.service });
+      const found = _.find(services, (o) => {
+        cost.service = this.matchCityCourier(cost.service);
+        return o.name === cost.service;
+      });
       if (found !== undefined) {
         results.push({
           id: found.id,
@@ -135,6 +138,19 @@ class ExpeditionModel extends bookshelf.Model {
       }
     });
     return results;
+  }
+
+  static matchCityCourier(service) {
+    switch (service) {
+      case 'CTC':
+        return 'REG';
+      case 'CTCYES':
+        return 'YES';
+      case 'CTCOKE':
+        return 'OKE';
+      default:
+        return service;
+    }
   }
 }
 
