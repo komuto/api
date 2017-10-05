@@ -146,7 +146,7 @@ class DisputeModel extends bookshelf.Model {
         withRelated: ['disputeProducts.product.images', relation],
       });
 
-    return disputes.map(dispute => this.detailDispute(dispute));
+    return disputes.map(dispute => this.detailDispute(dispute, false));
   }
 
   static async getDetail(where, relation) {
@@ -188,7 +188,16 @@ class DisputeModel extends bookshelf.Model {
     };
   }
 
-  static detailDispute(dispute) {
+  static detailDispute(dispute, isDetail = true) {
+    let fine;
+    if (isDetail) {
+      fine = dispute.related('invoice').related('items').reduce((res, item) => {
+        const found = _.find(dispute.related('disputeProducts').models, o => o.get('id_produk') === item.get('id_produk'));
+        if (!found) res.push(item.related('product').serialize({ minimal: true }));
+        return res;
+      }, []);
+    }
+
     const products = dispute.related('disputeProducts').map((val) => {
       const product = val.related('product');
       const image = product.related('images').models;
@@ -200,6 +209,7 @@ class DisputeModel extends bookshelf.Model {
     return {
       ...dispute.serialize(),
       dispute_products: products,
+      fine_products: fine,
     };
   }
 
