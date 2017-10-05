@@ -27,6 +27,11 @@ class PromoModel extends bookshelf.Model {
     return 'id_promo';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize() {
     return {
       id: this.get('id_promo'),
@@ -35,6 +40,9 @@ class PromoModel extends bookshelf.Model {
       type: parseNum(this.get('jenis_promo')),
       percentage: this.get('persentase_promo'),
       nominal: parseNum(this.get('nominal_promo')),
+      min_shopping: parseNum(this.get('min_belanja')),
+      max_cuts: parseNum(this.get('max_potongan')),
+      quota: parseNum(this.get('kuota_promo')),
       start_at: parseDate(this.get('startdate_promo')),
       expired_at: parseDate(this.get('expdate_promo')),
       status: parseNum(this.get('status_promo')),

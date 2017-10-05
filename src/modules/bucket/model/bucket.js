@@ -306,7 +306,7 @@ class BucketModel extends bookshelf.Model {
   }
 
   static async updateStatus(id, status, related) {
-    const bucket = await this.where({ id_bucket: id }).fetch({ withRelated: [related] });
+    const bucket = await this.where({ id_bucket: id }).fetch({ withRelated: related });
     if (status.invoice !== BucketStatus.UNPAID) {
       await Promise.all(bucket.related('invoices').map(async (invoice) => {
         if (status.invoice === InvoiceStatus.PAID) {
@@ -335,12 +335,19 @@ class BucketModel extends bookshelf.Model {
         }, { patch: true });
       }));
     }
+
+    if (status.bucket === BucketStatus.PAYMENT_RECEIVED) {
+      const promo = bucket.related('promo');
+      // eslint-disable-next-line no-plusplus
+      await promo.save({ kuota_promo: --promo.serialize().quota }, { patch: true });
+    }
+
     return await bucket.save({ status_bucket: status.bucket }, { patch: true });
   }
 
   static async midtransNotification(id, body) {
     let status;
-    let related = 'invoices';
+    let related = ['invoices'];
     switch (body.status_code) {
       case '200':
         status = {
@@ -348,7 +355,7 @@ class BucketModel extends bookshelf.Model {
           invoice: InvoiceStatus.PAID,
           transaction: InvoiceTransactionStatus.WAITING,
         };
-        related = 'invoices.items.product';
+        related = ['invoices.items.product', 'promo'];
         break;
       case '201':
         status = {
