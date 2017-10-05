@@ -50,8 +50,8 @@ routes.get('/expeditions/:id([0-9]{1,10})/cost',
  */
 routes.get('/expeditions/cost',
   validateParam(constraints.costByProduct),
-  // cache(),
-  ExpeditionController.getExpeditionCostByProduct,
+  cache(),
+  wrap(ExpeditionController.getExpeditionCostByProduct),
   apiResponse());
 
 export default routes;
