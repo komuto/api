@@ -98,9 +98,9 @@ def.secretKey = '9a4c5dee925f';
 
 // Midtrans auth
 def.midtrans = {};
-def.midtrans.clientKey = 'VT-client-Y6pK1V-G7F4a1YgU';
-def.midtrans.serverKey = 'VT-server-eSA2HQ1rSJOqGnIn4ow9wW6j';
-def.midtrans.isProduction = false;
+def.midtrans.clientKey = 'VT-client-Kh2JdUMi7H9ij1hW';
+def.midtrans.serverKey = 'VT-server-mKN5sKSvcf1fk3Rap8wSrusA';
+def.midtrans.isProduction = true;
 
 cfg.resolveLocalConfig(__dirname, (err, file) => {
   // eslint-disable-next-line global-require, import/no-dynamic-require
