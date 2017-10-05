@@ -98,8 +98,8 @@ def.secretKey = '9a4c5dee925f';
 
 // Midtrans auth
 def.midtrans = {};
-def.midtrans.clientKey = 'VT-client-2kdvJYszbJGhsBYH';
-def.midtrans.serverKey = 'VT-server-GbE4FnysSEzYC-jF_kC1x0hZ';
+def.midtrans.clientKey = 'VT-client-Y6pK1V-G7F4a1YgU';
+def.midtrans.serverKey = 'VT-server-eSA2HQ1rSJOqGnIn4ow9wW6j';
 def.midtrans.isProduction = false;
 
 cfg.resolveLocalConfig(__dirname, (err, file) => {
