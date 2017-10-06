@@ -105,8 +105,7 @@ class DisputeModel extends bookshelf.Model {
   }
 
   static async create(data) {
-    return await new this(data).save().catch((e) => {
-      console.log(e);
+    return await new this(data).save().catch(() => {
       throw createDisputeError('dispute', 'error');
     });
   }
