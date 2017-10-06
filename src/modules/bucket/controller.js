@@ -5,6 +5,8 @@ import { Product, Dropship } from '../product/model';
 import { Expedition } from '../expedition/model';
 import { Invoice, InvoiceStatus, InvoiceTransactionStatus } from '../payment/model';
 import { User } from '../user/model';
+import { Address } from '../address/model';
+import { Store } from '../store/model';
 import { Preference } from '../preference/model';
 import { addCartError, getBucketError, getItemError, paymentError, addPromoError } from './messages';
 import { BadRequestError } from '../../../common/errors';
@@ -101,16 +103,20 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
     note: null,
   });
 
-  // TODO: Validation user's address_id
-  // TODO: Check qty
   let shippingId;
+  let prevBill = 0;
+  let update = true;
   if (item) {
-    shippingId = item.serialize().shipping_id;
+    shippingId = item.get('id_pengiriman_produk');
+    const prevQty = Number(item.get('qty_listbucket'));
+    prevBill = prevQty !== body.qty ? prevQty * product.price : 0;
+    update = prevBill !== 0;
     await Shipping.update(shippingId, shippingObj);
   } else {
     const shipping = await Shipping.create(shippingObj);
     shippingId = shipping.id;
   }
+  const bill = product.price * body.qty;
 
   const itemObj = Item.matchDBColumn({
     shipping_id: shippingId,
@@ -120,23 +126,34 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
     weight: product.weight * body.qty,
     total_price: (product.price * body.qty) + delivery.cost + insuranceCost,
   });
-  return await Item.updateInsert(where, _.assign(itemObj, where));
+  const getNewItem = Item.updateInsert(where, _.assign(itemObj, where));
+  const updateBucket = update ? bucket.updateBill(bill, prevBill) : null;
+  const [newItem] = await Promise.all([getNewItem, updateBucket]);
+  return newItem;
 };
 
 BucketController.addToCart = async (req, res, next) => {
   let dropship;
-  let bucket = Bucket.findOrCreateBucket(req.user.id);
+  const getBucket = Bucket.findOrCreateBucket(req.user.id);
+  const getAddress = Address.where({ id_users: req.user.id,
+    id_alamatuser: req.body.address_id }).fetch();
   const { productId, storeId } = getProductAndStore(req.body.product_id);
-  let product = Product.findById(productId);
-  [bucket, product] = await Promise.all([bucket, product]);
+  const getProduct = Product.findById(productId);
+  const getStore = Store.where('id_users', req.user.id).fetch();
+  const [bucket, product, address, store] = await Promise
+    .all([getBucket, getProduct, getAddress, getStore]);
 
+  const ownStoreId = store.get('id_toko');
+  if (!address) throw addCartError('address', 'address_not_found');
   if (req.body.qty > product.stock) throw addCartError('cart', 'stock');
+  if (ownStoreId === req.user.id || ownStoreId === storeId) throw addCartError('product', 'not_valid');
 
-  let columns = { bucket_id: bucket.id, product_id: product.id };
+  const columns = { bucket_id: bucket.id, product_id: product.id, dropshipper_id: null };
   if (product.store_id !== storeId) {
     dropship = await Dropship.findByProductIdAndStoreId(productId, storeId);
+    if (dropship.get('id_toko') === ownStoreId) throw addCartError('product', 'not_valid');
     if (!dropship) throw getProductError('product', 'not_found');
-    columns = { ...columns, dropshipper_id: dropship.serialize().id };
+    columns.dropshipper_id = dropship.get('id_dropshipper');
   }
 
   const where = Item.matchDBColumn(columns);
@@ -149,11 +166,14 @@ BucketController.addToCart = async (req, res, next) => {
 
 BucketController.deleteCart = async (req, res, next) => {
   const bucket = await Bucket.get(req.user.id);
-  const item = await Item.get({ id_bucket: bucket.serialize().id, id_listbucket: req.params.id });
+  const item = await Item.where({ id_bucket: bucket.get('id_bucket'), id_listbucket: req.params.id })
+    .fetch({ withRelated: ['shipping'] });
   if (!item) throw getItemError('item', 'not_found');
-  const shippingId = item.serialize().shipping_id;
-  await item.destroy();
-  Shipping.where({ id_pengiriman_produk: shippingId }).destroy();
+  const { shipping, total_price: bill } = item.serialize();
+  const itemBill = bill - (shipping.delivery_cost + shipping.insurance_fee);
+  const totalBill = bucket.get('total_tagihan') - itemBill;
+  await Promise.all([item.destroy(), bucket.save({ total_tagihan: totalBill }, { patch: true })]);
+  Shipping.where({ id_pengiriman_produk: shipping.id }).destroy();
   return next();
 };
 
@@ -260,16 +280,19 @@ BucketController.checkout = async (req, res, next) => {
 };
 
 BucketController.bulkUpdate = async (req, res, next) => {
-  const bucket = await Bucket.getForCheckout(req.user.id);
-  let items = bucket.related('items');
-  if (items.length === 0) throw getBucketError('bucket', 'not_found_items');
+  const { items: bodies } = req.body;
+  const bucket = await Bucket.where({ id_users: req.user.id,
+    status_bucket: BucketStatus.ADDED }).fetch();
+  const getItems = bodies.map(item => Item.get({ id_listbucket: item.id,
+    id_bucket: bucket.get('id_bucket') }, 'product'));
 
-  items = await Promise.all(req.body.items.map(async (val) => {
-    const where = { id_listbucket: val.id };
-    const item = await Item.get(where);
+  const items = await Promise.all(getItems.map(async (getItem, idx) => {
+    const item = await getItem;
     if (!item) throw getItemError('item', 'not_found');
-    await item.load('product');
-    return await BucketController.saveCart(bucket, val, item.serialize().product, item, where);
+    const product = item.serialize().product;
+    if (bodies[idx].qty > product.stock) throw addCartError('cart', 'stock');
+    const where = { id_listbucket: item.get('id_listbucket') };
+    return await BucketController.saveCart(bucket, bodies[idx], product, item, where);
   }));
 
   req.resData = {
