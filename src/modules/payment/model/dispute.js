@@ -244,17 +244,23 @@ class DisputeModel extends bookshelf.Model {
       disputeObj.response_status === DisputeResponseStatus.BUYER_WIN &&
       disputeObj.status !== DisputeStatus.CLOSED
     ) {
-      dispute.related('disputeProducts').forEach((dp) => {
-        const found = _.find(reviews, o => o.product_id === dp.get('id_produk'));
+      const fine = dispute.related('invoice').related('items').reduce((res, item) => {
+        const found = _.find(dispute.related('disputeProducts').models, o => o.get('id_produk') === item.get('id_produk'));
+        if (!found) res.push(item.related('product').serialize({ minimal: true }));
+        return res;
+      }, []);
+
+      fine.forEach((val) => {
+        const found = _.find(reviews, o => o.product_id === val.id);
         if (!found) throw createReviewError('review', 'error');
       });
       status = DisputeStatus.CLOSED;
 
-      newReviews = await Promise.all(dispute.related('disputeProducts').map(async (dp) => {
-        const item = _.find(invoice.related('items').models, o => o.get('id_produk') === dp.get('id_produk'));
+      newReviews = await Promise.all(fine.map(async (val) => {
+        const item = _.find(invoice.related('items').models, o => o.get('id_produk') === val.id);
         const product = item.related('product').serialize();
-        const val = _.find(reviews, o => o.product_id === product.id);
-        return await Review.create(item, product, userId, val);
+        const body = _.find(reviews, o => o.product_id === product.id);
+        return await Review.create(item, product, userId, body);
       }));
     } else {
       throw createReviewError('review', 'disable');

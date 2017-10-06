@@ -24,7 +24,7 @@ class ItemModel extends bookshelf.Model {
   }
 
   serialize({ minimal = false, note = false } = {}) {
-    let item = {
+    const item = {
       id: this.get('id_listbucket'),
       qty: this.get('qty_listbucket'),
       weight: this.get('beratproduk_listbucket'),
@@ -33,7 +33,7 @@ class ItemModel extends bookshelf.Model {
     };
     if (note) item.note = this.get('keteranganopsi_listbucket');
     if (minimal) return item;
-    item = {
+    return {
       ...item,
       bucket_id: this.get('id_bucket'),
       product_id: this.get('id_produk'),
@@ -46,10 +46,6 @@ class ItemModel extends bookshelf.Model {
       review_id: parseNum(this.get('id_ulasanproduk'), null),
       note: this.get('keteranganopsi_listbucket'),
     };
-    if (this.relations.product) delete item.product_id;
-    if (this.relations.shipping) delete item.shipping_id;
-    if (this.relations.dropship) delete item.dropshipper_id;
-    return item;
   }
 
   /**
