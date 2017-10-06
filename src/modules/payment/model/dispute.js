@@ -138,8 +138,8 @@ class DisputeModel extends bookshelf.Model {
     const { where, relation, is_resolved: isResolved, page, pageSize } = params;
     const disputes = await this.where(where)
       .query((qb) => {
-        if (isResolved) qb.whereNot('responadmin_dispute', DisputeResponseStatus.NO_RESPONSE_YET);
-        else qb.where('responadmin_dispute', DisputeResponseStatus.NO_RESPONSE_YET);
+        if (isResolved) qb.where('status_dispute', DisputeStatus.CLOSED);
+        else qb.whereNot('status_dispute', DisputeStatus.CLOSED);
       })
       .fetchPage({
         page,
