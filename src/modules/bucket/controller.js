@@ -135,18 +135,25 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
 BucketController.addToCart = async (req, res, next) => {
   let dropship;
   const getBucket = Bucket.findOrCreateBucket(req.user.id);
-  const getAddress = Address.where({ id_users: req.user.id,
-    id_alamatuser: req.body.address_id }).fetch();
+  const getAddress = Address.where({
+    id_users: req.user.id,
+    id_alamatuser: req.body.address_id,
+  }).fetch();
   const { productId, storeId } = getProductAndStore(req.body.product_id);
   const getProduct = Product.findById(productId);
   const getStore = Store.where('id_users', req.user.id).fetch();
-  const [bucket, product, address, store] = await Promise
-    .all([getBucket, getProduct, getAddress, getStore]);
 
-  const ownStoreId = store.get('id_toko');
+  const [bucket, product, address, store] = await Promise.all([
+    getBucket,
+    getProduct,
+    getAddress,
+    getStore,
+  ]);
+
+  const ownStoreId = store ? store.get('id_toko') : null;
   if (!address) throw addCartError('address', 'address_not_found');
   if (req.body.qty > product.stock) throw addCartError('cart', 'stock');
-  if (ownStoreId === req.user.id || ownStoreId === storeId) throw addCartError('product', 'not_valid');
+  if (ownStoreId && ownStoreId === storeId) throw addCartError('product', 'not_valid');
 
   const columns = { bucket_id: bucket.id, product_id: product.id, dropshipper_id: null };
   if (product.store_id !== storeId) {
