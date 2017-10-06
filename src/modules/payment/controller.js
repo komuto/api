@@ -260,6 +260,12 @@ PaymentController.confirmDispute = async (req, res, next) => {
   return next();
 };
 
+PaymentController.buyerRefund = async (req, res, next) => {
+  const dispute = await Dispute.refund(req.params.id, req.user.id);
+  req.resData = { data: dispute };
+  return next();
+};
+
 PaymentController.getStoreDisputes = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;

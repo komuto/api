@@ -121,6 +121,14 @@ routes.post('/users/disputes/:id([0-9]{1,10})/received',
   apiResponse());
 
 /**
+ * POST buyer refund
+ */
+routes.post('/users/disputes/:id([0-9]{1,10})/refund',
+  auth(),
+  wrap(PaymentController.buyerRefund),
+  apiResponse());
+
+/**
  * GET list dispute seller
  */
 routes.get('/users/store/disputes',

@@ -46,6 +46,20 @@ class DisputeProductModel extends bookshelf.Model {
     }));
   }
 
+  static async bulkClone(disputeId, disputeProducts) {
+    return await Promise.all(disputeProducts.map(async (val) => {
+      val = val.serialize();
+      const data = this.matchDBColumn({
+        dispute_id: disputeId,
+        product_id: val.product_id,
+        name: val.name,
+        price: val.price,
+        qty: val.qty,
+      });
+      return await new this().save(data);
+    }));
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data

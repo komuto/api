@@ -9,6 +9,7 @@ import { createReviewError } from '../../review/messages';
 import { Review } from '../../review/model';
 import { InvoiceTransactionStatus } from './invoice';
 import { Preference } from '../../preference/model';
+import { DisputeProduct } from './dispute_product';
 
 const { parseDate, matchDB, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -104,7 +105,8 @@ class DisputeModel extends bookshelf.Model {
   }
 
   static async create(data) {
-    return await new this(data).save().catch(() => {
+    return await new this(data).save().catch((e) => {
+      console.log(e);
       throw createDisputeError('dispute', 'error');
     });
   }
@@ -321,6 +323,36 @@ class DisputeModel extends bookshelf.Model {
     }).fetch({ withRelated: ['disputeProducts', 'invoice.items'] });
     if (!dispute) throw getDisputeError('dispute', 'not_found');
     return await dispute.save({ status_dispute: DisputeStatus.RECEIVE_BY_SELLER }, { patch: true });
+  }
+
+  static async refund(id, userId) {
+    const dispute = await this.where({
+      id_users: userId,
+      id_dispute: id,
+      status_dispute: DisputeStatus.SEND_BY_SELLER,
+      solusi_dispute: DisputeSolutionType.EXCHANGE,
+    }).fetch({ withRelated: ['disputeProducts'] });
+    if (!dispute) throw getDisputeError('dispute', 'not_found');
+
+    const disputeObj = dispute.serialize();
+    const data = this.matchDBColumn({
+      user_id: userId,
+      store_id: disputeObj.store_id,
+      invoice_id: disputeObj.invoice_id,
+      invoice_type: 1, // default
+      solution: DisputeSolutionType.REFUND,
+      problems: dispute.get('problem_dispute'),
+      note: disputeObj.note,
+      dispute_number: disputeObj.dispute_number,
+      status: DisputeStatus.NEW,
+      response_status: DisputeResponseStatus.NO_RESPONSE_YET,
+      response_at: moment(),
+      created_at: moment(),
+    });
+    const cloneDispute = await this.create(data);
+    await DisputeProduct.bulkClone(cloneDispute.serialize().id, dispute.related('disputeProducts'));
+    await dispute.save({ status_dispute: DisputeStatus.CLOSED }, { patch: true });
+    return cloneDispute;
   }
 
   /**
