@@ -389,6 +389,11 @@ class BucketModel extends bookshelf.Model {
     return await this.updateStatus(id, status, related);
   }
 
+  async updateBill(plus, minus) {
+    const bill = (Number(this.get('total_tagihan')) - minus) + plus;
+    return await this.save({ total_tagihan: bill }, { patch: true });
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data

@@ -33,6 +33,8 @@ export const errMsg = {
   addCart: {
     title: 'Tambah barang gagal',
     stock: 'Stok tidak tersedia',
+    address_not_found: 'Alamat tidak ditemukan',
+    not_valid: 'Tidak bisa membeli barang sendiri',
   },
   balancePayment: {
     title: 'Gagal membayar dengan balance',
