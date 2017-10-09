@@ -390,7 +390,7 @@ class BucketModel extends bookshelf.Model {
   }
 
   async updateBill(plus, minus) {
-    const bill = (Number(this.get('total_tagihan')) - minus) + plus;
+    const bill = (Number(this.get('total_tagihan') || 0) - minus) + plus;
     return await this.save({ total_tagihan: bill }, { patch: true });
   }
 
