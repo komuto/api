@@ -2,7 +2,7 @@ import core from '../../core';
 import { SummTransType, TransSummary } from './transaction_summary';
 import { TransType } from './transaction_type';
 import { User } from '../../user/model/user';
-import { TransactionLog } from '../../payment/model';
+import { TransactionLog, PaymentMethod } from '../../payment/model';
 
 const { matchDB, parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
@@ -49,10 +49,9 @@ class TopupModel extends bookshelf.Model {
     return await new this({ id_users: userId }).fetchPage({ page, pageSize });
   }
 
-  static async updateStatus(id, status) {
+  static async updateStatus(id, status, paymentMethodId) {
     const topup = await this.where({ id }).fetch();
-    topup.save({ status }, { patch: true });
-    return topup;
+    return await topup.save({ status, id_paymentmethod: paymentMethodId }, { patch: true });
   }
 
   static async midtransNotification(id, body) {
@@ -88,7 +87,8 @@ class TopupModel extends bookshelf.Model {
       status: status.log,
     });
 
-    const topup = await this.updateStatus(id, status.topup);
+    const paymentMethodId = await PaymentMethod.getMidtransPaymentMethod(body.payment_type);
+    const topup = await this.updateStatus(id, status.topup, paymentMethodId);
     const [remark, user] = await Promise.all([
       TransType.getRemark(SummTransType.TOPUP),
       User.where('id_users', topup.get('id_users')).fetch(),

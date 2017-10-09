@@ -1,5 +1,4 @@
 import ModelBase from 'bookshelf-modelbase';
-import randomInt from 'random-int';
 import moment from 'moment';
 import _ from 'lodash';
 import 'moment-precise-range-plugin';
@@ -9,7 +8,7 @@ import './shipping';
 import { Item } from './item';
 import { PromoType } from './promo';
 import config from './../../../../config';
-import { InvoiceStatus, InvoiceTransactionStatus, TransactionLog } from '../../payment/model';
+import { InvoiceStatus, InvoiceTransactionStatus, TransactionLog, PaymentMethod } from '../../payment/model';
 import { Dropship } from '../../product/model/dropship';
 
 const { parseNum, parseDate, matchDB } = core.utils;
@@ -305,7 +304,7 @@ class BucketModel extends bookshelf.Model {
     }, 0);
   }
 
-  static async updateStatus(id, status, related) {
+  static async updateStatus(id, status, related, paymentMethodId) {
     const bucket = await this.where({ id_bucket: id }).fetch({ withRelated: related });
     if (status.invoice !== BucketStatus.UNPAID) {
       await Promise.all(bucket.related('invoices').map(async (invoice) => {
@@ -342,7 +341,10 @@ class BucketModel extends bookshelf.Model {
       await promo.save({ kuota_promo: --promo.serialize().quota }, { patch: true });
     }
 
-    return await bucket.save({ status_bucket: status.bucket }, { patch: true });
+    return await bucket.save({
+      status_bucket: status.bucket,
+      id_paymentmethod: paymentMethodId,
+    }, { patch: true });
   }
 
   static async midtransNotification(id, body) {
@@ -386,7 +388,8 @@ class BucketModel extends bookshelf.Model {
       status: status.log,
     });
 
-    return await this.updateStatus(id, status, related);
+    const paymentMethodId = await PaymentMethod.getMidtransPaymentMethod(body.payment_type);
+    return await this.updateStatus(id, status, related, paymentMethodId);
   }
 
   async updateBill(plus, minus) {

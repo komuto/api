@@ -60,6 +60,31 @@ class PaymentMethodModel extends bookshelf.Model {
     if (!paymentMethod) throw getPaymentError('payment_method', 'not_found');
     return paymentMethod;
   }
+
+  static async findByType(type) {
+    const paymentMethod = await this.where({ type_text: type }).fetch();
+    return paymentMethod.id;
+  }
+
+  static async getMidtransPaymentMethod(type) {
+    const matchType = {
+      credit_card: 'credit_card-midtrans',
+      bank_transfer: 'bank_transfer-midtrans',
+      bca_klikpay: 'bca_klikpay-midtrans',
+      bca_klikbca: 'bca_klikbca-midtrans',
+      mandiri_clickpay: 'mandiri_clickpay-midtrans',
+      bri_epay: 'bri_epay-midtrans',
+      cimb_clicks: 'cimb_clicks-midtrans',
+      danamon_online: 'danamon_online-midtrans',
+      telkomsel_cash: 'telkomsel_cash-midtrans',
+      xl_tunai: 'xl_tunai-midtrans',
+      indosat_dompetku: 'indosat_dompetku-midtrans',
+      mandiri_ecash: 'mandiri_ecash-midtrans',
+      cstore: 'cstore-midtrans',
+    };
+
+    return matchType[type] ? await this.findByType(matchType[type]) : null;
+  }
 }
 
 export const PaymentMethod = bookshelf.model('PaymentMethod', PaymentMethodModel);
