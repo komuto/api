@@ -67,8 +67,7 @@ class ReviewModel extends bookshelf.Model {
       if (data.user_id) qb.where('ulasan_produk.id_users', data.user_id);
     }).orderBy('-id_ulasanproduk')
       .fetchPage({ pageSize, page, withRelated });
-    const { pageSize: limit, rowCount: total, pageCount: pages } = reviews.pagination;
-    const models = await Promise.all(reviews.models.map(async (review) => {
+    return await Promise.all(reviews.models.map(async (review) => {
       const { id, name, photo } = review.related('user').serialize();
       if (withProduct) {
         const product = review.related('product');
@@ -88,10 +87,6 @@ class ReviewModel extends bookshelf.Model {
         user: { id, name, photo },
       };
     }));
-    return {
-      pagination: { page: reviews.pagination.page, limit, total, pages },
-      models,
-    };
   }
 
   /**

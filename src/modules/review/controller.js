@@ -19,7 +19,7 @@ ReviewController.getReviews = async (req, res, next) => {
 
   req.resData = {
     message: 'Review List Data',
-    meta: reviews.pagination,
+    meta: { page, limit: pageSize },
     data: reviews.models,
   };
   return next();
