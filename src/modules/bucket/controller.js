@@ -311,24 +311,30 @@ BucketController.bulkUpdate = async (req, res, next) => {
 
 BucketController.balancePayment = async (req, res, next) => {
   const now = moment();
-  const getBucket = Bucket.where({ id_bucket: req.params.id,
+  const getBucket = Bucket.where({
+    id_bucket: req.params.id,
     id_users: req.user.id,
-    status_bucket: BucketStatus.WAITING_FOR_PAYMENT }).fetch();
+    status_bucket: BucketStatus.WAITING_FOR_PAYMENT,
+  }).fetch();
   const getPref = Preference.where('namavar_globalparam', Preference.matchKey('payment')).fetch();
   const [bucket, pref] = await Promise.all([getBucket, getPref]);
+  if (!bucket) throw paymentError('transaction', 'not_found');
   const expired = moment(bucket.get('tglstatus_bucket')).add(pref.get('value1_globalparam'), 'days');
-  if (!bucket || now > expired) throw paymentError('transaction', 'not_found');
+  if (now > expired) throw paymentError('transaction', 'not_found');
   const bill = Number(bucket.get('total_tagihan'));
   const saldo = req.user.saldo_wallet - bill;
   if (saldo < 0) throw paymentError('saldo', 'not_enough');
 
-  await bucket.save({ status_bucket: BucketStatus.PAYMENT_RECEIVED,
+  await bucket.save({
+    status_bucket: BucketStatus.PAYMENT_RECEIVED,
     tglstatus_bucket: now,
-    bayar_wallet: bill }, { patch: true });
-  await Invoice.where('id_bucket', bucket.get('id_bucket'))
-    .save({ status_invoice: InvoiceStatus.PAID,
-      updated_at: now,
-      status_transaksi: InvoiceTransactionStatus.WAITING }, { patch: true });
+    bayar_wallet: bill,
+  }, { patch: true });
+  await Invoice.where('id_bucket', bucket.get('id_bucket')).save({
+    status_invoice: InvoiceStatus.PAID,
+    updated_at: now,
+    status_transaksi: InvoiceTransactionStatus.WAITING,
+  }, { patch: true });
   await User.where('id_users', req.user.id).save({ saldo_wallet: saldo }, { patch: true });
   return next();
 };
