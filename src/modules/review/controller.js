@@ -20,7 +20,7 @@ ReviewController.getReviews = async (req, res, next) => {
   req.resData = {
     message: 'Review List Data',
     meta: { page, limit: pageSize },
-    data: reviews.models,
+    data: reviews,
   };
   return next();
 };
@@ -35,8 +35,8 @@ ReviewController.getUserReviews = async (req, res, next) => {
 
   req.resData = {
     message: 'Review List Data',
-    meta: reviews.pagination,
-    data: reviews.models,
+    meta: { page, limit: pageSize },
+    data: reviews,
   };
   return next();
 };
@@ -52,8 +52,8 @@ ReviewController.getStoreReviews = async (req, res, next) => {
 
   req.resData = {
     message: 'Review List Data',
-    meta: reviews.pagination,
-    data: reviews.models,
+    meta: { page, limit: pageSize },
+    data: reviews,
   };
   return next();
 };
