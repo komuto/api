@@ -209,7 +209,11 @@ class InvoiceModel extends bookshelf.Model {
       if (!isJoin) qb.where(where);
       qb.distinct();
       if (!invoiceStatus) {
-        qb.whereNotIn('status_transaksi', [InvoiceTransactionStatus.WAITING, InvoiceTransactionStatus.PROCEED]);
+        qb.whereNotIn('status_transaksi', [
+          InvoiceTransactionStatus.WAITING,
+          InvoiceTransactionStatus.PROCEED,
+          InvoiceTransactionStatus.REJECTED,
+        ]);
         qb.whereNotNull('status_transaksi');
       }
       if (isJoin) {
