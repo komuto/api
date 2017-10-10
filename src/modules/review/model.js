@@ -109,8 +109,7 @@ class ReviewModel extends bookshelf.Model {
       const { productId, storeId: sId } = getProductAndStore(val.product_id);
       const product = await Product.findProduct(productId, sId);
       if (!product) throw createReviewError('product', 'store_not_found');
-      const item = items.find(o => o.get('id_produk') === product.get('id_produk')
-        && o.get('id_dropshipper') === product.get('id_dropshipper'));
+      const item = items.find(o => o.get('id_produk') === product.get('id_produk'));
       if (!item) throw createReviewError('product', 'product_not_found');
 
       return await this.create(item, product.serialize(), userId, val);
