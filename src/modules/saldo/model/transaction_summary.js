@@ -44,7 +44,7 @@ class transSummaryModel extends bookshelf.Model {
       first_saldo: parseNum(this.get('saldo_awal')),
       last_saldo: parseNum(this.get('saldo_akhir')),
       remark: this.get('remark'),
-      marketplace_id: this.get('id_marketplaceuser'),
+      marketplace_id: parseNum(this.get('id_marketplaceuser')),
       summaryable_type: this.get('summaryable_type'),
       summaryable_id: this.get('summaryable_id'),
     };

@@ -137,17 +137,14 @@ SaldoController.topupTrans = async (req, res, next) => {
   const transaction = await req.body.transaction.load([
     { summaryable: qb => qb.where({ status: TopupStatus.SUCCESS }) },
     'summaryable.paymentMethod',
-    'summaryable.topupConf',
   ]);
   let method;
-  let amount;
   try {
-    method = transaction.related('summaryable').related('paymentMethod').get('nama_paymentmethod');
-    amount = transaction.related('summaryable').related('topupConf').get('amount');
+    method = transaction.related('summaryable').related('paymentMethod').get('nama_paymentmethod') || null;
   } catch (e) {
     throw transDetailError('transaction', 'transaction_corrupted');
   }
-  const data = { ...transaction.serialize(), transfer_amount: amount, payment_method: method };
+  const data = { ...transaction.serialize(), payment_method: method };
   req.resData = { message: 'Topup Transaction Data', data };
   return next();
 };
