@@ -44,6 +44,9 @@ class transSummaryModel extends bookshelf.Model {
       first_saldo: parseNum(this.get('saldo_awal')),
       last_saldo: parseNum(this.get('saldo_akhir')),
       remark: this.get('remark'),
+      marketplace_id: this.get('id_marketplaceuser'),
+      summaryable_type: this.get('summaryable_type'),
+      summaryable_id: this.get('summaryable_id'),
     };
   }
 
@@ -81,7 +84,7 @@ class transSummaryModel extends bookshelf.Model {
         throw getHistoryError('date', 'invalid_date');
       }
     }
-    const transactions = await this.where('id_users', userId)
+    return await this.where('id_users', userId)
       .query((qb) => {
         if (filters) qb.whereIn('kode_summarytransaksi', filters);
         if (startAt) qb.where('tgl_summarytransaksi', '>=', startAt);
@@ -89,13 +92,6 @@ class transSummaryModel extends bookshelf.Model {
       })
       .orderBy('tgl_summarytransaksi', 'desc')
       .fetchPage({ page, pageSize, withRelated: 'detailTransSummary' });
-    return transactions.map((transaction) => {
-      const detail = transaction.related('detailTransSummary');
-      return {
-        ...transaction.serialize(),
-        bucket_id: detail.get('id_bucket') || null,
-      };
-    });
   }
 
   static checkSaldo(user, bucket, items) {
@@ -155,9 +151,11 @@ class transSummaryModel extends bookshelf.Model {
   }
 
   async getPaymentDetail() {
-    await this.load(['summaryable.promo',
+    await this.load([
+      'summaryable.promo',
       'summaryable.invoices.shipping.address',
-      'summaryable.invoices.items.product.image']);
+      'summaryable.invoices.items.product.image',
+    ]);
     const bucket = this.related('summaryable');
     const invoices = bucket.related('invoices');
     const getRelations = { address: [], store: [], expedition: [] };

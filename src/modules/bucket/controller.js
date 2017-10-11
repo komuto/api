@@ -12,6 +12,8 @@ import { addCartError, getBucketError, getItemError, paymentError, addPromoError
 import { BadRequestError } from '../../../common/errors';
 import { getProductAndStore } from '../core/utils';
 import { getProductError } from '../product/messages';
+import { SummTransType, TransSummary } from "../saldo/model/transaction_summary";
+import { TransType } from "../saldo/model/transaction_type";
 
 export const BucketController = {};
 export default { BucketController };
@@ -330,11 +332,25 @@ BucketController.balancePayment = async (req, res, next) => {
     tglstatus_bucket: now,
     bayar_wallet: bill,
   }, { patch: true });
+
   await Invoice.where('id_bucket', bucket.get('id_bucket')).save({
     status_invoice: InvoiceStatus.PAID,
     updated_at: now,
     status_transaksi: InvoiceTransactionStatus.WAITING,
   }, { patch: true });
+
+  const remark = await TransType.getRemark(SummTransType.PAYMENT);
+  await TransSummary.create(TransSummary.matchDBColumn({
+    amount: bill,
+    first_saldo: saldo + bill,
+    last_saldo: saldo,
+    user_id: req.user.id,
+    type: SummTransType.PAYMENT,
+    remark,
+    summaryable_type: 'bucket',
+    summaryable_id: bucket.get('id_bucket'),
+  }));
+
   await User.where('id_users', req.user.id).save({ saldo_wallet: saldo }, { patch: true });
   return next();
 };
