@@ -29,6 +29,7 @@ constraints.socialLogin = {
   access_token: {
     presence: { message: loginMsg.token_presence },
   },
+  reg_token: { presence: false },
 };
 
 constraints.registration = {

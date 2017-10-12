@@ -66,7 +66,7 @@ UserController.login = async (req, res, next) => {
  */
 UserController.getUserSocial = async (req, res, next) => {
   // Case where provider name and uid found on db
-  const { provider_name, provider_uid, access_token } = req.body;
+  const { provider_name, provider_uid, access_token, reg_token } = req.body;
   req.user = await User.getBySocial(provider_name, provider_uid);
   // Case where provider name and uid not found on db
   if (!req.user) {
@@ -80,6 +80,7 @@ UserController.getUserSocial = async (req, res, next) => {
       await user.save({
         hybridauth_provider_name: provider_name,
         hybridauth_provider_uid: provider_uid,
+        reg_token,
       }, { patch: true });
       req.user = user.serialize();
     } else { // Case where user has not been created
