@@ -14,6 +14,7 @@ import { ImageProduct } from './image_product';
 import { View } from './view';
 import { Wishlist } from '../../user/model/wishlist';
 import { Review } from '../../review/model';
+import { StoreExpeditionStatus } from "../../store/model/store_expedition";
 
 const { parseNum, parseDec, parseDate, getter, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
@@ -775,53 +776,39 @@ class ProductModel extends bookshelf.Model {
    * @param storeId {integer} store id
    */
   static async getProductExpeditionsManage(id, storeId) {
-    const expeditions = [];
-    const expeditionIds = [];
-    const expeditionServiceIds = [];
-    const where = { id_produk: id, id_toko: storeId };
-    const related = {
+    const product = await this.where({ id_produk: id, id_toko: storeId }).fetch({
       withRelated: [
         { expeditionServices: qb => qb.where('status_detilekspedisiproduk', ProductExpeditionStatus.USED) },
-        'expeditionServices.expedition',
       ],
-    };
-    let product = await this.where(where).fetch(related);
-    if (!product) {
-      const dropship = await Dropship.where(where).fetch({ withRelated: ['catalog'] });
-      if (!dropship) throw getProductError('product', 'not_found');
-      product = await this.where({ id_produk: dropship.get('id_produk') }).fetch(related);
-    }
+    });
     const expeditionServices = product.related('expeditionServices');
-    expeditionServices.each((service) => {
-      const expedition = service.related('expedition').serialize();
-      const found = _.find(expeditions, { id: expedition.id });
-      service = service.serialize();
-      service.is_checked = true;
-      service.is_active = true;
-      expeditionServiceIds.push(service.id);
-      if (found === undefined) {
-        expeditionIds.push(expedition.id);
-        expedition.services = [service];
-        return expeditions.push(expedition);
-      }
-      return found.services.push(service);
-    });
-    const dataExpeditions = await Expedition.query(qb => qb.whereIn('id_ekspedisi', expeditionIds))
-      .fetchAll({
-        withRelated: [{ services: qb => qb.whereNotIn('id_ekspedisiservice', expeditionServiceIds) }],
+
+    const store = await Store.where({ id_toko: storeId })
+      .fetch({ withRelated: ['expeditionServices.expedition.services'] });
+    const expeditions = store.related('expeditionServices').reduce((results, service) => {
+      const found = _.find(results, o => o.get('id_ekspedisi') === service.get('id_ekspedisi'));
+      if (!found) results.push(service.related('expedition'));
+      return results;
+    }, []);
+
+    return expeditions.map((expedition) => {
+      let services = expedition.related('services').map((service) => {
+        const found = _.find(expeditionServices.models, val => (
+          val.get('id_ekspedisiservice') === service.get('id_ekspedisiservice')
+        ));
+        return {
+          ...service.serialize(),
+          expedition: expedition.serialize({ minimal: true }),
+          is_checked: !!found,
+          is_active: !!found,
+        };
       });
-    dataExpeditions.each((val) => {
-      const expedition = _.find(expeditions, { id: val.serialize().id });
-      const services = val.related('services').map((o) => {
-        o = o.serialize();
-        o.expedition = val.serialize();
-        o.is_active = false;
-        return o;
-      });
-      expedition.services.push(...services);
-      expedition.services = _.sortBy(expedition.services, 'id');
+      services = _.sortBy(services, 'id');
+      return {
+        ...expedition.serialize(),
+        services,
+      };
     });
-    return expeditions;
   }
 
   static async getOwner(id) {

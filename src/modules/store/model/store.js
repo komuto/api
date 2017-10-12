@@ -266,12 +266,11 @@ class StoreModel extends bookshelf.Model {
    * @param userId {integer} user id
    */
   static async getUserExpeditionsManage(userId) {
-    const related = {
+    const store = await this.where({ id_users: userId }).fetch({
       withRelated: [
         { expeditionServices: qb => qb.where('status_ekspedisitoko', StoreExpeditionStatus.USED) },
       ],
-    };
-    const store = await this.where({ id_users: userId }).fetch(related);
+    });
     const expeditionServices = store.related('expeditionServices');
     const expeditions = await Expedition.fetchAll({ withRelated: ['services'] });
     return expeditions.map((expedition) => {
