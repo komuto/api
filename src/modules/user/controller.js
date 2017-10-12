@@ -397,7 +397,12 @@ UserController.replyMessage = async (req, res, next) => {
       id: req.params.id,
     });
   }
-  req.resData = { data: detailMessage };
+  const user = {
+    id: req.user.id,
+    name: req.user.name,
+    photo: req.user.photo,
+  };
+  req.resData = { data: { ...detailMessage.serialize(), user, store: null } };
   return next();
 };
 

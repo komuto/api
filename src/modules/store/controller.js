@@ -342,8 +342,8 @@ StoreController.deleteMessage = async (req, res, next) => {
  * Reply Message
  */
 StoreController.replyMessage = async (req, res, next) => {
-  const storeId = await Store.getStoreId(req.user.id);
-  const msg = await Message.findById(req.params.id, storeId, 'store');
+  const store = await Store.getStoreByUserId(req.user.id);
+  const msg = await Message.findById(req.params.id, store.get('id_toko'), 'store');
   const data = DetailMessage.matchDBColumn(_.assign(req.body, {
     message_id: req.params.id,
     user_id: req.user.id,
@@ -358,7 +358,18 @@ StoreController.replyMessage = async (req, res, next) => {
       id: req.params.id,
     });
   }
-  req.resData = { data: detailMessage };
+  const user = {
+    id: req.user.id,
+    name: req.user.name,
+    photo: req.user.photo,
+  };
+  req.resData = {
+    data: {
+      ...detailMessage.serialize(),
+      user,
+      store: store.serialize({ message: true }),
+    },
+  };
   return next();
 };
 
