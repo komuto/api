@@ -1,5 +1,4 @@
 import core from '../../core';
-import { getDiscussionError } from './../messages';
 import { createCommentError } from './../../store/messages';
 
 const bookshelf = core.postgres.db;
@@ -57,10 +56,7 @@ class CommentModel extends bookshelf.Model {
   static async getByDiscussionId(id, page, pageSize) {
     return await this.where({ id_diskusi: id })
       .orderBy('tgl_subdiskusi', 'DESC')
-      .fetchPage({ page, pageSize, withRelated: ['user'] })
-      .catch(() => {
-        throw getDiscussionError('discussion', 'not_found');
-      });
+      .fetchPage({ page, pageSize, withRelated: ['user'] });
   }
 
   /**

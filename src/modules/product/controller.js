@@ -22,7 +22,10 @@ import {
   getCatalogProductsError,
   addDropshipProductError,
   errMsg,
-  createDiscussionError, getDropshipProductError, deleteDropshipProductError,
+  createDiscussionError,
+  getDropshipProductError,
+  deleteDropshipProductError,
+  getDiscussionError,
 } from './messages';
 import { ReportEmail } from './email';
 import config from './../../../config';
@@ -166,11 +169,18 @@ ProductController.getDiscussions = async (req, res, next) => {
 ProductController.getComments = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const comments = await Comment.getByDiscussionId(req.params.id, page, pageSize);
+  const [discussion, comments] = await Promise.all([
+    Discussion.where({ id_diskusi: req.params.id }).fetch({ withRelated: ['product'] }),
+    Comment.getByDiscussionId(req.params.id, page, pageSize),
+  ]);
+  if (!discussion) throw getDiscussionError('discussion', 'not_found');
   req.resData = {
     message: 'Discussion Comments Data',
     meta: { page, limit: pageSize },
-    data: comments.serialize({ minimal: true }),
+    data: {
+      product: discussion.related('product').serialize({ minimal: true }),
+      comments: comments.serialize({ minimal: true }),
+    },
   };
   return next();
 };
