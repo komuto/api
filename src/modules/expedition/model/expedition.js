@@ -58,7 +58,7 @@ class ExpeditionModel extends bookshelf.Model {
   }
 
   static async getAllServices() {
-    const expeditions = await this.where({}).fetchAll({ withRelated: ['services'] });
+    const expeditions = await this.fetchAll({ withRelated: ['services'] });
     return expeditions.map((expedition) => {
       const services = expedition.related('services').map((service) => {
         service = service.serialize({ minimal: false });

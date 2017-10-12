@@ -266,48 +266,32 @@ class StoreModel extends bookshelf.Model {
    * @param userId {integer} user id
    */
   static async getUserExpeditionsManage(userId) {
-    const expeditions = [];
-    const expeditionIds = [];
-    const expeditionServiceIds = [];
-    const where = { id_users: userId };
     const related = {
       withRelated: [
         { expeditionServices: qb => qb.where('status_ekspedisitoko', StoreExpeditionStatus.USED) },
-        'expeditionServices.expedition',
       ],
     };
-    const product = await this.where(where).fetch(related);
-    const expeditionServices = product.related('expeditionServices');
-    expeditionServices.each((service) => {
-      const expedition = service.related('expedition').serialize();
-      const found = _.find(expeditions, { id: expedition.id });
-      service = service.serialize();
-      service.is_checked = true;
-      service.is_active = true;
-      expeditionServiceIds.push(service.id);
-      if (found === undefined) {
-        expeditionIds.push(expedition.id);
-        expedition.services = [service];
-        return expeditions.push(expedition);
-      }
-      return found.services.push(service);
-    });
-    const dataExpeditions = await Expedition.query(qb => qb.whereIn('id_ekspedisi', expeditionIds))
-      .fetchAll({
-        withRelated: [{ services: qb => qb.whereNotIn('id_ekspedisiservice', expeditionServiceIds) }],
+    const store = await this.where({ id_users: userId }).fetch(related);
+    const expeditionServices = store.related('expeditionServices');
+    const expeditions = await Expedition.fetchAll({ withRelated: ['services'] });
+    return expeditions.map((expedition) => {
+      let services = expedition.related('services').map((service) => {
+        const found = _.find(expeditionServices.models, val => (
+          val.get('id_ekspedisiservice') === service.get('id_ekspedisiservice')
+        ));
+        return {
+          ...service.serialize(),
+          expedition: expedition.serialize({ minimal: true }),
+          is_checked: !!found,
+          is_active: !!found,
+        };
       });
-    dataExpeditions.each((val) => {
-      const expedition = _.find(expeditions, { id: val.serialize().id });
-      const services = val.related('services').map((o) => {
-        o = o.serialize();
-        o.expedition = val.serialize();
-        o.is_active = false;
-        return o;
-      });
-      expedition.services.push(...services);
-      expedition.services = _.sortBy(expedition.services, 'id');
+      services = _.sortBy(services, 'id');
+      return {
+        ...expedition.serialize(),
+        services,
+      };
     });
-    return expeditions;
   }
 
   /**
