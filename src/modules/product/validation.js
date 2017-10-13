@@ -66,6 +66,17 @@ constraints.list = {
       maximum: 10,
     },
   },
+  catalog_id: {
+    presence: false,
+    numericality: {
+      onlyInteger: true,
+      greaterThan: 0,
+    },
+    length: {
+      minimum: 1,
+      maximum: 10,
+    },
+  },
 };
 
 constraints.search = { q: { presence: true } };
