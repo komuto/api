@@ -249,7 +249,10 @@ class StoreModel extends bookshelf.Model {
   static async getUserExpeditions(userId) {
     const expeditions = [];
     const store = await this.where({ id_users: userId }).fetch({
-      withRelated: ['expeditionServices.expedition'],
+      withRelated: [
+        { expeditionServices: qb => qb.where('status_ekspedisitoko', StoreExpeditionStatus.USED) },
+        'expeditionServices.expedition',
+      ],
     });
     const expeditionServices = store.related('expeditionServices');
     expeditionServices.each((service) => {
@@ -288,6 +291,8 @@ class StoreModel extends bookshelf.Model {
           is_active: !!found,
         };
       });
+      console.log(services);
+      const total = _.filter(services, {});
       services = _.sortBy(services, 'id');
       return {
         ...expedition.serialize(),
