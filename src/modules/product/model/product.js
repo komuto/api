@@ -43,9 +43,9 @@ class ProductModel extends bookshelf.Model {
 
   serialize({ minimal = false, wishlist = false, alterId = false } = {}) {
     const product = {
-      id: !alterId ? this.get('id_produk') : parseDec(`${this.get('id_produk')}.` +
+      id: !alterId ? this.get('id_produk') : `${this.get('id_produk')}.` +
         // if alterId is number then use that instead of id_toko
-        `${(typeof alterId === 'number' && alterId) || this.get('id_toko')}`),
+        `${(typeof alterId === 'number' && alterId) || this.get('id_toko')}`,
       name: this.get('nama_produk'),
       slug: slug(this.get('nama_produk'), { lower: true, charmap: '' }),
       price: parseDec(this.get('harga_produk')),
@@ -306,7 +306,7 @@ class ProductModel extends bookshelf.Model {
       const isLike = !!userId && wishlists.some(wishlist => parseNum(wishlist.get('id_users')) === userId
         && parseNum(wishlist.get('id_dropshipper')) === parseNum(product.get('id_dropshipper')));
       product = this.prototype.serialize.call(product);
-      product.id = parseDec(`${product.id}.${store.id}`);
+      product.id = `${product.id}.${store.id}`;
       product.image = image ? image.serialize().file : config.defaultImage.product;
       product.count_like = wishlists.length;
       product.count_view = view ? view.serialize().ip.length : 0;
@@ -530,7 +530,7 @@ class ProductModel extends bookshelf.Model {
       is_liked,
       count_discussion: discussions.length,
     };
-    product.id = parseDec(`${product.id}.${storeId}`);
+    product.id = `${product.id}.${storeId}`;
     product.count_sold = isDropshipped ? parseNum(dropship.get('count_sold')) : product.count_sold;
 
     otherProds = otherProds.map((otherProduct, index) => {
@@ -540,7 +540,7 @@ class ProductModel extends bookshelf.Model {
       } = this.loadLikesDropship(userId, otherLikes[index], otherProduct);
       const otherImages = otherProduct.related('images').serialize();
       const image = otherImages.length ? otherImages[0].file : config.defaultImage.product;
-      const id = parseDec(`${otherProduct.get('id_produk')}.${otherProduct.get('id_toko')}`);
+      const id = `${otherProduct.get('id_produk')}.${otherProduct.get('id_toko')}`;
       return {
         ...otherProduct.serialize({ minimal: true }),
         id,

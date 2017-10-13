@@ -7,7 +7,7 @@ import { Store } from '../../store/model/store';
 import config from '../../../../config';
 import { Dropship } from '../../product/model/dropship';
 
-const { parseDate, parseNum, matchDB, getProductAndStore, parseDec } = core.utils;
+const { parseDate, parseNum, matchDB, getProductAndStore } = core.utils;
 const bookshelf = core.postgres.db;
 
 export const InvoiceStatus = {
@@ -160,7 +160,7 @@ class InvoiceModel extends bookshelf.Model {
         ...item.serialize({ note: true }),
         product: {
           ...product.serialize({ minimal: true }),
-          id: parseDec(`${product.get('id_produk')}.${storeId}`),
+          id: `${product.get('id_produk')}.${storeId}`,
           image: image.length ? image[0].serialize().file : config.defaultImage.product,
         },
       };

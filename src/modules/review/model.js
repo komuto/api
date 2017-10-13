@@ -9,7 +9,7 @@ import { getNotification, NotificationType } from '../user/model/user';
 
 const { Notification, sellerNotification } = core;
 const bookshelf = core.postgres.db;
-const { parseNum, parseDate, parseDec, getProductAndStore, matchDB } = core.utils;
+const { parseNum, parseDate, getProductAndStore, matchDB } = core.utils;
 
 class ReviewModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -78,7 +78,7 @@ class ReviewModel extends bookshelf.Model {
         image = image ? image.serialize() : config.defaultImage.product;
         return {
           ...review.serialize(),
-          product: { id: parseDec(`${pId}.${store.id}`), name: pName, image: image.file, store },
+          product: { id: `${pId}.${store.id}`, name: pName, image: image.file, store },
           user: { id, name, photo },
         };
       }
@@ -142,7 +142,7 @@ class ReviewModel extends bookshelf.Model {
     if (owner.get('reg_token') && getNotification(notifications, NotificationType.REVIEW)) {
       Notification.send(sellerNotification.REVIEW, {
         token: owner.get('reg_token'),
-        product_id: parseDec(`${item.serialize().product_id}.${storeId}`),
+        product_id: `${item.serialize().product_id}.${storeId}`,
       });
     }
 
