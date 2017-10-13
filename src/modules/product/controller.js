@@ -170,7 +170,7 @@ ProductController.getComments = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const [discussion, comments] = await Promise.all([
-    Discussion.where({ id_diskusi: req.params.id }).fetch({ withRelated: ['product'] }),
+    Discussion.where({ id_diskusi: req.params.id }).fetch({ withRelated: ['product.image'] }),
     Comment.getByDiscussionId(req.params.id, page, pageSize),
   ]);
   if (!discussion) throw getDiscussionError('discussion', 'not_found');
