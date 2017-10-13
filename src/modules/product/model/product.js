@@ -784,7 +784,10 @@ class ProductModel extends bookshelf.Model {
     const expeditionServices = product.related('expeditionServices');
 
     const store = await Store.where({ id_toko: storeId })
-      .fetch({ withRelated: ['expeditionServices.expedition.services'] });
+      .fetch({ withRelated: [
+        'expeditionServices.expedition.services',
+        { expeditionServices: qb => qb.where('status_ekspedisitoko', StoreExpeditionStatus.USED) },
+      ] });
     const expeditions = store.related('expeditionServices').reduce((results, service) => {
       const found = _.find(results, o => o.get('id_ekspedisi') === service.get('id_ekspedisi'));
       if (!found) results.push(service.related('expedition'));
