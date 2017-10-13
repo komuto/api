@@ -291,11 +291,12 @@ class StoreModel extends bookshelf.Model {
           is_active: !!found,
         };
       });
-      console.log(services);
-      const total = _.filter(services, {});
+      const totalActive = _.filter(services, { is_active: true }).length;
+      expedition = expedition.serialize();
+      expedition.is_active = totalActive === services.length;
       services = _.sortBy(services, 'id');
       return {
-        ...expedition.serialize(),
+        ...expedition,
         services,
       };
     });
