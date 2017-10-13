@@ -8,13 +8,12 @@ import { Store } from '../../store/model/store';
 import config from './../../../../config';
 import { Dropship, DropshipStatus } from './dropship';
 import { ProductExpeditionStatus } from './product_expedition';
-import { Expedition } from '../../expedition/model';
 import { MasterFee } from './master_fee';
 import { ImageProduct } from './image_product';
 import { View } from './view';
 import { Wishlist } from '../../user/model/wishlist';
 import { Review } from '../../review/model';
-import { StoreExpeditionStatus } from "../../store/model/store_expedition";
+import { StoreExpeditionStatus } from '../../store/model/store_expedition';
 
 const { parseNum, parseDec, parseDate, getter, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
@@ -535,8 +534,10 @@ class ProductModel extends bookshelf.Model {
     product.count_sold = isDropshipped ? parseNum(dropship.get('count_sold')) : product.count_sold;
 
     otherProds = otherProds.map((otherProduct, index) => {
-      const { count_like: cl, is_liked: il }
-        = this.loadLikesDropship(userId, otherLikes[index], otherProduct);
+      const {
+        count_like: cl,
+        is_liked: il,
+      } = this.loadLikesDropship(userId, otherLikes[index], otherProduct);
       const otherImages = otherProduct.related('images').serialize();
       const image = otherImages.length ? otherImages[0].file : config.defaultImage.product;
       const id = parseDec(`${otherProduct.get('id_produk')}.${otherProduct.get('id_toko')}`);
@@ -781,6 +782,7 @@ class ProductModel extends bookshelf.Model {
         { expeditionServices: qb => qb.where('status_detilekspedisiproduk', ProductExpeditionStatus.USED) },
       ],
     });
+    if (!product) throw getProductError('product', 'not_found');
     const expeditionServices = product.related('expeditionServices');
 
     const store = await Store.where({ id_toko: storeId }).fetch({
@@ -789,6 +791,7 @@ class ProductModel extends bookshelf.Model {
         { expeditionServices: qb => qb.where('status_ekspedisitoko', StoreExpeditionStatus.USED) },
       ],
     });
+
     const expeditions = store.related('expeditionServices').reduce((results, service) => {
       const found = _.find(results, o => o.get('id_ekspedisi') === service.get('id_ekspedisi'));
       if (!found) results.push(service.related('expedition'));
