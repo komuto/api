@@ -27,7 +27,7 @@ export const StoreController = {};
 export default { StoreController };
 
 StoreController.getStore = async (req, res, next) => {
-  const store = await Store.getFullStore(req.params.id, req.user.id);
+  const store = await Store.getFullStore(req.params.id, req.user.id, req.marketplace.id);
   req.resData = {
     message: 'Store Detail Data',
     data: store,

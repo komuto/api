@@ -205,8 +205,9 @@ class StoreModel extends bookshelf.Model {
    * Get store with its relation
    * @param id {integer} store id
    * @param userId {integer} user id
+   * @param marketplaceId {integer} marketplace id
    */
-  static async getFullStore(id, userId) {
+  static async getFullStore(id, userId, marketplaceId) {
     let store = await this.where({ id_toko: id }).fetch({
       withRelated: [
         // TODO: add is_favorite
@@ -220,7 +221,9 @@ class StoreModel extends bookshelf.Model {
         { verifyAddress: qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) },
       ],
     });
-    if (!store) throw getStoreError('store', 'not_found');
+    if (!store || store.related('user').get('id_marketplaceuser') !== marketplaceId) {
+      throw getStoreError('store', 'not_found');
+    }
     const catalogs = this.getCatalogs(store, userId);
     const { origin, district } = this.getOriginAndDistrict(store);
     const { reviews, totalSold, quality, accuracy } = this.getReviews(store);
