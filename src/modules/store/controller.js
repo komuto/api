@@ -43,13 +43,13 @@ StoreController.favorite = async (req, res, next) => {
     Store.getMarketplaceId(req.params.id),
     Store.getStoreId(req.user.id),
   ]);
-  if (marketplace === false) throw makeFavoriteError('store', 'not_found');
+  if (marketplace === false || marketplace !== req.marketplace.id) throw makeFavoriteError('store', 'not_found');
   if (Number(req.params.id) === storeId) throw makeFavoriteError('store', 'not_valid');
 
   const data = {
     id_users: req.user.id,
     referred_toko: req.params.id,
-    referred_marketplace: marketplace || 0,
+    referred_marketplace: marketplace,
   };
   const favorite = await FavoriteStore.where({
     status_tokofavorit: FavoriteStoreStatus.ON,
@@ -65,6 +65,7 @@ StoreController.listFavorites = async (req, res, next) => {
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const favorites = await FavoriteStore.getListFavoriteStore(
     req.user.id,
+    req.marketplace.id,
     req.query.q,
     pageSize,
     page,

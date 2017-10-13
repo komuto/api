@@ -26,27 +26,31 @@ class FavoriteStoreModel extends bookshelf.Model {
   user() {
     return this.belongsTo('User', 'id_users');
   }
-/**/
+
   store() {
     return this.belongsTo('Store', 'referred_toko');
   }
 
   static async create(data) {
-    data.status_tokofavorit = FavoriteStoreStatus.ON;
-    data.tglstatus_tokofavorit = moment();
-    return await new this(data).save();
+    return await new this({
+      ...data,
+      status_tokofavorit: FavoriteStoreStatus.ON,
+      tglstatus_tokofavorit: moment(),
+    }).save();
   }
 
   /**
    * Get list of favorite store with its products
    * @param id {integer} user id
+   * @param marketplaceId {integer} marketplace id
    * @param query {string}
    * @param pageSize {integer} limit
    * @param page {integer}
    */
-  static async getListFavoriteStore(id, query, pageSize, page) {
+  static async getListFavoriteStore(id, marketplaceId, query, pageSize, page) {
     const favorites = await this.query((qb) => {
       qb.where('toko_favorit.id_users', id);
+      qb.where('toko_favorit.referred_marketplace', marketplaceId);
       if (query) {
         qb.join('toko as t', 't.id_toko', 'toko_favorit.referred_toko');
         qb.whereRaw('LOWER(nama_toko) LIKE ?', `%${query.toLowerCase()}%`);
