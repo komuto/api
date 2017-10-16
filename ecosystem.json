@@ -22,7 +22,7 @@
         "ref"  : "origin/master",
         "path" : "/home/skyshi/deploy/komuto.api",
         "repo"  : "git@gitlab.skyshi.io:komuto/api.git",
-        "post-deploy" : "cp ../../config/.env.komuto.api .env && npm install && npm run build && pm2 startOrRestart ecosystem.json"
+        "post-deploy" : "cp ../../config/.env.komuto.api .env && npm install && pm2 startOrRestart ecosystem.json"
       }
     }
 }
