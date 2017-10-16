@@ -183,8 +183,7 @@ class InvoiceModel extends bookshelf.Model {
     return { ...invoice.serialize(), items, dispute };
   }
 
-  static async get(userId, bucketId, id, withRelated = 'items') {
-    withRelated = [withRelated];
+  static async get(userId, bucketId, id, withRelated = ['items']) {
     const invoice = await this.where({
       id_invoice: id,
       id_user: userId,

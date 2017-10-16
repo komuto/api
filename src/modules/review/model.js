@@ -6,6 +6,7 @@ import { Invoice } from '../payment/model';
 import { Product } from '../product/model/product';
 import { Dropship } from '../product/model/dropship';
 import { getNotification, NotificationType } from '../user/model/user';
+import { Shipping, ShippingReceiverStatus, ShippingSenderStatus } from "../bucket/model/shipping";
 
 const { Notification, sellerNotification } = core;
 const bookshelf = core.postgres.db;
@@ -94,13 +95,12 @@ class ReviewModel extends bookshelf.Model {
    * @param {Object} params
    */
   static async bulkCreate(params) {
-    // TODO: Update shipping status
     const { user_id: userId, bucket_id: bucketId, invoice_id: invoiceId, reviews } = params;
 
-    const invoice = await Invoice.get(userId, bucketId, invoiceId);
+    const invoice = await Invoice.get(userId, bucketId, invoiceId, ['items', 'shipping']);
     const items = invoice.related('items');
 
-    return await Promise.all(reviews.map(async (val) => {
+    const reviewData = await Promise.all(reviews.map(async (val) => {
       const { productId, storeId: sId } = getProductAndStore(val.product_id);
       const product = await Product.findProduct(productId, sId);
       if (!product) throw createReviewError('product', 'store_not_found');
@@ -109,6 +109,13 @@ class ReviewModel extends bookshelf.Model {
 
       return await this.create(item, product.serialize(), userId, val);
     }));
+
+    await invoice.related('shipping').save({
+      statusresponkirim: ShippingSenderStatus.SENT,
+      statusresponterima: ShippingReceiverStatus.ACCEPT,
+    }, { patch: true });
+
+    return reviewData;
   }
 
   static async create(item, product, userId, val) {

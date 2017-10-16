@@ -169,7 +169,7 @@ PaymentController.bulkReview = async (req, res, next) => {
 };
 
 PaymentController.dispute = async (req, res, next) => {
-  const invoice = await Invoice.get(req.user.id, req.params.id, req.params.invoice_id, 'items.product');
+  const invoice = await Invoice.get(req.user.id, req.params.id, req.params.invoice_id, ['items.product']);
   const invoiceObj = invoice.serialize();
   const items = invoice.related('items').map(item => ({
     ...item.serialize(),
