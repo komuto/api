@@ -8,10 +8,7 @@
         "error_file"      : "log/error.log",
         "out_file"        : "log/access.log",
         "merge_logs"      : true,
-        "log_date_format" : "YYYY-MM-DD HH:mm Z",
-        "env"  : {
-            "PORT": 7007
-        }
+        "log_date_format" : "YYYY-MM-DD HH:mm Z"
       }
     ],
     "deploy" : {
