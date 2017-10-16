@@ -58,10 +58,15 @@ class CommentModel extends bookshelf.Model {
   /**
    * Get comments by discussion
    */
-  static async getByDiscussionId(id, page, pageSize) {
-    return await this.where({ id_diskusi: id })
+  static async getByDiscussionId(id, page, pageSize, isParam) {
+    const comments = await this.where({ id_diskusi: id })
       .orderBy('tgl_subdiskusi', 'DESC')
       .fetchPage({ page, pageSize, withRelated: ['user'] });
+
+    if (!isParam) {
+      return await this.getByDiscussionId(id, comments.pagination.pageCount, pageSize, true);
+    }
+    return { comments, page };
   }
 
   /**
