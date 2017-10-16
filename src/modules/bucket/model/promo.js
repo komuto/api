@@ -1,7 +1,6 @@
 import moment from 'moment';
 import core from '../../core';
 import { addPromoError } from './../messages';
-import { BucketStatus } from './bucket';
 
 const { parseNum, parseDate } = core.utils;
 const bookshelf = core.postgres.db;
