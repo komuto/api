@@ -6,7 +6,7 @@ import { Invoice } from '../payment/model';
 import { Product } from '../product/model/product';
 import { Dropship } from '../product/model/dropship';
 import { getNotification, NotificationType } from '../user/model/user';
-import { Shipping, ShippingReceiverStatus, ShippingSenderStatus } from "../bucket/model/shipping";
+import { ShippingReceiverStatus, ShippingSenderStatus } from '../bucket/model';
 
 const { Notification, sellerNotification } = core;
 const bookshelf = core.postgres.db;
