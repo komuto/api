@@ -2,16 +2,13 @@
     "apps" : [
       {
         "name"            : "komuto.api",
-        "script"          : "npm",
-        "args"            : "run start",
+        "script"          : "yarn",
+        "args"            : "start",
         "ignore_watch"    : ["node_modules", "log/error.log", "log/access.log"],
         "error_file"      : "log/error.log",
         "out_file"        : "log/access.log",
         "merge_logs"      : true,
-        "log_date_format" : "YYYY-MM-DD HH:mm Z",
-        "env"  : {
-            "PORT": 7007
-        }
+        "log_date_format" : "YYYY-MM-DD HH:mm Z"
       }
     ],
     "deploy" : {
@@ -22,7 +19,7 @@
         "ref"  : "origin/master",
         "path" : "/home/skyshi/deploy/komuto.api",
         "repo"  : "git@gitlab.skyshi.io:komuto/api.git",
-        "post-deploy" : "cp ../../config/.env.komuto.api .env && npm install && npm run build && pm2 startOrRestart ecosystem.json"
+        "post-deploy" : "cp ../../config/.env.komuto.api .env && yarn install && pm2 startOrRestart ecosystem.json"
       }
     }
 }
