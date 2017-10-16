@@ -1,10 +1,11 @@
 stages:
   - deploy
 
-deploy_job:
+deploy_staging:
   stage: deploy
   script:
-    - whoami
-    - chmod +x ./deploy.sh
-    - ./deploy.sh
-  when: always
+     - "if [ -n \"$DEPLOY\" ]; then start=`date +%s`; pm2 deploy ecosystem.json staging; end=`date +%s`; execution=`expr $end - $start`;fi"
+     - "if [ -n \"$DEPLOY\" ]; then curl -XPOST -H \"Content-type: application/json\" -d \"{'text': 'Deployment Api Komuto is done ($execution s) :yey:', 'channel': '#komuto'}\" $WEBHOOK_URL;fi"
+    
+  only:
+  - master
