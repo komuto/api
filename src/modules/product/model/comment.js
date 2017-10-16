@@ -15,6 +15,11 @@ class CommentModel extends bookshelf.Model {
     return 'id_subdiskusi';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return ['tgl_subdiskusi'];
+  }
+
   serialize({ minimal = false } = {}) {
     const comment = {
       id: this.get('id_subdiskusi'),
@@ -80,7 +85,6 @@ class CommentModel extends bookshelf.Model {
       user_id: 'id_users',
       discussion_id: 'id_diskusi',
       content: 'reply_subdiskusi',
-      created_at: 'tgl_subdiskusi',
       is_deleted: 'hapus_subdiskusi',
     };
     const newData = {};

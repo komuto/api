@@ -224,7 +224,6 @@ ProductController.createComment = async (req, res, next) => {
     user_id: req.user.id,
     discussion_id: req.params.id,
     content: req.body.content,
-    created_at: moment(),
     is_deleted: 0,
   });
   const comment = await Comment.create(data);
