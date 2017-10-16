@@ -25,6 +25,11 @@ class UserTokenModel extends bookshelf.Model {
     return 'id_tokenuser';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   /**
    * Generate token if not found in db
    * @param {integer} id
