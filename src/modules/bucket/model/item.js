@@ -2,7 +2,7 @@ import ModelBase from 'bookshelf-modelbase';
 import core from '../../core';
 import { getItemError } from './../messages';
 import config from './../../../../config';
-import { Product } from '../../product/model';
+import { Product } from '../../product/model/product';
 
 const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -13,6 +13,7 @@ class ItemModel extends bookshelf.Model {
   get tableName() {
     return 'listbucket';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_listbucket';
@@ -89,7 +90,7 @@ class ItemModel extends bookshelf.Model {
     let store = product.related('store');
     await product.load({ images: qb => (qb.limit(1)) });
     const images = product.related('images').serialize();
-    const expeditions = Product.loadExpeditions(product);
+    const expeditions = await Product.loadExpeditions(product);
     const districtStore = store.related('user').related('addresses').models[0].related('district');
 
     if (item.get('id_dropshipper')) {
