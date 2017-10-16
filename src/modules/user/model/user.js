@@ -64,6 +64,11 @@ class UserModel extends bookshelf.Model {
     return 'id_users';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   /**
    * @param pass {boolean} true = include password
    * @param birth {boolean} true = get name of the district id
