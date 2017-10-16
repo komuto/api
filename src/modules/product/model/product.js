@@ -432,7 +432,7 @@ class ProductModel extends bookshelf.Model {
       });
       qb.orderBy('date_created', 'desc');
       qb.limit(limit);
-    }).fetchAll({ withRelated: 'image' });
+    }).fetchAll({ withRelated: 'images' });
   }
 
   /**
@@ -467,9 +467,12 @@ class ProductModel extends bookshelf.Model {
       id_dropshipper: !isDropshipped ? null : idDropship }).fetchAll({ withRelated: 'user' });
 
     // Eager load other products so it doesn't block other process by not awaiting directly
-    const getOtherProds = this.getStoreProducts(storeId, 3,
+    const getOtherProds = this.getStoreProducts(
+      storeId,
+      3,
       qb => qb.whereNot('produk.id_produk', productId),
-      qb => qb.whereNot('d.id_produk', productId));
+      qb => qb.whereNot('d.id_produk', productId),
+    );
 
     let getStore;
     if (!isDropshipped) {
