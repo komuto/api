@@ -98,6 +98,7 @@ ProductController.getProduct = async (req, res, next) => {
   const { product, idDropship } = await Product.getFullProduct(productId, storeId, req.user.id);
   if (!product) throw getProductError('product', 'not_found');
   View.store(productId, requestIp.getClientIp(req), idDropship);
+  product.share_link = `${config.shareLink}${req.params.id}`;
   req.resData = {
     message: 'Product Detail Data',
     data: product,
