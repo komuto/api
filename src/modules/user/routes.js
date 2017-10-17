@@ -173,6 +173,15 @@ routes.get('/signup-verification',
   apiResponse());
 
 /**
+ * POST /signup-verification
+ * Resend verification email
+ */
+routes.post('/signup-verification',
+  auth(),
+  wrap(UserController.resendVerification),
+  apiResponse());
+
+/**
  * Get user account profile
  */
 routes.get('/accounts/profile',

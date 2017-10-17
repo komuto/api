@@ -211,6 +211,13 @@ UserController.activateUser = async (req, res, next) => {
   return next();
 };
 
+UserController.resendVerification = async (req, res, next) => {
+  const token = await UserToken.generateToken(req.user.id, TokenType.EMAIL_ACTIVATION);
+  // await UserEmail.sendActivateAccount(req.user.email, token);
+  await UserEmail.sendActivateAccount('wisnugrohosatrio@gmail.com', token);
+  return next();
+};
+
 /**
  * Check whether active forgot password token exists
  */
