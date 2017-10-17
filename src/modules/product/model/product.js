@@ -219,7 +219,7 @@ class ProductModel extends bookshelf.Model {
 
   static async getProducts(params) {
     const { page, pageSize, sort } = params;
-    const offset = page === 1 ? 0 : (page - 1) * pageSize;
+    const offset = page <= 1 ? 1 : (page - 1) * pageSize;
     const self = this;
 
     const fromProduct = knex
