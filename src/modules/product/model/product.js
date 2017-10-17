@@ -79,7 +79,7 @@ class ProductModel extends bookshelf.Model {
       count_sold: parseNum(this.get('count_sold'), 0),
       count_popular: parseNum(this.get('count_populer'), 0),
       count_view: this.relations && this.relations.view
-        && this.related('view').serialize().ip
+      && this.related('view').serialize().ip
         ? this.related('view').serialize().ip.length : 0,
       brand_id: this.get('identifier_brand'),
       catalog_id: this.get('identifier_katalog'),
@@ -217,17 +217,30 @@ class ProductModel extends bookshelf.Model {
     const offset = page === 1 ? 0 : (page - 1) * pageSize;
     const self = this;
 
-    const fromProduct = knex.select(['p.*', 'tglstatus_produk as date_created', 't.*',
-      'p.identifier_katalog as identifier_katalog', 'p.count_sold'])
+    const fromProduct = knex
+      .select([
+        'p.*',
+        'tglstatus_produk as date_created',
+        't.*',
+        'p.identifier_katalog as identifier_katalog',
+      ])
       .select(knex.raw('null as "id_dropshipper"'))
+      .select(knex.raw('COALESCE("p"."count_sold", 0) as "p_count_sold"'))
       .from('produk as p')
       .join('toko as t', 'p.id_toko', 't.id_toko')
       .join('users as u', 't.id_users', 'u.id_users');
 
     return self.addWhereClause(fromProduct, params)
       .union(function () {
-        const fromDropship = this.select(['p.*', 'tglstatus_dropshipper as date_created', 't.*',
-          'd.id_katalog as indentifier_katalog', 'd.count_sold', 'd.id_dropshipper'])
+        const fromDropship = this
+          .select([
+            'p.*',
+            'tglstatus_dropshipper as date_created',
+            't.*',
+            'd.id_katalog as indentifier_katalog',
+            'd.id_dropshipper',
+          ])
+          .select(knex.raw('COALESCE("d"."count_sold", 0) as "p_count_sold"'))
           .from('dropshipper as d')
           .join('produk as p', 'd.id_produk', 'p.id_produk')
           .join('toko as t', 'd.id_toko', 't.id_toko')
@@ -261,7 +274,7 @@ class ProductModel extends bookshelf.Model {
         sort = { column: 'harga_produk', by: 'desc' };
         break;
       case 'selling':
-        sort = { column: 'count_sold', by: 'desc' };
+        sort = { column: 'p_count_sold', by: 'desc' };
         break;
       default:
         sort = { column: 'date_created_produk', by: 'desc' };
@@ -305,12 +318,14 @@ class ProductModel extends bookshelf.Model {
       };
       const isLike = !!userId && wishlists.some(wishlist => parseNum(wishlist.get('id_users')) === userId
         && parseNum(wishlist.get('id_dropshipper')) === parseNum(product.get('id_dropshipper')));
+      const countSold = product.p_count_sold;
       product = this.prototype.serialize.call(product);
       product.id = `${product.id}.${store.id}`;
       product.image = image ? image.serialize().file : config.defaultImage.product;
       product.count_like = wishlists.length;
       product.count_view = view ? view.serialize().ip.length : 0;
       product.is_liked = isLike;
+      product.count_sold = parseNum(countSold);
       if (userId && isDropship) {
         product.commission = MasterFee.calculateCommissionByFees(masterFee, product.price, true);
       }
@@ -379,7 +394,7 @@ class ProductModel extends bookshelf.Model {
   static loadLikesDropship(userId, wishlists, product) {
     const id = product ? parseNum(product.get('id_dropshipper')) : null;
     const isLiked = wishlists.some(wishlist => parseNum(wishlist.get('id_users')) === userId
-    && parseNum(wishlist.get('id_dropshipper'), null) === id);
+      && parseNum(wishlist.get('id_dropshipper'), null) === id);
     const countLike = wishlists.length;
     return { is_liked: isLiked, count_like: countLike };
   }
@@ -463,8 +478,10 @@ class ProductModel extends bookshelf.Model {
     }
     const idDropship = isDropshipped ? dropship.get('id_dropshipper') : undefined;
 
-    let getReviews = Review.where({ id_produk: productId,
-      id_dropshipper: !isDropshipped ? null : idDropship }).fetchAll({ withRelated: 'user' });
+    let getReviews = Review.where({
+      id_produk: productId,
+      id_dropshipper: !isDropshipped ? null : idDropship,
+    }).fetchAll({ withRelated: 'user' });
 
     // Eager load other products so it doesn't block other process by not awaiting directly
     const getOtherProds = this.getStoreProducts(
@@ -566,7 +583,8 @@ class ProductModel extends bookshelf.Model {
         other_products: otherProds,
         expeditions,
       },
-      idDropship };
+      idDropship,
+    };
   }
 
   /**
@@ -628,7 +646,7 @@ class ProductModel extends bookshelf.Model {
       marketplaceId,
       product.price,
       isDropship,
-      );
+    );
 
     return {
       product,
