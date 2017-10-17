@@ -75,6 +75,7 @@ class UserModel extends bookshelf.Model {
    * @param account {boolean} true = minimal for account collection
    * @param phone {boolean} true = check if the phone is verified
    * @param notification {boolean} true = include notification
+   * @param orderDetail {boolean}
    */
   serialize({
               pass = false,
