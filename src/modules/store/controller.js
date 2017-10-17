@@ -43,8 +43,8 @@ StoreController.favorite = async (req, res, next) => {
     Store.getMarketplaceId(req.params.id),
     Store.where({ id_users: req.user.id }).fetch(),
   ]);
-  if (marketplace === false || marketplace !== req.marketplace.id) throw makeFavoriteError('store', 'not_found');
-  if (store && Number(req.params.id) === store.get('id_toko')) throw makeFavoriteError('store', 'not_valid');
+  if (marketplace === false || marketplace !== req.marketplace.id) throw makeFavoriteError('store', 'not_found', true);
+  if (store && Number(req.params.id) === store.get('id_toko')) throw makeFavoriteError('store', 'not_valid', true);
 
   const data = {
     id_users: req.user.id,
