@@ -21,6 +21,11 @@ class OTPModel extends bookshelf.Model {
     return 'otp';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   static async checkOTP(data) {
     return await this.query(qb => qb.where(data).andWhere('date_expired', '>', moment())).fetch();
   }

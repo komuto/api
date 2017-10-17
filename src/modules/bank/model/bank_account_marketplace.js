@@ -15,9 +15,15 @@ class BankAccountMarketplaceModel extends bookshelf.Model {
   get tableName() {
     return 'rekening_mp';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_rekeningmp';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
   }
 
   serialize() {

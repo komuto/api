@@ -26,6 +26,11 @@ class StoreModel extends bookshelf.Model {
     return 'id_toko';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize({ favorite = false, verified = false, message = false } = {}) {
     const store = {
       id: this.get('id_toko'),

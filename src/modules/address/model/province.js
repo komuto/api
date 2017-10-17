@@ -9,9 +9,15 @@ class ProvinceModel extends bookshelf.Model {
   get tableName() {
     return 'provinsi';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_provinsi';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
   }
 
   serialize() {

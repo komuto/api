@@ -20,6 +20,11 @@ class DropshipModel extends bookshelf.Model {
     return 'id_dropshipper';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize() {
     return {
       id: parseNum(this.get('id_dropshipper')),

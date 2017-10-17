@@ -14,9 +14,15 @@ class BankAccountModel extends bookshelf.Model {
   get tableName() {
     return 'rekening_users';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_rekeninguser';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
   }
 
   serialize({ minimal = false } = {}) {

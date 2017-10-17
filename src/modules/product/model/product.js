@@ -41,6 +41,11 @@ class ProductModel extends bookshelf.Model {
     return 'id_produk';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize({ minimal = false, wishlist = false, alterId = false } = {}) {
     const product = {
       id: !alterId ? this.get('id_produk') : `${this.get('id_produk')}.` +

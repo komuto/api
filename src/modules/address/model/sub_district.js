@@ -9,9 +9,15 @@ class SubDistrictModel extends bookshelf.Model {
   get tableName() {
     return 'kecamatan';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_kecamatan';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
   }
 
   serialize() {

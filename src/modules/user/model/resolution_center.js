@@ -35,6 +35,11 @@ class ResolutionCenterModel extends bookshelf.Model {
     return 'id_rescenter';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize({ minimal = false } = {}, name) {
     const resolution = {
       id: this.get('id_rescenter'),

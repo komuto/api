@@ -13,9 +13,15 @@ class ProductExpeditionModel extends bookshelf.Model {
   get tableName() {
     return 'detil_ekspedisiproduk';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_produk';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
   }
 
   initialize() {

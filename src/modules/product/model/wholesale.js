@@ -8,9 +8,15 @@ class WholesaleModel extends bookshelf.Model {
   get tableName() {
     return 'param_grosir';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_paramgrosir';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
   }
 
   serialize() {

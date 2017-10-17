@@ -17,9 +17,15 @@ class BankModel extends bookshelf.Model {
   get tableName() {
     return 'master_bank';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_masterbank';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
   }
 
   serialize({ minimal = false } = {}) {

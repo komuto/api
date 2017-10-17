@@ -9,9 +9,15 @@ class VillageModel extends bookshelf.Model {
   get tableName() {
     return 'kelurahan';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_kelurahan';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
   }
 
   serialize() {

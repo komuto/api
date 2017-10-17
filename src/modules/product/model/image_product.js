@@ -16,6 +16,11 @@ class ImageProductModel extends bookshelf.Model {
     return 'id_gambarproduk';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   initialize() {
     // Set order by to always based on id_gambarproduk asc when fetching
     this.on('fetching', (model, columns, options) => {

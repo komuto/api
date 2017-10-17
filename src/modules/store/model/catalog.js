@@ -18,6 +18,11 @@ class CatalogModel extends bookshelf.Model {
     return 'id_katalog';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize() {
     return {
       id: this.get('id_katalog'),

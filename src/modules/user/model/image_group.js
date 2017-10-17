@@ -29,6 +29,11 @@ class ImageGroupModel extends bookshelf.Model {
     return 'id_image';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize() {
     return {
       id: this.get('id_image'),

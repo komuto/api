@@ -17,6 +17,11 @@ class ExpeditionModel extends bookshelf.Model {
     return 'id_ekspedisi';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize({ minimal = false } = {}) {
     const expedition = {
       id: this.get('id_ekspedisi'),

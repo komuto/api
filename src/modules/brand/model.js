@@ -8,9 +8,15 @@ class BrandModel extends bookshelf.Model {
   get tableName() {
     return 'brands';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_brand';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
   }
 
   serialize() {

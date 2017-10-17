@@ -28,6 +28,11 @@ class PaymentMethodModel extends bookshelf.Model {
     return 'id_paymentmethod';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize() {
     return {
       id: this.get('id_paymentmethod'),

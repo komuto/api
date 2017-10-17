@@ -8,9 +8,15 @@ class AddressModel extends bookshelf.Model {
   get tableName() {
     return 'alamat_users';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_alamatuser';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
   }
 
   serialize({ full = false } = {}) {
@@ -91,7 +97,8 @@ class AddressModel extends bookshelf.Model {
       province,
       district,
       subDistrict,
-      village };
+      village,
+    };
   }
 
   /**
@@ -123,7 +130,8 @@ class AddressModel extends bookshelf.Model {
         province,
         district,
         subDistrict,
-        village };
+        village,
+      };
     });
   }
 
@@ -143,7 +151,8 @@ class AddressModel extends bookshelf.Model {
       province,
       district,
       subDistrict,
-      village };
+      village,
+    };
   }
 
   /**

@@ -17,9 +17,15 @@ class ReviewModel extends bookshelf.Model {
   get tableName() {
     return 'ulasan_produk';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_ulasanproduk';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
   }
 
   serialize({ minimal = true } = {}) {

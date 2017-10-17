@@ -14,6 +14,11 @@ class ServiceModel extends bookshelf.Model {
     return 'id_ekspedisiservice';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize({ minimal = true, fullName = false } = {}) {
     const service = {
       id: this.get('id_ekspedisiservice'),

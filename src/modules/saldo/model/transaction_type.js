@@ -13,6 +13,11 @@ class TransTypeModel extends bookshelf.Model {
     return 'kode_tipetransaksi';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize() {
     return {
       type_code: this.get('kode_tipetransaksi'),

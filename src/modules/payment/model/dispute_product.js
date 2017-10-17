@@ -15,6 +15,11 @@ class DisputeProductModel extends bookshelf.Model {
     return 'id_dispute_product';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize() {
     return {
       id: this.get('id_dispute_product'),

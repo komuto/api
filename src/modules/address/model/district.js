@@ -9,9 +9,15 @@ class DistrictModel extends bookshelf.Model {
   get tableName() {
     return 'kota_kab';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_kotakab';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
   }
 
   serialize() {

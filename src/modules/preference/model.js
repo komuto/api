@@ -7,9 +7,15 @@ class PreferenceModel extends bookshelf.Model {
   get tableName() {
     return 'global_parameters';
   }
+
   // eslint-disable-next-line class-methods-use-this
   get idAttribute() {
     return 'id_globalparam';
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
   }
 
   serialize() {

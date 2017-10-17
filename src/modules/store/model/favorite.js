@@ -23,6 +23,11 @@ class FavoriteStoreModel extends bookshelf.Model {
     return 'id_tokofavorit';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   user() {
     return this.belongsTo('User', 'id_users');
   }

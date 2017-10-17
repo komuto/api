@@ -12,6 +12,11 @@ class WishlistModel extends bookshelf.Model {
     return 'wishlist';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   product() {
     return this.belongsTo('Product', 'id_produk');
   }

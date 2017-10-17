@@ -20,6 +20,11 @@ class StoreExpeditionModel extends bookshelf.Model {
     return 'id_ekspedisiservice';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize() {
     return {
       store_id: this.get('id_toko'),
