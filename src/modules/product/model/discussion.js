@@ -17,6 +17,11 @@ class DiscussionModel extends bookshelf.Model {
     return 'id_diskusi';
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  get hasTimestamps() {
+    return false;
+  }
+
   serialize({ minimal = false } = {}) {
     const discussion = {
       id: this.get('id_diskusi'),
