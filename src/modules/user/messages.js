@@ -17,7 +17,7 @@ export const errMsg = {
     token_presence: '^Access token harus diisi',
   },
   registrationMsg: {
-    title: 'Email sudah terdaftar',
+    title: 'Registrasi gagal',
     duplicate_email: 'Email sudah terdaftar',
     name_presence: '^Nama harus diisi',
     email_presence: '^Email harus diisi',
