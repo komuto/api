@@ -173,7 +173,9 @@ class BucketModel extends bookshelf.Model {
 
   static getTimeLeft(maxTime) {
     // TODO: Get from global parameter
+    // console.log(maxTime, '1');
     const maxPaymentDate = moment(maxTime).add(2, 'days');
+    // console.log(maxPaymentDate, '2');
     if (moment().isAfter(maxPaymentDate)) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
     const { days, hours, minutes, seconds } = moment.preciseDiff(maxPaymentDate, moment(), true);
     return { days, hours, minutes, seconds };
@@ -206,7 +208,7 @@ class BucketModel extends bookshelf.Model {
       }
       if (index === 0) accu.time_left = this.getTimeLeft(invoice.get('updated_at'));
       return accu;
-    }, { total_price: 0, data: [], time_left: 0 });
+    }, { total_price: 0, data: [], time_left: { days: 0, hours: 0, minutes: 0, seconds: 0 } });
 
     const response = {
       bucket: bucket.serialize(),
