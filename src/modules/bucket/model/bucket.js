@@ -10,6 +10,7 @@ import { PromoType } from './promo';
 import config from './../../../../config';
 import { InvoiceStatus, InvoiceTransactionStatus, TransactionLog, PaymentMethod } from '../../payment/model';
 import { Dropship } from '../../product/model/dropship';
+import { Preference } from "../../preference/model";
 
 const { parseNum, parseDate, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
@@ -171,17 +172,14 @@ class BucketModel extends bookshelf.Model {
     });
   }
 
-  static getTimeLeft(maxTime) {
-    // TODO: Get from global parameter
-    // console.log(maxTime, '1');
-    const maxPaymentDate = moment(maxTime).add(2, 'days');
-    // console.log(maxPaymentDate, '2');
+  static getTimeLeft(maxTime, limit) {
+    const maxPaymentDate = moment(maxTime).add(limit, 'days');
     if (moment().isAfter(maxPaymentDate)) return { days: 0, hours: 0, minutes: 0, seconds: 0 };
     const { days, hours, minutes, seconds } = moment.preciseDiff(maxPaymentDate, moment(), true);
     return { days, hours, minutes, seconds };
   }
 
-  static loadDetailTransaction(bucket, isDetail) {
+  static loadDetailTransaction(bucket, limit, isDetail) {
     const { data, total_price, time_left } = bucket.related('invoices').reduce((accu, invoice, index) => {
       const items = invoice.related('items').map((item) => {
         let product = item.related('product');
@@ -206,7 +204,7 @@ class BucketModel extends bookshelf.Model {
       } else {
         accu.data.push(...items);
       }
-      if (index === 0) accu.time_left = this.getTimeLeft(invoice.get('updated_at'));
+      if (index === 0) accu.time_left = this.getTimeLeft(invoice.get('updated_at'), limit);
       return accu;
     }, { total_price: 0, data: [], time_left: { days: 0, hours: 0, minutes: 0, seconds: 0 } });
 
@@ -225,7 +223,8 @@ class BucketModel extends bookshelf.Model {
       .orderBy('tgl_orderbucket', 'desc')
       .fetchPage({ page, pageSize, withRelated: ['invoices.items.product.images'] });
     if (!buckets.length) return [];
-    return buckets.map(bucket => (this.loadDetailTransaction(bucket, false)));
+    const limit = await Preference.get('payment');
+    return buckets.map(bucket => (this.loadDetailTransaction(bucket, limit.value, false)));
   }
 
   static async detailTransaction(userId, bucketId) {
@@ -247,7 +246,8 @@ class BucketModel extends bookshelf.Model {
     } else {
       await Promise.all([bucket.load(['invoices.items.product.images', 'promo', 'invoices.store'])]);
     }
-    return this.loadDetailTransaction(bucket, true);
+    const limit = await Preference.get('payment');
+    return this.loadDetailTransaction(bucket, limit.value, true);
   }
 
   /**
