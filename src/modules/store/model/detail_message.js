@@ -27,6 +27,7 @@ class DetailMessageModel extends bookshelf.Model {
       user_id: this.relations.user ? undefined : this.get('id_users'),
       user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
       content: this.get('content_messages'),
+      status: parseNum(this.get('status')),
       created_at: parseDate(this.get('date_detilmessages')),
     };
   }

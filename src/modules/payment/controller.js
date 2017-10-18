@@ -224,10 +224,10 @@ PaymentController.getDisputes = async (req, res, next) => {
   const isResolved = req.query.is_resolved ? JSON.parse(req.query.is_resolved) : false;
   const disputes = await Dispute.getAll({
     where: { id_users: req.user.id },
-    relation: 'store',
     is_resolved: isResolved,
     page,
     pageSize,
+    userId: req.user.id,
   });
   req.resData = {
     message: 'Dispute Data',
@@ -239,7 +239,7 @@ PaymentController.getDisputes = async (req, res, next) => {
 
 PaymentController.getDispute = async (req, res, next) => {
   const where = { id_users: req.user.id, id_dispute: req.params.id };
-  const dispute = await Dispute.getDetail(where, 'store');
+  const dispute = await Dispute.getDetail(where);
   req.resData = {
     message: 'Dispute Data',
     data: dispute,
@@ -273,10 +273,10 @@ PaymentController.getStoreDisputes = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const disputes = await Dispute.getAll({
     where: { id_toko: storeId },
-    relation: 'user',
     is_resolved: isResolved,
     page,
     pageSize,
+    userId: req.user.id,
   });
   req.resData = {
     message: 'Dispute Data',
@@ -289,7 +289,7 @@ PaymentController.getStoreDisputes = async (req, res, next) => {
 PaymentController.getStoreDispute = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const where = { id_toko: storeId, id_dispute: req.params.id };
-  const dispute = await Dispute.getDetail(where, 'user');
+  const dispute = await Dispute.getDetail(where);
   req.resData = {
     message: 'Dispute Data',
     data: dispute,

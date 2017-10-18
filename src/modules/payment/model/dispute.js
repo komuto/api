@@ -140,7 +140,8 @@ class DisputeModel extends bookshelf.Model {
   }
 
   static async getAll(params) {
-    const { where, relation, is_resolved: isResolved, page, pageSize } = params;
+    const { where, is_resolved: isResolved, page, pageSize, userId } = params;
+    const relation = where.id_users ? 'store' : 'user';
     const disputes = await this.where(where)
       .query((qb) => {
         if (isResolved) qb.where('status_dispute', DisputeStatus.CLOSED);
@@ -149,13 +150,18 @@ class DisputeModel extends bookshelf.Model {
       .fetchPage({
         page,
         pageSize,
-        withRelated: ['disputeProducts.product.images', relation],
+        withRelated: [
+          relation,
+          'disputeProducts.product.images',
+          'message.detailMessages',
+        ],
       });
 
-    return disputes.map(dispute => this.detailDispute(dispute, false));
+    return disputes.map(dispute => this.detailDispute(dispute, false, userId));
   }
 
-  static async getDetail(where, relation) {
+  static async getDetail(where) {
+    const relation = where.id_users ? 'store' : 'user';
     const dispute = await this.where(where).fetch({
       withRelated: [
         'disputeProducts.product.images',
@@ -194,14 +200,23 @@ class DisputeModel extends bookshelf.Model {
     };
   }
 
-  static detailDispute(dispute, isDetail = true) {
+  static detailDispute(dispute, isDetail = true, userId = null) {
     let fine;
+    let countUnread;
+
     if (isDetail) {
       fine = dispute.related('invoice').related('items').reduce((res, item) => {
         const found = _.find(dispute.related('disputeProducts').models, o => o.get('id_produk') === item.get('id_produk'));
         if (!found) res.push(item.related('product').serialize({ minimal: true }));
         return res;
       }, []);
+    } else {
+      const message = dispute.related('message');
+      countUnread = message.related('detailMessages').reduce((res, msg) => {
+        msg = msg.serialize();
+        if (userId !== msg.user_id && !msg.status) res += 1;
+        return res;
+      }, 0);
     }
 
     const products = dispute.related('disputeProducts').map((val) => {
@@ -212,10 +227,12 @@ class DisputeModel extends bookshelf.Model {
         image: image.length ? image[0].serialize().file : config.defaultImage.product,
       };
     });
+
     return {
       ...dispute.serialize(),
       dispute_products: products,
       fine_products: fine,
+      count_unread: countUnread,
     };
   }
 
