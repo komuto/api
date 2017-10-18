@@ -38,7 +38,13 @@ constraints.registration = {
     presence: { message: registrationMsg.email_presence },
     email: { message: registrationMsg.email_not_valid },
   },
-  password: { presence: { message: registrationMsg.password_presence } },
+  password: {
+    presence: { message: registrationMsg.password_presence },
+    length: {
+      minimum: 5,
+      message: registrationMsg.password_length,
+    },
+  },
   gender: {
     presence: { message: registrationMsg.gender_presence },
     format: { pattern: /^male|female$/, message: registrationMsg.gender_not_valid },

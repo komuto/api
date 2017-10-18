@@ -23,6 +23,7 @@ export const errMsg = {
     email_presence: '^Email harus diisi',
     email_not_valid: '^Email tidak valid',
     password_presence: '^Password harus diisi',
+    password_length: '^Password minimal 5 karakter',
     gender_presence: '^Jenis kelamin harus diisi',
     gender_not_valid: '^Jenis kelamin tidak valid',
     phone_presence: '^No hp harus diisi',
