@@ -3,7 +3,7 @@ import { StoreExpedition, StoreExpeditionStatus } from './store_expedition';
 import { Catalog } from './catalog';
 import { FavoriteStore, FavoriteStoreStatus } from './favorite';
 import { Message, MessageFlagStatus, MessageType } from './message';
-import { DetailMessage } from './detail_message';
+import { DetailMessage, DetailMessageStatus } from './detail_message';
 
 export default {
   Store,
@@ -12,6 +12,7 @@ export default {
   FavoriteStore,
   Message,
   DetailMessage,
+  DetailMessageStatus,
   StoreStatus,
   StoreExpeditionStatus,
   FavoriteStoreStatus,

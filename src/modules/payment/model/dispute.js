@@ -4,7 +4,7 @@ import core from '../../core';
 import config from '../../../../config';
 import { createDisputeError, getDisputeError } from '../messages';
 import { Message, MessageFlagStatus, MessageType } from '../../store/model/message';
-import { DetailMessage } from '../../store/model/detail_message';
+import { DetailMessage, DetailMessageStatus } from '../../store/model/detail_message';
 import { createReviewError } from '../../review/messages';
 import { Review } from '../../review/model';
 import { InvoiceTransactionStatus } from './invoice';
@@ -178,9 +178,13 @@ class DisputeModel extends bookshelf.Model {
 
     const message = dispute.related('message');
     const discussions = message.related('detailMessages').map((msg) => {
-      msg = msg.serialize();
+      const msgObj = msg.serialize();
       const store = message.serialize().store;
-      msg.store = (store.user_id === msg.user.id) ? store : null;
+      msgObj.store = (store.user_id === msgObj.user.id) ? store : null;
+      if ((!msgObj.status && store.user_id !== msgObj.user.id)
+        || (!msgObj.status && where.id_users && where.id_users !== msgObj.user.id)) {
+        msg.save({ status: DetailMessageStatus.READ }, { patch: true });
+      }
       return msg;
     });
 

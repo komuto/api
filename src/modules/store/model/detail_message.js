@@ -4,6 +4,11 @@ import { createCommentError } from './../messages';
 const bookshelf = core.postgres.db;
 const { parseDate, parseNum, matchDB } = core.utils;
 
+export const DetailMessageStatus = {
+  UNREAD: 0,
+  READ: 1,
+};
+
 class DetailMessageModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -58,4 +63,4 @@ class DetailMessageModel extends bookshelf.Model {
 }
 
 export const DetailMessage = bookshelf.model('DetailMessage', DetailMessageModel);
-export default { DetailMessage };
+export default { DetailMessage, DetailMessageStatus };
