@@ -182,7 +182,7 @@ class DisputeModel extends bookshelf.Model {
       const store = message.serialize().store;
       msgObj.store = (store.user_id === msgObj.user.id) ? store : null;
       if ((!msgObj.status && store.user_id !== msgObj.user.id)
-        || (!msgObj.status && where.id_users && where.id_users !== msgObj.user.id)) {
+        || (!msgObj.status && where.id_users !== msgObj.user.id)) {
         msg.save({ status: DetailMessageStatus.READ }, { patch: true });
       }
       return msg;
