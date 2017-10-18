@@ -180,20 +180,22 @@ class ProductModel extends bookshelf.Model {
     return product.toJSON();
   }
 
-  static addWhereClause(products, params) {
+  static addWhereClause(products, params, isFromProduct) {
     const {
       query,
       price,
       address,
       where,
       storeId,
+      isDropship,
       other,
       marketplaceId,
     } = params;
     let { brands, services } = params;
 
     products.where(where).andWhere('u.id_marketplaceuser', marketplaceId);
-    if (storeId) products.whereNot('p.id_toko', storeId);
+    if (isDropship) products.whereNot('p.id_toko', storeId);
+    if (!isDropship && storeId) products.where(isFromProduct ? 'p.id_toko' : 'd.id_toko', storeId);
     if (query) products.whereRaw('to_tsvector(nama_produk) @@ to_tsquery(?)', query);
     if (price && price.min !== 0 && price.max !== 0) products.whereBetween('harga_produk', [price.min, price.max]);
     if (address) {
@@ -235,14 +237,14 @@ class ProductModel extends bookshelf.Model {
       .join('toko as t', 'p.id_toko', 't.id_toko')
       .join('users as u', 't.id_users', 'u.id_users');
 
-    return self.addWhereClause(fromProduct, params)
+    return self.addWhereClause(fromProduct, params, true)
       .union(function () {
         const fromDropship = this
           .select([
             'p.*',
             'tglstatus_dropshipper as date_created',
             't.*',
-            'd.id_katalog as indentifier_katalog',
+            'd.id_katalog as identifier_katalog',
             'd.id_dropshipper',
           ])
           .select(knex.raw('COALESCE("d"."count_sold", 0) as "p_count_sold"'))
@@ -250,7 +252,7 @@ class ProductModel extends bookshelf.Model {
           .join('produk as p', 'd.id_produk', 'p.id_produk')
           .join('toko as t', 'd.id_toko', 't.id_toko')
           .join('users as u', 't.id_users', 'u.id_users');
-        self.addWhereClause(fromDropship, params);
+        self.addWhereClause(fromDropship, params, false);
       })
       .orderBy(sort.column, sort.by)
       .limit(pageSize)
@@ -266,9 +268,8 @@ class ProductModel extends bookshelf.Model {
       userId,
       where,
       marketplaceId,
-      storeId,
+      isDropship,
     } = params;
-    const isDropship = !!storeId;
     let { sort, other = '' } = params;
 
     switch (sort) {

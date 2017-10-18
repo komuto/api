@@ -52,8 +52,8 @@ const getPrice = (price) => {
 ProductController.index = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const { category_id, condition: cond, catalog_id } = req.query;
-  const { store_id: storeId } = req.body;
+  const { category_id, condition: cond, catalog_id, store_id: storeId } = req.query;
+  const { is_dropship: isDropship = false } = req.body;
   const condition = cond && (cond === 'new' ? ProductCondition.NEW : ProductCondition.USED);
   const where = Product.matchDBColumn({ condition, category_id, catalog_id });
   const params = {
@@ -70,6 +70,7 @@ ProductController.index = async (req, res, next) => {
     userId: req.user.id,
     marketplaceId: req.marketplace.id,
     storeId,
+    isDropship,
   };
   const products = await Product.get(params);
 
@@ -498,7 +499,8 @@ ProductController.getProductExpeditionsManage = async (req, res, next) => {
 };
 
 ProductController.getDropshipProducts = async (req, res, next) => {
-  req.body.store_id = await Store.getStoreId(req.user.id);
+  req.body.is_dropship = true;
+  req.query.store_id = await Store.getStoreId(req.user.id);
   return next();
 };
 
