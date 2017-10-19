@@ -5,6 +5,7 @@ import _ from 'lodash';
 import config from '../../../config';
 import { BadRequestError } from '../../../common/errors';
 import constraints from './validation';
+import messages from '../core/messages';
 
 const upload = multer().array('images');
 
@@ -41,7 +42,7 @@ export function validateParam() {
       req.body.images = req.files;
       const hasError = validate(req.body, constraints.upload);
       if (hasError) {
-        const err = new BadRequestError('Invalid parameter');
+        const err = new BadRequestError(messages.bad_request.parameter);
         err.data = hasError;
         return next(err);
       }

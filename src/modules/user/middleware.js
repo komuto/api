@@ -6,6 +6,7 @@ import { jwt as jwtOptions } from '../../../config';
 import { getUserError, errMsg } from './messages';
 import { middleware } from '../core';
 import { AuthorizationError } from '../../../common/errors';
+import messages from '../core/messages';
 
 export const ROLE_ALL = '*';
 const { loginMsg, registrationMsg, updateMsg, OTPMsg } = errMsg;
@@ -75,7 +76,9 @@ export function addToken(req, res, next) {
  */
 export function userData(req, res, next) {
   if (!req.user) return next(getUserError('user', 'not_found'));
-  if (req.user.marketplace_id !== req.marketplace.id) throw new AuthorizationError('unauthorized');
+  if (req.user.marketplace_id !== req.marketplace.id) {
+    throw new AuthorizationError(messages.unauthorized.msg);
+  }
 
   req.resData = {
     message: 'User Data',

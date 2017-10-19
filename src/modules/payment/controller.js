@@ -26,6 +26,7 @@ import { getNominalError, getInvoiceError, acceptOrderError, rejectOrderError, i
 import { getStoreError } from './../store/messages';
 import { Topup } from '../saldo/model';
 import { BadRequestError } from './../../../common/errors';
+import messages from '../core/messages';
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -60,10 +61,7 @@ PaymentController.viaBank = async (req, res, next) => {
     date: moment.unix(req.body.date),
   }));
   const paymentConfirmation = await PaymentConfirmation.create(data);
-  req.resData = {
-    message: 'success',
-    data: paymentConfirmation,
-  };
+  req.resData = { data: paymentConfirmation };
   return next();
 };
 
@@ -337,9 +335,9 @@ PaymentController.notification = async (req, res, next) => {
       }
     } catch (e) {
       req.resData = {
-        code: 400,
+        code: messages.something_wrong.code,
         status: false,
-        message: 'Something went wrong',
+        message: messages.something_wrong.msg,
       };
     }
     console.log('\n=== MIDTRANS ===');

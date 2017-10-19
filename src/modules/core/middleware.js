@@ -9,6 +9,7 @@ import validate from 'validate.js';
 import c from '../../constants';
 import config from '../../../config';
 import { AuthorizationError, BadRequestError } from '../../../common/errors';
+import messages from '../core/messages';
 
 /**
  * Request logger middleware
@@ -39,7 +40,7 @@ export function requestUtilsMiddleware() {
 export function apiResponse() {
   return (req, res) => {
     const code = res.statusCode;
-    const { status = true, message = 'Success', data = {}, meta } = req.resData || {};
+    const { status = true, message = messages.success.msg, data = {}, meta } = req.resData || {};
     return res.json({
       code,
       status,
@@ -53,8 +54,10 @@ export function apiResponse() {
 export function auth(authorization = true) {
   return (req, res, next) => {
     passport.authenticate('jwt', (err, user) => {
-      if (!user && authorization) return next(new AuthorizationError('unauthorized'));
-      if (authorization && user.marketplace_id !== req.marketplace.id) throw new AuthorizationError('unauthorized');
+      if (!user && authorization) return next(new AuthorizationError(messages.unauthorized.msg));
+      if (authorization && user.marketplace_id !== req.marketplace.id) {
+        throw new AuthorizationError(messages.unauthorized.msg);
+      }
       req.user = user;
       return next();
     })(req, res, next);
@@ -66,7 +69,7 @@ export function checkContentType() {
     if (req.method === 'GET') return next();
     const contentType = req.headers['content-type'];
     if (!contentType || contentType.indexOf('application/json') !== 0) {
-      return next(new BadRequestError('Invalid format'));
+      return next(new BadRequestError(messages.bad_request.format));
     }
     return next();
   };
@@ -74,8 +77,8 @@ export function checkContentType() {
 
 export function pathNotFound() {
   return (req, res, next) => {
-    const err = new Error('Path Not Found');
-    err.httpStatus = 404;
+    const err = new Error(messages.path_not_found.msg);
+    err.httpStatus = messages.path_not_found.code;
     next(err);
   };
 }
@@ -90,8 +93,8 @@ export function errResponse() { // eslint-disable-next-line no-unused-vars
       data: err.data || {},
     };
     if (config.env !== 'development') {
-      response.code = 400;
-      response.message = 'Something went wrong';
+      response.code = messages.something_wrong.code;
+      response.message = messages.something_wrong.msg;
       response.data = {};
     }
     res.status(statusCode).json(response);
@@ -171,20 +174,20 @@ export function validateParam(
       if (evaluate) {
         if (params.length === 0) {
           const hasError = validate({}, constraints);
-          throw new BadRequestError('Invalid parameter', hasError);
+          throw new BadRequestError(messages.bad_request.parameter, hasError);
         }
         const propName = Object.keys(constraints)[0];
         params.forEach((param) => {
           if (modify) param = modify(param);
           if (!isBody) param = { [propName]: param };
           const hasError = validate(param, constraints);
-          if (hasError) throw new BadRequestError(`Invalid parameter ${prop || ''}`, hasError);
+          if (hasError) throw new BadRequestError(`${messages.bad_request.parameter} ${prop || ''}`, hasError);
         });
       }
     } else {
       const hasError = validate(isBody ? req.body : req.query, constraints);
       if (hasError) {
-        return next(new BadRequestError('Invalid parameter', hasError));
+        return next(new BadRequestError(messages.bad_request.parameter, hasError));
       }
     }
     return next();
