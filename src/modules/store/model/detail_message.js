@@ -29,7 +29,7 @@ class DetailMessageModel extends bookshelf.Model {
     return {
       id: this.get('id_detilmessages'),
       message_id: parseNum(this.get('id_messages')),
-      user_id: this.relations.user ? undefined : this.get('id_users'),
+      user_id: this.get('id_users'),
       user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
       content: this.get('content_messages'),
       status: parseNum(this.get('status')),

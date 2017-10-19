@@ -332,7 +332,8 @@ class DisputeModel extends bookshelf.Model {
       content,
       created_at: new Date(),
     });
-    return await DetailMessage.create(detailMessageObj);
+    const msg = await DetailMessage.create(detailMessageObj);
+    return await msg.refresh({ withRelated: ['user'] });
   }
 
   static async updateAirwayBill(where, airwayBill) {
