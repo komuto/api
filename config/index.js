@@ -58,6 +58,7 @@ def.jwt = {};
 def.jwt.secretOrKey = 'MY-APP';
 def.jwt.issuer = 'pionize.com';
 def.jwt.audience = 'pionize.com';
+def.jwt.expiry = '7d';
 
 // mailer config
 def.emailServiceAdapter = 'sendgrid';
