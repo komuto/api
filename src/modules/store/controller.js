@@ -55,8 +55,15 @@ StoreController.favorite = async (req, res, next) => {
     status_tokofavorit: FavoriteStoreStatus.ON,
     ...data,
   }).fetch({ columns: 'id_tokofavorit' });
-  if (favorite) await favorite.destroy();
-  else await FavoriteStore.create(data);
+
+  let isFavorite = true;
+  if (favorite) {
+    await favorite.destroy();
+    isFavorite = false;
+  } else {
+    await FavoriteStore.create(data);
+  }
+  req.resData = { data: { is_favorite: isFavorite } };
   return next();
 };
 
