@@ -318,10 +318,10 @@ BucketController.balancePayment = async (req, res, next) => {
     id_users: req.user.id,
     status_bucket: BucketStatus.WAITING_FOR_PAYMENT,
   }).fetch();
-  const getPref = Preference.where('namavar_globalparam', Preference.matchKey('payment')).fetch();
+  const getPref = Preference.get('payment');
   const [bucket, pref] = await Promise.all([getBucket, getPref]);
   if (!bucket) throw paymentError('transaction', 'not_found');
-  const expired = moment(bucket.get('tglstatus_bucket')).add(pref.get('value1_globalparam'), 'days');
+  const expired = moment(bucket.get('tglstatus_bucket')).add(pref.value, 'days');
   if (now > expired) throw paymentError('transaction', 'not_found');
   const bill = Number(bucket.get('total_tagihan'));
   const saldo = req.user.saldo_wallet - bill;
