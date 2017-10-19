@@ -20,7 +20,7 @@ const { formatValidation } = middleware;
 export function auth(roles, failedCb) {
   const reject = (req, res, next) => {
     if (utils.isFunction(failedCb)) return failedCb(req, res);
-    const err = new Error('Access denied.');
+    const err = new Error(messages.access_denied.msg);
     return next(err);
   };
 

@@ -28,4 +28,8 @@ export default {
     msg: 'Marketplace Not Found',
     code: 404,
   },
+  access_denied: {
+    msg: 'Access denied',
+    code: 401,
+  },
 };
