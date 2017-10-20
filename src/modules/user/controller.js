@@ -2,6 +2,8 @@ import { Facebook } from 'fb';
 import passport from 'passport';
 import moment from 'moment';
 import _ from 'lodash';
+import randomString from 'randomstring';
+import download from 'image-downloader';
 import {
   User,
   UserToken,
@@ -78,19 +80,32 @@ UserController.getUserSocial = async (req, res, next) => {
     // Case where user already created but provider name and uid do not match
     if (user) {
       await user.save({
+        reg_token,
         hybridauth_provider_name: provider_name,
         hybridauth_provider_uid: provider_uid,
-        reg_token,
       }, { patch: true });
       req.user = user.serialize();
     } else { // Case where user has not been created
+      let photo = `${randomString.generate(10)}.jpg`;
+      const options = {
+        url: response.picture.data.url,
+        dest: `/${config.imagePath}/${config.imageFolder.profile}/${photo}`,
+      };
+
+      try {
+        await download.image(options);
+      } catch (e) {
+        photo = null;
+      }
+
       response = {
         ...response,
         provider_name,
         provider_uid,
+        photo,
+        reg_token,
         gender: (response.gender === 'male') ? 'L' : 'P',
-        password: User.hashPasswordSync('komuto'),
-        photo: response.picture.data.url,
+        password: User.hashPasswordSync(randomString.generate(7)),
         status: UserStatus.ACTIVE,
         marketplace_id: req.marketplace.id,
       };
