@@ -346,4 +346,13 @@ routes.post('/users/resolutions/:id([0-9]{1,10})',
   wrap(UserController.replyResolution),
   apiResponse());
 
+/**
+ * GET /pages/notification
+ * Notification page
+ */
+routes.get('/pages/notification',
+  auth(),
+  wrap(UserController.getNotificationPage),
+  apiResponse());
+
 export default routes;

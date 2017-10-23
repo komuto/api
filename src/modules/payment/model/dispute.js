@@ -386,6 +386,17 @@ class DisputeModel extends bookshelf.Model {
     return cloneDispute;
   }
 
+  static async getMessagesCount(userId) {
+    const disputes = await this.where({ id_users: userId }).fetchAll({ withRelated: ['message.detailMessages'] });
+    return disputes.reduce((res, dispute) => {
+      const detailMessages = dispute.related('message').related('detailMessages');
+      const countDm = _.filter(detailMessages.models, dm => dm.get('id_users') !== userId
+        && dm.get('status') === DetailMessageStatus.UNREAD);
+      res += countDm.length;
+      return res;
+    }, 0);
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data
