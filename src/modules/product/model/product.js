@@ -346,37 +346,31 @@ class ProductModel extends bookshelf.Model {
     const {
       query,
       category_id: categoryId = null,
+      catalog_id: catalogId = null,
       store_id: storeId = null,
       marketplace_id: marketplaceId,
     } = data;
+    console.log(categoryId, storeId, catalogId);
     return await this.query((qb) => {
-      // qb.select('nama_produk');
-      // // qb.groupBy('nama_produk');
-      // qb.innerJoin('toko as t', 't.id_toko', 'produk.id_toko');
-      // qb.innerJoin('users as u', 'u.id_users', 't.id_users');
-      // qb.where('u.id_marketplaceuser', marketplaceId);
-      // if (categoryId) qb.where('id_kategoriproduk', categoryId);
-      // if (storeId) qb.where('t.id_toko', storeId);
-
-      qb.select(['produk.*', 'produk.id_toko']);
-      qb.select(knex.raw('null as "id_dropshipper"'));
+      qb.select('nama_produk');
       qb.innerJoin('toko as t', 't.id_toko', 'produk.id_toko');
       qb.innerJoin('users as u', 'u.id_users', 't.id_users');
       qb.where('u.id_marketplaceuser', marketplaceId);
       qb.where('status_produk', ProductStatus.SHOW);
       qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
       if (categoryId) qb.where('id_kategoriproduk', categoryId);
-      if (storeId) qb.where('produk.id_toko', storeId);
       qb.union(function () {
-        const dropship = this.select(['p.*', 'd.id_toko', 'id_dropshipper'])
+        const dropship = this.select('p.nama_produk')
           .from('produk as p')
           .leftJoin('dropshipper as d', 'd.id_produk', 'p.id_produk')
           .where('status_dropshipper', ProductStatus.SHOW);
-        if (storeId) dropship.where('d.id_toko', storeId);
+          // .whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
+        // if (storeId) dropship.where('d.id_toko', storeId);
       });
+      if (storeId) qb.where('produk.id_toko', storeId);
       qb.groupBy('nama_produk');
-      qb.limit(8);
-    }).fetchAll({ debug: true });
+      // qb.limit(8);
+    }).fetchAll();
   }
 
   static loadExpeditions(product) {
