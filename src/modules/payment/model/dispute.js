@@ -53,9 +53,6 @@ class DisputeModel extends bookshelf.Model {
   }
 
   serialize() {
-    // console.log(this.get('createdate_dispute'));
-    // console.log(moment(this.get('createdate_dispute')));
-    // console.log(moment.tz(this.get('createdate_dispute')));
     const dispute = {
       id: this.get('id_dispute'),
       user_id: this.get('id_users'),
