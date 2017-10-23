@@ -53,6 +53,9 @@ class DisputeModel extends bookshelf.Model {
   }
 
   serialize() {
+    // console.log(this.get('createdate_dispute'));
+    // console.log(moment(this.get('createdate_dispute')));
+    // console.log(moment.tz(this.get('createdate_dispute')));
     const dispute = {
       id: this.get('id_dispute'),
       user_id: this.get('id_users'),
@@ -160,7 +163,7 @@ class DisputeModel extends bookshelf.Model {
     return disputes.map(dispute => this.detailDispute(dispute, false, userId));
   }
 
-  static async getDetail(where) {
+  static async getDetail(where, userId) {
     const relation = where.id_users ? 'store' : 'user';
     const dispute = await this.where(where).fetch({
       withRelated: [
@@ -181,8 +184,7 @@ class DisputeModel extends bookshelf.Model {
       const msgObj = msg.serialize();
       const store = message.serialize().store;
       msgObj.store = (store.user_id === msgObj.user.id) ? store : null;
-      if ((!msgObj.status && store.user_id !== msgObj.user.id)
-        || (!msgObj.status && where.id_users !== msgObj.user.id)) {
+      if (!msgObj.status && userId !== msgObj.user.id) {
         msg.save({ status: DetailMessageStatus.READ }, { patch: true });
       }
       return msg;
@@ -330,7 +332,6 @@ class DisputeModel extends bookshelf.Model {
       message_id: messageId,
       user_id: userId,
       content,
-      status: DetailMessageStatus.UNREAD,
       created_at: new Date(),
     });
     const msg = await DetailMessage.create(detailMessageObj);
@@ -405,7 +406,6 @@ class DisputeModel extends bookshelf.Model {
       note: 'alasan_dispute',
       dispute_number: 'nopelaporan_dispute',
       remarks: 'remarksresult_dispute',
-      status: 'status_dispute',
       response_status: 'responadmin_dispute',
       response_at: 'tglresponadmin_dispute',
       created_at: 'createdate_dispute',

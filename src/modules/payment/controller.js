@@ -237,7 +237,7 @@ PaymentController.getDisputes = async (req, res, next) => {
 
 PaymentController.getDispute = async (req, res, next) => {
   const where = { id_users: req.user.id, id_dispute: req.params.id };
-  const dispute = await Dispute.getDetail(where);
+  const dispute = await Dispute.getDetail(where, req.user.id);
   req.resData = {
     message: 'Dispute Data',
     data: dispute,
@@ -287,7 +287,7 @@ PaymentController.getStoreDisputes = async (req, res, next) => {
 PaymentController.getStoreDispute = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const where = { id_toko: storeId, id_dispute: req.params.id };
-  const dispute = await Dispute.getDetail(where);
+  const dispute = await Dispute.getDetail(where, req.user.id);
   req.resData = {
     message: 'Dispute Data',
     data: dispute,
