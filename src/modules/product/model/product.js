@@ -342,13 +342,21 @@ class ProductModel extends bookshelf.Model {
   /**
    * Get search result
    */
-  static async search(query, marketplaceId) {
+  static async search(data) {
+    const {
+      query,
+      category_id: categoryId = null,
+      store_id: storeId = null,
+      marketplace_id: marketplaceId,
+    } = data;
     return await this.query((qb) => {
-      qb.select('nama_produk');
+      qb.select('*', 'nama_produk');
       qb.groupBy('nama_produk');
       qb.innerJoin('toko as t', 't.id_toko', 'produk.id_toko');
       qb.innerJoin('users as u', 'u.id_users', 't.id_users');
       qb.where('u.id_marketplaceuser', marketplaceId);
+      if (categoryId) qb.where('id_kategoriproduk', categoryId);
+      if (storeId) qb.where('t.id_toko', storeId);
       qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
       qb.limit(8);
     }).fetchAll();
