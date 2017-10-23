@@ -16,7 +16,7 @@ UserEmail.buildEmail = ({ layout, subject, link, emailToSend, token }) => {
 UserEmail.buildForgotPassword = (emailToSend, token) => UserEmail.buildEmail({
   layout: 'forgot_password.pug',
   subject: 'Reset Password Link',
-  link: 'password-new',
+  link: 'password/new',
   emailToSend,
   token,
 });
@@ -24,7 +24,7 @@ UserEmail.buildForgotPassword = (emailToSend, token) => UserEmail.buildEmail({
 UserEmail.buildActivateAccount = (emailToSend, token) => UserEmail.buildEmail({
   layout: 'activate_account.pug',
   subject: 'Activate Account Link',
-  link: 'signup-verification',
+  link: 'signup/verification',
   emailToSend,
   token,
 });
