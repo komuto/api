@@ -34,6 +34,7 @@ export const DisputeStatus = {
   RECEIVE_BY_BUYER: 6,
   PROCESS_OF_REFUND: 7,
   CLOSED: 8,
+  // TODO: Add reviewed status
 };
 
 class DisputeModel extends bookshelf.Model {

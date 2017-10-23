@@ -92,9 +92,9 @@ ProductController.search = async (req, res, next) => {
     store_id: req.query.store_id,
     marketplace_id: req.marketplace.id,
   });
-  results.each((result) => {
-    console.log(result.serialize());
-  });
+  // results.each((result) => {
+  //   console.log(result.serialize());
+  // });
   req.resData = {
     message: 'Products Search Result',
     data: results.map(val => ({ name: val.get('nama_produk') })),
