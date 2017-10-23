@@ -167,7 +167,7 @@ UserController.updatePassword = async (req, res, next) => {
  * Create user
  */
 UserController.createUser = async (req, res, next) => {
-  let user = await User.getByEmail(req.body.email);
+  let user = await User.getByEmail(req.body.email, req.marketplace.id);
   if (user) throw registrationError('email', 'duplicate_email', true);
   const password = req.body.password;
   req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';

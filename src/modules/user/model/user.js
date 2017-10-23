@@ -227,8 +227,8 @@ class UserModel extends bookshelf.Model {
     return await new this({ id_users: id }).fetch();
   }
 
-  static async getByEmail(email) {
-    return await new this({ email_users: email }).fetch();
+  static async getByEmail(email, marketplaceId) {
+    return await new this({ email_users: email, id_marketplaceuser: marketplaceId }).fetch();
   }
 
   static async getWithPhone(data) {
