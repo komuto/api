@@ -337,7 +337,7 @@ class BucketModel extends bookshelf.Model {
       }));
     }
 
-    if (status.bucket === BucketStatus.PAYMENT_RECEIVED) {
+    if (status.bucket === BucketStatus.PAYMENT_RECEIVED && bucket.get('id_promo')) {
       const promo = bucket.related('promo');
       // eslint-disable-next-line no-plusplus
       await promo.save({ kuota_promo: --promo.serialize().quota }, { patch: true });
