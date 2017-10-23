@@ -22,6 +22,7 @@ constraints.login = {
 constraints.socialLogin = {
   provider_name: {
     presence: { message: loginMsg.provName_presence },
+    inclusion: { within: ['facebook'] },
   },
   provider_uid: {
     presence: { message: loginMsg.uid_presence },
