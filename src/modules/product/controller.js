@@ -56,12 +56,13 @@ ProductController.index = async (req, res, next) => {
   const { is_dropship: isDropship = false } = req.body;
   const condition = cond && (cond === 'new' ? ProductCondition.NEW : ProductCondition.USED);
   const where = Product.matchDBColumn({ condition, category_id, catalog_id });
+  console.log(req.query.q);
   const params = {
     page,
     pageSize,
     where,
     price: req.query.price ? getPrice(req.query.price) : null,
-    query: req.query.q && req.query.q.replace(' ', '&'),
+    query: req.query.q && req.query.q.replace(/ /g, '&'),
     sort: req.query.sort || 'newest',
     other: req.query.other,
     brands: req.query.brands,
@@ -91,9 +92,6 @@ ProductController.search = async (req, res, next) => {
     category_id: req.query.category_id,
     store_id: req.query.store_id,
     marketplace_id: req.marketplace.id,
-  });
-  results.each((result) => {
-    console.log(result.serialize());
   });
   req.resData = {
     message: 'Products Search Result',
