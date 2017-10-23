@@ -386,8 +386,8 @@ class DisputeModel extends bookshelf.Model {
     return cloneDispute;
   }
 
-  static async getMessagesCount(userId) {
-    const disputes = await this.where({ id_users: userId }).fetchAll({ withRelated: ['message.detailMessages'] });
+  static async getMessagesCount(where, userId) {
+    const disputes = await this.where(where).fetchAll({ withRelated: ['message.detailMessages'] });
     return disputes.reduce((res, dispute) => {
       const detailMessages = dispute.related('message').related('detailMessages');
       const countDm = _.filter(detailMessages.models, dm => dm.get('id_users') !== userId

@@ -30,7 +30,7 @@ import {
 } from './messages';
 import { Discussion, Product } from '../product/model';
 import core from '../core';
-import { Dispute } from "../payment/model/dispute";
+import { Dispute } from '../payment/model';
 
 const { Notification, sellerNotification } = core;
 
@@ -528,7 +528,7 @@ UserController.replyResolution = async (req, res, next) => {
  * Get Notification Page
  */
 UserController.getNotificationPage = async (req, res, next) => {
-  const disputes = await Dispute.getMessagesCount(req.user.id);
+  const disputes = await Dispute.getMessagesCount({ id_users: req.user.id }, req.user.id);
   req.resData = {
     message: 'Notification Page',
     data: { disputes },
