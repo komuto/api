@@ -90,7 +90,31 @@ constraints.list = {
   },
 };
 
-constraints.search = { q: { presence: true } };
+constraints.search = {
+  q: { presence: true },
+  store_id: {
+    presence: false,
+    numericality: {
+      onlyInteger: true,
+      greaterThan: 0,
+    },
+    length: {
+      minimum: 1,
+      maximum: 10,
+    },
+  },
+  category_id: {
+    presence: false,
+    numericality: {
+      onlyInteger: true,
+      greaterThan: 0,
+    },
+    length: {
+      minimum: 1,
+      maximum: 10,
+    },
+  },
+};
 
 constraints.discussion = { question: { presence: true } };
 
