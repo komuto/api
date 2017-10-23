@@ -56,7 +56,6 @@ ProductController.index = async (req, res, next) => {
   const { is_dropship: isDropship = false } = req.body;
   const condition = cond && (cond === 'new' ? ProductCondition.NEW : ProductCondition.USED);
   const where = Product.matchDBColumn({ condition, category_id, catalog_id });
-  console.log(req.query.q);
   const params = {
     page,
     pageSize,
