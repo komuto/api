@@ -350,7 +350,7 @@ class ProductModel extends bookshelf.Model {
       marketplace_id: marketplaceId,
     } = data;
     return await this.query((qb) => {
-      qb.select('*', 'nama_produk');
+      qb.select('nama_produk');
       qb.groupBy('nama_produk');
       qb.innerJoin('toko as t', 't.id_toko', 'produk.id_toko');
       qb.innerJoin('users as u', 'u.id_users', 't.id_users');

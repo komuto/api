@@ -117,8 +117,10 @@ class StoreModel extends bookshelf.Model {
       const catalogProducts = catalog.related('products').map((product) => {
         const images = product.related('images').serialize();
         const { likes, isLiked } = this.getLikes(product, userId);
+        product = product.serialize({ minimal: true });
+        product.id = `${product.id}.${store.get('id_toko')}`;
         return {
-          ...product.serialize({ minimal: true }),
+          ...product,
           image: images.length ? images[0].file : config.defaultImage.product,
           count_like: likes.length,
           is_liked: isLiked,
@@ -178,13 +180,15 @@ class StoreModel extends bookshelf.Model {
         quality += review.toJSON().quality;
         accuracy += review.toJSON().accuracy;
         const { name, id: userId, photo } = review.related('user').serialize();
-        const reviewProduct = review.related('product');
+        let reviewProduct = review.related('product');
         const images = reviewProduct.related('images').serialize();
+        reviewProduct = reviewProduct.serialize();
+        reviewProduct.id = `${reviewProduct.id}.${store.get('id_toko')}`;
         return {
           ...review.serialize(),
           user: { id: userId, name, photo },
           product: {
-            ...reviewProduct.serialize(),
+            ...reviewProduct,
             image: images.length ? images[0].file : config.defaultImage.product,
           },
         };
@@ -218,9 +222,9 @@ class StoreModel extends bookshelf.Model {
       'user.addresses.province',
       'products.reviews.user',
       'catalogs.products.likes',
-      { 'products.reviews.product.images': qb => qb.limit(1) },
+      'products.reviews.product.images',
+      'catalogs.products.images',
       { 'catalogs.products': qb => qb.limit(3) },
-      { 'catalogs.products.images': qb => qb.limit(1) },
       { verifyAddress: qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) },
     ];
     if (userId) related.push({ favoriteStores: qb => qb.where('id_users', userId) });
