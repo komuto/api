@@ -6,7 +6,7 @@ const { formatSingularErr, formatError } = utils;
 export const errMsg = {
   loginMsg: {
     title: 'Login gagal',
-    wrong_password: 'Password salah',
+    wrong_password: 'Email atau password yang kamu masukkan salah, silahkan coba lagi',
     bad_request: 'Bad request',
     password_presence: '^Password harus diisi',
     email_presence: '^Email harus diisi',
