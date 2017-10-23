@@ -57,6 +57,7 @@ class DetailMessageModel extends bookshelf.Model {
       user_id: 'id_users',
       content: 'content_messages',
       created_at: 'date_detilmessages',
+      status: 'status',
     };
     return matchDB(data, column);
   }

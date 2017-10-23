@@ -330,6 +330,7 @@ class DisputeModel extends bookshelf.Model {
       message_id: messageId,
       user_id: userId,
       content,
+      status: DetailMessageStatus.UNREAD,
       created_at: new Date(),
     });
     const msg = await DetailMessage.create(detailMessageObj);
