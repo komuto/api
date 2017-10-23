@@ -76,7 +76,7 @@ UserController.getUserSocial = async (req, res, next) => {
     let response = await fb.api(provider_uid, { fields: 'id,name,email,gender,picture.type(large)' })
       .catch(e => fbError(e.response.error));
     if (response instanceof BadRequestError) throw response;
-    const user = await User.getByEmail(response.email);
+    const user = await User.getByEmail(response.email, req.marketplace.id);
     // Case where user already created but provider name and uid do not match
     if (user) {
       await user.save({
@@ -211,7 +211,7 @@ UserController.getAccountProfile = async (req, res, next) => {
 };
 
 UserController.forgotPassword = async (req, res, next) => {
-  const user = await User.getByEmail(req.body.email);
+  const user = await User.getByEmail(req.body.email, req.marketplace.id);
   if (!user) throw resetPassError('email', 'email_not_found');
   const token = await UserToken.generateToken(user.id, TokenType.FORGOT_PASSWORD);
   UserEmail.sendForgotPassword(req.body.email, token);
