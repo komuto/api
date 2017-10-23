@@ -406,6 +406,7 @@ class ProductModel extends bookshelf.Model {
    * @param product {object} bookshelf object before serialize
    */
   static loadLikesDropship(userId, wishlists, product) {
+    if (!wishlists) return { is_liked: false, count_like: 0 };
     const id = product ? parseNum(product.get('id_dropshipper')) : null;
     const isLiked = wishlists.some(wishlist => parseNum(wishlist.get('id_users')) === userId
       && parseNum(wishlist.get('id_dropshipper'), null) === id);
