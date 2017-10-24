@@ -17,7 +17,7 @@ import { OTPAddress } from './../OTP/model';
 import { Address } from './../address/model';
 import { User, getNotification, NotificationType } from './../user/model';
 import { OTPAddressEmail } from '../OTP/email';
-import { Invoice, InvoiceTransactionStatus } from '../payment/model';
+import { Invoice, InvoiceTransactionStatus, Dispute } from '../payment/model';
 import config from '../../../config';
 import core from '../core';
 
@@ -386,10 +386,11 @@ StoreController.replyMessage = async (req, res, next) => {
  */
 StoreController.getPage = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const [newOrders, processing, sale] = await Promise.all([
+  const [newOrders, processing, sale, disputes] = await Promise.all([
     Invoice.getCount(storeId, InvoiceTransactionStatus.WAITING),
     Invoice.getCount(storeId, InvoiceTransactionStatus.PROCEED),
     Invoice.getCount(storeId),
+    Dispute.getMessagesCount({ id_toko: storeId }, req.user.id),
   ]);
 
   req.resData = {
@@ -400,6 +401,7 @@ StoreController.getPage = async (req, res, next) => {
         processing_order: processing,
         sale,
       },
+      disputes,
     },
   };
   return next();

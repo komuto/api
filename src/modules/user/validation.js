@@ -51,7 +51,7 @@ constraints.registration = {
     format: { pattern: /^male|female$/, message: registrationMsg.gender_not_valid },
   },
   phone_number: { presence: { message: registrationMsg.phone_presence } },
-  reg_token: { presence: true },
+  reg_token: { presence: false },
 };
 
 constraints.update = {

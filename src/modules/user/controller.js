@@ -30,6 +30,7 @@ import {
 } from './messages';
 import { Discussion, Product } from '../product/model';
 import core from '../core';
+import { Dispute } from '../payment/model';
 
 const { Notification, sellerNotification } = core;
 
@@ -519,6 +520,18 @@ UserController.replyResolution = async (req, res, next) => {
   req.resData = {
     message: 'Resolution Data',
     data: resolution.serialize({ minimal: false }, req.user.name),
+  };
+  return next();
+};
+
+/**
+ * Get Notification Page
+ */
+UserController.getNotificationPage = async (req, res, next) => {
+  const disputes = await Dispute.getMessagesCount({ id_users: req.user.id }, req.user.id);
+  req.resData = {
+    message: 'Notification Page',
+    data: { disputes },
   };
   return next();
 };
