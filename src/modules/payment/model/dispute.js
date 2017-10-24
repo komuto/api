@@ -205,7 +205,7 @@ class DisputeModel extends bookshelf.Model {
   }
 
   static detailDispute(dispute, isDetail = true, userId = null) {
-    let fine = [];
+    let fine;
     let countUnread;
 
     if (isDetail) {
@@ -233,7 +233,7 @@ class DisputeModel extends bookshelf.Model {
     });
 
     const disputeObj = dispute.serialize();
-    if (disputeObj.status === DisputeStatus.CLOSED && !fine.length) {
+    if (isDetail && disputeObj.status === DisputeStatus.CLOSED && !fine.length) {
       disputeObj.status = DisputeStatus.REVIEWED;
       dispute.save({ status_dispute: DisputeStatus.REVIEWED }, { patch: true });
     }
