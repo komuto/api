@@ -34,6 +34,7 @@ export const DisputeStatus = {
   RECEIVE_BY_BUYER: 6,
   PROCESS_OF_REFUND: 7,
   CLOSED: 8,
+  REVIEWED: 9,
 };
 
 class DisputeModel extends bookshelf.Model {
@@ -144,8 +145,8 @@ class DisputeModel extends bookshelf.Model {
     const relation = where.id_users ? 'store' : 'user';
     const disputes = await this.where(where)
       .query((qb) => {
-        if (isResolved) qb.where('status_dispute', DisputeStatus.CLOSED);
-        else qb.whereNot('status_dispute', DisputeStatus.CLOSED);
+        if (isResolved) qb.where('status_dispute', DisputeStatus.REVIEWED);
+        else qb.whereNot('status_dispute', DisputeStatus.REVIEWED);
       })
       .fetchPage({
         page,
@@ -231,8 +232,14 @@ class DisputeModel extends bookshelf.Model {
       };
     });
 
+    const disputeObj = dispute.serialize();
+    if (disputeObj.status === DisputeStatus.CLOSED && !fine.length) {
+      disputeObj.status = DisputeStatus.REVIEWED;
+      dispute.save({ status_dispute: DisputeStatus.REVIEWED }, { patch: true });
+    }
+
     return {
-      ...dispute.serialize(),
+      ...disputeObj,
       dispute_products: products,
       fine_products: fine,
       count_unread: countUnread,
@@ -248,11 +255,10 @@ class DisputeModel extends bookshelf.Model {
     const invoice = dispute.related('invoice');
     const disputeObj = dispute.serialize();
     let newReviews;
-    let status = DisputeStatus.RECEIVE_BY_BUYER;
 
     if (
-      disputeObj.solution === DisputeSolutionType.EXCHANGE &&
-      disputeObj.status === DisputeStatus.SEND_BY_SELLER
+      disputeObj.solution === DisputeSolutionType.EXCHANGE
+      && disputeObj.status === DisputeStatus.SEND_BY_SELLER
     ) {
       invoice.related('items').forEach((item) => {
         const found = _.find(reviews, o => o.product_id === item.get('id_produk'));
@@ -265,9 +271,9 @@ class DisputeModel extends bookshelf.Model {
         return await Review.create(item, product, userId, val);
       }));
     } else if (
-      disputeObj.solution === DisputeSolutionType.REFUND &&
-      disputeObj.response_status === DisputeResponseStatus.BUYER_WIN &&
-      disputeObj.status !== DisputeStatus.CLOSED
+      disputeObj.solution === DisputeSolutionType.REFUND
+      && disputeObj.response_status === DisputeResponseStatus.BUYER_WIN
+      && disputeObj.status !== DisputeStatus.CLOSED
     ) {
       const fine = dispute.related('invoice').related('items').reduce((res, item) => {
         const found = _.find(dispute.related('disputeProducts').models, o => o.get('id_produk') === item.get('id_produk'));
@@ -279,7 +285,6 @@ class DisputeModel extends bookshelf.Model {
         const found = _.find(reviews, o => o.product_id === val.id);
         if (!found) throw createReviewError('review', 'error');
       });
-      status = DisputeStatus.CLOSED;
 
       newReviews = await Promise.all(fine.map(async (val) => {
         const item = _.find(invoice.related('items').models, o => o.get('id_produk') === val.id);
@@ -292,7 +297,7 @@ class DisputeModel extends bookshelf.Model {
     }
 
     await Promise.all([
-      dispute.save({ status_dispute: status }, { patch: true }),
+      dispute.save({ status_dispute: DisputeStatus.REVIEWED }, { patch: true }),
       invoice.save({
         status_transaksi: InvoiceTransactionStatus.COMPLAINT_DONE,
         updated_at: new Date(),
