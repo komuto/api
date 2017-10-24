@@ -1,5 +1,6 @@
 import 'babel-polyfill';
 import 'log-full';
+import 'newrelic';
 import express from 'express';
 import bodyParser from 'body-parser';
 import compression from 'compression';
