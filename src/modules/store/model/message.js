@@ -62,6 +62,10 @@ class MessageModel extends bookshelf.Model {
     return this.hasMany('DetailMessage', 'id_messages');
   }
 
+  invoice() {
+    return this.belongsTo('Invoice', 'parent_id');
+  }
+
   /**
    * Create message
    * @param data
@@ -94,15 +98,23 @@ class MessageModel extends bookshelf.Model {
         } else {
           qb.whereNot(column, MessageFlagStatus.ARCHIVE);
         }
-        qb.whereNull('group_message');
+        qb.whereNot('group_message', MessageType.COMPLAINT);
       })
-      .fetchPage({ page, pageSize, withRelated: ['store'] });
+      .orderBy(type === 'store' ? 'flagreceiver_date' : 'flagsender_date', 'desc')
+      .fetchPage({ page, pageSize, withRelated: ['store', 'invoice'] });
     return await Promise.all(messages.map(async (message) => {
       await message.load({ detailMessages: qb => qb.limit(1) });
       const detail = message.related('detailMessages').models[0];
+      let invoiceUrl = null;
+      const invoiceId = message.related('invoice').get('id_invoice');
+      if (invoiceId) {
+        // TODO: Generate invoice url from each group_message
+        invoiceUrl = invoiceId;
+      }
       return {
         ...message.serialize(),
         detail_message: detail || {},
+        invoice_url: invoiceUrl,
       };
     }));
   }
