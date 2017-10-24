@@ -78,6 +78,7 @@ app.use(core.middleware.requestUtilsMiddleware());
 app.prefix = (router => (app.use('/:mp', router)));
 
 app.use(core.routes);
+app.use(marketplace.routes);
 
 app.prefix(marketplace.middleware.verify());
 app.prefix(image.routes);
