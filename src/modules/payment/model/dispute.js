@@ -272,8 +272,8 @@ class DisputeModel extends bookshelf.Model {
       }));
     } else if (
       disputeObj.solution === DisputeSolutionType.REFUND
-      && disputeObj.response_status === DisputeResponseStatus.BUYER_WIN
-      && disputeObj.status !== DisputeStatus.CLOSED
+      && disputeObj.response_status !== DisputeResponseStatus.NO_RESPONSE_YET
+      && disputeObj.status === DisputeStatus.CLOSED
     ) {
       const fine = dispute.related('invoice').related('items').reduce((res, item) => {
         const found = _.find(dispute.related('disputeProducts').models, o => o.get('id_produk') === item.get('id_produk'));
@@ -296,13 +296,15 @@ class DisputeModel extends bookshelf.Model {
       throw createReviewError('review', 'disable');
     }
 
-    await Promise.all([
+    const [status] = await Promise.all([
       dispute.save({ status_dispute: DisputeStatus.REVIEWED }, { patch: true }),
       invoice.save({
         status_transaksi: InvoiceTransactionStatus.COMPLAINT_DONE,
         updated_at: new Date(),
       }, { patch: true }),
     ]);
+
+    console.log(status);
 
     return newReviews;
   }
