@@ -194,7 +194,7 @@ class ProductModel extends bookshelf.Model {
     let { brands, services } = params;
 
     products.where(where).andWhere('u.id_marketplaceuser', marketplaceId);
-    if (isDropship) products.whereNot('p.id_toko', storeId);
+    if (isDropship) products.whereNot('p.id_toko', storeId).andWhere('is_dropshiper', true);
     if (!isDropship && storeId) products.where(isFromProduct ? 'p.id_toko' : 'd.id_toko', storeId);
     if (query) products.whereRaw('to_tsvector(nama_produk) @@ to_tsquery(?)', query);
     if (price && price.min !== 0 && price.max !== 0) products.whereBetween('harga_produk', [price.min, price.max]);
