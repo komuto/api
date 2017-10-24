@@ -26,6 +26,7 @@ __MACOSX
 
 /config/local.js
 /config/*.local.js
+/config/serviceAccountKey.json
 
 yarn.lock
 
