@@ -205,7 +205,7 @@ class DisputeModel extends bookshelf.Model {
   }
 
   static detailDispute(dispute, isDetail = true, userId = null) {
-    let fine;
+    let fine = [];
     let countUnread;
 
     if (isDetail) {
