@@ -90,6 +90,7 @@ ProductController.search = async (req, res, next) => {
     query: req.query.q,
     category_id: req.query.category_id,
     store_id: req.query.store_id,
+    catalog_id: req.query.catalog_id,
     marketplace_id: req.marketplace.id,
   });
   req.resData = {
