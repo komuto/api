@@ -29,8 +29,14 @@ class MarketplaceModel extends bookshelf.Model {
     return false;
   }
 
-  serialize() {
+  serialize({ minimal = false } = {}) {
+    const marketplace = {
+      mobile_domain: this.get('mobile_domain'),
+      api_domain: this.get('api_domain'),
+    };
+    if (minimal) return marketplace;
     return {
+      ...marketplace,
       id: this.get('id_marketplaceuser'),
       marketplace_id: this.get('parentid_marketplace'),
       theme_id: this.get('identifier_themesmp'),
@@ -41,8 +47,6 @@ class MarketplaceModel extends bookshelf.Model {
       saldo_wallet: this.get('saldo_wallet'),
       logo: this.get('logo_marketplace'),
       favicon: this.get('favicon_pathmp'),
-      mobile_domain: this.get('mobile_domain'),
-      api_domain: this.get('api_domain'),
       status: this.get('status_marketplaceuser'),
       status_at: this.get('tgltatus_marketplaceuser'),
       is_cooperative: this.get('add_koperasi'),
@@ -58,7 +62,7 @@ class MarketplaceModel extends bookshelf.Model {
     const marketplace = await this.where({ mobile_domain: domain }).fetch();
     if (!marketplace) throw getMarketplaceError('marketplace', 'not_found');
     return {
-      ...marketplace.serialize(),
+      ...marketplace.serialize({ minimal: true }),
       generated_id: crypt.encode({ id: marketplace.get('id_marketplaceuser') }),
     };
   }
