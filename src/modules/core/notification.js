@@ -61,6 +61,7 @@ class NotificationClass {
         body: notification.body,
         content_available: 'true',
         priority: 'high',
+        sound: 'default',
       },
       data,
     };
