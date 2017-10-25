@@ -1,12 +1,7 @@
-import Cryptorjs from 'cryptorjs';
-import config from '../../../../config';
 import core from '../../core';
-import { getMarketplaceError } from '../messages';
 
 const { parseDate } = core.utils;
 const bookshelf = core.postgres.db;
-
-const crypt = new Cryptorjs(config.secretKey);
 
 export const MarketplaceStatus = {
   INACTIVE: 0,
@@ -29,14 +24,8 @@ class MarketplaceModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = false } = {}) {
-    const marketplace = {
-      mobile_domain: this.get('mobile_domain'),
-      api_domain: this.get('api_domain'),
-    };
-    if (minimal) return marketplace;
+  serialize() {
     return {
-      ...marketplace,
       id: this.get('id_marketplaceuser'),
       marketplace_id: this.get('parentid_marketplace'),
       theme_id: this.get('identifier_themesmp'),
@@ -51,6 +40,8 @@ class MarketplaceModel extends bookshelf.Model {
       status_at: this.get('tgltatus_marketplaceuser'),
       is_cooperative: this.get('add_koperasi'),
       cooperative_created_at: parseDate(this.get('datecreated_marketplaceuser')),
+      mobile_domain: this.get('mobile_domain'),
+      api_domain: this.get('api_domain'),
     };
   }
 
@@ -59,12 +50,7 @@ class MarketplaceModel extends bookshelf.Model {
   }
 
   static async findByDomain(domain) {
-    const marketplace = await this.where({ mobile_domain: domain }).fetch();
-    if (!marketplace) throw getMarketplaceError('marketplace', 'not_found');
-    return {
-      ...marketplace.serialize({ minimal: true }),
-      generated_id: crypt.encode({ id: marketplace.get('id_marketplaceuser') }),
-    };
+    return await this.where({ api_domain: domain }).fetch();
   }
 }
 

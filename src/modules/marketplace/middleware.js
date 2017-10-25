@@ -1,16 +1,13 @@
-import Cryptorjs from 'cryptorjs';
 import { Marketplace } from './model';
 import { NotFoundError } from '../../../common/errors';
-import config from '../../../config';
 import messages from '../core/messages';
-
-const crypt = new Cryptorjs(config.secretKey);
 
 export function verify() {
   return async (req, res, next) => {
     try {
-      const decoded = crypt.decode(req.params.mp);
-      const marketplace = await Marketplace.findById(decoded.id);
+      const host = req.get('host');
+      console.log(host)
+      const marketplace = await Marketplace.findByDomain(host);
       if (!marketplace) next(new NotFoundError(messages.marketplace_not_found.msg));
       req.marketplace = marketplace.serialize();
       next();

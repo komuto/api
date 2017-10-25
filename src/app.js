@@ -75,30 +75,27 @@ app.set('case sensitive routing', true);
 
 // configure middleware
 app.use(core.middleware.requestUtilsMiddleware());
-
-app.prefix = (router => (app.use('/:mp', router)));
+app.use(marketplace.middleware.verify());
 
 app.use(core.routes);
 app.use(marketplace.routes);
-
-app.prefix(marketplace.middleware.verify());
-app.prefix(image.routes);
+app.use(image.routes);
 
 app.use(core.middleware.checkContentType());
 
-app.prefix(user.routes);
-app.prefix(category.routes);
-app.prefix(expedition.routes);
-app.prefix(address.routes);
-app.prefix(brand.routes);
-app.prefix(product.routes);
-app.prefix(bank.routes);
-app.prefix(review.routes);
-app.prefix(store.routes);
-app.prefix(bucket.routes);
-app.prefix(otp.routes);
-app.prefix(payment.routes);
-app.prefix(saldo.routes);
+app.use(user.routes);
+app.use(category.routes);
+app.use(expedition.routes);
+app.use(address.routes);
+app.use(brand.routes);
+app.use(product.routes);
+app.use(bank.routes);
+app.use(review.routes);
+app.use(store.routes);
+app.use(bucket.routes);
+app.use(otp.routes);
+app.use(payment.routes);
+app.use(saldo.routes);
 
 app.use(core.middleware.pathNotFound());
 app.use(core.middleware.errResponse());

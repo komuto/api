@@ -95,9 +95,6 @@ def.cache.debug = true;
 def.cache.enable = true;
 def.cache.duration = 1800000; // in ms: 30 minutes
 
-// secret key for encode marketplace id
-def.secretKey = '9a4c5dee925f';
-
 // Midtrans auth
 def.midtrans = {};
 def.midtrans.clientKey = 'VT-client-Kh2JdUMi7H9ij1hW';

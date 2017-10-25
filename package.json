@@ -102,8 +102,7 @@
     "build": "node scripts/build.js",
     "build:watch": "node scripts/build.js --watch",
     "start": "node scripts/run.js",
-    "knex": "babel-node node_modules/.bin/knex",
-    "generate:id": "node scripts/generate_marketplace_id.js"
+    "knex": "babel-node node_modules/.bin/knex"
   },
   "jest": {
     "testEnvironment": "node",
