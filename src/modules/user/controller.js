@@ -56,11 +56,11 @@ UserController.login = async (req, res, next) => {
       return next(err);
     }
     if (req.body.reg_token) {
-      await User.where('id_users', user.id).save({ reg_token: null }, { patch: true });
+      await User.where('id_users', user.id).save({ reg_token: req.body.reg_token }, { patch: true });
       User.query((qb) => {
         qb.where('reg_token', req.body.reg_token);
         qb.whereNot('id_users', user.id);
-      }).save({ reg_token: req.body.reg_token }, { patch: true }).catch(() => {});
+      }).save({ reg_token: null }, { patch: true }).catch(() => {});
       user.reg_token = req.body.reg_token;
     }
     req.user = user;
