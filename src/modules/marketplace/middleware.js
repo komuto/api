@@ -1,12 +1,12 @@
 import { Marketplace } from './model';
 import { NotFoundError } from '../../../common/errors';
 import messages from '../core/messages';
+import config from '../../../config';
 
 export function verify() {
   return async (req, res, next) => {
     try {
-      const host = req.get('host');
-      console.log(host)
+      const host = req.get('host').includes(':') ? config.defaultApiDomain : req.get('host');
       const marketplace = await Marketplace.findByDomain(host);
       if (!marketplace) next(new NotFoundError(messages.marketplace_not_found.msg));
       req.marketplace = marketplace.serialize();

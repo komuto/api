@@ -45,10 +45,6 @@ class MarketplaceModel extends bookshelf.Model {
     };
   }
 
-  static async findById(id) {
-    return await this.where({ id_marketplaceuser: id }).fetch();
-  }
-
   static async findByDomain(domain) {
     return await this.where({ api_domain: domain }).fetch();
   }

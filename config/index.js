@@ -101,6 +101,8 @@ def.midtrans.clientKey = 'VT-client-Kh2JdUMi7H9ij1hW';
 def.midtrans.serverKey = 'VT-server-mKN5sKSvcf1fk3Rap8wSrusA';
 def.midtrans.isProduction = true;
 
+def.defaultApiDomain = 'api.komuto.skyshi.com';
+
 cfg.resolveLocalConfig(__dirname, (err, file) => {
   // eslint-disable-next-line global-require, import/no-dynamic-require
   if (!err) cfg.merge(def, require(file));
