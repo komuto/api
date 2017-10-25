@@ -134,7 +134,7 @@ class MessageModel extends bookshelf.Model {
     let message = await this.where(where)
       .query((qb) => {
         qb.whereNot(column, MessageFlagStatus.PERMANENT_DELETED);
-        qb.whereNull('group_message');
+        qb.whereNot('group_message', MessageType.COMPLAINT);
       })
       .fetch({ withRelated: ['store', 'detailMessages.user'] });
     if (!message) throw getMessageError('message', 'not_found');
