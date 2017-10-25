@@ -24,8 +24,17 @@ routes.get('/products',
  */
 routes.get('/users/store/products',
   auth(),
-  validateParam(constraints.listStoreProduct),
   wrap(ProductController.storeProducts),
+  apiResponse());
+
+/**
+ * GET /users/store/products/search
+ * View own products
+ */
+routes.get('/users/store/products/search',
+  auth(),
+  validateParam(constraints.listStoreProduct),
+  wrap(ProductController.storeProductsSearch),
   apiResponse());
 
 /**

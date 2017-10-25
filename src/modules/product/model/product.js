@@ -904,6 +904,68 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
+   * Get store products (search)
+   */
+  static async storeProductsSearch(params) {
+    const {
+      page,
+      pageSize,
+      storeId,
+      query,
+      catalogId,
+      hidden,
+      masterFee,
+    } = params;
+    const status = hidden ? ProductStatus.HIDE : ProductStatus.SHOW;
+    const offset = page <= 1 ? 0 : (page - 1) * pageSize;
+
+    const products = await this.query((qb) => {
+      qb.select(['*', 'tglstatus_produk as date_created', 'produk.id_toko', 'produk.identifier_katalog as identifier_katalog']);
+      qb.select(knex.raw('null as "id_dropshipper"'));
+      qb.where('produk.id_toko', storeId).andWhere('status_produk', status);
+      if (query) qb.whereRaw('to_tsvector(nama_produk) @@ to_tsquery(?)', query);
+      if (catalogId) qb.where('identifier_katalog', catalogId);
+      qb.union(function () {
+        const dropship = this
+          .select([
+            'p.*',
+            'd.tglstatus_dropshipper as date_created',
+            'd.id_toko',
+            'id_dropshipper',
+            'd.id_katalog as identifier_katalog',
+          ])
+          .from('produk as p')
+          .leftJoin('dropshipper as d', 'd.id_produk', 'p.id_produk')
+          .where('d.id_toko', storeId);
+        if (query) dropship.whereRaw('to_tsvector(nama_produk) @@ to_tsquery(?)', query);
+        if (catalogId) qb.where('identifier_katalog', catalogId);
+      });
+      qb.orderBy('date_created', 'desc');
+      qb.limit(pageSize).offset(offset);
+    }).fetchAll({ withRelated: ['images', 'store'], debug: true });
+
+    return await Promise.all(products.map(async (product) => {
+      await product.load({ images: qb => qb.limit(1) });
+      const images = product.related('images').models;
+      const image = images.length ? images[0].serialize().file : config.defaultImage.product;
+      const dropshipOrigin = !product.get('id_dropshipper') ? undefined
+        : {
+          store_id: product.get('id_produk'),
+          name: product.related('store').get('nama_toko'),
+          commission: {
+            nominal: MasterFee.calculateCommissionByFees(masterFee, Number(product.get('harga_produk'))),
+            percent: MasterFee.calculateCommissionByFees(masterFee, Number(product.get('harga_produk')), true),
+          },
+        };
+      return {
+        ...product.serialize({ minimal: true }),
+        image,
+        dropship_origin: dropshipOrigin,
+      };
+    }));
+  }
+
+  /**
    * @param productId {int}
    * @param storeId {int}
    */

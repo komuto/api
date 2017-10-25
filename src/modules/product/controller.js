@@ -349,6 +349,32 @@ ProductController.storeProducts = async (req, res, next) => {
 };
 
 /**
+ * Get store products search
+ */
+ProductController.storeProductsSearch = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const storeId = await Store.getStoreId(req.user.id);
+  const masterFee = await MasterFee.findByMarketplaceId(req.marketplace.id);
+  const params = {
+    page,
+    pageSize,
+    storeId,
+    query: req.query.q,
+    catalogId: req.query.catalog_id,
+    hidden: req.query.hidden !== undefined,
+    masterFee,
+  };
+  const products = await Product.storeProductsSearch(params);
+  req.resData = {
+    message: 'Store Products Data',
+    meta: { page, limit: pageSize },
+    data: products,
+  };
+  return next();
+};
+
+/**
  * Get store products based on catalog id
  */
 ProductController.storeCatalogProducts = async (req, res, next) => {

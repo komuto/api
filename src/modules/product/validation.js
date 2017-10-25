@@ -244,12 +244,23 @@ constraints.dropship = {
 };
 
 constraints.listStoreProduct = {
-  q: { presence: false },
+  q: { presence: true },
   hidden: {
     presence: false,
     inclusion: {
       within: ['true', 'false'],
       message: 'accept only boolean',
+    },
+  },
+  catalog_id: {
+    presence: false,
+    numericality: {
+      onlyInteger: true,
+      greaterThan: 0,
+    },
+    length: {
+      minimum: 1,
+      maximum: 10,
     },
   },
 };
