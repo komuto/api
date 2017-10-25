@@ -47,8 +47,21 @@ class NotificationClass {
     const data = { type: notification.type };
     if (id) data.id = String(id);
     if (productId) data.product_id = String(productId);
+    data.custom_notification = JSON.stringify({
+      ...data,
+      title: notification.title,
+      body: notification.body,
+      content_available: true,
+      priority: 'high',
+      show_in_foreground: true,
+    });
     return {
-      notification: { title: notification.title, body: notification.body },
+      notification: {
+        title: notification.title,
+        body: notification.body,
+        content_available: 'true',
+        priority: 'high',
+      },
       data,
     };
   }
