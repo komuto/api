@@ -31,6 +31,7 @@ import { ReportEmail } from './email';
 import config from './../../../config';
 import { BadRequestError } from './../../../common/errors';
 import core from '../core';
+import dropshipFaq from '../../../config/faq';
 
 const { Notification, sellerNotification, buyerNotification } = core;
 const { getProductAndStore } = core.utils;
@@ -519,6 +520,14 @@ ProductController.getCommission = async (req, res, next) => {
   req.resData = {
     message: 'Commission Data',
     data: { commission },
+  };
+  return next();
+};
+
+ProductController.getDropshipFaq = async (req, res, next) => {
+  req.resData = {
+    message: 'Dropship FAQ',
+    data: dropshipFaq,
   };
   return next();
 };

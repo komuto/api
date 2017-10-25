@@ -250,4 +250,13 @@ routes.get('/commissions',
   wrap(ProductController.getCommission),
   apiResponse());
 
+/**
+ * GET /dropship/faq
+ * Get dropship faq
+ */
+routes.get('/dropship/faq',
+  auth(),
+  wrap(ProductController.getDropshipFaq),
+  apiResponse());
+
 export default routes;
