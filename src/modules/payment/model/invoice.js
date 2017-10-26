@@ -6,6 +6,7 @@ import { getInvoiceError, createInvoiceError } from './../messages';
 import { Store } from '../../store/model/store';
 import config from '../../../../config';
 import { Dropship } from '../../product/model/dropship';
+import { DisputeSolutionType, DisputeStatus } from "./dispute";
 
 const { parseDate, parseNum, matchDB, getProductAndStore } = core.utils;
 const bookshelf = core.postgres.db;
@@ -183,15 +184,39 @@ class InvoiceModel extends bookshelf.Model {
     return { ...invoice.serialize(), items, dispute };
   }
 
+  /**
+   * Get invoice for bulk create review & dispute
+   */
   static async get(userId, bucketId, id, withRelated = ['items']) {
-    const invoice = await this.where({
-      id_invoice: id,
-      id_user: userId,
-      id_bucket: bucketId,
-      status_transaksi: InvoiceTransactionStatus.SENDING,
-    }).fetch({ withRelated });
+    const invoice = await this
+      .where({
+        id_invoice: id,
+        id_user: userId,
+        id_bucket: bucketId,
+      })
+      .query(qb => qb.whereIn('status_transaksi', [
+        InvoiceTransactionStatus.SENDING,
+        InvoiceTransactionStatus.PROBLEM,
+      ]))
+      .fetch({ withRelated });
     if (!invoice) throw getInvoiceError('invoice', 'not_found');
+    if (invoice.get('status_transaksi') === InvoiceTransactionStatus.PROBLEM) {
+      await this.checkDispute(invoice);
+    }
     return invoice;
+  }
+
+  static async checkDispute(invoice) {
+    await invoice.load('dispute');
+    const dispute = invoice.related('dispute');
+    const disputeObj = dispute.serialize();
+    if (
+      disputeObj.solution !== DisputeSolutionType.EXCHANGE
+      && disputeObj.status !== DisputeStatus.SEND_BY_SELLER
+    ) {
+      throw getInvoiceError('invoice', 'dispute_disable', true);
+    }
+    return dispute;
   }
 
   /**
