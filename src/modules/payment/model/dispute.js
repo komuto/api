@@ -296,15 +296,13 @@ class DisputeModel extends bookshelf.Model {
       throw createReviewError('review', 'disable');
     }
 
-    const [status] = await Promise.all([
+    await Promise.all([
       dispute.save({ status_dispute: DisputeStatus.REVIEWED }, { patch: true }),
       invoice.save({
         status_transaksi: InvoiceTransactionStatus.COMPLAINT_DONE,
         updated_at: new Date(),
       }, { patch: true }),
     ]);
-
-    console.log(status);
 
     return newReviews;
   }
@@ -425,6 +423,7 @@ class DisputeModel extends bookshelf.Model {
       response_at: 'tglresponadmin_dispute',
       created_at: 'createdate_dispute',
       path: 'pathpic_dispute',
+      status: 'status_dispute',
     };
     return matchDB(data, column);
   }
