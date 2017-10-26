@@ -280,7 +280,12 @@ ProductController.report = async (req, res, next) => {
     description: req.body.description,
   });
   const report = await Report.create(data);
-  ReportEmail.sendReportProduct(config.komutoEmail, report.serialize(), product);
+  ReportEmail.sendReportProduct(
+    config.komutoEmail,
+    report.serialize(),
+    product,
+    req.marketplace.mobile_domain,
+  );
   req.resData = {
     message: 'Report Data',
     data: report,
