@@ -39,7 +39,8 @@ def.cdnPath = 'http://cdn.localhost.com';
 // knexjs config
 def.knex = {};
 def.knex.client = 'postgres';
-def.knex.debug = true;
+def.knex.debug = false;
+def.knex.executionTimeDebug = true;
 def.knex.connection = {};
 def.knex.connection.host = '127.0.0.1';
 def.knex.connection.user = 'postgres';
