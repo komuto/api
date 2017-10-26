@@ -5,9 +5,12 @@ import { loginError } from '../../messages';
 export default new LocalStrategy({
   usernameField: 'email',
   passwordField: 'password',
-  passReqToCallback: false,
-}, async (email, password, done) => {
-  const user = await User.getWithPhone({ email_users: email });
+  passReqToCallback: true,
+}, async (req, email, password, done) => {
+  const user = await User.getWithPhone({
+    email_users: email,
+    id_marketplaceuser: req.marketplace.id,
+  });
   if (!user) return done(loginError('email', 'email_not_found', true), false);
   try {
     const check = await User.checkPasswordFromApi(password, user.get('password_users'));
