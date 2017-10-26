@@ -66,11 +66,6 @@ def.emailServiceAdapter = 'sendgrid';
 def.emailKey = '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';
 def.emailFrom = 'no-reply@skyshi.com';
 
-// fb api config
-def.fb = {};
-def.fb.appId = '829312977224065';
-def.fb.appSecret = '624070b7448b0bd5dac3cacf5f30a4bb';
-
 // url builder
 def.url = (dir = '/') => {
   const port = ((def.https && def.port !== 443) || (!def.https && def.port !== 80)) ? `:${def.port}` : '';

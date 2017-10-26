@@ -34,8 +34,6 @@ import { Dispute } from '../payment/model';
 
 const { Notification, sellerNotification } = core;
 
-const fb = new Facebook(config.fb);
-
 export const UserController = {};
 export default { UserController };
 
@@ -72,6 +70,10 @@ UserController.login = async (req, res, next) => {
  * Get user via social media
  */
 UserController.getUserSocial = async (req, res, next) => {
+  const fb = new Facebook({
+    appId: req.marketplace.fb_app_id,
+    appSecret: req.marketplace.fb_secret_id,
+  });
   // Case where provider name and uid found on db
   const { provider_name, provider_uid, access_token, reg_token } = req.body;
   req.user = await User.getBySocial(provider_name, provider_uid);
