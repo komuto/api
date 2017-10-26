@@ -83,11 +83,10 @@ export function formatSingularErr(obj, message) {
  * Format bad request error
  * @param field {string} field that causes error
  * @param msg {string} message of the error
- * @param isMsg {boolean} use message as title
  */
-export function formatError(field, msg, isMsg = false) {
+export function formatError(field, msg) {
   const data = formatSingularErr(field, this[msg]);
-  return new BadRequestError(isMsg ? this[msg] : this.title, data);
+  return new BadRequestError(this[msg], data);
 }
 
 /**

@@ -154,7 +154,7 @@ BucketController.addToCart = async (req, res, next) => {
 
   const ownStoreId = store ? store.get('id_toko') : null;
   if (!address) throw addCartError('address', 'address_not_found');
-  if (req.body.qty > product.stock) throw addCartError('cart', 'stock', true);
+  if (req.body.qty > product.stock) throw addCartError('cart', 'stock');
   if (ownStoreId && ownStoreId === storeId) throw addCartError('product', 'not_valid');
 
   const columns = { bucket_id: bucket.id, product_id: product.id, dropshipper_id: null };
@@ -299,7 +299,7 @@ BucketController.bulkUpdate = async (req, res, next) => {
     const item = await getItem;
     if (!item) throw getItemError('item', 'not_found');
     const product = item.serialize().product;
-    if (bodies[idx].qty > product.stock) throw addCartError('cart', 'stock', true);
+    if (bodies[idx].qty > product.stock) throw addCartError('cart', 'stock');
     const where = { id_listbucket: item.get('id_listbucket') };
     return await BucketController.saveCart(bucket, bodies[idx], product, item, where);
   }));

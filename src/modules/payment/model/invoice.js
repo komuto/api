@@ -215,7 +215,7 @@ class InvoiceModel extends bookshelf.Model {
       disputeObj.solution !== DisputeSolutionType.EXCHANGE
       && disputeObj.status !== DisputeStatus.SEND_BY_SELLER
     ) {
-      throw getInvoiceError('invoice', 'dispute_disable', true);
+      throw getInvoiceError('invoice', 'dispute_disable');
     }
     return dispute;
   }
