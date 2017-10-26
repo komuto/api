@@ -21,6 +21,11 @@ export const sellerNotification = {
     body: 'Anda memiliki resolusi baru',
     type: 'SELLER_RESOLUTION',
   },
+  TRANSACTION: {
+    title: 'Komuto',
+    body: 'Anda memiliki pesanan baru',
+    type: 'SELLER_TRANSACTION',
+  },
 };
 
 export const buyerNotification = {
@@ -42,11 +47,12 @@ export const buyerNotification = {
 };
 
 class NotificationClass {
-  static getPayload(notification, params) {
-    const { id = null, product_id: productId = null } = params;
-    const data = { type: notification.type };
-    if (id) data.id = String(id);
-    if (productId) data.product_id = String(productId);
+  static getPayload(notification, data) {
+    // TODO: This is ugly
+    data = {
+      ...data,
+      type: notification.type,
+    };
     data.custom_notification = JSON.stringify({
       ...data,
       title: notification.title,
@@ -67,9 +73,8 @@ class NotificationClass {
     };
   }
 
-  static send(notification, params) {
-    const { token } = params;
-    const payload = this.getPayload(notification, params);
+  static send(notification, token, data) {
+    const payload = this.getPayload(notification, data);
     firebaseadmin.messaging().sendToDevice(token, payload)
       .then((response) => {
         console.log('Successfully sent message:');

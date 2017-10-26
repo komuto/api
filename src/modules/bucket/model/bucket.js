@@ -10,8 +10,9 @@ import { PromoType } from './promo';
 import config from './../../../../config';
 import { InvoiceStatus, InvoiceTransactionStatus, TransactionLog, PaymentMethod } from '../../payment/model';
 import { Dropship } from '../../product/model/dropship';
-import { Preference } from "../../preference/model";
+import { Preference } from '../../preference/model';
 
+const { Notification, sellerNotification } = core;
 const { parseNum, parseDate, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
 bookshelf.plugin(ModelBase.pluggable);
@@ -328,6 +329,11 @@ class BucketModel extends bookshelf.Model {
               count_sold: updateSold,
             }, { patch: true });
           }));
+
+          const owner = invoice.related('store').related('user');
+          if (owner.get('reg_token')) {
+            Notification.send(sellerNotification.TRANSACTION, owner.get('reg_token'), { invoice_id: String(invoice.id) });
+          }
         }
 
         return await invoice.save({
@@ -360,7 +366,7 @@ class BucketModel extends bookshelf.Model {
           transaction: InvoiceTransactionStatus.WAITING,
           log: 'success',
         };
-        related = ['invoices.items.product', 'promo'];
+        related = ['invoices.items.product', 'promo', 'invoices.store.user'];
         break;
       case '201':
         status = {
