@@ -1,13 +1,11 @@
-import { Marketplace } from './model';
-
 export const MarketplaceController = {};
 export default { MarketplaceController };
 
-MarketplaceController.find = async (req, res, next) => {
-  const marketplace = await Marketplace.findByDomain(req.query.domain);
+MarketplaceController.get = async (req, res, next) => {
+  const { name, domain, mobile_domain, api_domain } = req.marketplace;
   req.resData = {
     message: 'Marketplace Data',
-    data: marketplace,
+    data: { name, domain, mobile_domain, api_domain },
   };
   return next();
 };
