@@ -153,10 +153,11 @@ class ReviewModel extends bookshelf.Model {
     }
     const notifications = owner.serialize({ notification: true }).notifications;
     if (owner.get('reg_token') && getNotification(notifications, NotificationType.REVIEW)) {
-      Notification.send(sellerNotification.REVIEW, {
-        token: owner.get('reg_token'),
-        product_id: `${item.serialize().product_id}.${storeId}`,
-      });
+      Notification.send(
+        sellerNotification.REVIEW,
+        owner.get('reg_token'),
+        { product_id: `${item.serialize().product_id}.${storeId}` },
+      );
     }
 
     return review;

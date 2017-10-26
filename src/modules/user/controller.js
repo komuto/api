@@ -421,10 +421,7 @@ UserController.replyMessage = async (req, res, next) => {
   const storeOwner = await User.getById(msg.store.user_id);
   const notifications = storeOwner.serialize({ notification: true }).notifications;
   if (storeOwner.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
-    Notification.send(sellerNotification.MESSAGE, {
-      token: storeOwner.get('reg_token'),
-      id: req.params.id,
-    });
+    Notification.send(sellerNotification.MESSAGE, storeOwner.get('reg_token'), { id: String(req.params.id) });
   }
   const user = {
     id: req.user.id,
