@@ -140,6 +140,7 @@ class InvoiceModel extends bookshelf.Model {
         'store',
         'shipping.address',
         'shipping.expeditionService.expedition',
+        { dispute: qb => qb.orderBy('createdate_dispute', 'desc') },
         'dispute.disputeProducts',
       ],
     });
