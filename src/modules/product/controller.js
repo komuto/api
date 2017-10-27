@@ -212,7 +212,7 @@ ProductController.createDiscussion = async (req, res, next) => {
   const notifications = owner.serialize({ notification: true }).notifications;
   if (owner.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
     Notification.send(
-      sellerNotification.DISCUSSION,
+      sellerNotification.CREATE_DISCUSSION,
       owner.get('reg_token'),
       {
         id: String(discussion.toJSON().id),
@@ -250,7 +250,7 @@ ProductController.createComment = async (req, res, next) => {
 
     if (buyer.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
       Notification.send(
-        buyerNotification.DISCUSSION,
+        buyerNotification.COMMENT_DISCUSSION,
         buyer.get('reg_token'),
         {
           id: String(discussion.toJSON().id),
@@ -260,7 +260,7 @@ ProductController.createComment = async (req, res, next) => {
     }
   } else if (owner.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
     Notification.send(
-      sellerNotification.DISCUSSION,
+      sellerNotification.COMMENT_DISCUSSION,
       owner.get('reg_token'),
       {
         id: String(discussion.toJSON().id),

@@ -6,20 +6,20 @@ export const sellerNotification = {
     body: 'Anda memiliki pesan baru',
     type: 'SELLER_MESSAGE',
   },
-  DISCUSSION: {
+  CREATE_DISCUSSION: {
     title: 'Komuto',
     body: 'Anda memiliki diskusi baru',
     type: 'SELLER_DISCUSSION',
+  },
+  COMMENT_DISCUSSION: {
+    title: 'Komuto',
+    body: 'Anda memiliki komentar baru',
+    type: 'SELLER_COMMENT_DISCUSSION',
   },
   REVIEW: {
     title: 'Komuto',
     body: 'Anda memiliki review baru',
     type: 'SELLER_REVIEW',
-  },
-  RESOLUTION: {
-    title: 'Komuto',
-    body: 'Anda memiliki resolusi baru',
-    type: 'SELLER_RESOLUTION',
   },
   TRANSACTION: {
     title: 'Komuto',
@@ -34,15 +34,10 @@ export const buyerNotification = {
     body: 'Anda memiliki pesan baru',
     type: 'BUYER_MESSAGE',
   },
-  DISCUSSION: {
+  COMMENT_DISCUSSION: {
     title: 'Komuto',
     body: 'Penjual mengomentari diskusi anda',
-    type: 'BUYER_DISCUSSION',
-  },
-  RESOLUTION: {
-    title: 'Komuto',
-    body: 'Penjual mengomentari pusat resolusi',
-    type: 'BUYER_RESOLUTION',
+    type: 'BUYER_COMMENT_DISCUSSION',
   },
 };
 
