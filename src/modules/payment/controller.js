@@ -205,7 +205,7 @@ PaymentController.dispute = async (req, res, next) => {
     created_at: moment(),
   });
   const dispute = await Dispute.create(data);
-  await DisputeProduct.bulkCreate(dispute.serialize().id, req.body.products, items);
+  await DisputeProduct.bulkCreate(dispute.id, req.body.products, items);
   if (req.body.images) await ImageGroup.bulkCreate(dispute.get('id_dispute'), req.body.images, 'dispute');
   if (req.body.solution === DisputeSolutionType.REFUND) {
     let totalRefund = 0;
@@ -218,13 +218,13 @@ PaymentController.dispute = async (req, res, next) => {
     const refundData = Refund.matchDBColumn({
       bucket_id: invoiceObj.bucket_id,
       invoice_id: invoiceObj.id,
-      dispute_id: dispute.serialize().id,
+      dispute_id: dispute.id,
       refund_number: `RF${disputeNumber}`,
       total: totalRefund,
       status: RefundStatus.PROCEED,
     });
     const refund = await Refund.create(refundData);
-    await RefundItem.bulkCreate(refund.serialize().id, req.body.products, items);
+    await RefundItem.bulkCreate(refund.id, req.body.products, items);
   }
   await Invoice.updateStatus(invoiceObj.id, InvoiceTransactionStatus.PROBLEM);
   const buyer = invoice.related('user');
@@ -235,7 +235,7 @@ PaymentController.dispute = async (req, res, next) => {
       type,
       buyer.get('reg_token'),
       req.marketplace.name,
-      { invoice_id: String(invoice.id) },
+      { dispute_id: String(dispute.id) },
     );
   }
   req.resData = { data: dispute };
