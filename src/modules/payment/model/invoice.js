@@ -6,7 +6,7 @@ import { getInvoiceError, createInvoiceError } from './../messages';
 import { Store } from '../../store/model/store';
 import config from '../../../../config';
 import { Dropship } from '../../product/model/dropship';
-import { DisputeSolutionType, DisputeStatus } from "./dispute";
+import { DisputeSolutionType, DisputeStatus } from './dispute';
 
 const { parseDate, parseNum, matchDB, getProductAndStore } = core.utils;
 const bookshelf = core.postgres.db;

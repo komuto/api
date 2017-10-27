@@ -26,6 +26,21 @@ export const sellerNotification = {
     body: 'Anda memiliki pesanan baru',
     type: 'SELLER_TRANSACTION',
   },
+  ORDER_RECEIVED: {
+    title: 'Komuto',
+    body: 'Pesanan telah diterima oleh pembeli',
+    type: 'SELLER_ORDER_RECEIVED',
+  },
+  ORDER_COMPLAINED_REFUND: {
+    title: 'Komuto',
+    body: 'Pembeli mengajukan refund',
+    type: 'SELLER_ORDER_COMPLAINED_REFUND',
+  },
+  ORDER_COMPLAINED_EXCHANGE: {
+    title: 'Komuto',
+    body: 'Pembeli mengajukan tukar barang baru',
+    type: 'SELLER_ORDER_COMPLAINED_EXCHANGE',
+  },
 };
 
 export const buyerNotification = {
@@ -36,22 +51,22 @@ export const buyerNotification = {
   },
   COMMENT_DISCUSSION: {
     title: 'Komuto',
-    body: 'Penjual mengomentari diskusi anda',
+    body: 'Penjual mengomentari diskusi Anda',
     type: 'BUYER_COMMENT_DISCUSSION',
   },
   ORDER_PROCEED: {
     title: 'Komuto',
-    body: 'Pesanan anda sedang diproses',
+    body: 'Pesanan Anda sedang diproses',
     type: 'BUYER_ORDER_PROCEED',
   },
   ORDER_SENT: {
     title: 'Komuto',
-    body: 'Pesanan anda telah dikirim',
+    body: 'Pesanan Anda telah dikirim',
     type: 'BUYER_ORDER_SENT',
   },
   ORDER_REJECTED: {
     title: 'Komuto',
-    body: 'Pesanan anda ditolak',
+    body: 'Pesanan Anda ditolak oleh penjual',
     type: 'BUYER_ORDER_REJECTED',
   },
 };

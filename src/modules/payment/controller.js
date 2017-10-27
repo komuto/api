@@ -27,7 +27,8 @@ import { getStoreError } from './../store/messages';
 import { Topup } from '../saldo/model';
 import { BadRequestError } from './../../../common/errors';
 import messages from '../core/messages';
-import { buyerNotification, Notification } from "../core/notification";
+
+const { buyerNotification, Notification, sellerNotification } = core;
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -159,7 +160,15 @@ PaymentController.bulkReview = async (req, res, next) => {
     invoice_id: req.params.invoice_id,
     reviews: req.body,
   });
-  await Invoice.updateStatus(req.params.invoice_id, InvoiceTransactionStatus.RECEIVED);
+  const invoice = await Invoice.updateStatus(
+    req.params.invoice_id,
+    InvoiceTransactionStatus.RECEIVED,
+  );
+  await invoice.refresh({ withRelated: 'user' });
+  const buyer = invoice.related('user');
+  if (buyer.get('reg_token')) {
+    Notification.send(sellerNotification.ORDER_RECEIVED, buyer.get('reg_token'), { invoice_id: String(invoice.id) });
+  }
   req.resData = {
     message: 'Reviews Data',
     data: reviews,
@@ -168,7 +177,7 @@ PaymentController.bulkReview = async (req, res, next) => {
 };
 
 PaymentController.dispute = async (req, res, next) => {
-  const invoice = await Invoice.get(req.user.id, req.params.id, req.params.invoice_id, ['items.product']);
+  const invoice = await Invoice.get(req.user.id, req.params.id, req.params.invoice_id, ['items.product', 'user']);
   const invoiceObj = invoice.serialize();
   const items = invoice.related('items').map(item => ({
     ...item.serialize(),
@@ -213,6 +222,12 @@ PaymentController.dispute = async (req, res, next) => {
     await RefundItem.bulkCreate(refund.serialize().id, req.body.products, items);
   }
   await Invoice.updateStatus(invoiceObj.id, InvoiceTransactionStatus.PROBLEM);
+  const buyer = invoice.related('user');
+  if (buyer.get('reg_token')) {
+    const type = req.body.solution === DisputeSolutionType.REFUND
+      ? sellerNotification.ORDER_COMPLAINED_REFUND : sellerNotification.ORDER_COMPLAINED_EXCHANGE;
+    Notification.send(type, buyer.get('reg_token'), { invoice_id: String(invoice.id) });
+  }
   req.resData = { data: dispute };
   return next();
 };
