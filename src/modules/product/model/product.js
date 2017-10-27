@@ -923,7 +923,7 @@ class ProductModel extends bookshelf.Model {
       qb.select(['*', 'tglstatus_produk as date_created', 'produk.id_toko', 'produk.identifier_katalog as identifier_katalog']);
       qb.select(knex.raw('null as "id_dropshipper"'));
       qb.where('produk.id_toko', storeId).andWhere('status_produk', status);
-      if (query) qb.whereRaw('to_tsvector(nama_produk) @@ to_tsquery(?)', query);
+      if (query) qb.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
       if (catalogId) qb.where('identifier_katalog', catalogId);
       qb.union(function () {
         const dropship = this
@@ -937,7 +937,7 @@ class ProductModel extends bookshelf.Model {
           .from('produk as p')
           .leftJoin('dropshipper as d', 'd.id_produk', 'p.id_produk')
           .where('d.id_toko', storeId);
-        if (query) dropship.whereRaw('to_tsvector(nama_produk) @@ to_tsquery(?)', query);
+        if (query) dropship.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
         if (catalogId) qb.where('identifier_katalog', catalogId);
       });
       qb.orderBy('date_created', 'desc');
