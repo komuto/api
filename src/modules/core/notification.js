@@ -7,7 +7,7 @@ export const sellerNotification = {
   },
   CREATE_DISCUSSION: {
     body: 'Anda memiliki diskusi baru',
-    type: 'SELLER_DISCUSSION',
+    type: 'SELLER_CREATE_DISCUSSION',
   },
   COMMENT_DISCUSSION: {
     body: 'Anda memiliki komentar baru',
