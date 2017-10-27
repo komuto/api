@@ -1,11 +1,12 @@
 import core from '../../core';
 import { createCatalogError, getCatalogError, updateCatalogError } from './../messages';
 import config from './../../../../config';
-import { ProductStatus, Product, ImageProduct, MasterFee } from '../../product/model';
+import { ProductStatus, Product, MasterFee } from '../../product/model';
 
 const bookshelf = core.postgres.db;
 const knex = core.postgres.knex;
 const { parseDate, defaultNull, getter } = core.utils;
+const PRODUCT_IMAGE_PATH = config.imageFolder.product;
 
 class CatalogModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
@@ -140,19 +141,80 @@ class CatalogModel extends bookshelf.Model {
       whereProduct.identifier_katalog = id === 0 ? null : id;
     }
 
-    return knex.select(knex.raw('"p".*, "d"."id_dropshipper", "nama_toko"'))
+    const select = [
+      'p.id_produk',
+      'p.id_toko',
+      'p.nama_produk',
+      'p.harga_produk',
+      'p.disc_produk',
+      'p.is_grosir',
+      'p.is_dropshiper',
+      'p.berat_produk',
+      'p.stock_produk',
+      'p.date_created_produk',
+      'p.count_sold',
+      'p.id_kategoriproduk',
+      'p.jenis_produk',
+      'p.deskripsi_produk',
+      'p.attrval_produk',
+      'p.status_produk',
+      'p.asuransi_produk',
+      'p.margin_dropshiper',
+      'p.count_populer',
+      'p.identifier_brand',
+      'p.identifier_katalog',
+      'p.tglstatus_produk',
+      'p.date_created_produk',
+      'd.id_dropshipper',
+      'nama_toko',
+      'file_gambarproduk',
+    ];
+
+    const select2 = [
+      'produk.id_produk',
+      'produk.id_toko',
+      'produk.nama_produk',
+      'produk.harga_produk',
+      'produk.disc_produk',
+      'produk.is_grosir',
+      'produk.is_dropshiper',
+      'produk.berat_produk',
+      'produk.stock_produk',
+      'produk.date_created_produk',
+      'produk.count_sold',
+      'produk.id_kategoriproduk',
+      'produk.jenis_produk',
+      'produk.deskripsi_produk',
+      'produk.attrval_produk',
+      'produk.status_produk',
+      'produk.asuransi_produk',
+      'produk.margin_dropshiper',
+      'produk.count_populer',
+      'produk.identifier_brand',
+      'produk.identifier_katalog',
+      'produk.tglstatus_produk',
+      'produk.date_created_produk',
+      'null as id_dropshipper',
+      'null as nama_toko',
+      'file_gambarproduk',
+    ];
+
+    return knex.select(knex.raw(select.join(',')))
       .from('dropshipper as d')
       .join('produk as p', 'p.id_produk', 'd.id_produk')
       .join('toko as t', 'p.id_toko', 't.id_toko')
+      .joinRaw('join (select id_produk, file_gambarproduk FROM gambar_produk) as images ON images.id_produk = p.id_produk')
       .where(whereDropship)
       .union(function () {
-        this.select(knex.raw('*, null as id_dropshipper, null as nama_toko'))
+        this.select(knex.raw(select2.join(',')))
           .from('produk')
+          .joinRaw('join (select id_produk, file_gambarproduk FROM gambar_produk) as images ON images.id_produk = produk.id_produk')
           .where(whereProduct);
       })
       .orderBy('id_produk', 'DESC')
       .limit(limit)
       .offset(offset)
+      .debug()
       .then(products => products);
   }
 
@@ -185,17 +247,13 @@ class CatalogModel extends bookshelf.Model {
     const getCountProducts = catalogId ? []
       : Product.countProductsByCatalog(catalogIds, storeId, status);
     const [productsCatalog, countProducts] = await Promise.all([getProducts, getCountProducts]);
-    const getImages = productsCatalog.map(
-      products => Promise.all(
-        products.map(product => ImageProduct.where('id_produk', product.id_produk).fetch()),
-      ),
-    );
     const masterFee = await MasterFee.findByMarketplaceId(marketplaceId);
 
     return await Promise.all(productsCatalog.map(async (products, index) => {
-      const images = await getImages[index];
-      const catalogProducts = products.map((product, idx) => {
-        const image = images[idx] ? images[idx].serialize().file : config.defaultImage.product;
+      const catalogProducts = products.map((product) => {
+        const image = product.file_gambarproduk
+          ? core.imagePath(PRODUCT_IMAGE_PATH, product.file_gambarproduk)
+          : config.defaultImage.product;
         const dropshipOrigin = !product.id_dropshipper ? false
           : {
             store_id: product.id_toko,
