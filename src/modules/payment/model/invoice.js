@@ -113,6 +113,10 @@ class InvoiceModel extends bookshelf.Model {
     return this.hasOne('Dispute', 'identifierinvoice_dispute');
   }
 
+  user() {
+    return this.belongsTo('User', 'id_user');
+  }
+
   static async create(data) {
     return await new this(data).save().catch(() => {
       throw createInvoiceError('invoice', 'error');

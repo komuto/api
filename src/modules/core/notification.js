@@ -39,6 +39,21 @@ export const buyerNotification = {
     body: 'Penjual mengomentari diskusi anda',
     type: 'BUYER_COMMENT_DISCUSSION',
   },
+  ORDER_PROCEED: {
+    title: 'Komuto',
+    body: 'Pesanan anda sedang diproses',
+    type: 'BUYER_ORDER_PROCEED',
+  },
+  ORDER_SENT: {
+    title: 'Komuto',
+    body: 'Pesanan anda telah dikirim',
+    type: 'BUYER_ORDER_SENT',
+  },
+  ORDER_REJECTED: {
+    title: 'Komuto',
+    body: 'Pesanan anda ditolak',
+    type: 'BUYER_ORDER_REJECTED',
+  },
 };
 
 class NotificationClass {

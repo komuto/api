@@ -27,6 +27,7 @@ import { getStoreError } from './../store/messages';
 import { Topup } from '../saldo/model';
 import { BadRequestError } from './../../../common/errors';
 import messages from '../core/messages';
+import { buyerNotification, Notification } from "../core/notification";
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -440,10 +441,14 @@ PaymentController.acceptOrder = async (req, res, next) => {
     id_invoice: req.params.id,
     status_transaksi: InvoiceTransactionStatus.WAITING,
     id_toko: storeId,
-  }).fetch();
+  }).fetch({ withRelated: 'user' });
   if (!invoice) throw acceptOrderError('order', 'not_found');
   await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.PROCEED)
     .catch();
+  const buyer = invoice.related('user');
+  if (buyer.get('reg_token')) {
+    Notification.send(buyerNotification.ORDER_PROCEED, buyer.get('reg_token'), { invoice_id: String(invoice.id) });
+  }
   return next();
 };
 
@@ -453,10 +458,14 @@ PaymentController.rejectOrder = async (req, res, next) => {
     id_invoice: req.params.id,
     status_transaksi: InvoiceTransactionStatus.WAITING,
     id_toko: storeId,
-  }).fetch();
+  }).fetch({ withRelated: 'user' });
   if (!invoice) throw rejectOrderError('order', 'not_found');
   await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.REJECTED)
     .catch();
+  const buyer = invoice.related('user');
+  if (buyer.get('reg_token')) {
+    Notification.send(buyerNotification.ORDER_REJECTED, buyer.get('reg_token'), { invoice_id: String(invoice.id) });
+  }
   return next();
 };
 
@@ -465,12 +474,18 @@ PaymentController.inputAirwayBill = async (req, res, next) => {
   const invoice = await Invoice.where({
     id_invoice: req.params.id,
     id_toko: storeId,
-  }).query(qb => qb.whereIn('status_transaksi', [InvoiceTransactionStatus.PROCEED,
-    InvoiceTransactionStatus.SENDING])).fetch();
+  }).query(qb => qb.whereIn('status_transaksi', [
+    InvoiceTransactionStatus.PROCEED,
+    InvoiceTransactionStatus.SENDING,
+  ])).fetch({ withRelated: 'user' });
   if (!invoice) throw inputBillError('order', 'not_found');
   await Shipping.where('id_pengiriman_produk', invoice.get('id_pengiriman_produk'))
     .save({ resiresponkirim: req.body.airway_bill }, { require: true, patch: true })
     .catch(() => { throw inputBillError('input', 'error'); });
   await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.SENDING);
+  const buyer = invoice.related('user');
+  if (buyer.get('reg_token')) {
+    Notification.send(buyerNotification.ORDER_REJECTED, buyer.get('reg_token'), { invoice_id: String(invoice.id) });
+  }
   return next();
 };
