@@ -154,7 +154,12 @@ StoreController.createMessage = async (req, res, next) => {
   if (storeOwner.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
     const notify = type === MessageType.SELLER_TO_BUYER
       ? buyerNotification.MESSAGE : sellerNotification.MESSAGE;
-    Notification.send(notify, storeOwner.get('reg_token'), { id: String(message.toJSON().id) });
+    Notification.send(
+      notify,
+      storeOwner.get('reg_token'),
+      req.marketplace.name,
+      { message_id: String(message.toJSON().id) },
+    );
   }
   req.resData = {
     message: 'Message Data',
@@ -358,7 +363,12 @@ StoreController.replyMessage = async (req, res, next) => {
   const buyer = await User.getById(msg.user_id);
   const notifications = buyer.serialize({ notification: true }).notifications;
   if (buyer.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
-    Notification.send(buyerNotification.MESSAGE, buyer.get('reg_token'), { id: String(req.params.id) });
+    Notification.send(
+      buyerNotification.MESSAGE,
+      buyer.get('reg_token'),
+      req.marketplace.name,
+      { message_id: String(req.params.id) },
+    );
   }
   const user = {
     id: req.user.id,

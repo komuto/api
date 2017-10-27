@@ -167,7 +167,12 @@ PaymentController.bulkReview = async (req, res, next) => {
   await invoice.refresh({ withRelated: 'user' });
   const buyer = invoice.related('user');
   if (buyer.get('reg_token')) {
-    Notification.send(sellerNotification.ORDER_RECEIVED, buyer.get('reg_token'), { invoice_id: String(invoice.id) });
+    Notification.send(
+      sellerNotification.ORDER_RECEIVED,
+      buyer.get('reg_token'),
+      req.marketplace.name,
+      { invoice_id: String(invoice.id) },
+    );
   }
   req.resData = {
     message: 'Reviews Data',
@@ -226,7 +231,12 @@ PaymentController.dispute = async (req, res, next) => {
   if (buyer.get('reg_token')) {
     const type = req.body.solution === DisputeSolutionType.REFUND
       ? sellerNotification.ORDER_COMPLAINED_REFUND : sellerNotification.ORDER_COMPLAINED_EXCHANGE;
-    Notification.send(type, buyer.get('reg_token'), { invoice_id: String(invoice.id) });
+    Notification.send(
+      type,
+      buyer.get('reg_token'),
+      req.marketplace.name,
+      { invoice_id: String(invoice.id) },
+    );
   }
   req.resData = { data: dispute };
   return next();
@@ -269,7 +279,12 @@ PaymentController.createDisputeDiscussion = async (req, res, next) => {
 };
 
 PaymentController.confirmDispute = async (req, res, next) => {
-  const dispute = await Dispute.bulkReviewProducts(req.params.id, req.user.id, req.body);
+  const dispute = await Dispute.bulkReviewProducts(
+    req.params.id,
+    req.user.id,
+    req.body,
+    req.marketplace.name,
+  );
   req.resData = { data: dispute };
   return next();
 };
@@ -462,7 +477,12 @@ PaymentController.acceptOrder = async (req, res, next) => {
     .catch();
   const buyer = invoice.related('user');
   if (buyer.get('reg_token')) {
-    Notification.send(buyerNotification.ORDER_PROCEED, buyer.get('reg_token'), { invoice_id: String(invoice.id) });
+    Notification.send(
+      buyerNotification.ORDER_PROCEED,
+      buyer.get('reg_token'),
+      req.marketplace.name,
+      { invoice_id: String(invoice.id) },
+    );
   }
   return next();
 };
@@ -479,7 +499,12 @@ PaymentController.rejectOrder = async (req, res, next) => {
     .catch();
   const buyer = invoice.related('user');
   if (buyer.get('reg_token')) {
-    Notification.send(buyerNotification.ORDER_REJECTED, buyer.get('reg_token'), { invoice_id: String(invoice.id) });
+    Notification.send(
+      buyerNotification.ORDER_REJECTED,
+      buyer.get('reg_token'),
+      req.marketplace.name,
+      { invoice_id: String(invoice.id) },
+    );
   }
   return next();
 };
@@ -500,7 +525,12 @@ PaymentController.inputAirwayBill = async (req, res, next) => {
   await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.SENDING);
   const buyer = invoice.related('user');
   if (buyer.get('reg_token')) {
-    Notification.send(buyerNotification.ORDER_REJECTED, buyer.get('reg_token'), { invoice_id: String(invoice.id) });
+    Notification.send(
+      buyerNotification.ORDER_REJECTED,
+      buyer.get('reg_token'),
+      req.marketplace.name,
+      { invoice_id: String(invoice.id) },
+    );
   }
   return next();
 };

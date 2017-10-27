@@ -177,6 +177,13 @@ class UserModel extends bookshelf.Model {
   }
 
   /**
+   * Add relation to Marketplace
+   */
+  marketplace() {
+    return this.belongsTo('Marketplace', 'id_users');
+  }
+
+  /**
    * Create password hash from plain text
    * @param {string} str
    */

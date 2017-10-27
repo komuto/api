@@ -214,8 +214,9 @@ ProductController.createDiscussion = async (req, res, next) => {
     Notification.send(
       sellerNotification.CREATE_DISCUSSION,
       owner.get('reg_token'),
+      req.marketplace.name,
       {
-        id: String(discussion.toJSON().id),
+        discussion_id: String(discussion.toJSON().id),
         product_id: String(req.params.id),
       },
     );
@@ -252,8 +253,9 @@ ProductController.createComment = async (req, res, next) => {
       Notification.send(
         buyerNotification.COMMENT_DISCUSSION,
         buyer.get('reg_token'),
+        req.marketplace.name,
         {
-          id: String(discussion.toJSON().id),
+          discussion_id: String(discussion.toJSON().id),
           product_id: String(req.params.id),
         },
       );
@@ -262,8 +264,9 @@ ProductController.createComment = async (req, res, next) => {
     Notification.send(
       sellerNotification.COMMENT_DISCUSSION,
       owner.get('reg_token'),
+      req.marketplace.name,
       {
-        id: String(discussion.toJSON().id),
+        discussion_id: String(discussion.toJSON().id),
         product_id: String(req.params.id),
       },
     );

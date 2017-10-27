@@ -332,7 +332,12 @@ class BucketModel extends bookshelf.Model {
 
           const owner = invoice.related('store').related('user');
           if (owner.get('reg_token')) {
-            Notification.send(sellerNotification.TRANSACTION, owner.get('reg_token'), { invoice_id: String(invoice.id) });
+            Notification.send(
+              sellerNotification.TRANSACTION,
+              owner.get('reg_token'),
+              owner.related('marketplace').get('nama_marketplace'),
+              { invoice_id: String(invoice.id) },
+            );
           }
         }
 
@@ -366,7 +371,7 @@ class BucketModel extends bookshelf.Model {
           transaction: InvoiceTransactionStatus.WAITING,
           log: 'success',
         };
-        related = ['invoices.items.product', 'promo', 'invoices.store.user'];
+        related = ['invoices.items.product', 'promo', 'invoices.store.user.marketplace'];
         break;
       case '201':
         status = {

@@ -246,7 +246,7 @@ class DisputeModel extends bookshelf.Model {
     };
   }
 
-  static async bulkReviewProducts(id, userId, reviews) {
+  static async bulkReviewProducts(id, userId, reviews, marketplaceName) {
     const dispute = await this.where({ id_dispute: id, id_users: userId })
       .fetch({ withRelated: ['invoice.items.product', 'disputeProducts'] });
 
@@ -268,7 +268,7 @@ class DisputeModel extends bookshelf.Model {
       newReviews = await Promise.all(invoice.related('items').map(async (item) => {
         const product = item.related('product').serialize();
         const val = _.find(reviews, o => o.product_id === product.id);
-        return await Review.create(item, product, userId, val);
+        return await Review.create(item, product, userId, val, marketplaceName);
       }));
     } else if (
       disputeObj.solution === DisputeSolutionType.REFUND
@@ -290,7 +290,7 @@ class DisputeModel extends bookshelf.Model {
         const item = _.find(invoice.related('items').models, o => o.get('id_produk') === val.id);
         const product = item.related('product').serialize();
         const body = _.find(reviews, o => o.product_id === product.id);
-        return await Review.create(item, product, userId, body);
+        return await Review.create(item, product, userId, body, marketplaceName);
       }));
     } else {
       throw createReviewError('review', 'disable');
