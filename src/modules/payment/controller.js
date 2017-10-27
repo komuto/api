@@ -481,7 +481,10 @@ PaymentController.acceptOrder = async (req, res, next) => {
       buyerNotification.ORDER_PROCEED,
       buyer.get('reg_token'),
       req.marketplace.name,
-      { invoice_id: String(invoice.id) },
+      {
+        bucket_id: String(invoice.get('id_bucket')),
+        invoice_id: String(invoice.id),
+      },
     );
   }
   return next();
@@ -503,7 +506,10 @@ PaymentController.rejectOrder = async (req, res, next) => {
       buyerNotification.ORDER_REJECTED,
       buyer.get('reg_token'),
       req.marketplace.name,
-      { invoice_id: String(invoice.id) },
+      {
+        bucket_id: String(invoice.get('id_bucket')),
+        invoice_id: String(invoice.id),
+      },
     );
   }
   return next();
@@ -526,10 +532,13 @@ PaymentController.inputAirwayBill = async (req, res, next) => {
   const buyer = invoice.related('user');
   if (buyer.get('reg_token')) {
     Notification.send(
-      buyerNotification.ORDER_REJECTED,
+      buyerNotification.ORDER_SENT,
       buyer.get('reg_token'),
       req.marketplace.name,
-      { invoice_id: String(invoice.id) },
+      {
+        bucket_id: String(invoice.get('id_bucket')),
+        invoice_id: String(invoice.id),
+      },
     );
   }
   return next();
