@@ -57,6 +57,7 @@ export const errMsg = {
     session_expired: 'Sesi user atau access token salah atau telah expired',
     api_down: 'Tidak bisa mengakses facebook api',
     permission_denied: 'Belum diberikan permisi seperlunya untuk bisa mengakses',
+    email_not_found: 'Belum diberikan permisi email untuk bisa mengakses',
   },
   OTPMsg: {
     title: 'Kirim OTP gagal',

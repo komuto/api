@@ -27,6 +27,7 @@ import {
   activateUserError,
   fbError,
   getResolutionError,
+  errMsg,
 } from './messages';
 import { Discussion, Product } from '../product/model';
 import core from '../core';
@@ -83,7 +84,7 @@ UserController.getUserSocial = async (req, res, next) => {
     let response = await fb.api(provider_uid, { fields: 'id,name,email,gender,picture.type(large)' })
       .catch(e => fbError(e.response.error));
     if (response instanceof BadRequestError) throw response;
-    // TODO: Error handling when no email in response
+    if (!response.email) throw new BadRequestError(errMsg.fbMsg.email_not_found);
     const user = await User.getByEmail(response.email, req.marketplace.id);
     // Case where user already created but provider name and uid do not match
     if (user) {
