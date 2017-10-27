@@ -76,7 +76,6 @@ def.url = (dir = '/') => {
 def.komutoUrl = 'http://api.komutodev.aptmi.com/komuto-api/';
 def.assetUrl = 'https://komutodev.aptmi.com';
 def.komutoEmail = 'developer@skyshi.com';
-def.shareLink = 'https://komuto.skyshi.com/product-detail?id=';
 
 // OTP sms
 def.otp = {};

@@ -978,6 +978,11 @@ class ProductModel extends bookshelf.Model {
     return own || dropship;
   }
 
+  static getShareLink(domain, data) {
+    const storeName = slug(data.store.name, { lower: true, charmap: '' });
+    return `https://${domain}/detail/${storeName}/${data.product.slug}-${data.product.id}`;
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data
