@@ -55,9 +55,9 @@ PaymentController.viaBank = async (req, res, next) => {
     BucketStatus.CHECKOUT,
   );
   await BankAccount.checkKomutoAccount(req.body.bank_account_id);
-  await PaymentConfirmation.checkDuplicate(bucket.serialize().id);
+  await PaymentConfirmation.checkDuplicate(bucket.id);
   const data = PaymentConfirmation.matchDBColumn(_.assign(req.body, {
-    bucket_id: bucket.serialize().id,
+    bucket_id: bucket.id,
     user_id: req.user.id,
     status: PaymentConfirmationStatus.DRAFT,
     date: moment.unix(req.body.date),

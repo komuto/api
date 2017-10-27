@@ -54,7 +54,7 @@ BucketController.addPromo = async (req, res, next) => {
 
 BucketController.cancelPromo = async (req, res, next) => {
   const bucket = await Bucket.get(req.user.id);
-  await Bucket.cancelPromo(bucket.serialize().id);
+  await Bucket.cancelPromo(bucket.id);
   return next();
 };
 
@@ -189,7 +189,7 @@ BucketController.deleteCart = async (req, res, next) => {
 BucketController.getItem = async (req, res, next) => {
   const bucket = await Bucket.get(req.user.id);
   const item = await Item.getDetail({
-    id_bucket: bucket.serialize().id,
+    id_bucket: bucket.id,
     id_listbucket: req.params.id,
   });
   req.resData = {
@@ -264,7 +264,7 @@ BucketController.checkout = async (req, res, next) => {
     const invoice = await Invoice.create(invoiceObj);
 
     await Promise.all(group.items.map(item => (
-      item.save({ id_invoice: invoice.serialize().id }, { patch: true })
+      item.save({ id_invoice: invoice.id }, { patch: true })
     )));
   }));
 
