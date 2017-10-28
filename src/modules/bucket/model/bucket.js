@@ -167,8 +167,8 @@ class BucketModel extends bookshelf.Model {
       defaults: this.matchDBColumn({
         wallet: 0,
         unique_code: 0,
-        order_at: new Date(),
-        status_at: new Date(),
+        order_at: moment().toDate(),
+        status_at: moment().toDate(),
       }),
     });
   }

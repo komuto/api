@@ -1,3 +1,4 @@
+import moment from 'moment';
 import core from '../../core';
 import { createMessageError, getMessageError } from './../messages';
 
@@ -171,7 +172,10 @@ class MessageModel extends bookshelf.Model {
     const columnAt = type === 'store' ? 'flagreceiver_date' : 'flagsender_date';
     const message = await this.where(where).fetch();
     if (!message) throw getMessageError('message', 'not_found');
-    return await message.save({ [column]: flagStatus, [columnAt]: new Date() }, { patch: true });
+    return await message.save({
+      [column]: flagStatus,
+      [columnAt]: moment().toDate(),
+    }, { patch: true });
   }
 
   /**

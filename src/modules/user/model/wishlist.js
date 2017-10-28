@@ -1,3 +1,4 @@
+import moment from 'moment';
 import core from '../../core';
 
 const bookshelf = core.postgres.db;
@@ -49,7 +50,7 @@ class WishlistModel extends bookshelf.Model {
       id_users: userId,
       id_dropshipper: dropshipperId,
       status_wishlist: WishlistStatus.ACTIVE,
-      tglstatus_wishlist: new Date(),
+      tglstatus_wishlist: moment().toDate(),
     };
     await new this().save(attach).catch(() => {});
     return true;

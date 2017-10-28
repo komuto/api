@@ -137,8 +137,8 @@ StoreController.createMessage = async (req, res, next) => {
     subject: req.body.subject,
     flag_sender: MessageFlagStatus.UNREAD,
     flag_receiver: MessageFlagStatus.UNREAD,
-    flag_sender_at: new Date(),
-    flag_receiver_at: new Date(),
+    flag_sender_at: moment().toDate(),
+    flag_receiver_at: moment().toDate(),
     parent_id: req.body.invoice_id,
     type,
   });
@@ -147,7 +147,7 @@ StoreController.createMessage = async (req, res, next) => {
     message_id: message.toJSON().id,
     user_id: req.user.id,
     content: req.body.content,
-    created_at: new Date(),
+    created_at: moment().toDate(),
   });
   const detailMessage = await DetailMessage.create(detailMessageObj);
   const notifications = storeOwner.serialize({ notification: true }).notifications;
@@ -198,7 +198,7 @@ StoreController.createCatalog = async (req, res, next) => {
   const data = {
     store_id: storeId,
     name: req.body.name,
-    created_at: new Date(),
+    created_at: moment().toDate(),
   };
   req.resData = {
     data: await Catalog.create(data),

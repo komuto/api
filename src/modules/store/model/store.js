@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import moment from 'moment';
 import core from '../../core';
 import config from '../../../../config';
 import { getStoreError, createStoreError } from './../messages';
@@ -376,7 +377,7 @@ class StoreModel extends bookshelf.Model {
   static async updateVerification(id) {
     const store = await new this({ id_users: id }).fetch();
     if (!store) throw getStoreError('store', 'not_found');
-    return await store.save({ tanggal_verifikasi: new Date() }, { patch: true });
+    return await store.save({ tanggal_verifikasi: moment().toDate() }, { patch: true });
   }
 
   /**

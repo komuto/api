@@ -257,8 +257,8 @@ BucketController.checkout = async (req, res, next) => {
       wallet: 0, // need confirmation
       status: InvoiceStatus.UNPAID,
       confirmed_at: null,
-      created_at: new Date(),
-      updated_at: new Date(),
+      created_at: moment().toDate(),
+      updated_at: moment().toDate(),
     });
 
     const invoice = await Invoice.create(invoiceObj);
@@ -279,7 +279,7 @@ BucketController.checkout = async (req, res, next) => {
 
   const bucketData = {
     status_bucket: BucketStatus.WAITING_FOR_PAYMENT,
-    tglstatus_bucket: new Date(),
+    tglstatus_bucket: moment().toDate(),
     total_tagihan: totalPrice,
   };
 

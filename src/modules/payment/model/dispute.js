@@ -300,7 +300,7 @@ class DisputeModel extends bookshelf.Model {
       dispute.save({ status_dispute: DisputeStatus.REVIEWED }, { patch: true }),
       invoice.save({
         status_transaksi: InvoiceTransactionStatus.COMPLAINT_DONE,
-        updated_at: new Date(),
+        updated_at: moment().toDate(),
       }, { patch: true }),
     ]);
 
@@ -320,8 +320,8 @@ class DisputeModel extends bookshelf.Model {
         subject: '',
         flag_sender: MessageFlagStatus.UNREAD,
         flag_receiver: MessageFlagStatus.UNREAD,
-        flag_sender_at: new Date(),
-        flag_receiver_at: new Date(),
+        flag_sender_at: moment().toDate(),
+        flag_receiver_at: moment().toDate(),
         type: MessageType.COMPLAINT,
         parent_id: dispute.serialize().id,
       });
@@ -334,7 +334,7 @@ class DisputeModel extends bookshelf.Model {
       message_id: messageId,
       user_id: userId,
       content,
-      created_at: new Date(),
+      created_at: moment().toDate(),
     });
     const msg = await DetailMessage.create(detailMessageObj);
     return await msg.refresh({ withRelated: ['user'] });
