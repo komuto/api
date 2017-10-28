@@ -86,10 +86,11 @@ class MessageModel extends bookshelf.Model {
    * @param pageSize
    */
   static async getById(id, type, isArchived = false, page, pageSize) {
-    const where = type === 'store' ? { id_toko: id } : { id_users: id };
+    const where = type === 'store' ? { 'messages.id_toko': id } : { 'messages.id_users': id };
     const column = type === 'store' ? 'flagreceiver_messages' : 'flagsender_messages';
     const messages = await this.where(where)
       .query((qb) => {
+        qb.joinRaw('join (select * FROM detil_messages) as dm ON dm.id_messages = messages.id_messages');
         qb.whereNotIn(column, [
           MessageFlagStatus.DELETED,
           MessageFlagStatus.PERMANENT_DELETED,
@@ -102,10 +103,17 @@ class MessageModel extends bookshelf.Model {
         qb.whereNot('group_message', MessageType.COMPLAINT);
       })
       .orderBy(type === 'store' ? 'flagreceiver_date' : 'flagsender_date', 'desc')
-      .fetchPage({ page, pageSize, withRelated: ['store', 'invoice'] });
-    return await Promise.all(messages.map(async (message) => {
-      await message.load({ detailMessages: qb => qb.limit(1) });
-      const detail = message.related('detailMessages').models[0];
+      .fetchPage({ page, pageSize, withRelated: ['store', 'invoice'], debug: true });
+
+    return messages.map((message) => {
+      const detail = {
+        id: message.get('dm.id_detilmessages'),
+        message_id: message.get('dm.id_messages'),
+        user_id: message.get('dm.id_users'),
+        content: message.get('dm.content_messages'),
+        status: message.get('dm.status'),
+        created_at: message.get('dm.date_detilmessages'),
+      };
       let invoiceUrl = null;
       const invoiceId = message.related('invoice').get('id_invoice');
       if (invoiceId) {
@@ -117,7 +125,7 @@ class MessageModel extends bookshelf.Model {
         detail_message: detail || {},
         invoice_url: invoiceUrl,
       };
-    }));
+    });
   }
 
   /**
