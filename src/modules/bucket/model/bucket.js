@@ -312,17 +312,19 @@ class BucketModel extends bookshelf.Model {
     if (status.invoice !== BucketStatus.UNPAID) {
       await Promise.all(bucket.related('invoices').map(async (invoice) => {
         if (status.invoice === InvoiceStatus.PAID) {
-          await Promise.all(invoice.related('items').map(async (item) => {
+          let dropshipper;
+          await Promise.all(invoice.related('items').map(async (item, i) => {
             const product = item.related('product');
             const { stock, count_sold: sold } = product.serialize();
             const qty = item.serialize().qty;
             let updateSold = sold + qty;
             if (item.get('id_dropshipper')) {
               updateSold = sold;
-              const dropshipper = await Dropship.where({ id_dropshipper: item.get('id_dropshipper') }).fetch();
-              await dropshipper.save({
+              const dropship = item.related('dropship');
+              await dropship.save({
                 count_sold: dropshipper.serialize().count_sold + qty,
               }, { patch: true });
+              if (i === 0) dropshipper = dropship.related('store').related('user');
             }
             return await product.save({
               stock_produk: stock - qty,
@@ -331,11 +333,21 @@ class BucketModel extends bookshelf.Model {
           }));
 
           const owner = invoice.related('store').related('user');
+          const marketplaceName = owner.related('marketplace').get('nama_marketplace');
           if (owner.get('reg_token')) {
             Notification.send(
               sellerNotification.TRANSACTION,
               owner.get('reg_token'),
-              owner.related('marketplace').get('nama_marketplace'),
+              marketplaceName,
+              { invoice_id: String(invoice.id) },
+            );
+          }
+
+          if (dropshipper && dropshipper.get('req_token')) {
+            Notification.send(
+              sellerNotification.TRANSACTION,
+              dropshipper.get('reg_token'),
+              marketplaceName,
               { invoice_id: String(invoice.id) },
             );
           }
@@ -371,7 +383,12 @@ class BucketModel extends bookshelf.Model {
           transaction: InvoiceTransactionStatus.WAITING,
           log: 'success',
         };
-        related = ['invoices.items.product', 'promo', 'invoices.store.user.marketplace'];
+        related = [
+          'invoices.items.product',
+          'promo',
+          'invoices.items.dropship.store.user',
+          'invoices.store.user.marketplace',
+        ];
         break;
       case '201':
         status = {
