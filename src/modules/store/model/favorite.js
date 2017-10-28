@@ -40,7 +40,7 @@ class FavoriteStoreModel extends bookshelf.Model {
     return await new this({
       ...data,
       status_tokofavorit: FavoriteStoreStatus.ON,
-      tglstatus_tokofavorit: moment(),
+      tglstatus_tokofavorit: moment().toDate(),
     }).save();
   }
 

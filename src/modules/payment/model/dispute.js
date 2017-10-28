@@ -382,8 +382,8 @@ class DisputeModel extends bookshelf.Model {
       dispute_number: disputeObj.dispute_number,
       status: DisputeStatus.NEW,
       response_status: DisputeResponseStatus.NO_RESPONSE_YET,
-      response_at: moment(),
-      created_at: moment(),
+      response_at: moment().toDate(),
+      created_at: moment().toDate(),
     });
     const cloneDispute = await this.create(data);
     await DisputeProduct.bulkClone(cloneDispute.serialize().id, dispute.related('disputeProducts'));

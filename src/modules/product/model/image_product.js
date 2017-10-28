@@ -50,7 +50,7 @@ class ImageProductModel extends bookshelf.Model {
    * @param data {array}
    */
   static async createBulk(id, data) {
-    const date = moment();
+    const date = moment().toDate();
     const images = data.map(file => new this().save({
       id_produk: id,
       file_gambarproduk: file.name,

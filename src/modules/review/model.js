@@ -132,7 +132,7 @@ class ReviewModel extends bookshelf.Model {
       store_id: storeId,
       user_id: userId,
       dropshipper_id: item.serialize().dropshipper_id,
-      created_at: moment(),
+      created_at: moment().toDate(),
     });
 
     const review = await new this(data).save().catch(() => {

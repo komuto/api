@@ -51,7 +51,7 @@ class UserTokenModel extends bookshelf.Model {
       type_tokenuser: type,
       value_tokenuser: token,
       status_tokenuser: TokenStatus.ACTIVE,
-      tglstatus_tokenuser: moment(),
+      tglstatus_tokenuser: moment().toDate(),
     }).save();
     return token;
   }

@@ -44,8 +44,8 @@ class OTPHPModel extends bookshelf.Model {
     data = {
       ...data,
       kode_otphp: randomInt(10000, 99999),
-      datecreated_otphp: created,
-      expdate_otphp: created.clone().add(limit.value, 'd'),
+      datecreated_otphp: created.toDate(),
+      expdate_otphp: created.clone().add(limit.value, 'd').toDate(),
     };
     return await this.save(data, { method: 'insert' });
   }

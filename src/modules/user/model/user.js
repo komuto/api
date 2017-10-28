@@ -204,10 +204,11 @@ class UserModel extends bookshelf.Model {
    * @param {Object} data
    */
   static async create(data) {
+    const now = moment().toDate();
     data.approval_koperasi_users = UserCooperativeStatus.NULL;
-    data.tgl_create_users = moment();
+    data.tgl_create_users = now;
     data.status_users = UserStatus.INACTIVE;
-    data.tglstatus_users = moment();
+    data.tglstatus_users = now;
     const user = await new this(data).save();
     return user.serialize();
   }

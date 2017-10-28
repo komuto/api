@@ -377,7 +377,7 @@ class InvoiceModel extends bookshelf.Model {
   }
 
   static async updateStatus(id, status) {
-    const now = moment();
+    const now = moment().toDate();
     const data = { status_transaksi: status, updated_at: now };
     if (status === InvoiceTransactionStatus.PROCEED) data.confirmation_date = now;
     return await this.where({ id_invoice: id }).save(data, { patch: true });

@@ -416,7 +416,7 @@ UserController.replyMessage = async (req, res, next) => {
   const data = DetailMessage.matchDBColumn(_.assign(req.body, {
     message_id: req.params.id,
     user_id: req.user.id,
-    created_at: moment(),
+    created_at: moment().toDate(),
   }));
   const detailMessage = await DetailMessage.create(data);
   const storeOwner = await User.getById(msg.store.user_id);
@@ -509,9 +509,9 @@ UserController.createResolution = async (req, res, next) => {
     discussions: ResolutionCenter.createDiscussion(req.user.name, req.body.message),
     ticket_number: ticketNumber,
     status: ResolutionCenterStatus.WAIT_TO_REPLY,
-    status_at: moment(),
-    ends_at: moment(),
-    created_at: moment(),
+    status_at: moment().toDate(),
+    ends_at: moment().toDate(),
+    created_at: moment().toDate(),
   });
   const resolution = await ResolutionCenter.create(data);
   if (req.body.images) await ImageGroup.bulkCreate(resolution.get('id_rescenter'), req.body.images);

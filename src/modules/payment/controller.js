@@ -201,8 +201,8 @@ PaymentController.dispute = async (req, res, next) => {
     dispute_number: disputeNumber,
     status: DisputeStatus.NEW,
     response_status: DisputeResponseStatus.NO_RESPONSE_YET,
-    response_at: moment(),
-    created_at: moment(),
+    response_at: moment().toDate(),
+    created_at: moment().toDate(),
   });
   const dispute = await Dispute.create(data);
   await DisputeProduct.bulkCreate(dispute.id, req.body.products, items);

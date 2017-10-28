@@ -48,8 +48,8 @@ class OTPAddressModel extends bookshelf.Model {
       user_id: userId,
       code: randomInt(100000, 999999),
       status: OTPAddressStatus.CREATED,
-      created_at: moment(),
-      expired_at: moment().add(limit.value, 'd'),
+      created_at: moment().toDate(),
+      expired_at: moment().add(limit.value, 'd').toDate(),
     });
     return await new this(data).save();
   }

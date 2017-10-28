@@ -329,13 +329,13 @@ BucketController.balancePayment = async (req, res, next) => {
 
   await bucket.save({
     status_bucket: BucketStatus.PAYMENT_RECEIVED,
-    tglstatus_bucket: now,
+    tglstatus_bucket: now.toDate(),
     bayar_wallet: bill,
   }, { patch: true });
 
   await Invoice.where('id_bucket', bucket.get('id_bucket')).save({
     status_invoice: InvoiceStatus.PAID,
-    updated_at: now,
+    updated_at: now.toDate(),
     status_transaksi: InvoiceTransactionStatus.WAITING,
   }, { patch: true });
 

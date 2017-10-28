@@ -36,8 +36,8 @@ class OTPModel extends bookshelf.Model {
     data = {
       ...data,
       kode: randomInt(10000, 99999),
-      date_created: created,
-      date_expired: created.clone().add(limit.value, 'd'),
+      date_created: created.toDate(),
+      date_expired: created.clone().add(limit.value, 'd').toDate(),
     };
     return await this.save(data, { method: 'insert' });
   }

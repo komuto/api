@@ -252,8 +252,8 @@ StoreController.createStore = async (req, res, next) => {
     status: StoreStatus.ACTIVE,
     seller_theme_id: 0,
     store_id_number: req.body.user.id_number,
-    created_at: moment(),
-    status_at: moment(),
+    created_at: moment().toDate(),
+    status_at: moment().toDate(),
   });
   const store = await Store.create(Store.matchDBColumn(storeData));
   const user = await User.update({ id_users: req.user.id }, User.matchDBColumn(req.body.user));
@@ -357,7 +357,7 @@ StoreController.replyMessage = async (req, res, next) => {
   const data = DetailMessage.matchDBColumn(_.assign(req.body, {
     message_id: req.params.id,
     user_id: req.user.id,
-    created_at: moment(),
+    created_at: moment().toDate(),
   }));
   const detailMessage = await DetailMessage.create(data);
   const buyer = await User.getById(msg.user_id);

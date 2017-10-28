@@ -73,7 +73,7 @@ class StoreExpeditionModel extends bookshelf.Model {
     Object.keys(data).forEach((prop) => {
       if (column[prop]) newData[column[prop]] = data[prop];
     });
-    if (full) newData.tglstatus_ekspedisitoko = moment();
+    if (full) newData.tglstatus_ekspedisitoko = moment().toDate();
     return newData;
   }
 }

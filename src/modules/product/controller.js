@@ -117,7 +117,7 @@ ProductController.getProduct = async (req, res, next) => {
 ProductController.createProduct = async (req, res, next) => {
   req.body.store_id = await Store.getStoreId(req.user.id);
   req.body.other_attr = '0';
-  req.body.date_created = moment();
+  req.body.date_created = moment().toDate();
   req.body.date_status = req.body.date_created;
   if (req.body.is_insurance !== undefined) req.body.is_insurance = req.body.is_insurance ? 1 : 0;
   if (req.body.catalog_id) {
@@ -206,7 +206,7 @@ ProductController.createDiscussion = async (req, res, next) => {
     product_id: productId,
     question: req.body.question,
     is_deleted: 0,
-    created_at: moment(),
+    created_at: moment().toDate(),
   });
   const discussion = await Discussion.create(data);
   const notifications = owner.serialize({ notification: true }).notifications;
@@ -329,8 +329,8 @@ ProductController.dropship = async (req, res, next) => {
     catalog_id: catalogId,
     store_id: storeId,
     status: DropshipStatus.SHOW,
-    status_at: moment(),
-    created_at: moment(),
+    status_at: moment().toDate(),
+    created_at: moment().toDate(),
   });
   const dropship = await Dropship.create(data);
   req.resData = {

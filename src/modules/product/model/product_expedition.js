@@ -41,12 +41,11 @@ class ProductExpeditionModel extends bookshelf.Model {
    * @param data {array}
    */
   static async createBulk(id, data) {
-    const date = moment();
     const expeditions = data.map(expedition => new this().save({
       id_produk: id,
       id_ekspedisiservice: expedition.expedition_service_id,
       status_detilekspedisiproduk: ProductExpeditionStatus.USED,
-      tglstatus_detilekspedisiproduk: date,
+      tglstatus_detilekspedisiproduk: moment().toDate(),
     }, { method: 'insert' }));
     return await Promise.all(expeditions);
   }
@@ -87,7 +86,7 @@ class ProductExpeditionModel extends bookshelf.Model {
       status: 'status_detilekspedisiproduk',
     };
     const newData = {};
-    if (full) newData.tglstatus_detilekspedisiproduk = moment();
+    if (full) newData.tglstatus_detilekspedisiproduk = moment().toDate();
     Object.keys(data).forEach((prop) => {
       if (column[prop]) newData[column[prop]] = data[prop];
     });
