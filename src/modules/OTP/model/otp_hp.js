@@ -34,8 +34,8 @@ class OTPHPModel extends bookshelf.Model {
   /**
    * Check if otp is already created
    */
-  static async checkOTP(data) {
-    return await this.query(qb => qb.where(data).andWhere('expdate_otphp', '>', moment())).fetch();
+  static checkOTP(data) {
+    return this.query(qb => qb.where(data).andWhere('expdate_otphp', '>', moment())).fetch();
   }
 
   async create(data) {

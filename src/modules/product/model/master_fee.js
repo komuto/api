@@ -46,8 +46,8 @@ class MasterFeeModel extends bookshelf.Model {
     return (masterFee.fee * masterFee.dropshipper_fee) / 100;
   }
 
-  static async findByMarketplaceId(marketplaceId) {
-    return await this.where({ identifier_marketplace_fee: marketplaceId }).orderBy('max_fee').fetchAll();
+  static findByMarketplaceId(marketplaceId) {
+    return this.where({ identifier_marketplace_fee: marketplaceId }).orderBy('max_fee').fetchAll();
   }
 
   static calculateCommissionByFees(masterFee, price, isPercentage = false) {

@@ -218,10 +218,10 @@ class CatalogModel extends bookshelf.Model {
       .then(products => products);
   }
 
-  static async loadCatalog(storeId, catalogId) {
+  static loadCatalog(storeId, catalogId) {
     const query = { id_toko: storeId };
     if (catalogId) query.id_katalog = catalogId;
-    return await this.where(query).fetchAll();
+    return this.where(query).fetchAll();
   }
 
   /**

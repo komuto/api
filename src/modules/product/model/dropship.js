@@ -62,18 +62,18 @@ class DropshipModel extends bookshelf.Model {
   /**
    * Create dropship
    */
-  static async create(data) {
-    return await new this(data).save().catch(() => {
+  static create(data) {
+    return new this(data).save().catch(() => {
       throw createDropshipError('dropship', 'error');
     });
   }
 
-  static async findByProductIdAndStoreId(productId, storeId, withRelated = null) {
-    return await new this({ id_produk: productId, id_toko: storeId }).fetch({ withRelated });
+  static findByProductIdAndStoreId(productId, storeId, withRelated = null) {
+    return new this({ id_produk: productId, id_toko: storeId }).fetch({ withRelated });
   }
 
-  static async findById(id) {
-    return await this.where({ id_dropshipper: id }).fetch({ withRelated: ['store.user'] });
+  static findById(id) {
+    return this.where({ id_dropshipper: id }).fetch({ withRelated: ['store.user'] });
   }
 
   /**

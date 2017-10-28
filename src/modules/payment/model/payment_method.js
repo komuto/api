@@ -49,8 +49,8 @@ class PaymentMethodModel extends bookshelf.Model {
   /**
    * Get all payment methods
    */
-  static async getAll() {
-    return await this.where({ status_paymentmethod: PaymentMethodStatus.ACTIVE })
+  static getAll() {
+    return this.where({ status_paymentmethod: PaymentMethodStatus.ACTIVE })
       .orderBy('id_paymentmethod')
       .fetchAll();
   }

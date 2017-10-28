@@ -80,8 +80,8 @@ class ItemModel extends bookshelf.Model {
   /**
    * Get item by bucket_id and product_id
    */
-  static async get(where, related) {
-    return await this.where(where).fetch({ withRelated: related });
+  static get(where, related) {
+    return this.where(where).fetch({ withRelated: related });
   }
 
   static async loadDetailItem(item) {
@@ -144,8 +144,8 @@ class ItemModel extends bookshelf.Model {
   /**
    * Update or insert item
    */
-  static async updateInsert(select, data) {
-    return await this.upsert(select, data);
+  static updateInsert(select, data) {
+    return this.upsert(select, data);
   }
 
   /**

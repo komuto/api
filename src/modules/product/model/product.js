@@ -460,8 +460,8 @@ class ProductModel extends bookshelf.Model {
    * @param productWhere {function} add where clause to product query
    * @param dropshipWhere {function} add where clause to dropship query
    */
-  static async getStoreProducts(id, limit, productWhere = false, dropshipWhere = false) {
-    return await this.query((qb) => {
+  static getStoreProducts(id, limit, productWhere = false, dropshipWhere = false) {
+    return this.query((qb) => {
       qb.select(['*', 'tglstatus_produk as date_created', 'id_toko']);
       qb.select(knex.raw('null as "id_dropshipper"'));
       qb.where('produk.id_toko', id).andWhere('status_produk', ProductStatus.SHOW);

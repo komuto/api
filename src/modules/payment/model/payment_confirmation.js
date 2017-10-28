@@ -41,8 +41,8 @@ class PaymentConfirmationModel extends bookshelf.Model {
   /**
    * Create payment confirmation
    */
-  static async create(data) {
-    return await new this(data).save().catch(() => {
+  static create(data) {
+    return new this(data).save().catch(() => {
       throw createPaymentConfirmationError('payment_confirmation', 'error');
     });
   }

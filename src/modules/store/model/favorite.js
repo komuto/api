@@ -36,8 +36,8 @@ class FavoriteStoreModel extends bookshelf.Model {
     return this.belongsTo('Store', 'referred_toko');
   }
 
-  static async create(data) {
-    return await new this({
+  static create(data) {
+    return new this({
       ...data,
       status_tokofavorit: FavoriteStoreStatus.ON,
       tglstatus_tokofavorit: moment().toDate(),

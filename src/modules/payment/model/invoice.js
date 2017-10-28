@@ -117,8 +117,8 @@ class InvoiceModel extends bookshelf.Model {
     return this.belongsTo('User', 'id_user');
   }
 
-  static async create(data) {
-    return await new this(data).save().catch(() => {
+  static create(data) {
+    return new this(data).save().catch(() => {
       throw createInvoiceError('invoice', 'error');
     });
   }
@@ -376,15 +376,15 @@ class InvoiceModel extends bookshelf.Model {
     return result;
   }
 
-  static async updateStatus(id, status) {
+  static updateStatus(id, status) {
     const now = moment().toDate();
     const data = { status_transaksi: status, updated_at: now };
     if (status === InvoiceTransactionStatus.PROCEED) data.confirmation_date = now;
-    return await this.where({ id_invoice: id }).save(data, { patch: true });
+    return this.where({ id_invoice: id }).save(data, { patch: true });
   }
 
-  static async getWithDropship(id) {
-    return await this.where('id_invoice', id).fetch({ withRelated: ['item.dropship'] });
+  static getWithDropship(id) {
+    return this.where('id_invoice', id).fetch({ withRelated: ['item.dropship'] });
   }
 
   static async getCount(storeId, status = null) {

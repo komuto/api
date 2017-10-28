@@ -70,8 +70,8 @@ class ResolutionCenterModel extends bookshelf.Model {
     return this.morphMany('ImageGroup', 'group', ['group', 'parent_id'], 'resolusi');
   }
 
-  static async get(id, isClosed, page, pageSize) {
-    return await this.where({ id_users: id })
+  static get(id, isClosed, page, pageSize) {
+    return this.where({ id_users: id })
       .query((qb) => {
         if (isClosed) qb.where('status_ticket_rescenter', 0);
         else qb.whereNot('status_ticket_rescenter', 0);
@@ -80,13 +80,15 @@ class ResolutionCenterModel extends bookshelf.Model {
       .fetchPage({ page, pageSize });
   }
 
-  static async getDetail(id, resolutionId) {
-    return await this.where({ id_users: id, id_rescenter: resolutionId })
-      .fetch({ withRelated: ['imageGroups'] });
+  static getDetail(id, resolutionId) {
+    return this.where({
+      id_users: id,
+      id_rescenter: resolutionId,
+    }).fetch({ withRelated: ['imageGroups'] });
   }
 
-  static async create(data) {
-    return await new this(data).save().catch(() => {
+  static create(data) {
+    return new this(data).save().catch(() => {
       throw createResolutionError('resolution_center', 'error');
     });
   }

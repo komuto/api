@@ -74,7 +74,7 @@ class transSummaryModel extends bookshelf.Model {
     return new this(data).save();
   }
 
-  static async get(userId, params, page, pageSize) {
+  static get(userId, params, page, pageSize) {
     const { filters } = params;
     let { start_at: startAt, end_at: endAt } = params;
     if (startAt) {
@@ -84,7 +84,7 @@ class transSummaryModel extends bookshelf.Model {
         throw getHistoryError('date', 'invalid_date');
       }
     }
-    return await this.where('id_users', userId)
+    return this.where('id_users', userId)
       .query((qb) => {
         if (filters) qb.whereIn('kode_summarytransaksi', filters);
         if (startAt) qb.where('tgl_summarytransaksi', '>=', startAt);

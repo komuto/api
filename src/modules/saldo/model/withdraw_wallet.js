@@ -37,8 +37,8 @@ class WithdrawModel extends bookshelf.Model {
     return this.belongsTo('BankAccount', 'id_rekeninguser');
   }
 
-  static async get(userId, page, pageSize) {
-    return await new this({ id_users: userId }).fetchPage({ page, pageSize, withRelated: ['bankAccount.bank'] });
+  static get(userId, page, pageSize) {
+    return new this({ id_users: userId }).fetchPage({ page, pageSize, withRelated: ['bankAccount.bank'] });
   }
 
   /**

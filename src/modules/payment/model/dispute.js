@@ -110,8 +110,8 @@ class DisputeModel extends bookshelf.Model {
     return this.hasOne('Refund', 'id_dispute');
   }
 
-  static async create(data) {
-    return await new this(data).save().catch(() => {
+  static create(data) {
+    return new this(data).save().catch(() => {
       throw createDisputeError('dispute', 'error');
     });
   }

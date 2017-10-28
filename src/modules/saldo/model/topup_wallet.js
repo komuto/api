@@ -45,8 +45,8 @@ class TopupModel extends bookshelf.Model {
     return this.hasOne('TopupConf', 'id_topup_wallet');
   }
 
-  static async get(userId, page, pageSize) {
-    return await new this({ id_users: userId }).orderBy('datecreated', 'desc').fetchPage({ page, pageSize });
+  static get(userId, page, pageSize) {
+    return new this({ id_users: userId }).orderBy('datecreated', 'desc').fetchPage({ page, pageSize });
   }
 
   static async updateStatus(id, status, paymentMethodId) {

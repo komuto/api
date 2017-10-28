@@ -26,8 +26,8 @@ class OTPModel extends bookshelf.Model {
     return false;
   }
 
-  static async checkOTP(data) {
-    return await this.query(qb => qb.where(data).andWhere('date_expired', '>', moment())).fetch();
+  static checkOTP(data) {
+    return this.query(qb => qb.where(data).andWhere('date_expired', '>', moment())).fetch();
   }
 
   async create(data) {

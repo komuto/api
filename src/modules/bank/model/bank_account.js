@@ -53,8 +53,8 @@ class BankAccountModel extends bookshelf.Model {
   /**
    * Get bank accounts by user id
    */
-  static async getByUserId(userId) {
-    return await this.where({ id_users: userId }).fetchAll({ withRelated: ['bank'] });
+  static getByUserId(userId) {
+    return this.where({ id_users: userId }).fetchAll({ withRelated: ['bank'] });
   }
 
   /**
@@ -73,12 +73,12 @@ class BankAccountModel extends bookshelf.Model {
    * @param id {int} bank account id
    * @param userId {int}
    */
-  static async getBankAccount(id, userId) {
-    return await this.where({ id_rekeninguser: id, id_users: userId }).fetch();
+  static getBankAccount(id, userId) {
+    return this.where({ id_rekeninguser: id, id_users: userId }).fetch();
   }
 
-  static async getKomutoAccounts() {
-    return await this.where({ id_marketplaceuser: 0 }).fetchAll({ withRelated: ['bank'] });
+  static getKomutoAccounts() {
+    return this.where({ id_marketplaceuser: 0 }).fetchAll({ withRelated: ['bank'] });
   }
 
   /**

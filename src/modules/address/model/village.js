@@ -36,8 +36,7 @@ class VillageModel extends bookshelf.Model {
    * @param {Object} data
    */
   static async create(data) {
-    const address = new this(data);
-    return await address.save();
+    return new this(data).save();
   }
 
   /**
@@ -46,25 +45,24 @@ class VillageModel extends bookshelf.Model {
    * @param {Object} data
    */
   static async update(id, data) {
-    const address = new this({ address_id: id });
-    return await address.save(data);
+    return new this({ address_id: id }).save(data);
   }
 
   /**
    * Get a line item by id
    * @param {integer} id
    */
-  static async getById(id) {
-    return await this.where({ address_id: id }).fetch();
+  static getById(id) {
+    return this.where({ address_id: id }).fetch();
   }
 
   /**
    * Get a line item by condition
    * @param {Object} condition
    */
-  static async get(condition = null) {
+  static get(condition = null) {
     condition = _.pickBy(condition, _.identity);
-    return await this.where(condition).fetchAll();
+    return this.where(condition).fetchAll();
   }
 }
 

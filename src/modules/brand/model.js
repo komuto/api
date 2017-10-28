@@ -39,9 +39,9 @@ class BrandModel extends bookshelf.Model {
    * Get brands by condition
    * @param {Object} condition
    */
-  static async get(condition = null) {
+  static get(condition = null) {
     condition = _.omitBy(condition, _.isNil);
-    return await this.where(condition).fetchAll();
+    return this.where(condition).fetchAll();
   }
 }
 

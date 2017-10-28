@@ -159,8 +159,8 @@ class BucketModel extends bookshelf.Model {
   /**
    * Find bucket
    */
-  static async findOrCreateBucket(userId) {
-    return await this.findOrCreate({
+  static findOrCreateBucket(userId) {
+    return this.findOrCreate({
       id_users: userId,
       status_bucket: BucketStatus.ADDED,
     }, {
@@ -255,8 +255,8 @@ class BucketModel extends bookshelf.Model {
    * Cancel promo
    * @param bucketId
    */
-  static async cancelPromo(bucketId) {
-    return await this.where({ id_bucket: bucketId }).save({ id_promo: null }, { patch: true });
+  static cancelPromo(bucketId) {
+    return this.where({ id_bucket: bucketId }).save({ id_promo: null }, { patch: true });
   }
 
   static async getTotalPrice(userId) {

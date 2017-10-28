@@ -65,8 +65,8 @@ class ReportModel extends bookshelf.Model {
   /**
    * Create report
    */
-  static async create(data) {
-    return await new this(data).save().catch(() => {
+  static create(data) {
+    return new this(data).save().catch(() => {
       throw createReportError('report', 'error');
     });
   }

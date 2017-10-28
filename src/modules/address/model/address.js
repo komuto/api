@@ -105,8 +105,8 @@ class AddressModel extends bookshelf.Model {
    * Get store address model
    * @param userId {integer} user id
    */
-  static async getStoreAddressModel(userId) {
-    return await this.where({ id_users: userId, alamat_originjual: 1 }).fetch();
+  static getStoreAddressModel(userId) {
+    return this.where({ id_users: userId, alamat_originjual: 1 }).fetch();
   }
 
   /**
@@ -182,16 +182,16 @@ class AddressModel extends bookshelf.Model {
    * Get a line item by id
    * @param {integer} id
    */
-  static async getById(id) {
-    return await this.where({ address_id: id }).fetch();
+  static getById(id) {
+    return this.where({ address_id: id }).fetch();
   }
 
   /**
    * Get a line item by condition
    * @param {Object} condition
    */
-  static async get(condition = null) {
-    return await this.where(condition).fetchAll();
+  static get(condition = null) {
+    return this.where(condition).fetchAll();
   }
 
   /**
@@ -199,12 +199,12 @@ class AddressModel extends bookshelf.Model {
    * @param idUser {integer} user id
    * @param idAddress {integer} OPTIONAL address id
    */
-  static async checkPrimary(idUser, idAddress) {
+  static checkPrimary(idUser, idAddress) {
     const query = { id_users: idUser, alamat_primary: '1' };
     if (idAddress) {
       query.id_alamatuser = idAddress;
     }
-    return await this.where(query).fetch();
+    return this.where(query).fetch();
   }
 
   /**
@@ -225,13 +225,13 @@ class AddressModel extends bookshelf.Model {
    * @param {integer} userId
    * @param {integer} districtId
    */
-  static async getStoreAddress(userId, districtId) {
+  static getStoreAddress(userId, districtId) {
     const param = {
       id_users: userId,
       alamat_originjual: 1,
     };
     if (districtId) param.id_kotakab = districtId;
-    return await this.where(param).fetch({ withRelated: ['province', 'district'] });
+    return this.where(param).fetch({ withRelated: ['province', 'district'] });
   }
 
   /**

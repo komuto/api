@@ -42,8 +42,8 @@ class RefundModel extends bookshelf.Model {
     return this.hasMany('RefundItem', 'id_refund');
   }
 
-  static async create(data) {
-    return await new this(data).save();
+  static create(data) {
+    return new this(data).save();
   }
 
   /**

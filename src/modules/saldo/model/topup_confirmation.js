@@ -26,8 +26,8 @@ class TopupConfModel extends bookshelf.Model {
     };
   }
 
-  static async get(userId, page, pageSize) {
-    return await new this({ id_users: userId }).fetchPage({ page, pageSize });
+  static get(userId, page, pageSize) {
+    return new this({ id_users: userId }).fetchPage({ page, pageSize });
   }
 
   /**

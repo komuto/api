@@ -45,8 +45,8 @@ class DetailMessageModel extends bookshelf.Model {
    * Crate detail message
    * @param data
    */
-  static async create(data) {
-    return await new this(data).save().catch(() => {
+  static create(data) {
+    return new this(data).save().catch(() => {
       throw createCommentError('comment', 'error');
     });
   }

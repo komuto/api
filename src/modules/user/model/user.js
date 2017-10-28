@@ -219,8 +219,8 @@ class UserModel extends bookshelf.Model {
    * @param {Object} newData
    * @return {Object} user updated field only
    */
-  static async update(data, newData) {
-    return await this.where(data).save(newData, { patch: true });
+  static update(data, newData) {
+    return this.where(data).save(newData, { patch: true });
   }
 
   /**
@@ -231,16 +231,16 @@ class UserModel extends bookshelf.Model {
     await this.where({ id_users: id }).save({ status_users: UserStatus.ACTIVE }, { patch: true });
   }
 
-  static async getById(id) {
-    return await new this({ id_users: id }).fetch();
+  static getById(id) {
+    return new this({ id_users: id }).fetch();
   }
 
-  static async getByEmail(email, marketplaceId) {
-    return await new this({ email_users: email, id_marketplaceuser: marketplaceId }).fetch();
+  static getByEmail(email, marketplaceId) {
+    return new this({ email_users: email, id_marketplaceuser: marketplaceId }).fetch();
   }
 
-  static async getWithPhone(data) {
-    return await new this(data).fetch({
+  static getWithPhone(data) {
+    return new this(data).fetch({
       withRelated: [{
         verifyPhone: qb => qb.where('status_otphp', OTPHPStatus.VERIFIED),
       }],
@@ -319,8 +319,8 @@ class UserModel extends bookshelf.Model {
     }));
   }
 
-  static async updateWallet(id, wallet) {
-    return await this.where({ id_users: id }).save({ saldo_wallet: wallet }, { patch: true });
+  static updateWallet(id, wallet) {
+    return this.where({ id_users: id }).save({ saldo_wallet: wallet }, { patch: true });
   }
 
   /**

@@ -86,8 +86,8 @@ class DiscussionModel extends bookshelf.Model {
   /**
    * Create discussion
    */
-  static async create(data) {
-    return await new this(data).save()
+  static create(data) {
+    return new this(data).save()
       .then(model => (model.fetch({ withRelated: ['user'] })))
       .catch(() => {
         throw createDiscussionError('discussion', 'error');
