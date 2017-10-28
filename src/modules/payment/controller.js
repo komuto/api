@@ -164,12 +164,12 @@ PaymentController.bulkReview = async (req, res, next) => {
     req.params.invoice_id,
     InvoiceTransactionStatus.RECEIVED,
   );
-  await invoice.refresh({ withRelated: 'user' });
-  const buyer = invoice.related('user');
-  if (buyer.get('reg_token')) {
+  await invoice.refresh({ withRelated: 'store.user' });
+  const seller = invoice.related('store.user');
+  if (seller.get('reg_token')) {
     Notification.send(
       sellerNotification.ORDER_RECEIVED,
-      buyer.get('reg_token'),
+      seller.get('reg_token'),
       req.marketplace.name,
       { invoice_id: String(invoice.id) },
     );
