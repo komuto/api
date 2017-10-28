@@ -165,11 +165,7 @@ PaymentController.bulkReview = async (req, res, next) => {
     InvoiceTransactionStatus.RECEIVED,
   );
   await invoice.refresh({ withRelated: ['store.user', 'items.dropship.store.user'] });
-  let dropshipper;
-  const firstItem = invoice.related('items').models[0];
-  if (firstItem.get('id_dropshipper')) {
-    dropshipper = firstItem.related('dropship').related('store').related('user');
-  }
+
   const seller = invoice.related('store.user');
   if (seller.get('reg_token')) {
     Notification.send(
@@ -180,6 +176,11 @@ PaymentController.bulkReview = async (req, res, next) => {
     );
   }
 
+  let dropshipper;
+  const firstItem = invoice.related('items').models[0];
+  if (firstItem.get('id_dropshipper')) {
+    dropshipper = firstItem.related('dropship').related('store').related('user');
+  }
   if (dropshipper.get('reg_token')) {
     Notification.send(
       sellerNotification.ORDER_RECEIVED,
@@ -197,7 +198,12 @@ PaymentController.bulkReview = async (req, res, next) => {
 };
 
 PaymentController.dispute = async (req, res, next) => {
-  const invoice = await Invoice.get(req.user.id, req.params.id, req.params.invoice_id, ['items.product', 'user']);
+  const invoice = await Invoice.get(
+    req.user.id,
+    req.params.id,
+    req.params.invoice_id,
+    ['items.product', 'user', 'items.dropship.store.user'],
+  );
   const invoiceObj = invoice.serialize();
   const items = invoice.related('items').map(item => ({
     ...item.serialize(),
@@ -242,17 +248,34 @@ PaymentController.dispute = async (req, res, next) => {
     await RefundItem.bulkCreate(refund.id, req.body.products, items);
   }
   await Invoice.updateStatus(invoiceObj.id, InvoiceTransactionStatus.PROBLEM);
+
+  const notificationType = req.body.solution === DisputeSolutionType.REFUND
+    ? sellerNotification.ORDER_COMPLAINED_REFUND
+    : sellerNotification.ORDER_COMPLAINED_EXCHANGE;
   const buyer = invoice.related('user');
   if (buyer.get('reg_token')) {
-    const type = req.body.solution === DisputeSolutionType.REFUND
-      ? sellerNotification.ORDER_COMPLAINED_REFUND : sellerNotification.ORDER_COMPLAINED_EXCHANGE;
     Notification.send(
-      type,
+      notificationType,
       buyer.get('reg_token'),
       req.marketplace.name,
       { dispute_id: String(dispute.id) },
     );
   }
+
+  let dropshipper;
+  const firstItem = invoice.related('items').models[0];
+  if (firstItem.get('id_dropshipper')) {
+    dropshipper = firstItem.related('dropship').related('store').related('user');
+  }
+  if (dropshipper.get('reg_token')) {
+    Notification.send(
+      notificationType,
+      dropshipper.get('reg_token'),
+      req.marketplace.name,
+      { dispute_id: String(dispute.id) },
+    );
+  }
+
   req.resData = { data: dispute };
   return next();
 };
