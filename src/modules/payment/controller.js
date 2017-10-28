@@ -164,7 +164,12 @@ PaymentController.bulkReview = async (req, res, next) => {
     req.params.invoice_id,
     InvoiceTransactionStatus.RECEIVED,
   );
-  await invoice.refresh({ withRelated: 'store.user' });
+  await invoice.refresh({ withRelated: ['store.user', 'items.dropship.store.user'] });
+  let dropshipper;
+  const firstItem = invoice.related('items').models[0];
+  if (firstItem.get('id_dropshipper')) {
+    dropshipper = firstItem.related('dropship').related('store').related('user');
+  }
   const seller = invoice.related('store.user');
   if (seller.get('reg_token')) {
     Notification.send(
@@ -174,6 +179,16 @@ PaymentController.bulkReview = async (req, res, next) => {
       { invoice_id: String(invoice.id) },
     );
   }
+
+  if (dropshipper.get('reg_token')) {
+    Notification.send(
+      sellerNotification.ORDER_RECEIVED,
+      dropshipper.get('reg_token'),
+      req.marketplace.name,
+      { invoice_id: String(invoice.id) },
+    );
+  }
+
   req.resData = {
     message: 'Reviews Data',
     data: reviews,
