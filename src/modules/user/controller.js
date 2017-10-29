@@ -141,6 +141,10 @@ UserController.updateUser = async (req, res, next) => {
   if (req.body.date_of_birth) req.body.date_of_birth = moment.unix(req.body.date_of_birth);
   // eslint-disable-next-line
   const { name, cooperative_member_number, photo, gender, date_of_birth, place_of_birth } = req.body;
+  if (photo) {
+    const notValid = photo.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+    if (notValid) throw userUpdateError('fields', 'not_valid');
+  }
   // eslint-disable-next-line
   const check = { name, cooperative_member_number, photo, gender, place_of_birth, date_of_birth };
   const data = User.matchDBColumn(check);
@@ -153,6 +157,10 @@ UserController.updateAccount = async (req, res, next) => {
   if (req.body.gender) req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
   if (req.body.date_of_birth) req.body.date_of_birth = moment.unix(req.body.date_of_birth);
   const { name, photo, gender, place_of_birth, date_of_birth } = req.body;
+  if (photo) {
+    const notValid = photo.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+    if (notValid) throw userUpdateError('fields', 'not_valid');
+  }
   const check = { name, photo, gender, place_of_birth, date_of_birth };
   const data = User.matchDBColumn(check);
   if (_.isEmpty(data)) throw userUpdateError('fields', 'not_valid');
