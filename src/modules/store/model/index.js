@@ -1,4 +1,4 @@
-import { Store, StoreStatus } from './store';
+import { Store, StoreStatus, StoreVerificationStatus } from './store';
 import { StoreExpedition, StoreExpeditionStatus } from './store_expedition';
 import { Catalog } from './catalog';
 import { FavoriteStore, FavoriteStoreStatus } from './favorite';
@@ -14,6 +14,7 @@ export default {
   DetailMessage,
   DetailMessageStatus,
   StoreStatus,
+  StoreVerificationStatus,
   StoreExpeditionStatus,
   FavoriteStoreStatus,
   MessageFlagStatus,

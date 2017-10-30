@@ -3,8 +3,7 @@ import slug from 'slug';
 import core from '../../core';
 import { Address } from '../../address/model';
 import { getProductError, errMsg, updateProductError } from './../messages';
-import { OTPAddressStatus, OTPAddress } from './../../OTP/model';
-import { Store } from '../../store/model/store';
+import { Store, StoreVerificationStatus } from '../../store/model/store';
 import config from './../../../../config';
 import { Dropship, DropshipStatus } from './dropship';
 import { ProductExpeditionStatus } from './product_expedition';
@@ -203,8 +202,7 @@ class ProductModel extends bookshelf.Model {
       products.where({ alamat_originjual: 1, id_kotakab: address });
     }
     if (other.verified) {
-      products.innerJoin('otp_address as otp', 'otp.id_users', 'u.id_users');
-      products.where('status_otpaddress', OTPAddressStatus.VERIFIED);
+      products.where('verification_status', StoreVerificationStatus.VERIFIED);
     }
     if (other.discount) products.where('disc_produk', '>', 0);
     if (brands) {
@@ -300,16 +298,7 @@ class ProductModel extends bookshelf.Model {
         .query(qb => qb.orderBy('id_gambarproduk')).fetch();
       const getLikes = Wishlist.where({ id_produk: id, id_dropshipper: idDropshipper }).fetchAll();
       const getViews = View.where({ id_produk: id, id_dropshipper: idDropshipper }).fetch();
-      let verified;
-      if (!other.verified) {
-        // Get all otp addresses, then iterate over those
-        // then check which store is verified and which don't
-        verified = OTPAddress.where({
-          id_users: product.id_users,
-          status_otpaddress: OTPAddressStatus.VERIFIED,
-        }).fetch();
-      }
-      return Promise.all([getImage, getLikes, getViews, verified]);
+      return Promise.all([getImage, getLikes, getViews]);
     });
 
     const masterFee = await MasterFee.findByMarketplaceId(marketplaceId);
@@ -498,7 +487,7 @@ class ProductModel extends bookshelf.Model {
     ];
     let product = await this.where({ id_produk: productId }).fetch({ withRelated: related });
     if (product && product.get('id_toko') !== storeId) {
-      const withRelated = [{ 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) }];
+      const withRelated = [];
       if (userId) withRelated.push('store.favoriteStores');
       dropship = await Dropship.findByProductIdAndStoreId(productId, storeId, withRelated);
       if (!dropship) return false;
@@ -521,7 +510,7 @@ class ProductModel extends bookshelf.Model {
 
     let getStore;
     if (!isDropshipped) {
-      const load = [{ 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) }, 'view'];
+      const load = ['view'];
       if (userId) load.push('store.favoriteStores');
       getStore = product.load(load);
     } else {
@@ -712,15 +701,17 @@ class ProductModel extends bookshelf.Model {
     }));
   }
 
-  static async countProductsByCatalog(catalogIds, storeId, status) {
+  static async countProductsByCatalog(catalogIds, storeId, status = null) {
     const dropshipStatus = DropshipStatus.SHOW;
     const productStatus = status;
     return await Promise.all(catalogIds.map(async (id) => {
       const getFromProduct = this.where({
         identifier_katalog: id === 0 ? null : id,
         id_toko: storeId,
-        status_produk: productStatus,
-      }).query(qb => qb.count('id_produk as count_product')).fetch();
+      }).query((qb) => {
+        if (status) qb.where('status_produk', productStatus);
+        qb.count('id_produk as count_product');
+      }).fetch();
       const getFromDropshipper = Dropship.where({
         id_katalog: id === 0 ? null : id,
         id_toko: storeId,

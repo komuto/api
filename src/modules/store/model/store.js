@@ -16,6 +16,12 @@ export const StoreStatus = {
   ACTIVE: 1,
 };
 
+export const StoreVerificationStatus = {
+  DEFAULT: 1, // unverified but still can create product
+  UNVERIFIED: 2,
+  VERIFIED: 3,
+};
+
 class StoreModel extends bookshelf.Model {
   // eslint-disable-next-line class-methods-use-this
   get tableName() {
@@ -44,7 +50,8 @@ class StoreModel extends bookshelf.Model {
     }
     if (favorite) return store;
     if (verified) {
-      store.is_verified = this.related('verifyAddress').length !== 0;
+      store.is_verified = this.get('verification_status') === StoreVerificationStatus.VERIFIED;
+      store.verification_status = this.get('verification_status');
     }
     return {
       ...store,
@@ -226,7 +233,6 @@ class StoreModel extends bookshelf.Model {
       'products.reviews.product.images',
       'catalogs.products.images',
       { 'catalogs.products': qb => qb.limit(3) },
-      { verifyAddress: qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) },
     ];
     if (userId) related.push({ favoriteStores: qb => qb.where('id_users', userId) });
     let store = await this.where({ id_toko: id }).fetch({ withRelated: related });
@@ -408,4 +414,4 @@ class StoreModel extends bookshelf.Model {
 }
 
 export const Store = bookshelf.model('Store', StoreModel);
-export default { Store, StoreStatus };
+export default { Store, StoreStatus, StoreVerificationStatus };

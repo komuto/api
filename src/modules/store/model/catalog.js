@@ -39,14 +39,13 @@ class CatalogModel extends bookshelf.Model {
   }
 
   static async getStoreCatalog(storeId) {
-    const catalogs = await this.where({ id_toko: storeId }).fetchAll({ withRelated: 'products' });
-    return catalogs.map((catalog) => {
-      const count = catalog.related('products');
-      return {
-        ...catalog.serialize(),
-        count_product: count.length,
-      };
-    });
+    const catalogs = await this.where({ id_toko: storeId }).fetchAll();
+    const catalogIds = catalogs.map(catalog => catalog.get('id_katalog'));
+    const countProducts = await Product.countProductsByCatalog(catalogIds, storeId);
+    return catalogs.map((catalog, i) => ({
+      ...catalog.serialize(),
+      count_product: countProducts[i],
+    }));
   }
 
   static async create(data) {
@@ -214,7 +213,6 @@ class CatalogModel extends bookshelf.Model {
       .orderBy('id_produk', 'DESC')
       .limit(limit)
       .offset(offset)
-      .debug()
       .then(products => products);
   }
 

@@ -6,7 +6,9 @@ import _ from 'lodash';
 import config from '../../../../config';
 import core from '../../core';
 import { model as addressModel } from '../../address';
-import { OTPHPStatus, OTPAddressStatus } from '../../OTP/model';
+import { OTPHPStatus } from '../../OTP/model';
+import { Preference } from '../../preference/model';
+import { StoreVerificationStatus } from "../../store/model/store";
 
 const { defaultNull, parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -256,16 +258,28 @@ class UserModel extends bookshelf.Model {
   }
 
   static async getUserProfile(id) {
-    let user = await this.where('id_users', id).fetch({
+    let user = this.where('id_users', id).fetch({
       withRelated: [
         'birthPlace',
-        { 'store.verifyAddress': qb => qb.where('status_otpaddress', OTPAddressStatus.VERIFIED) },
+        'store',
         { verifyPhone: qb => qb.where('status_otphp', OTPHPStatus.VERIFIED) },
       ],
     });
-    const store = user.related('store').serialize({ verified: true });
+    let limit = Preference.get('unverified_store');
+    [user, limit] = await Promise.all([user, limit]);
+    let store = user.related('store');
     user = user.serialize({ birth: true, phone: true });
-    return { user, store };
+    const endDate = moment(store.get('tanggal_verifikasi'), 'YYYY-MM-DD').add(limit.value, 'd');
+    store = store.serialize({ verified: true });
+    const diff = endDate.diff(moment(), 'd');
+    const timeLeft = store.verification_status === StoreVerificationStatus.DEFAULT ? diff : null;
+    return {
+      user,
+      store: {
+        ...store,
+        verification_left: timeLeft < 0 ? 0 : timeLeft,
+      },
+    };
   }
 
   /**
