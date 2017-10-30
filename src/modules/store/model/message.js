@@ -1,6 +1,8 @@
 import moment from 'moment';
 import core from '../../core';
+import config from '../../../../config';
 import { createMessageError, getMessageError } from './../messages';
+import { IMAGE_PATH } from '../../user/model/user';
 
 const bookshelf = core.postgres.db;
 const { parseDate, parseNum, matchDB } = core.utils;
@@ -90,7 +92,9 @@ class MessageModel extends bookshelf.Model {
     const column = type === 'store' ? 'flagreceiver_messages' : 'flagsender_messages';
     const messages = await this.where(where)
       .query((qb) => {
+        qb.select(['*', 'dm.*', 'dm.id_users as d_id_users', 'u.namalengkap_users', 'u.pathfoto_users']);
         qb.joinRaw('join (select * FROM detil_messages) as dm ON dm.id_messages = messages.id_messages');
+        qb.join('users as u', 'u.id_users', 'dm.id_users');
         qb.whereNotIn(column, [
           MessageFlagStatus.DELETED,
           MessageFlagStatus.PERMANENT_DELETED,
@@ -106,13 +110,21 @@ class MessageModel extends bookshelf.Model {
       .fetchPage({ page, pageSize, withRelated: ['store', 'invoice'], debug: true });
 
     return messages.map((message) => {
+      const user = {
+        id: message.get('d_id_users'),
+        name: message.get('namalengkap_users'),
+        photo: message.get('pathfoto_users')
+          ? core.imagePath(IMAGE_PATH, message.get('pathfoto_users'))
+          : config.defaultImage.user,
+      };
       const detail = {
-        id: message.get('dm.id_detilmessages'),
-        message_id: message.get('dm.id_messages'),
-        user_id: message.get('dm.id_users'),
-        content: message.get('dm.content_messages'),
-        status: message.get('dm.status'),
-        created_at: message.get('dm.date_detilmessages'),
+        id: message.get('id_detilmessages'),
+        message_id: message.get('id_messages'),
+        user_id: message.get('d_id_users'),
+        user,
+        content: message.get('content_messages'),
+        status: message.get('status'),
+        created_at: parseDate(message.get('date_detilmessages')),
       };
       let invoiceUrl = null;
       const invoiceId = message.related('invoice').get('id_invoice');

@@ -16,7 +16,7 @@ const { District } = addressModel;
 // 8 rounds will produce about 40 hashes per second on a 2GHz core
 // see: https://www.npmjs.com/package/bcrypt
 const SALT_ROUND = 8;
-const IMAGE_PATH = 'user';
+export const IMAGE_PATH = 'user';
 
 export const UserStatus = {
   INACTIVE: 0,
@@ -378,4 +378,4 @@ class UserModel extends bookshelf.Model {
 }
 
 export const User = bookshelf.model('User', UserModel);
-export default { User, UserStatus };
+export default { User, UserStatus, IMAGE_PATH };
