@@ -98,7 +98,7 @@ class UserModel extends bookshelf.Model {
       ...user,
       gender: this.get('jeniskelamin_users') === 'L' ? 'male' : 'female',
       place_of_birth: defaultNull(this.get('kota_lahir')),
-      date_of_birth: parseDate(this.get('tgl_lahir'), null),
+      date_of_birth: this.get('tgl_lahir'),
     };
     if (account) return user;
     user = {

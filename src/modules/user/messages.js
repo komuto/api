@@ -48,6 +48,7 @@ export const errMsg = {
     place_not_valid: '^Tempat lahir bukan kode wilayah valid',
     phone_presence: '^No hp harus diisi',
     phone_not_valid: '^No hp harus angka',
+    date_not_valid: 'Tanggal lahir tidak valid',
   },
   getUserMsg: {
     title: 'Get user gagal',

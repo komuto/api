@@ -138,33 +138,46 @@ UserController.getBalance = (req, res, next) => {
  */
 UserController.updateUser = async (req, res, next) => {
   if (req.body.gender) req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
-  if (req.body.date_of_birth) req.body.date_of_birth = moment.unix(req.body.date_of_birth);
-  // eslint-disable-next-line
-  const { name, cooperative_member_number, photo, gender, date_of_birth, place_of_birth } = req.body;
+  const { name, cooperative_member_number, photo, gender, place_of_birth } = req.body;
+  let dateOfBirth = req.body.date_of_birth;
+  if (dateOfBirth) {
+    dateOfBirth = moment(dateOfBirth, 'YYYY-MM-DD');
+    if (!dateOfBirth.isValid()) throw userUpdateError('fields', 'date_not_valid');
+    dateOfBirth = dateOfBirth.format('YYYY-MM-DD');
+  }
   if (photo) {
+    // eslint-disable-next-line
     const notValid = photo.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
     if (notValid) throw userUpdateError('fields', 'not_valid');
   }
   // eslint-disable-next-line
-  const check = { name, cooperative_member_number, photo, gender, place_of_birth, date_of_birth };
+  const check = { name, cooperative_member_number, photo, gender, place_of_birth, date_of_birth: dateOfBirth };
   const data = User.matchDBColumn(check);
   if (_.isEmpty(data)) throw userUpdateError('fields', 'not_valid');
-  await User.update({ id_users: req.user.id }, data);
+  const user = await User.update({ id_users: req.user.id }, data);
+  req.resData = { data: user };
   return next();
 };
 
 UserController.updateAccount = async (req, res, next) => {
   if (req.body.gender) req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
-  if (req.body.date_of_birth) req.body.date_of_birth = moment.unix(req.body.date_of_birth);
-  const { name, photo, gender, place_of_birth, date_of_birth } = req.body;
+  const { name, photo, gender, place_of_birth } = req.body;
+  let dateOfBirth = req.body.date_of_birth;
+  if (dateOfBirth) {
+    dateOfBirth = moment(dateOfBirth, 'YYYY-MM-DD');
+    if (!dateOfBirth.isValid()) throw userUpdateError('fields', 'date_not_valid');
+    dateOfBirth = dateOfBirth.format('YYYY-MM-DD');
+  }
   if (photo) {
+    // eslint-disable-next-line
     const notValid = photo.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
     if (notValid) throw userUpdateError('fields', 'not_valid');
   }
-  const check = { name, photo, gender, place_of_birth, date_of_birth };
+  const check = { name, photo, gender, place_of_birth, date_of_birth: dateOfBirth };
   const data = User.matchDBColumn(check);
   if (_.isEmpty(data)) throw userUpdateError('fields', 'not_valid');
-  await User.update({ id_users: req.user.id }, data);
+  const user = await User.update({ id_users: req.user.id }, data);
+  req.resData = { data: user };
   return next();
 };
 
