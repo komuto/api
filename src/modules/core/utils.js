@@ -47,7 +47,8 @@ export function checkNull(key, defaultValue, transform = null) {
   return key;
 }
 
-export function parseDate(key, defaultValue) {
+export function parseDate(key, defaultValue, format = null) {
+  if (format) return checkNull(key, defaultValue, moment(key).format(format));
   return checkNull(key, defaultValue, moment(key).unix());
 }
 
