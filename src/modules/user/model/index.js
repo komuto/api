@@ -4,7 +4,8 @@ import { Wishlist, WishlistStatus } from './wishlist';
 import { ResolutionCenter, ResolutionCenterStatus, ResolutionTopic, ResolutionPriority } from './resolution_center';
 import { ImageGroup } from './image_group';
 
-export default { User,
+export default {
+  User,
   UserStatus,
   UserToken,
   TokenType,
