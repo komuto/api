@@ -59,15 +59,16 @@ export const buyerNotification = {
 };
 
 class NotificationClass {
-  static getPayload(notification, title, data) {
+  static getPayload(notification, marketplace, data) {
     // TODO: This is ugly
     data = {
       ...data,
       type: notification.type,
+      click_action: `https://${marketplace.mobile_domain}/${data.click_action}`,
     };
     data.custom_notification = JSON.stringify({
       ...data,
-      title,
+      title: marketplace.name,
       body: notification.body,
       content_available: true,
       priority: 'high',
@@ -75,18 +76,19 @@ class NotificationClass {
     });
     return {
       notification: {
-        title,
+        title: marketplace.name,
         body: notification.body,
         content_available: 'true',
         priority: 'high',
         sound: 'default',
+        click_action: data.click_action,
       },
       data,
     };
   }
 
-  static send(notification, token, title, data) {
-    const payload = this.getPayload(notification, title, data);
+  static send(notification, token, marketplace, data) {
+    const payload = this.getPayload(notification, marketplace, data);
     firebaseadmin.messaging().sendToDevice(token, payload)
       .then((response) => {
         console.log('Successfully sent message:');

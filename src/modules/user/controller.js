@@ -446,8 +446,8 @@ UserController.replyMessage = async (req, res, next) => {
     Notification.send(
       sellerNotification.MESSAGE,
       storeOwner.get('reg_token'),
-      req.marketplace.name,
-      { message_id: String(req.params.id) },
+      req.marketplace,
+      { message_id: String(req.params.id), click_action: `notification-message-detail?id=${req.params.id}` },
     );
   }
   const user = {

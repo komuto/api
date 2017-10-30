@@ -333,13 +333,13 @@ class BucketModel extends bookshelf.Model {
           }));
 
           const owner = invoice.related('store').related('user');
-          const marketplaceName = owner.related('marketplace').get('nama_marketplace');
+          const marketplace = owner.related('marketplace').serialize();
           if (owner.get('reg_token')) {
             Notification.send(
               sellerNotification.TRANSACTION,
               owner.get('reg_token'),
-              marketplaceName,
-              { invoice_id: String(invoice.id) },
+              marketplace,
+              { invoice_id: String(invoice.id), click_action: `order-detail?id=${invoice.id}` },
             );
           }
 
@@ -347,8 +347,8 @@ class BucketModel extends bookshelf.Model {
             Notification.send(
               sellerNotification.TRANSACTION,
               dropshipper.get('reg_token'),
-              marketplaceName,
-              { invoice_id: String(invoice.id) },
+              marketplace,
+              { invoice_id: String(invoice.id), click_action: `order-detail?id=${invoice.id}` },
             );
           }
         }

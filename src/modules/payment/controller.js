@@ -164,29 +164,15 @@ PaymentController.bulkReview = async (req, res, next) => {
     req.params.invoice_id,
     InvoiceTransactionStatus.RECEIVED,
   );
-  await invoice.refresh({ withRelated: ['store.user', 'items.dropship.store.user'] });
+  await invoice.refresh({ withRelated: ['store.user', 'items'] });
 
   const seller = invoice.related('store.user');
   if (seller.get('reg_token')) {
     Notification.send(
       sellerNotification.ORDER_RECEIVED,
       seller.get('reg_token'),
-      req.marketplace.name,
-      { invoice_id: String(invoice.id) },
-    );
-  }
-
-  let dropshipper;
-  const firstItem = invoice.related('items').models[0];
-  if (firstItem.get('id_dropshipper')) {
-    dropshipper = firstItem.related('dropship').related('store').related('user');
-  }
-  if (dropshipper.get('reg_token')) {
-    Notification.send(
-      sellerNotification.ORDER_RECEIVED,
-      dropshipper.get('reg_token'),
-      req.marketplace.name,
-      { invoice_id: String(invoice.id) },
+      req.marketplace,
+      { invoice_id: String(invoice.id), click_action: `order-detail?id=${invoice.id}` },
     );
   }
 
@@ -198,12 +184,7 @@ PaymentController.bulkReview = async (req, res, next) => {
 };
 
 PaymentController.dispute = async (req, res, next) => {
-  const invoice = await Invoice.get(
-    req.user.id,
-    req.params.id,
-    req.params.invoice_id,
-    ['items.product', 'user', 'items.dropship.store.user'],
-  );
+  const invoice = await Invoice.get(req.user.id, req.params.id, req.params.invoice_id, ['items.product', 'user']);
   const invoiceObj = invoice.serialize();
   const items = invoice.related('items').map(item => ({
     ...item.serialize(),
@@ -257,22 +238,8 @@ PaymentController.dispute = async (req, res, next) => {
     Notification.send(
       notificationType,
       buyer.get('reg_token'),
-      req.marketplace.name,
-      { dispute_id: String(dispute.id) },
-    );
-  }
-
-  let dropshipper;
-  const firstItem = invoice.related('items').models[0];
-  if (firstItem.get('id_dropshipper')) {
-    dropshipper = firstItem.related('dropship').related('store').related('user');
-  }
-  if (dropshipper.get('reg_token')) {
-    Notification.send(
-      notificationType,
-      dropshipper.get('reg_token'),
-      req.marketplace.name,
-      { dispute_id: String(dispute.id) },
+      req.marketplace,
+      { dispute_id: String(dispute.id), click_action: `complain-seller-detail?id=${dispute.id}` },
     );
   }
 
@@ -321,7 +288,7 @@ PaymentController.confirmDispute = async (req, res, next) => {
     req.params.id,
     req.user.id,
     req.body,
-    req.marketplace.name,
+    req.marketplace,
   );
   req.resData = { data: dispute };
   return next();
@@ -518,10 +485,11 @@ PaymentController.acceptOrder = async (req, res, next) => {
     Notification.send(
       buyerNotification.ORDER_PROCEED,
       buyer.get('reg_token'),
-      req.marketplace.name,
+      req.marketplace,
       {
         bucket_id: String(invoice.get('id_bucket')),
         invoice_id: String(invoice.id),
+        click_action: `transaction/${invoice.get('id_bucket')}/${invoice.id}`,
       },
     );
   }
@@ -543,10 +511,11 @@ PaymentController.rejectOrder = async (req, res, next) => {
     Notification.send(
       buyerNotification.ORDER_REJECTED,
       buyer.get('reg_token'),
-      req.marketplace.name,
+      req.marketplace,
       {
         bucket_id: String(invoice.get('id_bucket')),
         invoice_id: String(invoice.id),
+        click_action: `transaction/${invoice.get('id_bucket')}/${invoice.id}`,
       },
     );
   }
@@ -572,10 +541,11 @@ PaymentController.inputAirwayBill = async (req, res, next) => {
     Notification.send(
       buyerNotification.ORDER_SENT,
       buyer.get('reg_token'),
-      req.marketplace.name,
+      req.marketplace,
       {
         bucket_id: String(invoice.get('id_bucket')),
         invoice_id: String(invoice.id),
+        click_action: `transaction/${invoice.get('id_bucket')}/${invoice.id}`,
       },
     );
   }

@@ -214,10 +214,11 @@ ProductController.createDiscussion = async (req, res, next) => {
     Notification.send(
       sellerNotification.CREATE_DISCUSSION,
       owner.get('reg_token'),
-      req.marketplace.name,
+      req.marketplace,
       {
-        discussion_id: String(discussion.toJSON().id),
+        discussion_id: String(discussion.id),
         product_id: String(req.params.id),
+        click_action: `notification-discussion-detail?id=${req.params.id}&idd=${discussion.id}`,
       },
     );
   }
@@ -253,10 +254,11 @@ ProductController.createComment = async (req, res, next) => {
       Notification.send(
         buyerNotification.COMMENT_DISCUSSION,
         buyer.get('reg_token'),
-        req.marketplace.name,
+        req.marketplace,
         {
-          discussion_id: String(discussion.toJSON().id),
+          discussion_id: String(discussion.id),
           product_id: String(req.params.id),
+          click_action: `discussion/detail?id=${req.params.id}&idd=${discussion.id}`,
         },
       );
     }
@@ -264,10 +266,11 @@ ProductController.createComment = async (req, res, next) => {
     Notification.send(
       sellerNotification.COMMENT_DISCUSSION,
       owner.get('reg_token'),
-      req.marketplace.name,
+      req.marketplace,
       {
-        discussion_id: String(discussion.toJSON().id),
+        discussion_id: String(discussion.id),
         product_id: String(req.params.id),
+        click_action: `notification-discussion-detail?id=${req.params.id}&idd=${discussion.id}`,
       },
     );
   }

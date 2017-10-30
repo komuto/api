@@ -124,7 +124,7 @@ class ReviewModel extends bookshelf.Model {
     return reviewData;
   }
 
-  static async create(item, product, userId, val, marketplaceName) {
+  static async create(item, product, userId, val, marketplace) {
     let storeId = product.store_id;
     const data = this.matchDBColumn({
       ...val,
@@ -153,11 +153,12 @@ class ReviewModel extends bookshelf.Model {
     }
     const notifications = owner.serialize({ notification: true }).notifications;
     if (owner.get('reg_token') && getNotification(notifications, NotificationType.REVIEW)) {
+      const productId = `${item.serialize().product_id}.${storeId}`;
       Notification.send(
         sellerNotification.REVIEW,
         owner.get('reg_token'),
-        marketplaceName,
-        { product_id: `${item.serialize().product_id}.${storeId}` },
+        marketplace,
+        { product_id: productId, click_action: `reviews?id=${productId}` },
       );
     }
 
