@@ -93,7 +93,7 @@ class MessageModel extends bookshelf.Model {
     const messages = await this.where(where)
       .query((qb) => {
         qb.select(['*', 'dm.*', 'dm.id_users as d_id_users', 'u.namalengkap_users', 'u.pathfoto_users']);
-        qb.joinRaw('join (select * FROM detil_messages) as dm ON dm.id_messages = messages.id_messages');
+        qb.joinRaw('join (select DISTINCT ON (id_messages) * FROM detil_messages) as dm ON dm.id_messages = messages.id_messages');
         qb.join('users as u', 'u.id_users', 'dm.id_users');
         qb.whereNotIn(column, [
           MessageFlagStatus.DELETED,
