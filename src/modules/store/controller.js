@@ -320,7 +320,7 @@ StoreController.getMessages = async (req, res, next) => {
  */
 StoreController.getMessage = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const message = await Message.findById(req.params.id, storeId, 'store');
+  const message = await Message.findById(req.params.id, storeId, 'store', req.marketplace.mobile_domain);
   req.resData = {
     message: 'Detail Message Data',
     data: message,

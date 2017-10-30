@@ -403,7 +403,7 @@ UserController.getMessages = async (req, res, next) => {
  * Get Detail Message
  */
 UserController.getMessage = async (req, res, next) => {
-  const message = await Message.findById(req.params.id, req.user.id, 'user');
+  const message = await Message.findById(req.params.id, req.user.id, 'user', req.marketplace.mobile_domain);
   req.resData = {
     message: 'Detail Message Data',
     data: message,

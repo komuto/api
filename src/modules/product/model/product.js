@@ -942,7 +942,7 @@ class ProductModel extends bookshelf.Model {
       });
       qb.orderBy('date_created', 'desc');
       qb.limit(pageSize).offset(offset);
-    }).fetchAll({ withRelated: ['images', 'store'], debug: true });
+    }).fetchAll({ withRelated: ['images', 'store'] });
 
     return await Promise.all(products.map(async (product) => {
       await product.load({ images: qb => qb.limit(1) });

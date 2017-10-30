@@ -107,7 +107,7 @@ class MessageModel extends bookshelf.Model {
         qb.whereNot('group_message', MessageType.COMPLAINT);
       })
       .orderBy(type === 'store' ? 'flagreceiver_date' : 'flagsender_date', 'desc')
-      .fetchPage({ page, pageSize, withRelated: ['store', 'invoice'], debug: true });
+      .fetchPage({ page, pageSize, withRelated: 'store' });
 
     return messages.map((message) => {
       const user = {
@@ -126,16 +126,9 @@ class MessageModel extends bookshelf.Model {
         status: message.get('status'),
         created_at: parseDate(message.get('date_detilmessages')),
       };
-      let invoiceUrl = null;
-      const invoiceId = message.related('invoice').get('id_invoice');
-      if (invoiceId) {
-        // TODO: Generate invoice url from each group_message
-        invoiceUrl = invoiceId;
-      }
       return {
         ...message.serialize(),
         detail_message: detail || {},
-        invoice_url: invoiceUrl,
       };
     });
   }
@@ -145,8 +138,9 @@ class MessageModel extends bookshelf.Model {
    * @param id
    * @param typeId
    * @param type
+   * @param domain
    */
-  static async findById(id, typeId, type) {
+  static async findById(id, typeId, type, domain = null) {
     const where = { id_messages: id };
     const column = type === 'store' ? 'flagreceiver_messages' : 'flagsender_messages';
     if (type === 'store') where.id_toko = typeId;
@@ -157,7 +151,7 @@ class MessageModel extends bookshelf.Model {
         qb.whereNot(column, MessageFlagStatus.PERMANENT_DELETED);
         qb.whereNot('group_message', MessageType.COMPLAINT);
       })
-      .fetch({ withRelated: ['store', 'detailMessages.user'] });
+      .fetch({ withRelated: ['store', 'detailMessages.user', 'invoice'] });
     if (!message) throw getMessageError('message', 'not_found');
 
     const detailMessages = message.related('detailMessages').map((msg) => {
@@ -167,6 +161,12 @@ class MessageModel extends bookshelf.Model {
       return msg;
     });
 
+    let invoiceUrl = null;
+    const invoice = message.related('invoice');
+    if (domain && invoice.get('id_invoice')) {
+      invoiceUrl = `https://${domain}/transaction/${invoice.get('id_invoice')}/${invoice.get('id_bucket')}`;
+    }
+
     message = message.serialize();
     const flag = type === 'store' ? message.flag_receiver : message.flag_sender;
     message.type = flag === MessageFlagStatus.ARCHIVE ? 'archive' : 'conversation';
@@ -174,6 +174,7 @@ class MessageModel extends bookshelf.Model {
     return {
       ...message,
       detail_messages: detailMessages,
+      invoice_url: invoiceUrl,
     };
   }
 
