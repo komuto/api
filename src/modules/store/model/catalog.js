@@ -203,12 +203,12 @@ class CatalogModel extends bookshelf.Model {
       .from('dropshipper as d')
       .join('produk as p', 'p.id_produk', 'd.id_produk')
       .join('toko as t', 'p.id_toko', 't.id_toko')
-      .joinRaw('join (select id_produk, file_gambarproduk FROM gambar_produk) as images ON images.id_produk = p.id_produk')
+      .joinRaw('join (select DISTINCT ON (id_produk) id_produk, file_gambarproduk FROM gambar_produk) as images ON images.id_produk = p.id_produk')
       .where(whereDropship)
       .union(function () {
         this.select(knex.raw(select2.join(',')))
           .from('produk')
-          .joinRaw('join (select id_produk, file_gambarproduk FROM gambar_produk) as images ON images.id_produk = produk.id_produk')
+          .joinRaw('join (select DISTINCT ON (id_produk) id_produk, file_gambarproduk FROM gambar_produk) as images ON images.id_produk = produk.id_produk')
           .where(whereProduct);
       })
       .orderBy('id_produk', 'DESC')
