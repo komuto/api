@@ -22,11 +22,19 @@ import core from '../core';
 import { Review } from '../review/model';
 import { ImageGroup } from '../user/model';
 import nominal from '../../../config/nominal.json';
-import { getNominalError, getInvoiceError, acceptOrderError, rejectOrderError, inputBillError } from './messages';
+import {
+  getNominalError,
+  getInvoiceError,
+  acceptOrderError,
+  rejectOrderError,
+  inputBillError,
+} from './messages';
 import { getStoreError } from './../store/messages';
 import { Topup } from '../saldo/model';
 import { BadRequestError } from './../../../common/errors';
 import messages from '../core/messages';
+import { Preference } from '../preference/model';
+import { paymentError } from '../bucket/messages';
 
 const { buyerNotification, Notification, sellerNotification } = core;
 
@@ -68,7 +76,12 @@ PaymentController.viaBank = async (req, res, next) => {
 };
 
 PaymentController.getSnapToken = async (req, res, next) => {
-  const bucket = await Bucket.getDetail(req.user.id, req.params.id, req.query.platform);
+  const [bucket, limit] = await Promise.all([
+    await Bucket.getDetail(req.user.id, req.params.id, req.query.platform),
+    await Preference.get('payment'),
+  ]);
+  const endDate = moment.unix(bucket.order_at).add(limit.value, 'd');
+  if (endDate.diff(moment(), 'd') < 0) throw paymentError('transaction', 'not_found');
   const { firstName, lastName } = getName(req.user.name);
   const payload = {
     transaction_details: {
