@@ -24,9 +24,7 @@ module.exports = [
     '5. Pilih salah satu produk dengan mencari produk yang sesuai dengan toko anda. Anda bisa memilih produk berdasarkan kategori, ulasan, diskusi, dan beberapa filter lain yang tersedia.\n' +
     '6. Jika sudah memutuskan produk pilihan anda, lanjutkan dengan memilih barang tersebut dengan menekan “Pilih Barang Ini”.\n' +
     '7. Lalu pilih penempatan katalog produk tersebut atau buat katalog baru di toko anda, lalu tekan “Lanjutkan”.\n' +
-    '8. Selamat, anda telah sukses menambahkan sebuah produk dropship pada toko anda. Tekan “Lihat Daftar Produk” untuk melihat produk apa saja yang telah anda tambahkan. Dan silahkan melakukan kembali proses “Tambah Produk” untuk meramaikan dan menambah pilihan produk dalam toko anda.\n' +
-    'Link Flow Tambah Produk:\n' +
-    'https://drive.google.com/open?id=0Bxt3Z5h-8TY6ejFBV0ZhU2J1VmM\n',
+    '8. Selamat, anda telah sukses menambahkan sebuah produk dropship pada toko anda. Tekan “Lihat Daftar Produk” untuk melihat produk apa saja yang telah anda tambahkan. Dan silahkan melakukan kembali proses “Tambah Produk” untuk meramaikan dan menambah pilihan produk dalam toko anda.\n',
   },
   {
     question: 'Bagaimana jika ada yang bertanya tentang produk ini. siapakah yang akan menjawab? pemilik barang atau reseller ?',
