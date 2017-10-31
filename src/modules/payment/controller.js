@@ -81,6 +81,7 @@ PaymentController.getSnapToken = async (req, res, next) => {
     await Bucket.getDetail(req.user.id, req.params.id, req.query.platform),
     await Preference.get('payment'),
   ]);
+  // TODO: check stock
   const endDate = moment.unix(bucket.order_at).add(limit.value, 'd');
   if (endDate.diff(moment(), 'd') < 0) throw paymentError('transaction', 'not_found');
   const { firstName, lastName } = getName(req.user.name);

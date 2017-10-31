@@ -179,15 +179,21 @@ ProductController.getComments = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const [discussion, comment] = await Promise.all([
-    Discussion.where({ id_diskusi: req.params.id }).fetch({ withRelated: ['product.image'] }),
+    Discussion.where({ id_diskusi: req.params.id }).fetch({ withRelated: ['product.image', 'product.store', 'store'] }),
     Comment.getByDiscussionId(req.params.id, page, pageSize, req.query.page),
   ]);
   if (!discussion) throw getDiscussionError('discussion', 'not_found');
+  let product = discussion.related('product');
+  let store = discussion.get('id_toko') ? discussion.related('store') : product.related('store');
+  store = store.serialize({ message: true });
+  product = product.serialize({ minimal: true });
+  product.id = `${product.id}.${store.id}`;
   req.resData = {
     message: 'Discussion Comments Data',
     meta: { page: comment.page, limit: pageSize },
     data: {
-      product: discussion.related('product').serialize({ minimal: true }),
+      product,
+      store,
       comments: comment.comments.serialize({ minimal: true }),
     },
   };

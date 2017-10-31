@@ -34,6 +34,8 @@ class DiscussionModel extends bookshelf.Model {
     return {
       ...discussion,
       product_id: this.get('id_produk'),
+      store_id: parseNum(this.get('id_toko')),
+      dropshipper_id: parseNum(this.get('id_dropshipper')),
       is_deleted: !!parseNum(this.get('hapus_diskusi')),
       deleted_at: parseDate(this.get('tglhapus_diskusi')),
     };
@@ -58,6 +60,13 @@ class DiscussionModel extends bookshelf.Model {
    */
   product() {
     return this.belongsTo('Product', 'id_produk');
+  }
+
+  /**
+   * Add relation to Store
+   */
+  store() {
+    return this.belongsTo('Store', 'id_toko');
   }
 
   /**
