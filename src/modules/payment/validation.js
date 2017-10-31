@@ -1,5 +1,6 @@
 const constraints = {};
 
+// unused
 constraints.bank = {
   bank_account_id: {
     presence: true,

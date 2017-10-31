@@ -56,6 +56,7 @@ PaymentController.getMethods = async (req, res, next) => {
   return next();
 };
 
+// Unused
 PaymentController.viaBank = async (req, res, next) => {
   const bucket = await Bucket.findByIdAndStatus(
     req.params.id,

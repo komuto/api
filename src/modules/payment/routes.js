@@ -24,6 +24,7 @@ routes.get('/saldo/nominal/:id/token',
  * POST /buckets/id/bank
  * Bank payment method
  */
+// unused route
 routes.post('/buckets/:id([0-9]{1,10})/bank',
   auth(),
   validateParam(constraints.bank, true),
