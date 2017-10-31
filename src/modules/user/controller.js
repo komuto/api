@@ -148,8 +148,8 @@ UserController.updateUser = async (req, res, next) => {
     dateOfBirth = dateOfBirth.format('YYYY-MM-DD');
   }
   if (photo) {
-    // eslint-disable-next-line
-    const notValid = photo.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+    const re = new RegExp('^(http|https)://', 'i');
+    const notValid = re.test(photo);
     if (notValid) throw userUpdateError('fields', 'not_valid');
   }
   // eslint-disable-next-line
@@ -171,8 +171,8 @@ UserController.updateAccount = async (req, res, next) => {
     dateOfBirth = dateOfBirth.format('YYYY-MM-DD');
   }
   if (photo) {
-    // eslint-disable-next-line
-    const notValid = photo.match(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g);
+    const re = new RegExp('^(http|https)://', 'i');
+    const notValid = re.test(photo);
     if (notValid) throw userUpdateError('fields', 'not_valid');
   }
   const check = { name, photo, gender, place_of_birth, date_of_birth: dateOfBirth };
