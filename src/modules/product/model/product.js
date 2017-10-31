@@ -487,7 +487,7 @@ class ProductModel extends bookshelf.Model {
     ];
     let product = await this.where({ id_produk: productId }).fetch({ withRelated: related });
     if (product && product.get('id_toko') !== storeId) {
-      const withRelated = [];
+      const withRelated = ['store'];
       if (userId) withRelated.push('store.favoriteStores');
       dropship = await Dropship.findByProductIdAndStoreId(productId, storeId, withRelated);
       if (!dropship) return false;
