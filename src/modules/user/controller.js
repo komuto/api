@@ -119,6 +119,8 @@ UserController.getUserSocial = async (req, res, next) => {
         marketplace_id: req.marketplace.id,
       };
       req.user = await User.create(User.matchDBColumn(response));
+      const token = await UserToken.generateToken(req.user.id, TokenType.EMAIL_ACTIVATION);
+      UserEmail.sendActivateAccount(req.user.email, token, req.marketplace.mobile_domain);
     }
   }
   req.user.is_required_password = true;
