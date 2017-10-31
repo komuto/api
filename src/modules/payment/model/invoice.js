@@ -192,13 +192,9 @@ class InvoiceModel extends bookshelf.Model {
   /**
    * Get invoice for bulk create review & dispute
    */
-  static async get(userId, bucketId, id, withRelated = ['items']) {
+  static async get(userId, bucketId, id, withRelated = ['items'], solution = null) {
     const invoice = await this
-      .where({
-        id_invoice: id,
-        id_user: userId,
-        id_bucket: bucketId,
-      })
+      .where({ id_invoice: id, id_user: userId, id_bucket: bucketId })
       .query(qb => qb.whereIn('status_transaksi', [
         InvoiceTransactionStatus.SENDING,
         InvoiceTransactionStatus.PROBLEM,
@@ -206,18 +202,19 @@ class InvoiceModel extends bookshelf.Model {
       .fetch({ withRelated });
     if (!invoice) throw getInvoiceError('invoice', 'not_found');
     if (invoice.get('status_transaksi') === InvoiceTransactionStatus.PROBLEM) {
-      await this.checkDispute(invoice);
+      await this.checkDispute(invoice, solution);
     }
     return invoice;
   }
 
-  static async checkDispute(invoice) {
+  static async checkDispute(invoice, solution) {
     await invoice.load('dispute');
     const dispute = invoice.related('dispute');
     const disputeObj = dispute.serialize();
     if (
       disputeObj.solution !== DisputeSolutionType.EXCHANGE
       && disputeObj.status !== DisputeStatus.SEND_BY_SELLER
+      && solution === DisputeSolutionType.REFUND
     ) {
       throw getInvoiceError('invoice', 'dispute_disable');
     }
