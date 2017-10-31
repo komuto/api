@@ -249,10 +249,11 @@ class UserModel extends bookshelf.Model {
     });
   }
 
-  static async getBySocial(name, uid) {
+  static async getBySocial(name, uid, marketplaceId) {
     const user = await new this({
       hybridauth_provider_name: name,
       hybridauth_provider_uid: uid,
+      id_marketplaceuser: marketplaceId,
     }).fetch();
     return user ? user.serialize() : user;
   }

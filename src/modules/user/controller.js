@@ -77,7 +77,7 @@ UserController.getUserSocial = async (req, res, next) => {
   });
   // Case where provider name and uid found on db
   const { provider_name, provider_uid, access_token, reg_token } = req.body;
-  req.user = await User.getBySocial(provider_name, provider_uid);
+  req.user = await User.getBySocial(provider_name, provider_uid, req.marketplace.id);
   // Case where provider name and uid not found on db
   if (!req.user) {
     fb.setAccessToken(access_token);
