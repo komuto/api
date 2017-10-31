@@ -58,13 +58,14 @@ class OTPAddressModel extends bookshelf.Model {
    * Verify store
    */
   static async verify(userId, code) {
-    const otp = await this.where({
-      id_users: userId,
-      kode_otpaddress: code,
-      status_otpaddress: OTPAddressStatus.CREATED,
-    }).query((qb) => {
-      qb.where('expdate_otpaddress', '>', moment());
-    }).fetch();
+    const otp = await this
+      .where({
+        id_users: userId,
+        kode_otpaddress: code,
+        status_otpaddress: OTPAddressStatus.CREATED,
+      })
+      .query(qb => qb.where('expdate_otpaddress', '>', moment()))
+      .fetch();
     if (!otp) throw verifyOTPAddressError('OTPAddress', 'not_found');
     return await otp.save({ status_otpaddress: OTPAddressStatus.VERIFIED }, { patch: true });
   }

@@ -5,6 +5,7 @@ import { OTPAddress } from '../OTP/model';
 import { Store } from '../store/model';
 import config from '../../../config';
 import { OTPAddressEmail } from '../OTP/email';
+import { StoreVerificationStatus } from "../store/model/store";
 
 export const AddressController = {};
 export default { AddressController };
@@ -127,20 +128,22 @@ AddressController.updateAddress = async (req, res, next) => {
 };
 
 AddressController.updateStoreAddress = async (req, res, next) => {
-  let address = await Address.getStoreAddressModel(req.user.id);
+  const address = await Address.getStoreAddressModel(req.user.id);
   if (!address) throw getAddressError('address', 'not_found');
-  address = await address.save(Address.matchDBColumn(req.body), { patch: true });
   await OTPAddress.updateStatus(req.user.id);
-  const otp = await OTPAddress.create(req.user.id);
-  const store = await Store.getStoreByUserId(req.user.id);
+  const [updateAddress, otp, store] = await Promise.all([
+    await address.save(Address.matchDBColumn(req.body), { patch: true }),
+    await OTPAddress.create(req.user.id),
+    await Store.getStoreByUserId(req.user.id),
+  ]);
+  await store.save({ verification_status: StoreVerificationStatus.UNVERIFIED });
   const data = {
     user: req.user,
     store: store.serialize(),
-    address: address.serialize(),
+    address: updateAddress.serialize(),
     otp: otp.serialize(),
   };
   OTPAddressEmail.sendOtpAddress(config.komutoEmail, data);
-
   req.resData = {
     message: 'Address Data',
     data: address,
