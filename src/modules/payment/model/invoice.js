@@ -241,7 +241,6 @@ class InvoiceModel extends bookshelf.Model {
         qb.whereNotIn('status_transaksi', [
           InvoiceTransactionStatus.WAITING,
           InvoiceTransactionStatus.PROCEED,
-          InvoiceTransactionStatus.REJECTED,
         ]);
         qb.whereNotNull('status_transaksi');
       }
