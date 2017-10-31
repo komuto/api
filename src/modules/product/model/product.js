@@ -193,6 +193,7 @@ class ProductModel extends bookshelf.Model {
     let { brands, services } = params;
 
     products.where(where).andWhere('u.id_marketplaceuser', marketplaceId);
+    products.where(isFromProduct ? 'p.status_produk' : 'd.status_dropshipper', ProductStatus.SHOW);
     if (isDropship) products.whereNot('p.id_toko', storeId).andWhere('is_dropshiper', true);
     if (!isDropship && storeId) products.where(isFromProduct ? 'p.id_toko' : 'd.id_toko', storeId);
     if (query) products.whereRaw('to_tsvector(nama_produk) @@ to_tsquery(?)', query);
