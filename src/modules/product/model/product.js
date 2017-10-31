@@ -353,6 +353,9 @@ class ProductModel extends bookshelf.Model {
         const dropship = this.select('p.nama_produk')
           .from('produk as p')
           .leftJoin('dropshipper as d', 'd.id_produk', 'p.id_produk')
+          .innerJoin('toko as td', 'td.id_toko', 'd.id_toko')
+          .innerJoin('users as ud', 'ud.id_users', 'td.id_users')
+          .where('ud.id_marketplaceuser', marketplaceId)
           .where('status_dropshipper', ProductStatus.SHOW)
           .whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
         if (categoryId) dropship.where('id_kategoriproduk', categoryId);
