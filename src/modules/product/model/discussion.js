@@ -141,6 +141,8 @@ class DiscussionModel extends bookshelf.Model {
       question: 'pertanyaan_diskusi',
       created_at: 'tgl_diskusi',
       is_deleted: 'hapus_diskusi',
+      store_id: 'id_toko',
+      dropshipper_id: 'id_dropshipper',
     };
     const newData = {};
     Object.keys(data).forEach((prop) => {

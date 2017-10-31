@@ -963,12 +963,27 @@ class ProductModel extends bookshelf.Model {
   /**
    * @param productId {int}
    * @param storeId {int}
+   * @param isOriginalStore {boolean}
    */
-  static async findProduct(productId, storeId) {
-    const getOwn = this.where({ 'produk.id_produk': productId, 'produk.id_toko': storeId }).fetch();
-    const getDropship = this.query(qb => qb.select(['produk.*', 'id_dropshipper'])
-      .leftJoin('dropshipper as d', 'd.id_produk', 'produk.id_produk')
-      .where({ 'd.id_produk': productId, 'd.id_toko': storeId })).fetch();
+  static async findProduct(productId, storeId, isOriginalStore = false) {
+    const withRelated = isOriginalStore ? 'store.user' : null;
+    const getOwn = this.where({ 'produk.id_produk': productId, 'produk.id_toko': storeId }).fetch({ withRelated });
+    const select = ['produk.*', 'id_dropshipper'];
+    if (isOriginalStore) {
+      select.push('d.id_toko as d_id_toko');
+      select.push('u.id_users as u_id_users');
+      select.push('u.reg_token');
+      select.push('u.notifications');
+    }
+    const getDropship = this.query((qb) => {
+      qb.select(select);
+      qb.leftJoin('dropshipper as d', 'd.id_produk', 'produk.id_produk');
+      if (isOriginalStore) {
+        qb.join('toko as t', 't.id_toko', 'd.id_toko');
+        qb.join('users as u', 'u.id_users', 't.id_users');
+      }
+      qb.where({ 'd.id_produk': productId, 'd.id_toko': storeId });
+    }).fetch();
     const [own, dropship] = await Promise.all([getOwn, getDropship]);
     return own || dropship;
   }

@@ -47,7 +47,7 @@ export const getNotification = (notifications, type) => (
   _.find(notifications, o => o.type === type).is_active
 );
 
-const notificationDefault = () => [
+export const notificationDefault = () => [
   { type: NotificationType.MESSAGE_FROM_ADMIN, is_active: true },
   { type: NotificationType.NEWSLETTER, is_active: true },
   { type: NotificationType.REVIEW, is_active: true },

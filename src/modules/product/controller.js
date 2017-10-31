@@ -32,6 +32,7 @@ import config from './../../../config';
 import { BadRequestError } from './../../../common/errors';
 import core from '../core';
 import dropshipFaq from '../../../config/faq';
+import { notificationDefault } from '../user/model/user';
 
 const { Notification, sellerNotification, buyerNotification } = core;
 const { getProductAndStore } = core.utils;
@@ -204,22 +205,37 @@ ProductController.getComments = async (req, res, next) => {
  * Create discussion
  */
 ProductController.createDiscussion = async (req, res, next) => {
-  const { productId } = getProductAndStore(req.params.id);
-  const owner = await Product.getOwner(productId);
-  if (owner.get('id_users') === req.user.id) throw createDiscussionError('product', 'owner');
-  const data = Discussion.matchDBColumn({
+  const { productId, storeId } = getProductAndStore(req.params.id);
+  const product = await Product.findProduct(productId, storeId, true);
+  const isFromDropship = !!product.get('id_dropshipper');
+  const owner = product.related('store').related('user');
+  let regToken = owner.get('reg_token');
+  let userId = owner.get('id_users');
+  let notifications = owner.serialize({ notification: true }).notifications;
+  let data = {
     user_id: req.user.id,
     product_id: productId,
     question: req.body.question,
     is_deleted: 0,
     created_at: moment().toDate(),
-  });
+  };
+  if (isFromDropship) {
+    regToken = product.get('reg_token');
+    userId = product.get('u_id_users');
+    notifications = product.get('notifications') || notificationDefault();
+    data = {
+      ...data,
+      store_id: product.get('d_id_toko'),
+      dropshipper_id: product.get('id_dropshipper'),
+    };
+  }
+  if (userId === req.user.id) throw createDiscussionError('product', 'owner');
+  data = Discussion.matchDBColumn(data);
   const discussion = await Discussion.create(data);
-  const notifications = owner.serialize({ notification: true }).notifications;
-  if (owner.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
+  if (regToken && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
     Notification.send(
       sellerNotification.CREATE_DISCUSSION,
-      owner.get('reg_token'),
+      regToken,
       req.marketplace,
       {
         discussion_id: String(discussion.id),
