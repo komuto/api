@@ -46,7 +46,7 @@ class TopupModel extends bookshelf.Model {
   }
 
   static get(userId, page, pageSize) {
-    return new this({ id_users: userId }).orderBy('datecreated', 'desc').fetchPage({ page, pageSize });
+    return this.where({ id_users: userId }).orderBy('datecreated', 'desc').fetchPage({ page, pageSize });
   }
 
   static async updateStatus(id, status, paymentMethodId) {
