@@ -968,12 +968,15 @@ class ProductModel extends bookshelf.Model {
   static async findProduct(productId, storeId, isOriginalStore = false) {
     const withRelated = isOriginalStore ? 'store.user' : null;
     const getOwn = this.where({ 'produk.id_produk': productId, 'produk.id_toko': storeId }).fetch({ withRelated });
-    const select = ['produk.*', 'id_dropshipper'];
+    let select = ['produk.*', 'id_dropshipper'];
     if (isOriginalStore) {
-      select.push('d.id_toko as d_id_toko');
-      select.push('u.id_users as u_id_users');
-      select.push('u.reg_token');
-      select.push('u.notifications');
+      select = [
+        ...select,
+        'd.id_toko as d_id_toko',
+        'u.id_users as u_id_users',
+        'u.reg_token',
+        'u.notifications',
+      ];
     }
     const getDropship = this.query((qb) => {
       qb.select(select);
