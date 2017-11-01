@@ -100,11 +100,11 @@ class TopupModel extends bookshelf.Model {
       amount,
       first_saldo: saldo,
       last_saldo: updateSaldo,
-      user_id: id,
+      user_id: user.id,
       type: SummTransType.TOPUP,
       remark,
       summaryable_type: 'topup_wallet',
-      summaryable_id: topup.get('id'),
+      summaryable_id: topup.id,
     }));
     await user.save({ saldo_wallet: updateSaldo }, { patch: true });
     return topup;
