@@ -72,17 +72,36 @@ class DiscussionModel extends bookshelf.Model {
   /**
    * Get discussion by product id
    */
-  static async getByProductId(productId, page, pageSize) {
-    const discussions = await this.where({ id_produk: productId })
-      .orderBy('tgl_diskusi', 'DESC')
-      .fetchPage({
-        page,
-        pageSize,
-        withRelated: ['comments', 'user'],
-      })
-      .catch(() => {
-        throw getDiscussionError('discussion', 'not_found');
-      });
+  static async getByProductId(productId, storeId, page, pageSize) {
+    const [original, dropshipper] = await Promise.all([
+      this
+        .query((qb) => {
+          qb.join('produk as p', 'p.id_produk', 'diskusi.id_produk');
+          qb.where('diskusi.id_produk', productId);
+          qb.where('p.id_toko', storeId);
+          qb.whereNull('id_dropshipper');
+        })
+        .orderBy('tgl_diskusi', 'DESC')
+        .fetchPage({
+          page,
+          pageSize,
+          withRelated: ['comments', 'user'],
+        }),
+      this
+        .query((qb) => {
+          qb.join('dropshipper as d', 'd.id_dropshipper', 'diskusi.id_dropshipper');
+          qb.where('diskusi.id_produk', productId);
+          qb.where('d.id_toko', storeId);
+        })
+        .orderBy('tgl_diskusi', 'DESC')
+        .fetchPage({
+          page,
+          pageSize,
+          withRelated: ['comments', 'user'],
+        }),
+    ]);
+
+    const discussions = original.length ? original : dropshipper;
     return discussions.map((discussion) => {
       const comments = discussion.related('comments');
       return {
