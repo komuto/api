@@ -125,6 +125,7 @@ class StoreModel extends bookshelf.Model {
       const catalogProducts = catalog.related('products').map((product) => {
         const images = product.related('images').serialize();
         const { likes, isLiked } = this.getLikes(product, userId);
+        console.log(isLiked);
         product = product.serialize({ minimal: true });
         product.id = `${product.id}.${store.get('id_toko')}`;
         return {
@@ -214,7 +215,7 @@ class StoreModel extends bookshelf.Model {
    */
   static getLikes(product, id) {
     const likes = product.related('likes');
-    const isLiked = id ? _.find(likes.models, o => o.attributes.id_users === id) : false;
+    const isLiked = id ? !!_.find(likes.models, o => o.attributes.id_users === id) : false;
     return { likes, isLiked };
   }
 
