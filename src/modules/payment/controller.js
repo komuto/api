@@ -28,6 +28,7 @@ import {
   acceptOrderError,
   rejectOrderError,
   inputBillError,
+  errMsg,
 } from './messages';
 import { getStoreError } from './../store/messages';
 import { Topup } from '../saldo/model';
@@ -37,6 +38,7 @@ import { Preference } from '../preference/model';
 import { paymentError } from '../bucket/messages';
 
 const { buyerNotification, Notification, sellerNotification } = core;
+const { validateImageUrl } = core.middleware;
 
 const midtrans = new Midtrans({
   clientKey: config.midtrans.clientKey,
@@ -199,6 +201,9 @@ PaymentController.bulkReview = async (req, res, next) => {
 };
 
 PaymentController.dispute = async (req, res, next) => {
+  if (req.body.images) {
+    req.body.images.map(img => validateImageUrl(img.name, errMsg.createDispute.image));
+  }
   const invoice = await Invoice.get(
     req.user.id,
     req.params.id,

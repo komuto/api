@@ -74,6 +74,7 @@ export const errMsg = {
   createResolution: {
     title: 'Create resolusi gagal',
     error: 'Gagal membuat resolusi',
+    image: 'Image tidak valid',
   },
 };
 

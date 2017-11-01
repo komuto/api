@@ -34,6 +34,7 @@ import core from '../core';
 import { Dispute } from '../payment/model';
 
 const { Notification, sellerNotification } = core;
+const { validateImageUrl } = core.middleware;
 
 export const UserController = {};
 export default { UserController };
@@ -147,13 +148,15 @@ UserController.updateUser = async (req, res, next) => {
     if (!dateOfBirth.isValid()) throw userUpdateError('fields', 'date_not_valid');
     dateOfBirth = dateOfBirth.format('YYYY-MM-DD');
   }
-  if (photo) {
-    const re = new RegExp('^(http|https)://', 'i');
-    const notValid = re.test(photo);
-    if (notValid) throw userUpdateError('fields', 'not_valid');
-  }
-  // eslint-disable-next-line
-  const check = { name, cooperative_member_number, photo, gender, place_of_birth, date_of_birth: dateOfBirth };
+  validateImageUrl(photo, errMsg.updateMsg.not_valid);
+  const check = {
+    name,
+    cooperative_member_number,
+    photo,
+    gender,
+    place_of_birth,
+    date_of_birth: dateOfBirth,
+  };
   const data = User.matchDBColumn(check);
   if (_.isEmpty(data)) throw userUpdateError('fields', 'not_valid');
   const user = await User.update({ id_users: req.user.id }, data);
@@ -170,11 +173,7 @@ UserController.updateAccount = async (req, res, next) => {
     if (!dateOfBirth.isValid()) throw userUpdateError('fields', 'date_not_valid');
     dateOfBirth = dateOfBirth.format('YYYY-MM-DD');
   }
-  if (photo) {
-    const re = new RegExp('^(http|https)://', 'i');
-    const notValid = re.test(photo);
-    if (notValid) throw userUpdateError('fields', 'not_valid');
-  }
+  validateImageUrl(photo, errMsg.updateMsg.not_valid);
   const check = { name, photo, gender, place_of_birth, date_of_birth: dateOfBirth };
   const data = User.matchDBColumn(check);
   if (_.isEmpty(data)) throw userUpdateError('fields', 'not_valid');
@@ -525,6 +524,9 @@ UserController.getResolution = async (req, res, next) => {
  * Create Resolution
  */
 UserController.createResolution = async (req, res, next) => {
+  if (req.body.images) {
+    req.body.images.map(img => validateImageUrl(img.name, errMsg.createResolution.image));
+  }
   const ticketNumber = await ResolutionCenter.getTicketNumber();
   const data = ResolutionCenter.matchDBColumn({
     ...req.body,

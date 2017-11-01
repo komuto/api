@@ -19,6 +19,7 @@ export const errMsg = {
   createDispute: {
     title: 'Create dispute gagal',
     error: 'Error create dispute',
+    image: 'Image tidak valid',
   },
   createPaymentConfirmation: {
     title: 'Create informasi pembayaran gagal',

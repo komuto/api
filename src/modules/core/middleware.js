@@ -193,3 +193,11 @@ export function validateParam(
     return next();
   };
 }
+
+export function validateImageUrl(str, msg) {
+  if (str) {
+    const re = new RegExp('^(http|https)://', 'i');
+    const notValid = re.test(str);
+    if (notValid) throw new BadRequestError(msg);
+  }
+}

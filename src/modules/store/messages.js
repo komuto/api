@@ -22,6 +22,9 @@ export const errMsg = {
     title: 'Create toko gagal',
     duplicate: 'Toko sudah ada',
   },
+  updateStore: {
+    logo: 'Format logo salah',
+  },
   getStore: {
     title: 'Get toko gagal',
     not_found: 'Toko tidak ditemukan',

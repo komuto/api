@@ -12,7 +12,7 @@ import {
   StoreExpedition,
   StoreStatus,
 } from './model';
-import { makeFavoriteError, deleteCatalogError, createMessageError } from './messages';
+import { makeFavoriteError, deleteCatalogError, createMessageError, errMsg } from './messages';
 import { OTPAddress } from './../OTP/model';
 import { Address } from './../address/model';
 import { User, getNotification, NotificationType } from './../user/model';
@@ -22,6 +22,7 @@ import config from '../../../config';
 import core from '../core';
 
 const { Notification, sellerNotification, buyerNotification } = core;
+const { validateImageUrl } = core.middleware;
 
 export const StoreController = {};
 export default { StoreController };
@@ -250,6 +251,7 @@ StoreController.verify = async (req, res, next) => {
  */
 StoreController.createStore = async (req, res, next) => {
   const expeditionServices = req.body.expedition_services;
+  validateImageUrl(req.body.store.logo, errMsg.updateStore.logo);
   const storeData = _.assign(req.body.store, {
     user_id: req.user.id,
     status: StoreStatus.ACTIVE,
@@ -297,6 +299,7 @@ StoreController.createStore = async (req, res, next) => {
  */
 StoreController.updateStore = async (req, res, next) => {
   const { slogan, description, logo } = req.body;
+  validateImageUrl(logo, errMsg.updateStore.logo);
   const store = await Store.update(Store.matchDBColumn({ slogan, description, logo }), req.user.id);
   req.resData = { data: store };
   return next();
