@@ -50,13 +50,14 @@ class MasterFeeModel extends bookshelf.Model {
     return this.where({ identifier_marketplace_fee: marketplaceId }).orderBy('max_fee').fetchAll();
   }
 
-  static calculateCommissionByFees(masterFee, price, isPercentage = false) {
+  static calculateCommissionByFees(masterFee, price, isPercentage = false, isDropship = true) {
     if (!masterFee.models.length) throw getFeeError('master_fee', 'not_found');
 
     let found = _.find(masterFee.models, o => o.serialize().max >= price);
     if (!found) return 0;
 
     found = found.serialize();
+    if (!isDropship) return found.fee;
     const fee = (found.fee * found.dropshipper_fee) / 100;
     if (isPercentage) return fee;
     return (fee * price) / 100;

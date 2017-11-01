@@ -258,8 +258,11 @@ class CatalogModel extends bookshelf.Model {
             name: product.nama_toko,
             commission: {
               nominal: MasterFee.calculateCommissionByFees(masterFee, Number(product.harga_produk)),
-              percent: MasterFee
-                .calculateCommissionByFees(masterFee, Number(product.harga_produk), true),
+              percent: MasterFee.calculateCommissionByFees(
+                masterFee,
+                Number(product.harga_produk),
+                true,
+              ),
             },
           };
         // Provide this.get() utility for serialize
@@ -267,6 +270,12 @@ class CatalogModel extends bookshelf.Model {
         product = {
           ...Product.prototype.serialize.call(product, { minimal: true }),
           image,
+          commission: MasterFee.calculateCommissionByFees(
+            masterFee,
+            Number(product.harga_produk),
+            true,
+            false,
+          ),
           is_checked: false,
         };
         if (dropshipOrigin) product.dropship_origin = dropshipOrigin;
