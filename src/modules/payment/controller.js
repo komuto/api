@@ -203,7 +203,7 @@ PaymentController.dispute = async (req, res, next) => {
     req.user.id,
     req.params.id,
     req.params.invoice_id,
-    ['items.product', 'user'],
+    ['items.product', 'store.user'],
     req.body.solution,
   );
   const invoiceObj = invoice.serialize();
@@ -254,11 +254,11 @@ PaymentController.dispute = async (req, res, next) => {
   const notificationType = req.body.solution === DisputeSolutionType.REFUND
     ? sellerNotification.ORDER_COMPLAINED_REFUND
     : sellerNotification.ORDER_COMPLAINED_EXCHANGE;
-  const buyer = invoice.related('user');
-  if (buyer.get('reg_token')) {
+  const seller = invoice.related('store').related('user');
+  if (seller.get('reg_token')) {
     Notification.send(
       notificationType,
-      buyer.get('reg_token'),
+      seller.get('reg_token'),
       req.marketplace,
       { dispute_id: String(dispute.id), click_action: `complain-seller-detail?id=${dispute.id}` },
     );
