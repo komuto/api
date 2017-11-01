@@ -296,7 +296,8 @@ StoreController.createStore = async (req, res, next) => {
  * Update Store
  */
 StoreController.updateStore = async (req, res, next) => {
-  const store = await Store.update(Store.matchDBColumn(req.body), req.user.id);
+  const { slogan, description, logo } = req.body;
+  const store = await Store.update(Store.matchDBColumn({ slogan, description, logo }), req.user.id);
   req.resData = { data: store };
   return next();
 };

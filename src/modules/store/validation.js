@@ -24,7 +24,6 @@ constraints.create = {
 };
 
 constraints.update = {
-  name: { presence: true },
   slogan: { presence: true },
   description: { presence: true },
   logo: { presence: false },
