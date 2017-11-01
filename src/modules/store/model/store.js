@@ -310,7 +310,7 @@ class StoreModel extends bookshelf.Model {
       });
       const totalActive = _.filter(services, { is_active: true }).length;
       expedition = expedition.serialize();
-      expedition.is_active = totalActive === services.length;
+      expedition.is_active = services.length ? totalActive === services.length : false;
       services = _.sortBy(services, 'id');
       return {
         ...expedition,
