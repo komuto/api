@@ -7,6 +7,7 @@ export const errMsg = {
     title: 'Get keranjang gagal',
     not_found: 'Keranjang tidak ditemukan',
     not_found_items: 'Tidak menemukan items',
+    stock: 'Permintaan barang melebihi stok barang',
   },
   getTransaction: {
     title: 'Get transaksi gagal',

@@ -96,28 +96,40 @@ class BucketModel extends bookshelf.Model {
   /**
    * Get detail bucket
    */
-  static async getDetail(userId, bucketId = null, platform = null) {
-    let where = { id_users: userId };
-    if (bucketId) {
-      where = { ...where, id_bucket: bucketId, status_bucket: BucketStatus.WAITING_FOR_PAYMENT };
-    } else {
-      where = { ...where, status_bucket: BucketStatus.ADDED };
-    }
-    const related = [
-      'promo',
-      { 'items.product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
-      'items.product.store.user.addresses.district',
-      'items.product.expeditionServices.expedition',
-      'items.shipping.address.province',
-      'items.shipping.address.district',
-      'items.shipping.address.subDistrict',
-      'items.shipping.expeditionService.expedition',
-    ];
-    const bucket = await this.where(where).fetch({ withRelated: bucketId ? [] : related });
+  static async getDetail(userId) {
+    const bucket = await this.where({ id_users: userId, status_bucket: BucketStatus.ADDED }).fetch({
+      withRelated: [
+        'promo',
+        { 'items.product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
+        'items.product.store.user.addresses.district',
+        'items.product.expeditionServices.expedition',
+        'items.shipping.address.province',
+        'items.shipping.address.district',
+        'items.shipping.address.subDistrict',
+        'items.shipping.expeditionService.expedition',
+      ],
+    });
     if (!bucket) throw getBucketError('bucket', 'not_found');
-    if (platform) bucket.save({ platform }, { patch: true });
     const items = await Promise.all(bucket.related('items').map(async item => await Item.loadDetailItem(item)));
     return { ...bucket.serialize(), items };
+  }
+
+  /**
+   * Get detail bucket for snap
+   */
+  static async getForPayment(userId, bucketId, platform = null) {
+    const bucket = await this.where({
+      id_users: userId,
+      id_bucket: bucketId,
+      status_bucket: BucketStatus.WAITING_FOR_PAYMENT,
+    }).fetch({ withRelated: 'items.product' });
+    if (!bucket) throw getBucketError('bucket', 'not_found');
+    if (platform) bucket.save({ platform }, { patch: true });
+    bucket.related('items').each((item) => {
+      item = item.serialize();
+      if (item.product.stock < item.qty) throw getBucketError('item', 'stock');
+    });
+    return bucket;
   }
 
   /**

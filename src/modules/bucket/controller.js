@@ -313,11 +313,7 @@ BucketController.bulkUpdate = async (req, res, next) => {
 
 BucketController.balancePayment = async (req, res, next) => {
   const now = moment();
-  const getBucket = Bucket.where({
-    id_bucket: req.params.id,
-    id_users: req.user.id,
-    status_bucket: BucketStatus.WAITING_FOR_PAYMENT,
-  }).fetch();
+  const getBucket = Bucket.getForPayment(req.user.id, req.params.id);
   const getPref = Preference.get('payment');
   const [bucket, pref] = await Promise.all([getBucket, getPref]);
   if (!bucket) throw paymentError('transaction', 'not_found');
@@ -327,20 +323,20 @@ BucketController.balancePayment = async (req, res, next) => {
   const saldo = req.user.saldo_wallet - bill;
   if (saldo < 0) throw paymentError('saldo', 'not_enough');
 
-  await bucket.save({
+  bucket.save({
     status_bucket: BucketStatus.PAYMENT_RECEIVED,
     tglstatus_bucket: now.toDate(),
     bayar_wallet: bill,
   }, { patch: true });
 
-  await Invoice.where('id_bucket', bucket.get('id_bucket')).save({
+  Invoice.where('id_bucket', bucket.get('id_bucket')).save({
     status_invoice: InvoiceStatus.PAID,
     updated_at: now.toDate(),
     status_transaksi: InvoiceTransactionStatus.WAITING,
   }, { patch: true });
 
   const remark = await TransType.getRemark(SummTransType.PAYMENT);
-  await TransSummary.create(TransSummary.matchDBColumn({
+  TransSummary.create(TransSummary.matchDBColumn({
     amount: bill,
     first_saldo: saldo + bill,
     last_saldo: saldo,
@@ -351,6 +347,7 @@ BucketController.balancePayment = async (req, res, next) => {
     summaryable_id: bucket.get('id_bucket'),
   }));
 
-  await User.where('id_users', req.user.id).save({ saldo_wallet: saldo }, { patch: true });
+  User.where('id_users', req.user.id).save({ saldo_wallet: saldo }, { patch: true });
+  req.resData = { data: bucket };
   return next();
 };
