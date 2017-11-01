@@ -108,7 +108,9 @@ class WishlistModel extends bookshelf.Model {
       }
       const images = product.related('images');
       const countLike = product.related('likes').length;
-      product = { ...product.serialize({ minimal: true, wishlist: true }), count_like: countLike };
+      product = product.serialize({ minimal: true, wishlist: true });
+      product.id = `${product.id}.${store.id}`;
+      product = { ...product, count_like: countLike };
       return { product, store, images };
     });
   }
