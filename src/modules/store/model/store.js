@@ -200,7 +200,7 @@ class StoreModel extends bookshelf.Model {
           is_liked,
         };
       });
-      catalog = catalog.id ? catalog.serialize() : { id: 0, name: 'Tanpa Katalog' };
+      catalog = catalog.id ? catalog.serialize() : { id: 0, store_id: id, name: 'Tanpa Katalog' };
       return {
         ...catalog,
         products: catalogProducts,
