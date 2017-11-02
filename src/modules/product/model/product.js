@@ -946,7 +946,7 @@ class ProductModel extends bookshelf.Model {
           .leftJoin('dropshipper as d', 'd.id_produk', 'p.id_produk')
           .where('d.id_toko', storeId);
         if (query) dropship.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
-        if (catalogId) qb.where('identifier_katalog', catalogId);
+        if (catalogId) qb.where('d.id_katalog', catalogId);
       });
       qb.orderBy('date_created', 'desc');
       qb.limit(pageSize).offset(offset);
