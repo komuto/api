@@ -21,6 +21,7 @@ def.logPath = path.join(rootDir, 'logs/log');
 
 // images
 def.imagePath = path.join(rootDir, 'public/image');
+def.imageMaxWidth = 1000;
 def.imageFolder = {};
 def.imageFolder.store = 'toko';
 def.imageFolder.product = 'produk';

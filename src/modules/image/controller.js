@@ -18,9 +18,9 @@ ImageController.upload = async (req, res, next) => {
         const imageResize = sharp(image.buffer);
         const data = await imageResize.metadata()
           .then((metadata) => {
-            if (metadata.width > 1000) {
+            if (metadata.width > config.imageMaxWidth) {
               return imageResize
-                .resize(1000)
+                .resize(config.imageMaxWidth)
                 .toBuffer();
             }
             return imageResize.toBuffer();
