@@ -235,10 +235,14 @@ class StoreModel extends bookshelf.Model {
       { 'catalogs.products': qb => qb.limit(3) },
     ];
     if (userId) related.push({ favoriteStores: qb => qb.where('id_users', userId) });
-    let store = await this.where({ id_toko: id }).fetch({ withRelated: related });
-    if (!store || store.related('user').get('id_marketplaceuser') !== marketplaceId) {
-      throw getStoreError('store', 'not_found');
-    }
+    let store = await this
+      .query((qb) => {
+        qb.where('id_toko', id);
+        qb.join('users as u', 'u.id_users', 'toko.id_users');
+        qb.where('u.id_marketplaceuser', marketplaceId);
+      })
+      .fetch({ withRelated: related });
+    if (!store) throw getStoreError('store', 'not_found');
     const catalogs = this.getCatalogs(store, userId);
     const { origin, district } = this.getOriginAndDistrict(store);
     const { reviews, totalSold, quality, accuracy } = this.getReviews(store);
