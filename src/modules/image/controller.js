@@ -1,6 +1,7 @@
 import fs from 'fs';
 import _ from 'lodash';
 import Promise from 'bluebird';
+import sharp from 'sharp';
 import { uploadError } from './messages';
 import config from '../../../config';
 
@@ -12,11 +13,26 @@ ImageController.upload = async (req, res, next) => {
   const names = [];
   const promises = _.map(images, (image) => {
     names.push({ name: image.filename });
-    return new Promise((resolve, reject) => {
-      fs.writeFile(image.path, image.buffer, (err) => {
-        if (err) reject(err);
-        resolve();
-      });
+    return new Promise(async (resolve, reject) => {
+      try {
+        const imageResize = sharp(image.buffer);
+        const data = await imageResize.metadata()
+          .then((metadata) => {
+            if (metadata.width > 1000) {
+              return imageResize
+                .resize(1000)
+                .toBuffer();
+            }
+            return imageResize.toBuffer();
+          });
+
+        fs.writeFile(image.path, data, (err) => {
+          if (err) reject(err);
+          resolve();
+        });
+      } catch (err) {
+        reject(err);
+      }
     });
   });
 
