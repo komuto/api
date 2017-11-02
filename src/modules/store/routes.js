@@ -17,6 +17,15 @@ routes.get('/stores/:id([0-9]{1,10})',
   apiResponse());
 
 /**
+ * GET /stores/id/reviews
+ * Get store reviews
+ */
+routes.get('/stores/:id([0-9]{1,10})/reviews',
+  auth(false),
+  wrap(StoreController.getStoreReviews),
+  apiResponse());
+
+/**
  * Favorite or delete store
  */
 routes.put('/stores/:id([0-9]{1,10})/favorite',

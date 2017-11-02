@@ -20,6 +20,7 @@ import { OTPAddressEmail } from '../OTP/email';
 import { Invoice, InvoiceTransactionStatus, Dispute } from '../payment/model';
 import config from '../../../config';
 import core from '../core';
+import { Review } from "../review/model";
 
 const { Notification, sellerNotification, buyerNotification } = core;
 const { validateImageUrl } = core.middleware;
@@ -32,6 +33,18 @@ StoreController.getStore = async (req, res, next) => {
   req.resData = {
     message: 'Store Detail Data',
     data: store,
+  };
+  return next();
+};
+
+StoreController.getStoreReviews = async (req, res, next) => {
+  const page = req.query.page ? parseInt(req.query.page, 10) : 1;
+  const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
+  const reviews = await Review.getByStoreId(req.params.id, page, pageSize, req.marketplace.id);
+  req.resData = {
+    message: 'Store Review Data',
+    meta: { page, limit: pageSize },
+    data: reviews,
   };
   return next();
 };

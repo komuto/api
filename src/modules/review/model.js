@@ -8,6 +8,7 @@ import { Dropship } from '../product/model/dropship';
 import { getNotification, NotificationType } from '../user/model/user';
 import { ShippingReceiverStatus, ShippingSenderStatus } from '../bucket/model';
 
+const knex = core.postgres.knex;
 const { Notification, sellerNotification } = core;
 const bookshelf = core.postgres.db;
 const { parseNum, parseDate, getProductAndStore, matchDB } = core.utils;
@@ -163,6 +164,62 @@ class ReviewModel extends bookshelf.Model {
     }
 
     return review;
+  }
+
+  static async getByStoreId(storeId, page, pageSize, marketplaceId) {
+    const select = [
+      'count("id_ulasanproduk") as "count_review"',
+      'SUM(kualitasproduk::integer) as "qualities"',
+      'SUM(akurasiproduk::integer) as "accuracies"',
+    ];
+    let rating = this
+      .query((qb) => {
+        qb.select(knex.raw(select.join(',')));
+        qb.where('p.id_toko', storeId); // from original store
+        qb.where('ulasan_produk.id_toko', storeId); // from dropship product
+        qb.where('u.id_marketplaceuser', marketplaceId);
+        qb.join('users as u', 'u.id_users', 'ulasan_produk.id_users');
+        qb.join('produk as p', 'p.id_produk', 'ulasan_produk.id_produk');
+      })
+      .fetch();
+
+    let reviews = this
+      .query((qb) => {
+        qb.where('ulasan_produk.id_toko', storeId);
+        qb.join('toko as t', 't.id_toko', 'ulasan_produk.id_toko');
+        qb.join('users as u', 'u.id_users', 't.id_users');
+        qb.where('u.id_marketplaceuser', marketplaceId);
+        qb.orderBy('tgl_ulasanproduk', 'desc');
+      })
+      .fetchPage({ page, pageSize, withRelated: ['user', 'product.image'] });
+
+    [rating, reviews] = await Promise.all([rating, reviews]);
+
+    reviews = reviews.map((review) => {
+      const { name, id: userId, photo } = review.related('user').serialize();
+      let product = review.related('product');
+      const image = product.related('image');
+      product = product.serialize();
+      product.id = `${product.id}.${review.get('id_toko')}`;
+      product.image = image ? image.serialize().file : config.defaultImage.product;
+      return {
+        ...review.serialize(),
+        user: { id: userId, name, photo },
+        ...product,
+      };
+    });
+
+    const qualities = parseNum(rating.get('qualities'));
+    const accuracies = parseNum(rating.get('accuracies'));
+    const countReview = parseNum(rating.get('count_review'));
+
+    return {
+      rating: {
+        quality: qualities / countReview,
+        accuracy: accuracies / countReview,
+      },
+      reviews,
+    };
   }
 
   /**
