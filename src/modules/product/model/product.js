@@ -1009,6 +1009,46 @@ class ProductModel extends bookshelf.Model {
     return `https://${domain}/detail/${storeName}/${data.product.slug}-${data.product.id}`;
   }
 
+  static getProductByCatalogId(catalogId, storeId) {
+    return this.query((qb) => {
+      qb.select(['*', 'tglstatus_produk as date_created', 'produk.id_toko', 'produk.identifier_katalog as identifier_katalog']);
+      qb.select(knex.raw('null as "id_dropshipper"'));
+      qb.where('status_produk', ProductStatus.SHOW);
+      qb.where('identifier_katalog', catalogId);
+      qb.where('produk.id_toko', storeId);
+      qb.union(function () {
+        this
+          .select([
+            'p.*',
+            'd.tglstatus_dropshipper as date_created',
+            'd.id_toko',
+            'id_dropshipper',
+            'd.id_katalog as identifier_katalog',
+          ])
+          .from('produk as p')
+          .leftJoin('dropshipper as d', 'd.id_produk', 'p.id_produk')
+          .where('d.id_katalog', catalogId)
+          .where('d.id_toko', storeId);
+      });
+      qb.orderBy('date_created', 'desc');
+      qb.limit(3);
+    }).fetchAll({ withRelated: ['image', 'likes'] });
+  }
+
+  static getCountSold(storeId) {
+    const fromProduct = this.query((qb) => {
+      qb.select(knex.raw('SUM(count_sold::integer) as "count_sold"'));
+      qb.where('id_toko', storeId);
+    }).fetch();
+
+    const fromDropship = Dropship.query((qb) => {
+      qb.select(knex.raw('SUM(count_sold::integer) as "count_sold"'));
+      qb.where('id_toko', storeId);
+    }).fetch();
+
+    return Promise.all([fromProduct, fromDropship]);
+  }
+
   /**
    * Transform supplied data properties to match with db column
    * @param {object} data

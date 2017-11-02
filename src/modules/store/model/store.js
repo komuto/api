@@ -3,11 +3,11 @@ import moment from 'moment';
 import core from '../../core';
 import config from '../../../../config';
 import { getStoreError, createStoreError } from './../messages';
-import { OTPAddressStatus } from './../../OTP/model';
 import { StoreExpeditionStatus } from './store_expedition';
 import { Expedition } from '../../expedition/model';
+import { Product } from '../../product/model/product';
 
-const { parseDate } = core.utils;
+const { parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;
 const IMAGE_PATH = config.imageFolder.store;
 
@@ -116,32 +116,6 @@ class StoreModel extends bookshelf.Model {
   }
 
   /**
-   * Get detail catalogs
-   * @param store
-   * @param userId
-   */
-  static getCatalogs(store, userId) {
-    return store.related('catalogs').map((catalog) => {
-      const catalogProducts = catalog.related('products').map((product) => {
-        const images = product.related('images').serialize();
-        const { likes, isLiked } = this.getLikes(product, userId);
-        product = product.serialize({ minimal: true });
-        product.id = `${product.id}.${store.get('id_toko')}`;
-        return {
-          ...product,
-          image: images.length ? images[0].file : config.defaultImage.product,
-          count_like: likes.length,
-          is_liked: isLiked,
-        };
-      });
-      return {
-        ...catalog.serialize(),
-        products: catalogProducts,
-      };
-    });
-  }
-
-  /**
    * Get marketplace id with store id
    * @param id {integer} store id
    */
@@ -172,50 +146,18 @@ class StoreModel extends bookshelf.Model {
   }
 
   /**
-   * Get reviews
-   * @param store
-   * @returns {{reviews: Array, totalSold: number, quality: number, accuracy: number}}
-   */
-  static getReviews(store) {
-    let quality = 0;
-    let accuracy = 0;
-    let totalSold = 0;
-    const reviews = [];
-    const products = store.related('products');
-    products.each((product) => {
-      totalSold += product.toJSON().count_sold;
-      const productReviews = product.related('reviews').map((review) => {
-        quality += review.toJSON().quality;
-        accuracy += review.toJSON().accuracy;
-        const { name, id: userId, photo } = review.related('user').serialize();
-        let reviewProduct = review.related('product');
-        const images = reviewProduct.related('images').serialize();
-        reviewProduct = reviewProduct.serialize();
-        reviewProduct.id = `${reviewProduct.id}.${store.get('id_toko')}`;
-        return {
-          ...review.serialize(),
-          user: { id: userId, name, photo },
-          product: {
-            ...reviewProduct,
-            image: images.length ? images[0].file : config.defaultImage.product,
-          },
-        };
-      });
-      if (productReviews.length) reviews.push(...productReviews);
-    });
-    return { reviews, totalSold, quality, accuracy };
-  }
-
-  /**
    * Get likes
    * @param product
-   * @param id
-   * @returns {{likes: (Model|Collection|undefined|*), isLiked: *}}
+   * @param userId
+   * @returns {{is_liked: bool, count_like: integer}}
    */
-  static getLikes(product, id) {
+  static getLikes(product, userId) {
     const likes = product.related('likes');
-    const isLiked = id ? !!_.find(likes.models, o => o.attributes.id_users === id) : false;
-    return { likes, isLiked };
+    const id = parseNum(product.get('id_dropshipper'), null);
+    const isLiked = likes.some(like => parseNum(like.get('id_users')) === userId
+      && parseNum(like.get('id_dropshipper'), null) === id);
+    const countLike = likes.length;
+    return { is_liked: isLiked, count_like: countLike };
   }
 
   /**
@@ -228,24 +170,50 @@ class StoreModel extends bookshelf.Model {
     const related = [
       'user.addresses.district',
       'user.addresses.province',
-      'products.reviews.user',
-      'catalogs.products.likes',
-      'products.reviews.product.images',
-      'catalogs.products.images',
-      { 'catalogs.products': qb => qb.limit(3) },
+      'catalogs',
     ];
     if (userId) related.push({ favoriteStores: qb => qb.where('id_users', userId) });
     let store = await this
       .query((qb) => {
-        qb.where('id_toko', id);
-        qb.join('users as u', 'u.id_users', 'toko.id_users');
+        qb.where('toko.id_toko', id);
         qb.where('u.id_marketplaceuser', marketplaceId);
+        qb.join('users as u', 'u.id_users', 'toko.id_users');
       })
       .fetch({ withRelated: related });
+
     if (!store) throw getStoreError('store', 'not_found');
-    const catalogs = this.getCatalogs(store, userId);
+    let catalogs = store.related('catalogs');
+    catalogs.models.push({ id: null });
+
+    catalogs = Promise.all(catalogs.map(async (catalog) => {
+      let catalogProducts = await Product.getProductByCatalogId(catalog.id, store.id);
+      catalogProducts = catalogProducts.map((product) => {
+        const image = product.related('image');
+        const { is_liked, count_like } = this.getLikes(product, userId);
+        product = product.serialize({ minimal: true });
+        product.id = `${product.id}.${store.get('id_toko')}`;
+
+        return {
+          ...product,
+          image: image ? image.serialize().file : config.defaultImage.product,
+          count_like,
+          is_liked,
+        };
+      });
+      catalog = catalog.id ? catalog.serialize() : { name: 'Tanpa Katalog' };
+      return {
+        ...catalog,
+        products: catalogProducts,
+      };
+    }));
+
+    const [data, [fromProduct, fromDropship]] = await Promise.all([
+      catalogs,
+      Product.getCountSold(store.id),
+    ]);
+    catalogs = data;
+    const totalSold = parseNum(fromProduct.get('count_sold')) + parseNum(fromDropship.get('count_sold'));
     const { origin, district } = this.getOriginAndDistrict(store);
-    const { reviews, totalSold, quality, accuracy } = this.getReviews(store);
     const isFavorite = store.related('favoriteStores').length;
     store = store.serialize({ verified: true });
     store.total_product_sold = totalSold;
@@ -256,9 +224,9 @@ class StoreModel extends bookshelf.Model {
       district,
       catalogs,
       rating: {
-        quality: quality / reviews.length,
-        accuracy: accuracy / reviews.length,
-        reviews,
+        quality: 0,
+        accuracy: 0,
+        reviews: [],
       },
     };
   }
