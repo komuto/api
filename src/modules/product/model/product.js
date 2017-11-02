@@ -13,6 +13,7 @@ import { View } from './view';
 import { Wishlist } from '../../user/model/wishlist';
 import { Review } from '../../review/model';
 import { StoreExpeditionStatus } from '../../store/model/store_expedition';
+import { Discussion } from './discussion';
 
 const { parseNum, parseDec, parseDate, getter, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
@@ -504,8 +505,15 @@ class ProductModel extends bookshelf.Model {
       id_dropshipper: !isDropshipped ? null : idDropship,
     }).fetchAll({ withRelated: 'user' });
 
+    let countDiscussion;
+    if (isDropshipped) {
+      countDiscussion = Discussion.where('id_produk', productId).andWhere('id_toko', storeId).count();
+    } else {
+      countDiscussion = Discussion.query(qb => qb.where('id_produk', productId).whereNull('id_dropshipper')).count();
+    }
+
     // Eager load other products so it doesn't block other process by not awaiting directly
-    const getOtherProds = this.getStoreProducts(
+    let otherProds = this.getStoreProducts(
       storeId,
       3,
       qb => qb.whereNot('produk.id_produk', productId),
@@ -524,18 +532,21 @@ class ProductModel extends bookshelf.Model {
     let getWholesaler = !product.get('is_grosir') ? false
       : product.load('wholesale').catch(() => { throw getProductError('product', 'error'); });
     const category = product.related('category').serialize();
-    const getAddress = Address.getStoreAddress(product.related('store').get('id_users'));
-    const images = product.related('images');
-    const address = await getAddress;
+    let address = Address.getStoreAddress(product.related('store').get('id_users'));
+
+    [
+      address,
+      countDiscussion,
+      otherProds,
+    ] = await Promise.all([address, countDiscussion, otherProds]);
+
     const location = { province: address.related('province'), district: address.related('district') };
     const expeditions = this.loadExpeditions(product);
-    const discussions = product.related('discussions');
 
     getStore = getStore !== false && await getStore;
     let store = getStore !== false ? product.related('store') : dropship.related('store');
     const isFavorite = userId ? this.loadFavorites(store, userId) : false;
     store = store.serialize({ verified: true });
-    let otherProds = await getOtherProds;
     const [likes, ...otherLikes] = await Promise.all(otherProds.reduce((res, prod, index) => {
       // include likes for main product
       if (index === 0) {
@@ -563,13 +574,15 @@ class ProductModel extends bookshelf.Model {
     rating.accuracy = parseFloat(this.ratingAvg(rating.accuracy));
     const { count_like, is_liked } = this.loadLikesDropship(userId, likes, dropship);
     await getViewDropship;
+    const images = product.related('images');
+
     product = {
       ...product.serialize(),
       store_id: storeId,
       count_review: reviews.length,
       count_like,
       is_liked,
-      count_discussion: discussions.length,
+      count_discussion: parseNum(countDiscussion),
     };
     product.id = `${product.id}.${storeId}`;
     product.count_sold = isDropshipped ? parseNum(dropship.get('count_sold')) : product.count_sold;
