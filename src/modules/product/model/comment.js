@@ -63,6 +63,7 @@ class CommentModel extends bookshelf.Model {
       .orderBy('tgl_subdiskusi', 'DESC')
       .fetchPage({ page, pageSize, withRelated: ['user'] });
 
+    // Get last page of comments when query page is undefined
     if (!isParam) {
       return await this.getByDiscussionId(id, comments.pagination.pageCount, pageSize, true);
     }
