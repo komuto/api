@@ -397,6 +397,10 @@ PaymentController.notification = async (req, res, next) => {
         console.log(type, topup.serialize());
       }
     } catch (e) {
+      console.log('\n\n\n====ERROR====\n\n');
+      console.log(e);
+      console.log('\n\n\n');
+
       TransactionLog.create({
         order_id: 0,
         transaction_name: 'ERROR',
