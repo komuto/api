@@ -189,6 +189,7 @@ class ProductModel extends bookshelf.Model {
       storeId,
       isDropship,
       other,
+      catalogId,
       marketplaceId,
     } = params;
     let { brands, services } = params;
@@ -197,6 +198,7 @@ class ProductModel extends bookshelf.Model {
     products.where(isFromProduct ? 'p.status_produk' : 'd.status_dropshipper', ProductStatus.SHOW);
     if (isDropship) products.whereNot('p.id_toko', storeId).andWhere('is_dropshiper', true);
     if (!isDropship && storeId) products.where(isFromProduct ? 'p.id_toko' : 'd.id_toko', storeId);
+    if (catalogId) products.where(isFromProduct ? 'p.identifier_katalog' : 'd.id_katalog', catalogId);
     if (query) products.whereRaw('to_tsvector(nama_produk) @@ to_tsquery(?)', query);
     if (price && price.min !== 0 && price.max !== 0) products.whereBetween('harga_produk', [price.min, price.max]);
     if (address) {

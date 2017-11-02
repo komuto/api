@@ -54,10 +54,10 @@ const getPrice = (price) => {
 ProductController.index = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const { category_id, condition: cond, catalog_id, store_id: storeId } = req.query;
+  const { category_id, condition: cond, catalog_id: catalogId, store_id: storeId } = req.query;
   const { is_dropship: isDropship = false } = req.body;
   const condition = cond && (cond === 'new' ? ProductCondition.NEW : ProductCondition.USED);
-  const where = Product.matchDBColumn({ condition, category_id, catalog_id });
+  const where = Product.matchDBColumn({ condition, category_id });
   const params = {
     page,
     pageSize,
@@ -71,6 +71,7 @@ ProductController.index = async (req, res, next) => {
     address: req.query.address,
     userId: req.user.id,
     marketplaceId: req.marketplace.id,
+    catalogId,
     storeId,
     isDropship,
   };
