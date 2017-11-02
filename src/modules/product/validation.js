@@ -70,7 +70,7 @@ constraints.list = {
     presence: false,
     numericality: {
       onlyInteger: true,
-      greaterThan: 0,
+      greaterThan: -1,
     },
     length: {
       minimum: 1,
