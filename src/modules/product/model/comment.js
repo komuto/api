@@ -60,7 +60,7 @@ class CommentModel extends bookshelf.Model {
    */
   static async getByDiscussionId(id, page, pageSize, isParam) {
     const comments = await this.where({ id_diskusi: id })
-      .orderBy('tgl_subdiskusi', 'DESC')
+      .orderBy('tgl_subdiskusi')
       .fetchPage({ page, pageSize, withRelated: ['user'] });
 
     // Get last page of comments when query page is undefined

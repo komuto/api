@@ -192,7 +192,7 @@ ProductController.getComments = async (req, res, next) => {
   product.id = `${product.id}.${store.id}`;
   req.resData = {
     message: 'Discussion Comments Data',
-    meta: { page: comment.page, limit: pageSize },
+    meta: { page: comment.page === 0 ? 1 : comment.page, limit: pageSize },
     data: {
       product,
       store,
