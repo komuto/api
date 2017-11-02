@@ -126,7 +126,7 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
     note: body.note,
     additional_cost: 0, // admin cost
     weight: product.weight * body.qty,
-    total_price: (product.price * body.qty) + delivery.cost + insuranceCost,
+    total_price: bill,
   });
   const getNewItem = Item.updateInsert(where, _.assign(itemObj, where));
   const updateBucket = update ? bucket.updateBill(bill, prevBill) : null;
