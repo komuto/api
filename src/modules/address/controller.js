@@ -5,7 +5,7 @@ import { OTPAddress } from '../OTP/model';
 import { Store } from '../store/model';
 import config from '../../../config';
 import { OTPAddressEmail } from '../OTP/email';
-import { StoreVerificationStatus } from "../store/model/store";
+import { StoreVerificationStatus } from '../store/model/store';
 
 export const AddressController = {};
 export default { AddressController };

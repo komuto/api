@@ -8,7 +8,7 @@ import core from '../../core';
 import { model as addressModel } from '../../address';
 import { OTPHPStatus } from '../../OTP/model';
 import { Preference } from '../../preference/model';
-import { StoreVerificationStatus } from "../../store/model/store";
+import { StoreVerificationStatus } from '../../store/model/store';
 
 const { defaultNull, parseDate, parseNum } = core.utils;
 const bookshelf = core.postgres.db;

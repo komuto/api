@@ -36,7 +36,7 @@ import { BadRequestError } from './../../../common/errors';
 import messages from '../core/messages';
 import { Preference } from '../preference/model';
 import { paymentError } from '../bucket/messages';
-import { TransactionLog } from "./model/transaction_log";
+import { TransactionLog } from './model/transaction_log';
 
 const { buyerNotification, Notification, sellerNotification } = core;
 const { validateImageUrl } = core.middleware;

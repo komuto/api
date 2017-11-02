@@ -12,8 +12,8 @@ import { addCartError, getBucketError, getItemError, paymentError, addPromoError
 import { BadRequestError } from '../../../common/errors';
 import { getProductAndStore } from '../core/utils';
 import { getProductError } from '../product/messages';
-import { SummTransType, TransSummary } from "../saldo/model/transaction_summary";
-import { TransType } from "../saldo/model/transaction_type";
+import { SummTransType, TransSummary } from '../saldo/model/transaction_summary';
+import { TransType } from '../saldo/model/transaction_type';
 
 export const BucketController = {};
 export default { BucketController };

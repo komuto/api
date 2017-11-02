@@ -21,7 +21,6 @@ routes.get('/stores/:id([0-9]{1,10})',
  * Get store reviews
  */
 routes.get('/stores/:id([0-9]{1,10})/reviews',
-  auth(false),
   wrap(StoreController.getStoreReviews),
   apiResponse());
 

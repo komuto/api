@@ -20,7 +20,7 @@ import { OTPAddressEmail } from '../OTP/email';
 import { Invoice, InvoiceTransactionStatus, Dispute } from '../payment/model';
 import config from '../../../config';
 import core from '../core';
-import { Review } from "../review/model";
+import { Review } from '../review/model';
 
 const { Notification, sellerNotification, buyerNotification } = core;
 const { validateImageUrl } = core.middleware;
