@@ -100,8 +100,9 @@ class ReviewModel extends bookshelf.Model {
   /**
    * Bulk create review
    * @param {Object} params
+   * @param {Object} marketplace
    */
-  static async bulkCreate(params) {
+  static async bulkCreate(params, marketplace) {
     const { user_id: userId, bucket_id: bucketId, invoice_id: invoiceId, reviews } = params;
 
     const invoice = await Invoice.get(userId, bucketId, invoiceId, ['items', 'shipping']);
@@ -114,7 +115,7 @@ class ReviewModel extends bookshelf.Model {
       const item = items.find(o => o.get('id_produk') === product.get('id_produk'));
       if (!item) throw createReviewError('product', 'product_not_found');
 
-      return await this.create(item, product.serialize(), userId, val);
+      return await this.create(item, product.serialize(), userId, val, marketplace);
     }));
 
     await invoice.related('shipping').save({
