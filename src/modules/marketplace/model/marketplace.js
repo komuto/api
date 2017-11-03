@@ -51,7 +51,7 @@ class MarketplaceModel extends bookshelf.Model {
     return this.query((qb) => {
       qb.where('api_domain', domain);
       qb.orWhere('mobile_domain', domain);
-    }).fetch({ debug: true });
+    }).fetch();
   }
 }
 
