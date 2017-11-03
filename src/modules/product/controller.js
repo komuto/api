@@ -146,10 +146,7 @@ ProductController.createProduct = async (req, res, next) => {
   const wholesales = (Array.isArray(req.body.wholesales) && req.body.wholesales.length > 0)
     ? Wholesale.createBulk(productId, req.body.wholesales) : [];
   await Promise.all([expeditions, images, wholesales]);
-  req.resData = {
-    message: 'Product Data',
-    data: product,
-  };
+  req.resData = { data: product };
   return next();
 };
 
