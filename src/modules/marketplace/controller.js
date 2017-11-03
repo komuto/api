@@ -4,12 +4,11 @@ export const MarketplaceController = {};
 export default { MarketplaceController };
 
 MarketplaceController.get = async (req, res, next) => {
-  const { name, domain, mobile_domain, api_domain } = req.marketplace;
-  const version = '1.0';
+  const { name, domain, mobile_domain, api_domain, fb_app_id, fb_app_secret } = req.marketplace;
 
   req.resData = {
     message: 'Marketplace Data',
-    data: { name, domain, mobile_domain, api_domain, version },
+    data: { name, domain, mobile_domain, api_domain, fb_app_id, fb_app_secret },
   };
   return next();
 };

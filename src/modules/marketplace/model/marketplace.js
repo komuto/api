@@ -42,8 +42,8 @@ class MarketplaceModel extends bookshelf.Model {
       cooperative_created_at: parseDate(this.get('datecreated_marketplaceuser')),
       mobile_domain: this.get('mobile_domain'),
       api_domain: this.get('api_domain'),
-      fb_app_id: this.get('api_domain'),
-      fb_app_secret: this.get('api_domain'),
+      fb_app_id: this.get('fb_app_id'),
+      fb_app_secret: this.get('fb_app_secret'),
     };
   }
 
