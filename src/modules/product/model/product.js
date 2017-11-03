@@ -948,8 +948,8 @@ class ProductModel extends bookshelf.Model {
             'p.*',
             'd.tglstatus_dropshipper as date_created',
             'd.id_toko',
-            'id_dropshipper',
             'd.id_katalog as identifier_katalog',
+            'id_dropshipper',
           ])
           .from('produk as p')
           .leftJoin('dropshipper as d', 'd.id_produk', 'p.id_produk')
