@@ -334,7 +334,7 @@ class BucketModel extends bookshelf.Model {
               updateSold = sold;
               const dropship = item.related('dropship');
               await dropship.save({
-                count_sold: dropshipper.serialize().count_sold + qty,
+                count_sold: dropship.serialize().count_sold + qty,
               }, { patch: true });
               if (i === 0) dropshipper = dropship.related('store').related('user');
             }
