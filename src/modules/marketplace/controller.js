@@ -23,28 +23,4 @@ MarketplaceController.getBanners = async (req, res, next) => {
   return next();
 };
 
-MarketplaceController.getManifest = async (req, res) => {
-  const manifest = {
-    "name": "Komuto PWA",
-    "short_name": "Komuto",
-    "icons": [
-      {
-        "src": "/static/img/icons/android-chrome-192x192.png",
-        "sizes": "192x192",
-        "type": "image/png"
-      },
-      {
-        "src": "/static/img/icons/android-chrome-512x512.png",
-        "sizes": "512x512",
-        "type": "image/png"
-      }
-    ],
-    "start_url": "/",
-    "display": "standalone",
-    "theme_color": "#ef5656",
-    "background_color": "#fff",
-    "gcm_sender_id": "103953800507"
-  };
-
-  return res.json(manifest);
-};
+MarketplaceController.getManifest = async (req, res) => res.json(req.marketplace.manifest);

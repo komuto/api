@@ -44,6 +44,7 @@ class MarketplaceModel extends bookshelf.Model {
       api_domain: this.get('api_domain'),
       fb_app_id: this.get('fb_app_id'),
       fb_app_secret: this.get('fb_app_secret'),
+      manifest: this.get('manifest'),
     };
   }
 
