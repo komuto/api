@@ -11,6 +11,7 @@ export const errMsg = {
   createProduct: {
     title: 'Daftar produk gagal',
     catalog_not_found: 'Katalog tidak ditemukan',
+    unverified_store: 'Toko belum terverifikasi',
   },
   getDiscussion: {
     title: 'Get diskusi gagal',

@@ -318,6 +318,14 @@ class StoreModel extends bookshelf.Model {
   }
 
   /**
+   * Get store id
+   * @param userId {integer} user id
+   */
+  static getStore(userId) {
+    return new this({ id_users: userId }).fetch();
+  }
+
+  /**
    * Find store by id
    * @param id {integer} store id
    */

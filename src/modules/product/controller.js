@@ -15,7 +15,7 @@ import {
   MasterFee,
 } from './model';
 import { Wishlist, getNotification, NotificationType } from '../user/model';
-import { Store, Catalog } from '../store/model';
+import { Store, Catalog, StoreVerificationStatus } from '../store/model';
 import {
   getProductError,
   createProductError,
@@ -33,6 +33,8 @@ import { BadRequestError } from './../../../common/errors';
 import core from '../core';
 import dropshipFaq from '../../../config/faq';
 import { notificationDefault } from '../user/model/user';
+import { getStoreError } from '../store/messages';
+import { Preference } from "../preference/model";
 
 const { Notification, sellerNotification, buyerNotification } = core;
 const { getProductAndStore } = core.utils;
@@ -117,7 +119,17 @@ ProductController.getProduct = async (req, res, next) => {
 };
 
 ProductController.createProduct = async (req, res, next) => {
-  req.body.store_id = await Store.getStoreId(req.user.id);
+  const store = await Store.getStore(req.user.id);
+  if (!store) throw getStoreError('store', 'not_found');
+  if (store.get('verification_status') === StoreVerificationStatus.UNVERIFIED) {
+    throw createProductError('store', 'unverified_store');
+  } else if (store.get('verification_status') === StoreVerificationStatus.DEFAULT) {
+    const limit = await Preference.get('unverified_store');
+    const endDate = moment(store.get('tanggal_verifikasi'), 'YYYY-MM-DD').add(limit.value, 'd');
+    const diff = endDate.diff(moment(), 'd');
+    if (diff < 0) throw createProductError('store', 'unverified_store');
+  }
+  req.body.store_id = store.id;
   req.body.other_attr = '0';
   req.body.date_created = moment().toDate();
   req.body.date_status = req.body.date_created;
