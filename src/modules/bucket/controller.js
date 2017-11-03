@@ -129,6 +129,8 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
     total_price: bill,
   });
   const getNewItem = Item.updateInsert(where, _.assign(itemObj, where));
+
+  // total bill before checkout doesn't include any additional charges
   const updateBucket = update ? bucket.updateBill(bill, prevBill) : null;
   const [newItem] = await Promise.all([getNewItem, updateBucket]);
   return newItem;
@@ -230,6 +232,11 @@ BucketController.checkout = async (req, res, next) => {
     let totalWeight = 0;
     _.forEach(group.items, (o) => {
       o = o.serialize();
+
+      if (o.product.is_discount) {
+        o.product.price -= o.product.price * (o.product.discount / 100);
+      }
+
       subTotalPrice += o.product.price * o.qty;
       adminCost += o.additional_cost;
       insuranceFee += o.shipping.insurance_fee;
@@ -277,6 +284,8 @@ BucketController.checkout = async (req, res, next) => {
   totalPrice -= promo;
   totalPrice += bucketObj.unique_code;
 
+  // total bill include promo & unique code
+  // admin cost, insurance fee, & delivery cost (per invoice)
   const bucketData = {
     status_bucket: BucketStatus.WAITING_FOR_PAYMENT,
     tglstatus_bucket: moment().toDate(),
