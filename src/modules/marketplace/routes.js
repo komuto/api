@@ -13,4 +13,11 @@ routes.get('/marketplace',
   wrap(MarketplaceController.get),
   apiResponse());
 
+/**
+ * Get banners
+ */
+routes.get('/banners',
+  wrap(MarketplaceController.getBanners),
+  apiResponse());
+
 export default routes;
