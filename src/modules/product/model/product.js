@@ -1031,8 +1031,8 @@ class ProductModel extends bookshelf.Model {
             'p.*',
             'd.tglstatus_dropshipper as date_created',
             'd.id_toko',
-            'id_dropshipper',
             'd.id_katalog as identifier_katalog',
+            'id_dropshipper',
           ])
           .from('produk as p')
           .leftJoin('dropshipper as d', 'd.id_produk', 'p.id_produk')
@@ -1041,7 +1041,7 @@ class ProductModel extends bookshelf.Model {
       });
       qb.orderBy('date_created', 'desc');
       qb.limit(3);
-    }).fetchAll({ withRelated: ['image', 'likes'] });
+    }).fetchAll({ withRelated: 'image' });
   }
 
   static getCountSold(storeId) {
@@ -1056,6 +1056,33 @@ class ProductModel extends bookshelf.Model {
     }).fetch();
 
     return [fromProduct, fromDropship];
+  }
+
+  static getLike(product, userId) {
+    const countLike = Wishlist
+      .query((qb) => {
+        qb.where('id_produk', product.id);
+        if (product.get('id_dropshipper')) {
+          qb.where('id_dropshipper', product.get('id_dropshipper'));
+        } else {
+          qb.whereNull('id_dropshipper');
+        }
+      })
+      .count();
+
+    const isLiked = userId ? Wishlist
+      .query((qb) => {
+        qb.where('id_produk', product.id);
+        qb.where('id_users', userId);
+        if (product.get('id_dropshipper')) {
+          qb.where('id_dropshipper', product.get('id_dropshipper'));
+        } else {
+          qb.whereNull('id_dropshipper');
+        }
+      })
+      .fetch() : false;
+
+    return [countLike, isLiked];
   }
 
   /**

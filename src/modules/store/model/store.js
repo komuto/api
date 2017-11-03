@@ -146,21 +146,6 @@ class StoreModel extends bookshelf.Model {
   }
 
   /**
-   * Get likes
-   * @param product
-   * @param userId
-   * @returns {{is_liked: bool, count_like: integer}}
-   */
-  static getLikes(product, userId) {
-    const likes = product.related('likes');
-    const id = parseNum(product.get('id_dropshipper'), null);
-    const isLiked = likes.some(like => parseNum(like.get('id_users')) === userId
-      && parseNum(like.get('id_dropshipper'), null) === id);
-    const countLike = likes.length;
-    return { is_liked: isLiked, count_like: countLike };
-  }
-
-  /**
    * Get store with its relation
    * @param id {integer} store id
    * @param userId {integer} user id
@@ -187,19 +172,20 @@ class StoreModel extends bookshelf.Model {
 
     catalogs = Promise.all(catalogs.map(async (catalog) => {
       let catalogProducts = await Product.getProductByCatalogId(catalog.id, store.id);
-      catalogProducts = catalogProducts.map((product) => {
+      catalogProducts = await Promise.all(catalogProducts.map(async (product) => {
+        const [countLike, isLiked] = await Promise.all(Product.getLike(product, userId));
         const image = product.related('image');
-        const { is_liked, count_like } = this.getLikes(product, userId);
         product = product.serialize({ minimal: true });
         product.id = `${product.id}.${store.get('id_toko')}`;
 
         return {
           ...product,
           image: image ? image.serialize().file : config.defaultImage.product,
-          count_like,
-          is_liked,
+          count_like: parseNum(countLike),
+          is_liked: !!isLiked,
         };
-      });
+      }));
+
       catalog = catalog.id ? catalog.serialize() : { id: 0, store_id: id, name: 'Tanpa Katalog' };
       return {
         ...catalog,
