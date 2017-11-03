@@ -34,6 +34,8 @@ const app = express();
 
 // core.cacheClear();
 
+app.use('/assets', express.static(config.publicPath));
+
 app.use(core.middleware.winstonLogger());
 
 process.on('unhandledRejection', (err) => {
