@@ -42,7 +42,7 @@ ImageController.upload = async (req, res, next) => {
 
   req.resData = {
     data: {
-      path: `${config.assetUrl}/uploads/${req.body.folder}`,
+      path: `${config.assetUrl}/assets/${req.body.folder}`,
       images: names,
     },
   };
