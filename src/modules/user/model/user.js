@@ -108,7 +108,7 @@ class UserModel extends bookshelf.Model {
       marketplace_id: defaultNull(this.get('id_marketplaceuser')),
       email: this.get('email_users'),
       cooperative_member_number: defaultNull(this.get('no_anggotakoperasi_users')),
-      approval_cooperative_status: this.get('approval_koperasi_users'),
+      approval_cooperative_status: parseNum(this.get('approval_koperasi_users')),
       phone_number: defaultNull(this.get('nohp_users')),
       status: parseInt(this.get('status_users'), 10),
       mother_name: defaultNull(this.get('ibukandung_users')),
@@ -271,16 +271,14 @@ class UserModel extends bookshelf.Model {
     let store = user.related('store');
     user = user.serialize({ birth: true, phone: true });
     const endDate = moment(store.get('tanggal_verifikasi'), 'YYYY-MM-DD').add(limit.value, 'd');
-    store = store.serialize({ verified: true });
+    store = store.id ? store.serialize({ verified: true }) : null;
     const diff = endDate.diff(moment(), 'd');
-    const timeLeft = store.verification_status === StoreVerificationStatus.DEFAULT ? diff : null;
-    return {
-      user,
-      store: {
-        ...store,
-        verification_left: timeLeft < 0 ? 0 : timeLeft,
-      },
-    };
+    if (store) {
+      const timeLeft = store.verification_status === StoreVerificationStatus.DEFAULT ? diff : null;
+      store.verification_left = timeLeft < 0 ? 0 : timeLeft;
+    }
+
+    return { user, store };
   }
 
   /**
