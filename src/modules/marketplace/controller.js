@@ -3,6 +3,7 @@ export default { MarketplaceController };
 
 MarketplaceController.get = async (req, res, next) => {
   const { name, domain, mobile_domain, api_domain } = req.marketplace;
+  const version = '1.0';
   const manifest = {
     "name": "My Progressive Web Application",
     "short_name": "Progressive",
@@ -73,7 +74,7 @@ MarketplaceController.get = async (req, res, next) => {
 
   req.resData = {
     message: 'Marketplace Data',
-    data: { name, domain, mobile_domain, api_domain, manifest },
+    data: { name, domain, mobile_domain, api_domain, version, manifest },
   };
   return next();
 };
