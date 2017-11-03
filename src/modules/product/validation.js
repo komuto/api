@@ -150,14 +150,26 @@ constraints.createProduct = {
   },
   brand_id: { numericality: { onlyInteger: true } },
   description: { presence: true },
-  price: { presence: true, numericality: true },
+  price: {
+    presence: true,
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 0,
+    },
+  },
   weight: {
     presence: true,
-    numericality: { onlyInteger: true },
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 0,
+    },
   },
   stock: {
     presence: true,
-    numericality: { onlyInteger: true },
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 0,
+    },
   },
   discount: {
     presence: true,
@@ -201,16 +213,52 @@ constraints.createProduct = {
 };
 
 constraints.createWholesale = {
-  min: { presence: true, numericality: { onlyInteger: true } },
-  max: { presence: true, numericality: { onlyInteger: true } },
-  price: { presence: true, numericality: true },
+  min: {
+    presence: true,
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 0,
+    },
+  },
+  max: {
+    presence: true,
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 0,
+    },
+  },
+  price: {
+    presence: true,
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 0,
+    },
+  },
 };
 
 constraints.updateWholesale = {
   id: { presence: true, numericality: { onlyInteger: true } },
-  min: { presence: true, numericality: { onlyInteger: true } },
-  max: { presence: true, numericality: { onlyInteger: true } },
-  price: { presence: true, numericality: true },
+  min: {
+    presence: true,
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 0,
+    },
+  },
+  max: {
+    presence: true,
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 0,
+    },
+  },
+  price: {
+    presence: true,
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 0,
+    },
+  },
   status: {
     presence: true,
     inclusion: {
@@ -292,7 +340,13 @@ constraints.moveCatalog = {
 };
 
 constraints.updateProduct = {
-  stock: { presence: false, numericality: { onlyInteger: true } },
+  stock: {
+    presence: false,
+    numericality: {
+      onlyInteger: true,
+      greaterThan: 0,
+    },
+  },
   is_dropship: {
     presence: false,
     inclusion: {
@@ -320,7 +374,13 @@ constraints.updateProduct = {
   category_id: { presence: false, numericality: { onlyInteger: true } },
   brand_id: { presence: false, numericality: { onlyInteger: true } },
   description: { presence: false },
-  price: { presence: false, numericality: { onlyInteger: true } },
+  price: {
+    presence: false,
+    numericality: {
+      onlyInteger: true,
+      greaterThan: 0,
+    },
+  },
   discount: {
     presence: false,
     numericality: {
@@ -329,7 +389,13 @@ constraints.updateProduct = {
       lessThanOrEqualTo: 100,
     },
   },
-  weight: { presence: false, numericality: { onlyInteger: true } },
+  weight: {
+    presence: false,
+    numericality: {
+      onlyInteger: true,
+      greaterThan: 0,
+    },
+  },
   condition: {
     presence: false,
     inclusion: {
