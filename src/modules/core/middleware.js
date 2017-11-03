@@ -196,7 +196,7 @@ export function validateParam(
 
 export function validateImageUrl(str, msg) {
   if (str) {
-    const re = new RegExp('^(http|https)://', 'i');
+    const re = new RegExp('^(http|https|file)://', 'i');
     const notValid = re.test(str);
     if (notValid) throw new BadRequestError(msg);
   }
