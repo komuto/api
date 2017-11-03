@@ -177,7 +177,7 @@ PaymentController.bulkReview = async (req, res, next) => {
     bucket_id: req.params.id,
     invoice_id: req.params.invoice_id,
     reviews: req.body,
-  });
+  }, req.marketplace);
   const invoice = await Invoice.updateStatus(
     req.params.invoice_id,
     InvoiceTransactionStatus.RECEIVED,
