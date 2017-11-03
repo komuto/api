@@ -20,4 +20,9 @@ routes.get('/banners',
   wrap(MarketplaceController.getBanners),
   apiResponse());
 
+/**
+ * Get manifest.json
+ */
+routes.get('/manifest.json', wrap(MarketplaceController.getManifest));
+
 export default routes;
