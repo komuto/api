@@ -1055,7 +1055,7 @@ class ProductModel extends bookshelf.Model {
       qb.where('id_toko', storeId);
     }).fetch();
 
-    return Promise.all([fromProduct, fromDropship]);
+    return [fromProduct, fromDropship];
   }
 
   /**

@@ -207,9 +207,9 @@ class StoreModel extends bookshelf.Model {
       };
     }));
 
-    const [data, [fromProduct, fromDropship]] = await Promise.all([
+    const [data, fromProduct, fromDropship] = await Promise.all([
       catalogs,
-      Product.getCountSold(store.id),
+      ...Product.getCountSold(store.id),
     ]);
     catalogs = data;
     const totalSold = parseNum(fromProduct.get('count_sold')) + parseNum(fromDropship.get('count_sold'));
