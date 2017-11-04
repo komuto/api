@@ -304,12 +304,11 @@ class ProductModel extends bookshelf.Model {
     const products = await this.getProducts({ ...params, sort, other, where });
     const getRelations = products.map((product) => {
       const id = product.id_produk;
-      const idDropshipper = product.id_dropshipper;
+      const dropshipperId = product.id_dropshipper;
       const getImage = ImageProduct.where('id_produk', id)
         .query(qb => qb.orderBy('id_gambarproduk')).fetch();
-      const getLikes = Wishlist.where({ id_produk: id, id_dropshipper: idDropshipper }).fetchAll();
-      const getViews = View.where({ id_produk: id, id_dropshipper: idDropshipper }).fetch();
-      return Promise.all([getImage, getLikes, getViews]);
+      const getViews = View.where({ id_produk: id, id_dropshipper: dropshipperId }).fetch();
+      return Promise.all([getImage, getViews, ...this.getLike(product, userId, false)]);
     });
 
     const masterFee = await MasterFee.findByMarketplaceId(marketplaceId);
@@ -317,20 +316,16 @@ class ProductModel extends bookshelf.Model {
     return await Promise.all(products.map(async (product, index) => {
       // Provide this.get() utility for serialize
       Object.setPrototypeOf(product, getter);
-      const [image, wishlists, view, verified] = await getRelations[index];
-      const store = {
-        ...Store.prototype.serialize.call(product),
-        is_verified: other.verified || !!verified,
-      };
-      const isLike = !!userId && wishlists.some(wishlist => parseNum(wishlist.get('id_users')) === userId
-        && parseNum(wishlist.get('id_dropshipper')) === parseNum(product.get('id_dropshipper')));
+      const [image, view, countLike, isLiked] = await getRelations[index];
+      const store = Store.prototype.serialize.call(product);
       const countSold = product.p_count_sold;
+
       product = this.prototype.serialize.call(product);
       product.id = `${product.id}.${store.id}`;
       product.image = image ? image.serialize().file : config.defaultImage.product;
-      product.count_like = wishlists.length;
       product.count_view = view ? view.serialize().ip.length : 0;
-      product.is_liked = isLike;
+      product.count_like = parseNum(countLike);
+      product.is_liked = !!isLiked;
       product.count_sold = parseNum(countSold);
       if (userId && isDropship) {
         product.commission = MasterFee.calculateCommissionByFees(masterFee, product.price, true);
@@ -1058,12 +1053,15 @@ class ProductModel extends bookshelf.Model {
     return [fromProduct, fromDropship];
   }
 
-  static getLike(product, userId) {
+  static getLike(product, userId, isModel = true) {
+    const productId = isModel ? product.id : product.id_produk;
+    const dropshipperId = isModel ? product.get('id_dropshipper') : product.id_dropshipper;
+
     const countLike = Wishlist
       .query((qb) => {
-        qb.where('id_produk', product.id);
-        if (product.get('id_dropshipper')) {
-          qb.where('id_dropshipper', product.get('id_dropshipper'));
+        qb.where('id_produk', productId);
+        if (dropshipperId) {
+          qb.where('id_dropshipper', dropshipperId);
         } else {
           qb.whereNull('id_dropshipper');
         }
@@ -1072,10 +1070,10 @@ class ProductModel extends bookshelf.Model {
 
     const isLiked = userId ? Wishlist
       .query((qb) => {
-        qb.where('id_produk', product.id);
+        qb.where('id_produk', productId);
         qb.where('id_users', userId);
-        if (product.get('id_dropshipper')) {
-          qb.where('id_dropshipper', product.get('id_dropshipper'));
+        if (dropshipperId) {
+          qb.where('id_dropshipper', dropshipperId);
         } else {
           qb.whereNull('id_dropshipper');
         }

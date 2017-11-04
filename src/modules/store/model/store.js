@@ -53,6 +53,7 @@ class StoreModel extends bookshelf.Model {
       store.is_verified = this.get('verification_status') === StoreVerificationStatus.VERIFIED;
       store.verification_status = this.get('verification_status');
     }
+
     return {
       ...store,
       user_id: this.get('id_users'),
@@ -67,6 +68,8 @@ class StoreModel extends bookshelf.Model {
       store_id_number: this.get('no_ktp_toko'),
       total_favorite: this.get('jumlahfavorit_toko'),
       term_condition: this.get('note'),
+      is_verified: this.get('verification_status') === StoreVerificationStatus.VERIFIED,
+      verification_status: this.get('verification_status'),
       created_at: parseDate(this.get('tgl_create_toko')),
       status_at: parseDate(this.get('tglstatus_toko')),
       verification_at: parseDate(this.get('tanggal_verifikasi')),
