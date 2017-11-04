@@ -550,7 +550,7 @@ class ProductModel extends bookshelf.Model {
     const wholesaler = getWholesaler === false ? [] : product.related('wholesale').serialize();
     store.is_favorite = isFavorite;
     getReviews = await getReviews;
-    const { reviews, rating } = await this.loadReviewsRatings(getReviews);
+    const { reviews, rating } = this.loadReviewsRatings(getReviews);
     rating.quality = parseFloat(this.ratingAvg(rating.quality));
     rating.accuracy = parseFloat(this.ratingAvg(rating.accuracy));
     const [countLike, isLiked] = await Promise.all(this.getLike(product, userId));
