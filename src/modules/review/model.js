@@ -65,16 +65,19 @@ class ReviewModel extends bookshelf.Model {
   static async getAll(data, { pageSize, page }, withProduct = false) {
     const withRelated = ['user'];
     if (withProduct) withRelated.push('product.store');
-    const reviews = await this.query((qb) => {
-      if (data.store_id) {
-        qb.innerJoin('produk', 'produk.id_produk', 'ulasan_produk.id_produk');
-        qb.where('ulasan_produk.id_toko', data.store_id);
-      }
-      if (data.q) qb.whereRaw('LOWER(isi_ulasanproduk) LIKE ?', `%${data.q.toLowerCase()}%`);
-      if (data.product_id) qb.where('ulasan_produk.id_produk', data.product_id);
-      if (data.user_id) qb.where('ulasan_produk.id_users', data.user_id);
-    }).orderBy('-id_ulasanproduk')
+    const reviews = await this
+      .query((qb) => {
+        if (data.store_id) {
+          qb.innerJoin('produk', 'produk.id_produk', 'ulasan_produk.id_produk');
+          qb.where('ulasan_produk.id_toko', data.store_id);
+        }
+        if (data.q) qb.whereRaw('LOWER(isi_ulasanproduk) LIKE ?', `%${data.q.toLowerCase()}%`);
+        if (data.product_id) qb.where('ulasan_produk.id_produk', data.product_id);
+        if (data.user_id) qb.where('ulasan_produk.id_users', data.user_id);
+      })
+      .orderBy('-id_ulasanproduk')
       .fetchPage({ pageSize, page, withRelated });
+
     return await Promise.all(reviews.models.map(async (review) => {
       const { id, name, photo } = review.related('user').serialize();
       if (withProduct) {
@@ -95,6 +98,25 @@ class ReviewModel extends bookshelf.Model {
         user: { id, name, photo },
       };
     }));
+  }
+
+  static getRating(productId, storeId, marketplaceId) {
+    const select = [
+      'count("id_ulasanproduk") as "count_review"',
+      'SUM(kualitasproduk::integer) as "qualities"',
+      'SUM(akurasiproduk::integer) as "accuracies"',
+    ];
+    return this
+      .query((qb) => {
+        qb.select(knex.raw(select.join(',')));
+        qb.where('ulasan_produk.id_produk', productId);
+        qb.where('p.id_toko', storeId); // from original store
+        qb.where('ulasan_produk.id_toko', storeId); // from dropship product
+        qb.where('u.id_marketplaceuser', marketplaceId);
+        qb.join('users as u', 'u.id_users', 'ulasan_produk.id_users');
+        qb.join('produk as p', 'p.id_produk', 'ulasan_produk.id_produk');
+      })
+      .fetch();
   }
 
   /**
@@ -216,8 +238,8 @@ class ReviewModel extends bookshelf.Model {
 
     return {
       rating: {
-        quality: qualities / countReview,
-        accuracy: accuracies / countReview,
+        quality: countReview ? qualities / countReview : 0,
+        accuracy: countReview ? accuracies / countReview : 0,
       },
       reviews,
     };

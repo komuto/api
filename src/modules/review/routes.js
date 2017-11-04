@@ -23,6 +23,14 @@ routes.get('/products/:id([0-9]{1,10}.[0-9]{1,10})/reviews',
   apiResponse());
 
 /**
+ * GET /products/id/rating
+ * Get rating
+ */
+routes.get('/products/:id([0-9]{1,10}.[0-9]{1,10})/rating',
+  wrap(ReviewController.getRating),
+  apiResponse());
+
+/**
  * GET /users/reviews
  * Get all reviews of user
  */

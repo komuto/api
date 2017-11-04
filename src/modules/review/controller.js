@@ -26,6 +26,27 @@ ReviewController.getReviews = async (req, res, next) => {
 };
 
 /**
+ * Gel rating
+ */
+ReviewController.getRating = async (req, res, next) => {
+  const { productId, storeId } = getProductAndStore(req.params.id);
+  const rating = await Review.getRating(productId, storeId, req.marketplace.id);
+
+  const qualities = Number(rating.get('qualities'));
+  const accuracies = Number(rating.get('accuracies'));
+  const countReview = Number(rating.get('count_review'));
+
+  req.resData = {
+    message: 'Rating Data',
+    data: {
+      quality: countReview ? qualities / countReview : 0,
+      accuracy: countReview ? accuracies / countReview : 0,
+    },
+  };
+  return next();
+};
+
+/**
  * Gel all reviews of user
  */
 ReviewController.getUserReviews = async (req, res, next) => {
