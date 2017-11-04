@@ -69,15 +69,9 @@ class FavoriteStoreModel extends bookshelf.Model {
     });
 
     const addresses = [];
-    const getLikes = [];
     const stores = await Promise.all(favorites.models.map(async (favorite, idx) => {
       const store = favorite.related('store');
       const products = await getProducts[idx];
-      const like = products.map(product => Wishlist.where({
-        id_produk: product.get('id_produk'),
-        id_dropshipper: parseNum(product.get('id_dropshipper')) || null,
-      }).fetchAll());
-      getLikes[idx] = like;
       const userId = store.related('user').get('id_users');
       // Get province
       addresses.push(Address.getStoreAddress(userId));
@@ -88,10 +82,13 @@ class FavoriteStoreModel extends bookshelf.Model {
     }));
 
     return Promise.all(stores.map(async (store, idx) => {
-      store.products = await Promise.all(store.products.map(async (product, key) => {
-        const likes = await getLikes[idx][key];
-        const { is_liked, count_like } = Product.loadLikesDropship(id, likes, product);
-        return { ...product.serialize({ minimal: true, alterId: true }), is_liked, count_like };
+      store.products = await Promise.all(store.products.map(async (product) => {
+        const [countLike, isLiked] = await Promise.all(Product.getLike(product, id));
+        return {
+          ...product.serialize({ minimal: true, alterId: true }),
+          count_like: parseNum(countLike),
+          is_liked: !!isLiked,
+        };
       }));
       const address = await addresses[idx];
       store.store.province = address.related('province').serialize();

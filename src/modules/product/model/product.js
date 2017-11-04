@@ -415,20 +415,6 @@ class ProductModel extends bookshelf.Model {
     return { likes, isLiked };
   }
 
-  /**
-   * @param userId {int}
-   * @param wishlists {object} bookshelf object before serialize
-   * @param product {object} bookshelf object before serialize
-   */
-  static loadLikesDropship(userId, wishlists, product) {
-    if (!wishlists) return { is_liked: false, count_like: 0 };
-    const id = product ? parseNum(product.get('id_dropshipper'), null) : null;
-    const isLiked = wishlists.some(wishlist => parseNum(wishlist.get('id_users')) === userId
-      && parseNum(wishlist.get('id_dropshipper'), null) === id);
-    const countLike = wishlists.length;
-    return { is_liked: isLiked, count_like: countLike };
-  }
-
   static loadFavorites(store, id) {
     const favorites = store.related('favoriteStores');
     return !!_.find(favorites.models, o => o.get('id_users') === id);
