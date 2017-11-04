@@ -1057,28 +1057,16 @@ class ProductModel extends bookshelf.Model {
     const productId = isModel ? product.id : product.id_produk;
     const dropshipperId = isModel ? product.get('id_dropshipper') : product.id_dropshipper;
 
-    const countLike = Wishlist
-      .query((qb) => {
-        qb.where('id_produk', productId);
-        if (dropshipperId) {
-          qb.where('id_dropshipper', dropshipperId);
-        } else {
-          qb.whereNull('id_dropshipper');
-        }
-      })
-      .count();
+    const countLike = Wishlist.where({
+      id_produk: productId,
+      id_dropshipper: dropshipperId,
+    }).count();
 
-    const isLiked = userId ? Wishlist
-      .query((qb) => {
-        qb.where('id_produk', productId);
-        qb.where('id_users', userId);
-        if (dropshipperId) {
-          qb.where('id_dropshipper', dropshipperId);
-        } else {
-          qb.whereNull('id_dropshipper');
-        }
-      })
-      .fetch() : false;
+    const isLiked = userId ? Wishlist.where({
+      id_users: userId,
+      id_produk: productId,
+      id_dropshipper: dropshipperId,
+    }).fetch() : false;
 
     return [countLike, isLiked];
   }
