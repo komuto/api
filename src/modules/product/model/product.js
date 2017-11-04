@@ -238,13 +238,15 @@ class ProductModel extends bookshelf.Model {
         'p.*',
         'tglstatus_produk as date_created',
         't.*',
+        'file_gambarproduk',
         'p.identifier_katalog as identifier_katalog',
       ])
       .select(knex.raw('null as "id_dropshipper"'))
       .select(knex.raw('COALESCE("p"."count_sold", 0) as "p_count_sold"'))
       .from('produk as p')
       .join('toko as t', 'p.id_toko', 't.id_toko')
-      .join('users as u', 't.id_users', 'u.id_users');
+      .join('users as u', 't.id_users', 'u.id_users')
+      .joinRaw('join (select DISTINCT ON (id_produk) id_produk, file_gambarproduk FROM gambar_produk) as images ON images.id_produk = p.id_produk');
 
     return self.addWhereClause(fromProduct, params, true)
       .union(function () {
@@ -253,6 +255,7 @@ class ProductModel extends bookshelf.Model {
             'p.*',
             'tglstatus_dropshipper as date_created',
             't.*',
+            'file_gambarproduk',
             'd.id_katalog as identifier_katalog',
             'd.id_dropshipper',
           ])
@@ -260,7 +263,8 @@ class ProductModel extends bookshelf.Model {
           .from('dropshipper as d')
           .join('produk as p', 'd.id_produk', 'p.id_produk')
           .join('toko as t', 'd.id_toko', 't.id_toko')
-          .join('users as u', 't.id_users', 'u.id_users');
+          .join('users as u', 't.id_users', 'u.id_users')
+          .joinRaw('join (select DISTINCT ON (id_produk) id_produk, file_gambarproduk FROM gambar_produk) as images ON images.id_produk = p.id_produk');
         self.addWhereClause(fromDropship, params, false);
       })
       .orderBy(sort.column, sort.by)
@@ -292,7 +296,7 @@ class ProductModel extends bookshelf.Model {
         sort = { column: 'p_count_sold', by: 'desc' };
         break;
       default:
-        sort = { column: 'date_created_produk', by: 'desc' };
+        sort = { column: 'date_created', by: 'desc' };
     }
 
     other = other.split(',').reduce((result, type) => {
@@ -305,24 +309,25 @@ class ProductModel extends bookshelf.Model {
     const getRelations = products.map((product) => {
       const id = product.id_produk;
       const dropshipperId = product.id_dropshipper;
-      const getImage = ImageProduct.where('id_produk', id)
-        .query(qb => qb.orderBy('id_gambarproduk')).fetch();
       const getViews = View.where({ id_produk: id, id_dropshipper: dropshipperId }).fetch();
-      return Promise.all([getImage, getViews, ...this.getLike(product, userId, false)]);
+      return Promise.all([getViews, ...this.getLike(product, userId, false)]);
     });
 
     const masterFee = await MasterFee.findByMarketplaceId(marketplaceId);
 
     return await Promise.all(products.map(async (product, index) => {
+      const image = product.file_gambarproduk
+        ? core.imagePath(IMAGE_PATH, product.file_gambarproduk)
+        : config.defaultImage.product;
       // Provide this.get() utility for serialize
       Object.setPrototypeOf(product, getter);
-      const [image, view, countLike, isLiked] = await getRelations[index];
+      const [view, countLike, isLiked] = await getRelations[index];
       const store = Store.prototype.serialize.call(product);
       const countSold = product.p_count_sold;
 
       product = this.prototype.serialize.call(product);
       product.id = `${product.id}.${store.id}`;
-      product.image = image ? image.serialize().file : config.defaultImage.product;
+      product.image = image;
       product.count_view = view ? view.serialize().ip.length : 0;
       product.count_like = parseNum(countLike);
       product.is_liked = !!isLiked;
