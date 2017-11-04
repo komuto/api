@@ -1,6 +1,7 @@
 import moment from 'moment';
 import core from '../../core';
 
+const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
 
 export const WishlistStatus = {
@@ -95,24 +96,30 @@ class WishlistModel extends bookshelf.Model {
           'product',
           'product.store',
           'product.images',
-          'product.likes',
           'dropship.store',
         ],
       });
 
-    return wishlists.map((wishlist) => {
+    return await Promise.all(wishlists.map(async (wishlist) => {
       let product = wishlist.related('product');
       let store = product.related('store');
       if (wishlist.get('id_dropshipper')) {
         store = wishlist.related('dropship').related('store');
       }
       const images = product.related('images');
-      const countLike = product.related('likes').length;
+      const countLike = await this.getCountLike(product.id, wishlist.get('id_dropshipper'));
       product = product.serialize({ minimal: true, wishlist: true });
       product.id = `${product.id}.${store.id}`;
-      product = { ...product, count_like: countLike };
+      product = { ...product, count_like: parseNum(countLike) };
       return { product, store, images };
-    });
+    }));
+  }
+
+  static getCountLike(productId, dropshipperId) {
+    return this.where({
+      id_produk: productId,
+      id_dropshipper: dropshipperId,
+    }).count();
   }
 }
 
