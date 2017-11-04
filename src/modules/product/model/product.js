@@ -445,10 +445,12 @@ class ProductModel extends bookshelf.Model {
   /**
    * @param id {int} store id
    * @param limit {int}
+   * @param isImage {boolean}
    * @param productWhere {function} add where clause to product query
    * @param dropshipWhere {function} add where clause to dropship query
    */
-  static getStoreProducts(id, limit, productWhere = false, dropshipWhere = false) {
+  static getStoreProducts(id, limit, isImage = false, productWhere = false, dropshipWhere = false) {
+    const withRelated = isImage ? 'image' : null;
     return this.query((qb) => {
       qb.select(['*', 'tglstatus_produk as date_created', 'id_toko']);
       qb.select(knex.raw('null as "id_dropshipper"'));
@@ -463,7 +465,7 @@ class ProductModel extends bookshelf.Model {
       });
       qb.orderBy('date_created', 'desc');
       qb.limit(limit);
-    }).fetchAll({ withRelated: 'images' });
+    }).fetchAll({ withRelated });
   }
 
   /**
@@ -510,6 +512,7 @@ class ProductModel extends bookshelf.Model {
     let otherProds = this.getStoreProducts(
       storeId,
       3,
+      true,
       qb => qb.whereNot('produk.id_produk', productId),
       qb => qb.whereNot('d.id_produk', productId),
     );
@@ -567,8 +570,8 @@ class ProductModel extends bookshelf.Model {
 
     otherProds = await Promise.all(otherProds.map(async (otherProduct, index) => {
       const [cl, il] = await Promise.all(otherLikes[index]);
-      const otherImages = otherProduct.related('images').serialize();
-      const image = otherImages.length ? otherImages[0].file : config.defaultImage.product;
+      const otherImage = otherProduct.related('image');
+      const image = otherImage ? otherImage.serialize().file : config.defaultImage.product;
       const id = `${otherProduct.get('id_produk')}.${otherProduct.get('id_toko')}`;
       return {
         ...otherProduct.serialize({ minimal: true }),
