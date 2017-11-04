@@ -8,7 +8,6 @@ import config from './../../../../config';
 import { Dropship, DropshipStatus } from './dropship';
 import { ProductExpeditionStatus } from './product_expedition';
 import { MasterFee } from './master_fee';
-import { ImageProduct } from './image_product';
 import { View } from './view';
 import { Wishlist } from '../../user/model/wishlist';
 import { Review } from '../../review/model';
@@ -509,10 +508,10 @@ class ProductModel extends bookshelf.Model {
     }
     const idDropship = isDropshipped ? dropship.get('id_dropshipper') : undefined;
 
-    let getReviews = Review.where({
-      id_produk: productId,
-      id_dropshipper: !isDropshipped ? null : idDropship,
-    }).fetchAll({ withRelated: 'user' });
+    let getReviews = Review
+      .where({ id_produk: productId, id_dropshipper: idDropship || null })
+      .query(qb => qb.limit(3))
+      .fetchAll({ withRelated: 'user' });
 
     let countDiscussion;
     if (isDropshipped) {
@@ -556,23 +555,7 @@ class ProductModel extends bookshelf.Model {
     let store = getStore !== false ? product.related('store') : dropship.related('store');
     const isFavorite = userId ? this.loadFavorites(store, userId) : false;
     store = store.serialize({ verified: true });
-    const [likes, ...otherLikes] = await Promise.all(otherProds.reduce((res, prod, index) => {
-      // include likes for main product
-      if (index === 0) {
-        const wishlist = Wishlist.where({
-          id_produk: product.get('id_produk'),
-          id_dropshipper: (dropship && parseNum(dropship.get('id_dropshipper'))) || null,
-        }).fetchAll();
-        res.push(wishlist);
-      }
-      // likes for other products
-      const wishlist = Wishlist.where({
-        id_produk: prod.get('id_produk'),
-        id_dropshipper: parseNum(prod.get('id_dropshipper')) || null,
-      }).fetchAll();
-      res.push(wishlist);
-      return res;
-    }, []));
+    const otherLikes = otherProds.map(prod => this.getLike(prod, userId));
 
     getWholesaler = getWholesaler !== false && await getWholesaler;
     const wholesaler = getWholesaler === false ? [] : product.related('wholesale').serialize();
@@ -581,7 +564,7 @@ class ProductModel extends bookshelf.Model {
     const { reviews, rating } = await this.loadReviewsRatings(getReviews);
     rating.quality = parseFloat(this.ratingAvg(rating.quality));
     rating.accuracy = parseFloat(this.ratingAvg(rating.accuracy));
-    const { count_like, is_liked } = this.loadLikesDropship(userId, likes, dropship);
+    const [countLike, isLiked] = await Promise.all(this.getLike(product, userId));
     await getViewDropship;
     const images = product.related('images');
 
@@ -589,29 +572,26 @@ class ProductModel extends bookshelf.Model {
       ...product.serialize(),
       store_id: storeId,
       count_review: reviews.length,
-      count_like,
-      is_liked,
+      count_like: parseNum(countLike),
+      is_liked: !!isLiked,
       count_discussion: parseNum(countDiscussion),
     };
     product.id = `${product.id}.${storeId}`;
     product.count_sold = isDropshipped ? parseNum(dropship.get('count_sold')) : product.count_sold;
 
-    otherProds = otherProds.map((otherProduct, index) => {
-      const {
-        count_like: cl,
-        is_liked: il,
-      } = this.loadLikesDropship(userId, otherLikes[index], otherProduct);
+    otherProds = await Promise.all(otherProds.map(async (otherProduct, index) => {
+      const [cl, il] = await Promise.all(otherLikes[index]);
       const otherImages = otherProduct.related('images').serialize();
       const image = otherImages.length ? otherImages[0].file : config.defaultImage.product;
       const id = `${otherProduct.get('id_produk')}.${otherProduct.get('id_toko')}`;
       return {
         ...otherProduct.serialize({ minimal: true }),
         id,
-        count_like: cl,
-        is_liked: il,
+        count_like: parseNum(cl),
+        is_liked: !!il,
         image,
       };
-    });
+    }));
 
     return {
       product: {
@@ -1060,7 +1040,7 @@ class ProductModel extends bookshelf.Model {
 
   static getLike(product, userId, isModel = true) {
     const productId = isModel ? product.id : product.id_produk;
-    const dropshipperId = isModel ? product.get('id_dropshipper') : product.id_dropshipper;
+    const dropshipperId = isModel ? product.get('id_dropshipper') || null : product.id_dropshipper;
 
     const countLike = Wishlist.where({
       id_produk: productId,
