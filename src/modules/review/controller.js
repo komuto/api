@@ -9,11 +9,11 @@ export default { ReviewController };
  * Gel all reviews
  */
 ReviewController.getReviews = async (req, res, next) => {
-  const { productId = null } = req.params.id ? getProductAndStore(req.params.id) : {};
+  const { productId = null, storeId } = req.params.id ? getProductAndStore(req.params.id) : {};
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const reviews = await Review.getAll(
-    productId ? { product_id: productId } : req.query,
+    productId ? { product_id: productId, store_id: storeId } : req.query,
     { page, pageSize },
   );
 

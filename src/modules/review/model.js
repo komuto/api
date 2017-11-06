@@ -63,30 +63,25 @@ class ReviewModel extends bookshelf.Model {
    * @param {boolean} withProduct
    */
   static async getAll(data, { pageSize, page }, withProduct = false) {
-    const withRelated = ['user'];
-    if (withProduct) withRelated.push('product.store');
+    const withRelated = !withProduct ? 'user' : ['user', 'product.store', 'product.image'];
     const reviews = await this
       .query((qb) => {
-        if (data.store_id) {
-          qb.innerJoin('produk', 'produk.id_produk', 'ulasan_produk.id_produk');
-          qb.where('ulasan_produk.id_toko', data.store_id);
-        }
+        if (data.store_id) qb.where('ulasan_produk.id_toko', data.store_id);
         if (data.q) qb.whereRaw('LOWER(isi_ulasanproduk) LIKE ?', `%${data.q.toLowerCase()}%`);
         if (data.product_id) qb.where('ulasan_produk.id_produk', data.product_id);
         if (data.user_id) qb.where('ulasan_produk.id_users', data.user_id);
       })
-      .orderBy('-id_ulasanproduk')
+      .orderBy('-tgl_ulasanproduk')
       .fetchPage({ pageSize, page, withRelated });
 
-    return await Promise.all(reviews.models.map(async (review) => {
+    return reviews.models.map((review) => {
       const { id, name, photo } = review.related('user').serialize();
       if (withProduct) {
         const product = review.related('product');
         const { id: pId, name: pName } = product.serialize();
         const store = product.related('store').serialize({ favorite: true });
-        await product.load({ images: qb => qb.limit(1) });
-        let image = product.related('images').models[0];
-        image = image ? image.serialize() : config.defaultImage.product;
+        let image = product.related('image');
+        image = image ? image.serialize().file : config.defaultImage.product;
         return {
           ...review.serialize(),
           product: { id: `${pId}.${store.id}`, name: pName, image: image.file, store },
@@ -97,7 +92,7 @@ class ReviewModel extends bookshelf.Model {
         ...review.serialize({ minimal: false }),
         user: { id, name, photo },
       };
-    }));
+    });
   }
 
   static getRating(productId, storeId, marketplaceId = null) {
