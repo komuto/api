@@ -29,15 +29,44 @@ constraints.bulkReview = {
     },
   },
   review: { presence: true },
-  quality: { presence: true, numericality: true },
-  accuracy: { presence: true, numericality: true },
+  quality: {
+    presence: true,
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 1,
+      lessThanOrEqualTo: 5,
+    },
+  },
+  accuracy: {
+    presence: true,
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 1,
+      lessThanOrEqualTo: 5,
+    },
+  },
 };
 
 constraints.disputeBulkReview = {
+  // format product_id without store id e.g. `1`
   product_id: { presence: true, numericality: true },
   review: { presence: true },
-  quality: { presence: true, numericality: true },
-  accuracy: { presence: true, numericality: true },
+  quality: {
+    presence: true,
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 1,
+      lessThanOrEqualTo: 5,
+    },
+  },
+  accuracy: {
+    presence: true,
+    numericality: {
+      onlyInteger: true,
+      greaterThanOrEqualTo: 1,
+      lessThanOrEqualTo: 5,
+    },
+  },
 };
 
 constraints.dispute = {
