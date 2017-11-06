@@ -224,6 +224,7 @@ ProductController.createDiscussion = async (req, res, next) => {
   let data = {
     user_id: req.user.id,
     product_id: productId,
+    store_id: product.get('id_toko'),
     question: req.body.question,
     is_deleted: 0,
     created_at: moment().toDate(),
