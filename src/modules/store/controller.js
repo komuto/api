@@ -40,7 +40,7 @@ StoreController.getStore = async (req, res, next) => {
 StoreController.getStoreReviews = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const reviews = await Review.getByStoreId(req.params.id, page, pageSize, req.marketplace.id);
+  const reviews = await Review.getByStoreId(req.params.id, page, pageSize);
   req.resData = {
     message: 'Store Review Data',
     meta: { page, limit: pageSize },

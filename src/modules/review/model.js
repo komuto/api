@@ -186,7 +186,7 @@ class ReviewModel extends bookshelf.Model {
     return review;
   }
 
-  static async getByStoreId(storeId, page, pageSize, marketplaceId) {
+  static async getByStoreId(storeId, page, pageSize) {
     const select = [
       'count("id_ulasanproduk") as "count_review"',
       'SUM(kualitasproduk::integer) as "qualities"',
@@ -195,20 +195,13 @@ class ReviewModel extends bookshelf.Model {
     let rating = this
       .query((qb) => {
         qb.select(knex.raw(select.join(',')));
-        qb.where('p.id_toko', storeId); // from original store
-        qb.where('ulasan_produk.id_toko', storeId); // from dropship product
-        qb.where('u.id_marketplaceuser', marketplaceId);
-        qb.join('users as u', 'u.id_users', 'ulasan_produk.id_users');
-        qb.join('produk as p', 'p.id_produk', 'ulasan_produk.id_produk');
+        qb.where('id_toko', storeId);
       })
       .fetch();
 
     let reviews = this
       .query((qb) => {
-        qb.where('ulasan_produk.id_toko', storeId);
-        qb.join('toko as t', 't.id_toko', 'ulasan_produk.id_toko');
-        qb.join('users as u', 'u.id_users', 't.id_users');
-        qb.where('u.id_marketplaceuser', marketplaceId);
+        qb.where('id_toko', storeId);
         qb.orderBy('tgl_ulasanproduk', 'desc');
       })
       .fetchPage({ page, pageSize, withRelated: ['user', 'product.image'] });
