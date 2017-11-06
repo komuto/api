@@ -1,7 +1,7 @@
 import core from '../../core';
-import './comment';
 import { getDiscussionError, createDiscussionError } from './../messages';
 import config from './../../../../config';
+import { Comment } from './comment';
 
 const bookshelf = core.postgres.db;
 const { parseDate, parseNum } = core.utils;
@@ -73,42 +73,18 @@ class DiscussionModel extends bookshelf.Model {
    * Get discussion by product id
    */
   static async getByProductId(productId, storeId, page, pageSize) {
-    const [original, dropshipper] = await Promise.all([
-      this
-        .query((qb) => {
-          qb.join('produk as p', 'p.id_produk', 'diskusi.id_produk');
-          qb.where('diskusi.id_produk', productId);
-          qb.where('p.id_toko', storeId);
-          qb.whereNull('id_dropshipper');
-        })
-        .orderBy('tgl_diskusi', 'DESC')
-        .fetchPage({
-          page,
-          pageSize,
-          withRelated: ['comments', 'user'],
-        }),
-      this
-        .query((qb) => {
-          qb.join('dropshipper as d', 'd.id_dropshipper', 'diskusi.id_dropshipper');
-          qb.where('diskusi.id_produk', productId);
-          qb.where('d.id_toko', storeId);
-        })
-        .orderBy('tgl_diskusi', 'DESC')
-        .fetchPage({
-          page,
-          pageSize,
-          withRelated: ['comments', 'user'],
-        }),
-    ]);
+    const discussions = await this
+      .where({ id_produk: productId, id_toko: storeId })
+      .orderBy('tgl_diskusi', 'DESC')
+      .fetchPage({ page, pageSize, withRelated: 'user' });
 
-    const discussions = original.length ? original : dropshipper;
-    return discussions.map((discussion) => {
-      const comments = discussion.related('comments');
+    return await Promise.all(discussions.map(async (discussion) => {
+      const countComment = await Comment.where({ id_diskusi: discussion.id }).count();
       return {
         ...discussion.serialize({ minimal: true }),
-        count_comments: comments.length,
+        count_comments: parseNum(countComment),
       };
-    });
+    }));
   }
 
   /**
@@ -123,19 +99,18 @@ class DiscussionModel extends bookshelf.Model {
   }
 
   /**
-   * Get discussion by user id or product ids
+   * Get discussion by user id or store id
    */
-  static async get(data, page, pageSize, isProduct = false) {
-    let query = this.where({ id_users: data });
-    if (isProduct) query = this.forge().where('id_produk', 'in', data);
-    const discussions = await query.orderBy('tgl_diskusi', 'DESC')
-      .fetchPage({ page, pageSize, withRelated: ['product'] })
+  static async getByQuery(where, page, pageSize) {
+    const discussions = await this
+      .where(where)
+      .orderBy('tgl_diskusi', 'desc')
+      .fetchPage({ page, pageSize, withRelated: ['product.image'] })
       .catch(() => { throw getDiscussionError('discussion', 'not_found'); });
 
-    return await Promise.all(discussions.map(async (discussion) => {
+    return discussions.map((discussion) => {
       let product = discussion.related('product');
-      await product.load({ images: qb => qb.limit(1) });
-      const image = product.related('images').models[0];
+      const image = product.related('image');
       product = {
         ...product.serialize({ minimal: true }),
         id: `${product.get('id_produk')}.${product.get('id_toko')}`,
@@ -145,7 +120,7 @@ class DiscussionModel extends bookshelf.Model {
         ...discussion.serialize({ minimal: true }),
         product,
       };
-    }));
+    });
   }
 
   /**

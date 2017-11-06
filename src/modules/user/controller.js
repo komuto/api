@@ -359,7 +359,7 @@ UserController.updatePhone = async (req, res, next) => {
 UserController.getDiscussions = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const discussions = await Discussion.get(req.user.id, page, pageSize);
+  const discussions = await Discussion.getByQuery({ id_users: req.user.id }, page, pageSize);
   req.resData = {
     message: 'Discussion Data',
     meta: { page, limit: pageSize },
@@ -375,8 +375,7 @@ UserController.getStoreDiscussions = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const storeId = await Store.getStoreId(req.user.id);
-  const productIds = await Product.getIdsByStoreId(storeId);
-  const discussions = await Discussion.get(productIds, page, pageSize, true);
+  const discussions = await Discussion.getByQuery({ id_toko: storeId }, page, pageSize);
   req.resData = {
     message: 'Discussion Data',
     meta: { page, limit: pageSize },

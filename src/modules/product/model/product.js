@@ -662,14 +662,6 @@ class ProductModel extends bookshelf.Model {
   }
 
   /**
-   * Get ids product by store id
-   */
-  static async getIdsByStoreId(storeId) {
-    const products = await this.where({ id_toko: storeId }).fetchAll();
-    return products.map(product => (product.get('id_produk')));
-  }
-
-  /**
    * Get expedition and service
    */
   static async getExpeditionsById(id) {
