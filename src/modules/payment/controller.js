@@ -182,9 +182,9 @@ PaymentController.bulkReview = async (req, res, next) => {
     req.params.invoice_id,
     InvoiceTransactionStatus.RECEIVED,
   );
-  await invoice.refresh({ withRelated: ['store.user', 'items'] });
+  await invoice.refresh({ withRelated: 'store.user' });
 
-  const seller = invoice.related('store.user');
+  const seller = invoice.related('store').related('user');
   if (seller.get('reg_token')) {
     Notification.send(
       sellerNotification.ORDER_RECEIVED,
