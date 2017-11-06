@@ -132,6 +132,7 @@ BucketController.saveCart = async (bucket, body, product, item, where) => {
   const getNewItem = Item.updateInsert(where, _.assign(itemObj, where));
 
   // total bill before checkout doesn't include any additional charges
+  // total bill used for checking minimum price of promo
   const updateBucket = update ? bucket.updateBill(bill, prevBill) : null;
   const [newItem] = await Promise.all([getNewItem, updateBucket]);
   return newItem;
