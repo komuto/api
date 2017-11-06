@@ -1,7 +1,6 @@
 import moment from 'moment';
 import requestIp from 'request-ip';
 import {
-  Product,
   ProductCondition,
   Discussion,
   Comment,
@@ -14,6 +13,7 @@ import {
   View,
   MasterFee,
 } from './model';
+import { Product } from './model/product';
 import { Wishlist, getNotification, NotificationType } from '../user/model';
 import { Store, Catalog, StoreVerificationStatus } from '../store/model';
 import {
@@ -34,7 +34,7 @@ import core from '../core';
 import dropshipFaq from '../../../config/faq';
 import { notificationDefault } from '../user/model/user';
 import { getStoreError } from '../store/messages';
-import { Preference } from "../preference/model";
+import { Preference } from '../preference/model';
 
 const { Notification, sellerNotification, buyerNotification } = core;
 const { getProductAndStore } = core.utils;

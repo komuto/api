@@ -1,6 +1,5 @@
 import moment from 'moment';
 import core from '../../core';
-import { Wishlist } from '../../user/model/wishlist';
 import { Address } from '../../address/model';
 import { Product } from '../../product/model';
 
@@ -94,6 +93,10 @@ class FavoriteStoreModel extends bookshelf.Model {
       store.store.province = address.related('province').serialize();
       return store;
     }));
+  }
+
+  static getFavorite(storeId, userId) {
+    return this.where({ referred_toko: storeId, id_users: userId }).fetch();
   }
 }
 
