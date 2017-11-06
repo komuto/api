@@ -1,7 +1,6 @@
 import moment from 'moment';
 import requestIp from 'request-ip';
 import {
-  ProductCondition,
   Discussion,
   Comment,
   Report,
@@ -13,7 +12,7 @@ import {
   View,
   MasterFee,
 } from './model';
-import { Product } from './model/product';
+import { Product, ProductCondition } from './model/product';
 import { Wishlist, getNotification, NotificationType } from '../user/model';
 import { Store, Catalog, StoreVerificationStatus } from '../store/model';
 import {

@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import moment from 'moment';
 import { Bucket, Promo, Item, Shipping, BucketStatus, PromoType } from './model';
-import { Product, Dropship } from '../product/model';
+import { Dropship } from '../product/model';
+import { Product } from '../product/model/product';
 import { Expedition } from '../expedition/model';
 import { Invoice, InvoiceStatus, InvoiceTransactionStatus } from '../payment/model';
 import { User } from '../user/model';

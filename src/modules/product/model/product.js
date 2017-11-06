@@ -1066,4 +1066,3 @@ class ProductModel extends bookshelf.Model {
 }
 
 export const Product = bookshelf.model('Product', ProductModel);
-export default { Product, ProductCondition };

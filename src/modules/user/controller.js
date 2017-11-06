@@ -29,7 +29,8 @@ import {
   getResolutionError,
   errMsg,
 } from './messages';
-import { Discussion, Product } from '../product/model';
+import { Discussion } from '../product/model';
+import { Product } from '../product/model/product';
 import core from '../core';
 import { Dispute } from '../payment/model';
 

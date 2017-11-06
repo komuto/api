@@ -1,7 +1,7 @@
 import moment from 'moment';
 import core from '../../core';
 import { Address } from '../../address/model';
-import { Product } from '../../product/model';
+import { Product } from '../../product/model/product';
 
 const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;

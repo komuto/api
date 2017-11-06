@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Expedition, ExpeditionService } from './model';
-import { Product } from './../product/model';
+import { Product } from './../product/model/product';
 import { NotFoundError } from '../../../common/errors';
 import { getProductAndStore } from '../core/utils';
 

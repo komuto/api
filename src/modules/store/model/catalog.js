@@ -1,7 +1,8 @@
 import core from '../../core';
 import { createCatalogError, getCatalogError, updateCatalogError } from './../messages';
 import config from './../../../../config';
-import { ProductStatus, Product, MasterFee } from '../../product/model';
+import { MasterFee } from '../../product/model';
+import { Product, ProductStatus } from '../../product/model/product';
 
 const bookshelf = core.postgres.db;
 const knex = core.postgres.knex;
