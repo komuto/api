@@ -392,27 +392,15 @@ class ProductModel extends bookshelf.Model {
       }, []);
   }
 
-  static loadReviewsRatings(getReviews) {
-    const accSum = [0, 0];
-    const qtySum = [0, 0];
-    const reviews = getReviews.map((review) => {
+  static loadReviews(getReviews) {
+    return getReviews.map((review) => {
       const { name, id: userId, photo } = review.related('user').serialize();
       review = review.serialize();
-      const { quality, accuracy } = review;
-      this.ratingSum(accSum, accuracy);
-      this.ratingSum(qtySum, quality);
       return {
         ...review,
         user: { id: userId, name, photo },
       };
     });
-    return { reviews, rating: { accuracy: accSum, quality: qtySum } };
-  }
-
-  static loadLikes(product, id) {
-    const likes = product.related('likes');
-    const isLiked = !!_.find(likes.models, o => o.get('id_users') === id);
-    return { likes, isLiked };
   }
 
   static loadFavorites(store, id) {
@@ -420,26 +408,16 @@ class ProductModel extends bookshelf.Model {
     return !!_.find(favorites.models, o => o.get('id_users') === id);
   }
 
-  /**
-   * Adding to be averaged later
-   * @param ref [array] array reference
-   * @param rating [integer]
-   */
-  static ratingSum(ref, rating) {
-    if (rating) {
-      ref[0] += rating;
-      ref[1] += 1;
-    }
-  }
+  static loadRating(rating) {
+    const countReview = parseNum(rating.get('count_review'));
+    const qualities = parseNum(rating.get('qualities'));
+    const accuracies = parseNum(rating.get('accuracies'));
 
-  static ratingAvg(res) {
-    // if there is no rating
-    if (res[1] === 0) return 0;
-
-    res = (res[0] / res[1]).toFixed(1);
-    // e.g.: if the rating is 5.0 change it to 5
-    if (res[2] === '0') res = res[0];
-    return res;
+    return {
+      count_review: countReview,
+      quality: countReview ? parseFloat(qualities / countReview) : 0,
+      accuracy: countReview ? parseFloat(accuracies / countReview) : 0,
+    };
   }
 
   /**
@@ -498,8 +476,11 @@ class ProductModel extends bookshelf.Model {
 
     let getReviews = Review
       .where({ id_produk: productId, id_dropshipper: idDropship || null })
-      .query(qb => qb.limit(3))
+      .query(qb => qb.limit(2))
+      .orderBy('tgl_ulasanproduk', 'desc')
       .fetchAll({ withRelated: 'user' });
+
+    let rating = Review.getRating(productId, storeId);
 
     let countDiscussion;
     if (isDropshipped) {
@@ -531,11 +512,25 @@ class ProductModel extends bookshelf.Model {
     const category = product.related('category').serialize();
     let address = Address.getStoreAddress(product.related('store').get('id_users'));
 
+    let [countLike, isLiked] = this.getLike(product, userId);
+
     [
       address,
       countDiscussion,
       otherProds,
-    ] = await Promise.all([address, countDiscussion, otherProds]);
+      getReviews,
+      rating,
+      countLike,
+      isLiked,
+    ] = await Promise.all([
+      address,
+      countDiscussion,
+      otherProds,
+      getReviews,
+      rating,
+      countLike,
+      isLiked,
+    ]);
 
     const location = { province: address.related('province'), district: address.related('district') };
     const expeditions = this.loadExpeditions(product);
@@ -544,23 +539,21 @@ class ProductModel extends bookshelf.Model {
     let store = getStore !== false ? product.related('store') : dropship.related('store');
     const isFavorite = userId ? this.loadFavorites(store, userId) : false;
     store = store.serialize({ verified: true });
+    store.is_favorite = isFavorite;
     const otherLikes = otherProds.map(prod => this.getLike(prod, userId));
 
     getWholesaler = getWholesaler !== false && await getWholesaler;
     const wholesaler = getWholesaler === false ? [] : product.related('wholesale').serialize();
-    store.is_favorite = isFavorite;
-    getReviews = await getReviews;
-    const { reviews, rating } = this.loadReviewsRatings(getReviews);
-    rating.quality = parseFloat(this.ratingAvg(rating.quality));
-    rating.accuracy = parseFloat(this.ratingAvg(rating.accuracy));
-    const [countLike, isLiked] = await Promise.all(this.getLike(product, userId));
+    const reviews = this.loadReviews(getReviews);
+    const { count_review: countReview, quality, accuracy } = this.loadRating(rating);
+    rating = { quality, accuracy };
     await getViewDropship;
     const images = product.related('images');
 
     product = {
       ...product.serialize(),
       store_id: storeId,
-      count_review: reviews.length,
+      count_review: parseNum(countReview),
       count_like: parseNum(countLike),
       is_liked: !!isLiked,
       count_discussion: parseNum(countDiscussion),

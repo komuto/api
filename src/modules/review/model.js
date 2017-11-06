@@ -100,7 +100,7 @@ class ReviewModel extends bookshelf.Model {
     }));
   }
 
-  static getRating(productId, storeId, marketplaceId) {
+  static getRating(productId, storeId, marketplaceId = null) {
     const select = [
       'count("id_ulasanproduk") as "count_review"',
       'SUM(kualitasproduk::integer) as "qualities"',
@@ -112,8 +112,10 @@ class ReviewModel extends bookshelf.Model {
         qb.where('ulasan_produk.id_produk', productId);
         qb.where('p.id_toko', storeId); // from original store
         qb.where('ulasan_produk.id_toko', storeId); // from dropship product
-        qb.where('u.id_marketplaceuser', marketplaceId);
-        qb.join('users as u', 'u.id_users', 'ulasan_produk.id_users');
+        if (marketplaceId) {
+          qb.where('u.id_marketplaceuser', marketplaceId);
+          qb.join('users as u', 'u.id_users', 'ulasan_produk.id_users');
+        }
         qb.join('produk as p', 'p.id_produk', 'ulasan_produk.id_produk');
       })
       .fetch();
