@@ -88,7 +88,7 @@ routes.put('/users',
 routes.put('/accounts/profile',
   auth(),
   validateUpdate(),
-  wrap(UserController.updateAccount),
+  wrap(UserController.updateUser),
   apiResponse());
 
 /**

@@ -18,7 +18,7 @@ const { District } = addressModel;
 // 8 rounds will produce about 40 hashes per second on a 2GHz core
 // see: https://www.npmjs.com/package/bcrypt
 const SALT_ROUND = 8;
-export const IMAGE_PATH = 'user';
+export const IMAGE_PATH = config.imageFolder.profile;
 
 export const UserStatus = {
   INACTIVE: 0,
@@ -120,6 +120,7 @@ class UserModel extends bookshelf.Model {
       provider_name: this.get('hybridauth_provider_name'),
       provider_uid: this.get('hybridauth_provider_uid'),
       reg_token: this.get('reg_token'),
+      file_name: this.get('pathfoto_users'),
     };
     if (pass) user.password = this.get('password_users');
     if (birth) {

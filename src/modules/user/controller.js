@@ -30,9 +30,10 @@ import {
   errMsg,
 } from './messages';
 import { Discussion } from '../product/model';
-import { Product } from '../product/model/product';
 import core from '../core';
 import { Dispute } from '../payment/model';
+import { ImageService } from '../image';
+import { IMAGE_PATH } from './model/user';
 
 const { Notification, sellerNotification } = core;
 const { validateImageUrl } = core.middleware;
@@ -161,24 +162,7 @@ UserController.updateUser = async (req, res, next) => {
   const data = User.matchDBColumn(check);
   if (_.isEmpty(data)) throw userUpdateError('fields', 'not_valid');
   const user = await User.update({ id_users: req.user.id }, data);
-  req.resData = { data: user };
-  return next();
-};
-
-UserController.updateAccount = async (req, res, next) => {
-  if (req.body.gender) req.body.gender = (req.body.gender === 'male') ? 'L' : 'P';
-  const { name, photo, gender, place_of_birth } = req.body;
-  let dateOfBirth = req.body.date_of_birth;
-  if (dateOfBirth) {
-    dateOfBirth = moment(dateOfBirth, 'YYYY-MM-DD');
-    if (!dateOfBirth.isValid()) throw userUpdateError('fields', 'date_not_valid');
-    dateOfBirth = dateOfBirth.format('YYYY-MM-DD');
-  }
-  validateImageUrl(photo, errMsg.updateMsg.not_valid);
-  const check = { name, photo, gender, place_of_birth, date_of_birth: dateOfBirth };
-  const data = User.matchDBColumn(check);
-  if (_.isEmpty(data)) throw userUpdateError('fields', 'not_valid');
-  const user = await User.update({ id_users: req.user.id }, data);
+  if (photo) ImageService.deleteImage(req.user.file_name, `${config.imagePath}/${IMAGE_PATH}`);
   req.resData = { data: user };
   return next();
 };
