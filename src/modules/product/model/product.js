@@ -480,12 +480,9 @@ class ProductModel extends bookshelf.Model {
 
     let rating = Review.getRating(productId, storeId);
 
-    let countDiscussion;
-    if (isDropshipped) {
-      countDiscussion = Discussion.query(qb => qb.where('id_produk', productId).where('id_toko', storeId)).count();
-    } else {
-      countDiscussion = Discussion.query(qb => qb.where('id_produk', productId).whereNull('id_dropshipper')).count();
-    }
+    let countDiscussion = Discussion
+      .query(qb => qb.where('id_produk', productId).where('id_toko', storeId))
+      .count();
 
     // Eager load other products so it doesn't block other process by not awaiting directly
     let otherProds = this.getStoreProducts(
