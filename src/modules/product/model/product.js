@@ -270,7 +270,10 @@ class ProductModel extends bookshelf.Model {
       .orderBy(sort.column, sort.by)
       .limit(pageSize)
       .offset(offset)
-      .then(products => products);
+      .then(products => products)
+      .catch(() => {
+        throw getProductError('product', 'error');
+      });
   }
 
   /**
