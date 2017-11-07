@@ -23,11 +23,13 @@ MarketplaceController.getBanners = async (req, res, next) => {
       const pArr = sArr[sArr.length - 2].split('-');
       const storeId = sArr[sArr.length - 1];
       const productId = pArr[pArr.length - 1];
+
       return {
         ...banner,
         product_id: `${productId}.${storeId}`,
       };
     }
+
     return {
       ...banner,
       product_id: null,
