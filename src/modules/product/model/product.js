@@ -466,8 +466,7 @@ class ProductModel extends bookshelf.Model {
       ],
     });
     if (product && product.get('id_toko') !== storeId) {
-      const withRelated = ['store'];
-      dropship = await Dropship.findByProductIdAndStoreId(productId, storeId, withRelated);
+      dropship = await Dropship.findByProductIdAndStoreId(productId, storeId, 'store');
       if (!dropship) return false;
       isDropshipped = true;
     }
