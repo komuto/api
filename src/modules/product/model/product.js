@@ -455,15 +455,16 @@ class ProductModel extends bookshelf.Model {
     let dropship;
     let isDropshipped = false;
     let getViewDropship = false;
-    const related = [
-      'category',
-      'images',
-      'discussions',
-      'expeditionServices.expedition',
-      'store',
-      { expeditionServices: qb => qb.where('status_detilekspedisiproduk', ProductExpeditionStatus.USED) },
-    ];
-    let product = await this.where({ id_produk: productId }).fetch({ withRelated: related });
+    let product = await this.where({ id_produk: productId }).fetch({
+      withRelated: [
+        'category',
+        'images',
+        'discussions',
+        'expeditionServices.expedition',
+        'store',
+        { expeditionServices: qb => qb.where('status_detilekspedisiproduk', ProductExpeditionStatus.USED) },
+      ],
+    });
     if (product && product.get('id_toko') !== storeId) {
       const withRelated = ['store'];
       dropship = await Dropship.findByProductIdAndStoreId(productId, storeId, withRelated);
@@ -495,14 +496,16 @@ class ProductModel extends bookshelf.Model {
 
     let getStore;
     if (!isDropshipped) {
-      const load = ['view'];
-      getStore = product.load(load);
+      getStore = product.load('view');
     } else {
       getStore = false;
       getViewDropship = product.load({ view: qb => qb.where('id_dropshipper', idDropship) });
     }
-    let getWholesaler = !product.get('is_grosir') ? false
+
+    let getWholesaler = !product.get('is_grosir')
+      ? false
       : product.load('wholesale').catch(() => { throw getProductError('product', 'error'); });
+
     const category = product.related('category').serialize();
     let address = Address.getStoreAddress(product.related('store').get('id_users'));
 
