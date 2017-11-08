@@ -1,5 +1,6 @@
 import moment from 'moment';
 import core from '../../core';
+import config from '../../../../config';
 
 const { parseNum } = core.utils;
 const bookshelf = core.postgres.db;
@@ -95,7 +96,7 @@ class WishlistModel extends bookshelf.Model {
         withRelated: [
           'product',
           'product.store',
-          'product.images',
+          'product.image',
           'dropship.store',
         ],
       });
@@ -106,12 +107,21 @@ class WishlistModel extends bookshelf.Model {
       if (wishlist.get('id_dropshipper')) {
         store = wishlist.related('dropship').related('store');
       }
-      const images = product.related('images');
+      const image = product.related('image');
       const countLike = await this.getCountLike(product.id, wishlist.get('id_dropshipper'));
       product = product.serialize({ minimal: true, wishlist: true });
-      product.id = `${product.id}.${store.id}`;
-      product = { ...product, count_like: parseNum(countLike) };
-      return { product, store, images };
+
+      return {
+        product: {
+          ...product,
+          id: `${product.id}.${store.id}`,
+          image: image ? image.serialize().file : config.defaultImage.product,
+          count_like: parseNum(countLike),
+        },
+        store,
+        // still used for mobile
+        images: [image],
+      };
     }));
   }
 
