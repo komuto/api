@@ -5,18 +5,18 @@ import { email } from '../../core';
 export const UserEmail = {};
 export default { UserEmail };
 
-UserEmail.buildEmail = ({ layout, subject, baseUrl, link, emailToSend, token }) => {
+UserEmail.buildEmail = ({ layout, subject, baseUrl, link, emailParams, token }) => {
   const emailTemplate = pug.compileFile(path.join(__dirname, `./view/${layout}`));
   const url = `https://${baseUrl}/${link}?token=${token}`;
   const html = emailTemplate({ url });
-  return email.build({ subject, emailToSend, html });
+  return email.build({ subject, emailParams, html });
 };
 
-UserEmail.buildForgotPassword = (emailToSend, token, baseUrl) => UserEmail.buildEmail({
+UserEmail.buildForgotPassword = (emailParams, token, baseUrl) => UserEmail.buildEmail({
   layout: 'forgot_password.pug',
   subject: 'Reset Password Link',
   link: 'password/new',
-  emailToSend,
+  emailParams,
   token,
   baseUrl,
 });
@@ -30,8 +30,8 @@ UserEmail.buildActivateAccount = (emailToSend, token, baseUrl) => UserEmail.buil
   baseUrl,
 });
 
-UserEmail.sendForgotPassword = (emailToSend, token, baseUrl) => {
-  email.send(UserEmail.buildForgotPassword(emailToSend, token, baseUrl));
+UserEmail.sendForgotPassword = (emailParams, token, baseUrl) => {
+  email.send(UserEmail.buildForgotPassword(emailParams, token, baseUrl));
 };
 
 UserEmail.sendActivateAccount = (emailToSend, token, baseUrl) => {

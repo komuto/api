@@ -227,10 +227,21 @@ UserController.getAccountProfile = async (req, res, next) => {
 };
 
 UserController.forgotPassword = async (req, res, next) => {
-  const user = await User.getByEmail(req.body.email, req.marketplace.id);
+  let user = await User.getByEmail(req.body.email, req.marketplace.id);
   if (!user) throw resetPassError('email', 'email_not_found');
-  const token = await UserToken.generateToken(user.id, TokenType.FORGOT_PASSWORD);
-  UserEmail.sendForgotPassword(req.body.email, token, req.marketplace.mobile_domain);
+  user = user.serialize();
+  // const token = await UserToken.generateToken(user.id, TokenType.FORGOT_PASSWORD);
+  const token = 'lkasjdflkjasdfl';
+  UserEmail.sendForgotPassword(
+    {
+      to: user.email,
+      toName: user.name,
+      from: req.marketplace.email,
+      fromName: req.marketplace.name,
+    },
+    token,
+    req.marketplace.mobile_domain,
+  );
   return next();
 };
 

@@ -64,9 +64,13 @@ def.jwt.audience = 'pionize.com';
 def.jwt.expiry = '7d';
 
 // mailer config
-def.emailServiceAdapter = 'sendgrid';
-def.emailKey = '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';
-def.emailFrom = 'no-reply@skyshi.com';
+// def.emailServiceAdapter = 'sendgrid';
+// def.emailKey = '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';
+// def.emailFrom = 'no-reply@skyshi.com';
+
+// mailer config
+def.emailServiceAdapter = 'mandrill';
+def.emailApiKey = 'iOKR7tQDREfanv5yUZxkyQ';
 
 // url builder
 def.url = (dir = '/') => {
