@@ -134,7 +134,7 @@ class InvoiceModel extends bookshelf.Model {
   }
 
   static async detail(userId, bucketId, id) {
-    const invoice = await this.where({
+    let invoice = await this.where({
       id_invoice: id,
       id_user: userId,
       id_bucket: bucketId,
@@ -146,6 +146,8 @@ class InvoiceModel extends bookshelf.Model {
         'shipping.expeditionService.expedition',
         { dispute: qb => qb.orderBy('createdate_dispute', 'desc') },
         'dispute.disputeProducts',
+        'store.user.addresses.district',
+        'store.user.addresses.province',
       ],
     });
 
@@ -186,7 +188,18 @@ class InvoiceModel extends bookshelf.Model {
       };
     }
 
-    return { ...invoice.serialize(), items, dispute };
+    const store = invoice.related('store');
+    const { origin } = Store.getOriginAndDistrict(store);
+    invoice = invoice.serialize();
+    invoice = {
+      ...invoice,
+      store: {
+        ...store.serialize({ favorite: true }),
+        origin,
+      },
+    };
+
+    return { ...invoice, items, dispute };
   }
 
   /**
