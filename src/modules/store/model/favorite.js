@@ -64,7 +64,7 @@ class FavoriteStoreModel extends bookshelf.Model {
     const getProducts = favorites.models.map((favorite) => {
       const store = favorite.related('store');
       const storeId = store.get('id_toko');
-      return Product.getStoreProducts(storeId, 3);
+      return Product.getStoreProducts(storeId, 3, true);
     });
 
     const addresses = [];
