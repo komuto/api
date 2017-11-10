@@ -5,19 +5,19 @@ import { email } from '../../core';
 export const OTPAddressEmail = {};
 export default { OTPAddressEmail };
 
-OTPAddressEmail.buildEmail = ({ layout, subject, emailToSend, data }) => {
+OTPAddressEmail.buildEmail = ({ layout, subject, emailParams, data }) => {
   const emailTemplate = pug.compileFile(path.join(__dirname, `./view/${layout}`));
   const html = emailTemplate({ data });
-  return email.build({ subject, emailToSend, html });
+  return email.build({ subject, emailParams, html });
 };
 
-OTPAddressEmail.buildOtpAddressMail = (emailToSend, data) => OTPAddressEmail.buildEmail({
+OTPAddressEmail.buildOtpAddressMail = (emailParams, data) => OTPAddressEmail.buildEmail({
   layout: 'otp_address.pug',
   subject: 'OTP Address',
-  emailToSend,
+  emailParams,
   data,
 });
 
-OTPAddressEmail.sendOtpAddress = (emailToSend, data) => {
-  email.send(OTPAddressEmail.buildOtpAddressMail(emailToSend, data));
+OTPAddressEmail.sendOtpAddress = (emailParams, data) => {
+  email.send(OTPAddressEmail.buildOtpAddressMail(emailParams, data));
 };

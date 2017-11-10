@@ -328,7 +328,12 @@ ProductController.report = async (req, res, next) => {
   });
   const report = await Report.create(data);
   ReportEmail.sendReportProduct(
-    config.komutoEmail,
+    {
+      to: config.komutoEmail,
+      toName: config.komutoEmailName,
+      from: req.marketplace.email,
+      fromName: req.marketplace.name,
+    },
     report.serialize(),
     product,
     req.marketplace.mobile_domain,

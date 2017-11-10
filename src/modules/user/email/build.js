@@ -21,11 +21,11 @@ UserEmail.buildForgotPassword = (emailParams, token, baseUrl) => UserEmail.build
   baseUrl,
 });
 
-UserEmail.buildActivateAccount = (emailToSend, token, baseUrl) => UserEmail.buildEmail({
+UserEmail.buildActivateAccount = (emailParams, token, baseUrl) => UserEmail.buildEmail({
   layout: 'activate_account.pug',
   subject: 'Activate Account Link',
   link: 'signup/verification',
-  emailToSend,
+  emailParams,
   token,
   baseUrl,
 });
@@ -34,6 +34,6 @@ UserEmail.sendForgotPassword = (emailParams, token, baseUrl) => {
   email.send(UserEmail.buildForgotPassword(emailParams, token, baseUrl));
 };
 
-UserEmail.sendActivateAccount = (emailToSend, token, baseUrl) => {
-  email.send(UserEmail.buildActivateAccount(emailToSend, token, baseUrl));
+UserEmail.sendActivateAccount = (emailParams, token, baseUrl) => {
+  email.send(UserEmail.buildActivateAccount(emailParams, token, baseUrl));
 };

@@ -230,8 +230,7 @@ UserController.forgotPassword = async (req, res, next) => {
   let user = await User.getByEmail(req.body.email, req.marketplace.id);
   if (!user) throw resetPassError('email', 'email_not_found');
   user = user.serialize();
-  // const token = await UserToken.generateToken(user.id, TokenType.FORGOT_PASSWORD);
-  const token = 'lkasjdflkjasdfl';
+  const token = await UserToken.generateToken(user.id, TokenType.FORGOT_PASSWORD);
   UserEmail.sendForgotPassword(
     {
       to: user.email,
@@ -255,7 +254,16 @@ UserController.activateUser = async (req, res, next) => {
 
 UserController.resendVerification = async (req, res, next) => {
   const token = await UserToken.generateToken(req.user.id, TokenType.EMAIL_ACTIVATION);
-  await UserEmail.sendActivateAccount(req.user.email, token, req.marketplace.mobile_domain);
+  await UserEmail.sendActivateAccount(
+    {
+      to: req.user.email,
+      toName: req.user.name,
+      from: req.marketplace.email,
+      fromName: req.marketplace.name,
+    },
+    token,
+    req.marketplace.mobile_domain,
+  );
   return next();
 };
 
