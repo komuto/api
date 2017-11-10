@@ -81,11 +81,11 @@ PaymentController.viaBank = async (req, res, next) => {
 
 PaymentController.getSnapToken = async (req, res, next) => {
   const [bucketModel, limit] = await Promise.all([
-    await Bucket.getForPayment(req.user.id, req.params.id, req.query.platform),
-    await Preference.get('payment'),
+    Bucket.getForPayment(req.user.id, req.params.id, req.query.platform),
+    Preference.get('payment'),
   ]);
   const bucket = bucketModel.serialize();
-  const endDate = moment.unix(bucket.order_at).add(limit.value, 'd');
+  const endDate = moment.unix(bucket.status_at).add(limit.value, 'd');
   if (endDate.diff(moment(), 'd') < 0) throw paymentError('transaction', 'not_found');
   const { firstName, lastName } = getName(req.user.name);
   const payload = {
