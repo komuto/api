@@ -174,10 +174,10 @@ class ProductModel extends bookshelf.Model {
   /**
    * Get product by id
    */
-  static async findById(id) {
-    const product = await this.where({ id_produk: id }).fetch();
+  static async findById(id, withRelated = null) {
+    const product = await this.where({ id_produk: id }).fetch({ withRelated });
     if (!product) throw getProductError('product', 'not_found');
-    return product.toJSON();
+    return product;
   }
 
   static addWhereClause(products, params, isFromProduct) {

@@ -83,8 +83,15 @@ BucketController.getCost = async (body, product) => {
   return delivery[0];
 };
 
-BucketController.saveCart = async (bucket, body, product, item, where) => {
+BucketController.saveCart = async (bucket, body, product, item, where, wholesale = []) => {
   let insuranceCost = 0;
+
+  if (wholesale.length) {
+    const found = _.find(wholesale, o => body.qty >= o.min && body.qty <= o.max);
+    if (found) {
+      product.price = found.price;
+    }
+  }
 
   if (product.is_discount) {
     product.price -= product.price * (product.discount / 100);
@@ -146,16 +153,18 @@ BucketController.addToCart = async (req, res, next) => {
     id_alamatuser: req.body.address_id,
   }).fetch();
   const { productId, storeId } = getProductAndStore(req.body.product_id);
-  const getProduct = Product.findById(productId);
+  const getProduct = Product.findById(productId, 'wholesale');
   const getStore = Store.where('id_users', req.user.id).fetch();
 
-  const [bucket, product, address, store] = await Promise.all([
+  const [bucket, productModel, address, store] = await Promise.all([
     getBucket,
     getProduct,
     getAddress,
     getStore,
   ]);
 
+  const product = productModel.serialize();
+  const wholesale = product.is_wholesaler ? productModel.related('wholesale').serialize() : [];
   const ownStoreId = store ? store.get('id_toko') : null;
   if (!address) throw addCartError('address', 'address_not_found');
   if (req.body.qty > product.stock) throw addCartError('cart', 'stock');
@@ -170,10 +179,10 @@ BucketController.addToCart = async (req, res, next) => {
   }
 
   const where = Item.matchDBColumn(columns);
-  const item = await Item.get(where);
-  req.resData = {
-    data: await BucketController.saveCart(bucket, req.body, product, item, where),
-  };
+  let item = await Item.get(where);
+  item = await BucketController.saveCart(bucket, req.body, product, item, where, wholesale);
+  req.resData = { data: item };
+
   return next();
 };
 
@@ -301,18 +310,32 @@ BucketController.checkout = async (req, res, next) => {
 
 BucketController.bulkUpdate = async (req, res, next) => {
   const { items: bodies } = req.body;
-  const bucket = await Bucket.where({ id_users: req.user.id,
-    status_bucket: BucketStatus.ADDED }).fetch();
-  const getItems = bodies.map(item => Item.get({ id_listbucket: item.id,
-    id_bucket: bucket.get('id_bucket') }, 'product'));
+  const bucket = await Bucket.where({
+    id_users: req.user.id,
+    status_bucket: BucketStatus.ADDED,
+  }).fetch();
+  const getItems = bodies.map(item => Item.get(
+    {
+      id_listbucket: item.id,
+      id_bucket: bucket.get('id_bucket'),
+    }, 'product.wholesale'));
 
   const items = await Promise.all(getItems.map(async (getItem, idx) => {
     const item = await getItem;
     if (!item) throw getItemError('item', 'not_found');
     const product = item.serialize().product;
+    const wholesale = product.is_wholesaler ? item.related('product').related('wholesale').serialize() : [];
     if (bodies[idx].qty > product.stock) throw addCartError('cart', 'stock');
     const where = { id_listbucket: item.get('id_listbucket') };
-    return await BucketController.saveCart(bucket, bodies[idx], product, item, where);
+
+    return await BucketController.saveCart(
+      bucket,
+      bodies[idx],
+      product,
+      item,
+      where,
+      wholesale,
+    );
   }));
 
   req.resData = {

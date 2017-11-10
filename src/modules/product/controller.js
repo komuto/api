@@ -154,7 +154,8 @@ ProductController.createProduct = async (req, res, next) => {
  */
 ProductController.addWishlist = async (req, res, next) => {
   const { productId, storeId } = getProductAndStore(req.params.id);
-  const product = await Product.findById(productId);
+  const productModel = await Product.findById(productId);
+  const product = productModel.serialize();
   let dropshipperId = null;
   if (product.store_id !== storeId) {
     const dropship = await Dropship.findByProductIdAndStoreId(productId, storeId);
@@ -319,7 +320,7 @@ ProductController.createComment = async (req, res, next) => {
  */
 ProductController.report = async (req, res, next) => {
   const { productId } = getProductAndStore(req.params.id);
-  const product = await Product.findById(productId);
+  const productModel = await Product.findById(productId);
   const data = Report.matchDBColumn({
     product_id: productId,
     user_id: req.user.id,
@@ -335,7 +336,7 @@ ProductController.report = async (req, res, next) => {
       fromName: req.marketplace.name,
     },
     report.serialize(),
-    product,
+    productModel.serialize(),
     req.marketplace.mobile_domain,
   );
   req.resData = {
