@@ -1,34 +1,33 @@
-import sendgrid from 'sendgrid';
+import mandrill from 'mandrill-api';
 import config from '../../../config';
-
-const { mail: helper } = sendgrid;
 
 export const email = {};
 export default { email };
 
 /**
  * Build email to send
- * @param {string} subject
- * @param {string} emailToSend
- * @param {string} html
  */
-email.build = ({ subject, emailToSend, html }) => {
-  const fromEmail = new helper.Email(config.emailFrom);
-  const toEmail = new helper.Email(emailToSend);
-  const content = new helper.Content('text/html', html);
-  const mail = new helper.Mail(fromEmail, subject, toEmail, content);
-  return mail.toJSON();
-};
+email.build = ({ subject, emailParams, html }) => ({
+  html,
+  subject,
+  from_email: emailParams.from,
+  from_name: emailParams.fromName,
+  to: [
+    {
+      email: emailParams.to,
+      name: emailParams.toName,
+      type: 'to',
+    },
+  ],
+});
 
-/**
- * @param toSend {function} buildEmail
- */
-email.send = (toSend) => {
-  const sg = sendgrid(config.emailKey);
-  const request = sg.emptyRequest({
-    method: 'POST',
-    path: '/v3/mail/send',
-    body: toSend,
+email.send = (message) => {
+  const mandrillClient = new mandrill.Mandrill(config.emailApiKey);
+
+  mandrillClient.messages.send({
+    message,
+    async: false,
+    ip_pool: 'Main Pool',
+    send_at: new Date(),
   });
-  sg.API(request);
 };

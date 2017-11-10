@@ -298,7 +298,15 @@ StoreController.createStore = async (req, res, next) => {
     store: store.serialize(),
     otp: otp.serialize(),
   };
-  OTPAddressEmail.sendOtpAddress(config.komutoEmail, data);
+  OTPAddressEmail.sendOtpAddress(
+    {
+      to: config.komutoEmail,
+      toName: config.komutoEmailName,
+      from: req.marketplace.email,
+      fromName: req.marketplace.name,
+    },
+    data,
+  );
 
   req.resData = {
     message: 'Store Data',

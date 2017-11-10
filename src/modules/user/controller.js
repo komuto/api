@@ -227,10 +227,20 @@ UserController.getAccountProfile = async (req, res, next) => {
 };
 
 UserController.forgotPassword = async (req, res, next) => {
-  const user = await User.getByEmail(req.body.email, req.marketplace.id);
+  let user = await User.getByEmail(req.body.email, req.marketplace.id);
   if (!user) throw resetPassError('email', 'email_not_found');
+  user = user.serialize();
   const token = await UserToken.generateToken(user.id, TokenType.FORGOT_PASSWORD);
-  UserEmail.sendForgotPassword(req.body.email, token, req.marketplace.mobile_domain);
+  UserEmail.sendForgotPassword(
+    {
+      to: user.email,
+      toName: user.name,
+      from: req.marketplace.email,
+      fromName: req.marketplace.name,
+    },
+    token,
+    req.marketplace.mobile_domain,
+  );
   return next();
 };
 
@@ -244,7 +254,16 @@ UserController.activateUser = async (req, res, next) => {
 
 UserController.resendVerification = async (req, res, next) => {
   const token = await UserToken.generateToken(req.user.id, TokenType.EMAIL_ACTIVATION);
-  await UserEmail.sendActivateAccount(req.user.email, token, req.marketplace.mobile_domain);
+  await UserEmail.sendActivateAccount(
+    {
+      to: req.user.email,
+      toName: req.user.name,
+      from: req.marketplace.email,
+      fromName: req.marketplace.name,
+    },
+    token,
+    req.marketplace.mobile_domain,
+  );
   return next();
 };
 

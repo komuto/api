@@ -64,9 +64,8 @@ def.jwt.audience = 'pionize.com';
 def.jwt.expiry = '7d';
 
 // mailer config
-def.emailServiceAdapter = 'sendgrid';
-def.emailKey = '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';
-def.emailFrom = 'no-reply@skyshi.com';
+def.emailServiceAdapter = 'mandrill';
+def.emailApiKey = 'hNAn-n09RO246QBPdDiLmQ';
 
 // url builder
 def.url = (dir = '/') => {
@@ -78,6 +77,7 @@ def.url = (dir = '/') => {
 def.komutoUrl = 'http://api.komutodev.aptmi.com/komuto-api/';
 def.assetUrl = 'https://komutodev.aptmi.com';
 def.komutoEmail = 'developer@skyshi.com';
+def.komutoEmailName = 'Admin Komuto';
 
 // OTP sms
 def.otp = {};

@@ -143,7 +143,15 @@ AddressController.updateStoreAddress = async (req, res, next) => {
     address: updateAddress.serialize(),
     otp: otp.serialize(),
   };
-  OTPAddressEmail.sendOtpAddress(config.komutoEmail, data);
+  OTPAddressEmail.sendOtpAddress(
+    {
+      to: config.komutoEmail,
+      toName: config.komutoEmailName,
+      from: req.marketplace.email,
+      fromName: req.marketplace.name,
+    },
+    data,
+  );
   req.resData = {
     message: 'Address Data',
     data: address,
