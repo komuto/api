@@ -473,13 +473,17 @@ PaymentController.getProcessingOrders = async (req, res, next) => {
 
 PaymentController.getProcessingOrderDetail = async (req, res, next) => {
   const store = await Store.where('id_users', req.user.id).fetch();
-  const invoice = await Invoice
-    .getOrderDetail(req.params.id, store, InvoiceTransactionStatus.PROCEED);
+  const invoice = await Invoice.getOrderDetail(
+    req.params.id,
+    store,
+    InvoiceTransactionStatus.PROCEED,
+  );
   if (!invoice) throw getInvoiceError('invoice', 'not_found');
   req.resData = {
     message: 'Processing Order Detail Data',
     data: invoice,
   };
+
   return next();
 };
 

@@ -48,6 +48,7 @@ class PreferenceModel extends bookshelf.Model {
       payment: 'limit_respon_pembayaran',
       send_product: 'limit_kirimbarang_refund',
       unverified_store: 'masa_aktif_user_unverified',
+      order_response: 'limit_respon_sales_order',
     };
     return variable[key];
   }
