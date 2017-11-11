@@ -7,6 +7,7 @@ export const errMsg = {
     title: 'Get invoice gagal',
     not_found: 'Invoice tidak ditemukan',
     dispute_disable: 'Tidak bisa melakukan komplain',
+    expired: 'Invoice sudah melewati limit respon proses order',
   },
   getPayment: {
     title: 'Get payment gagal',
