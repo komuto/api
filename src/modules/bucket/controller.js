@@ -87,7 +87,12 @@ BucketController.saveCart = async (bucket, body, product, item, where, wholesale
   let insuranceCost = 0;
 
   if (wholesale.length) {
-    const found = _.find(wholesale, o => body.qty >= o.min && body.qty <= o.max);
+    const found = _.find(wholesale, (o, i) => {
+      if (i === wholesale.length - 1) {
+        return body.qty >= o.min;
+      }
+      return body.qty >= o.min && body.qty <= o.max;
+    });
     if (found) {
       product.price = found.price;
     }
@@ -153,7 +158,7 @@ BucketController.addToCart = async (req, res, next) => {
     id_alamatuser: req.body.address_id,
   }).fetch();
   const { productId, storeId } = getProductAndStore(req.body.product_id);
-  const getProduct = Product.findById(productId, 'wholesale');
+  const getProduct = Product.findById(productId, true);
   const getStore = Store.where('id_users', req.user.id).fetch();
 
   const [bucket, productModel, address, store] = await Promise.all([
@@ -318,7 +323,7 @@ BucketController.bulkUpdate = async (req, res, next) => {
     {
       id_listbucket: item.id,
       id_bucket: bucket.get('id_bucket'),
-    }, 'product.wholesale'));
+    }, { 'product.wholesale': qb => qb.orderBy('min_paramgrosir') }));
 
   const items = await Promise.all(getItems.map(async (getItem, idx) => {
     const item = await getItem;
