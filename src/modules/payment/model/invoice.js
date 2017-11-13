@@ -7,6 +7,7 @@ import { Store } from '../../store/model/store';
 import config from '../../../../config';
 import { Dropship } from '../../product/model/dropship';
 import { DisputeSolutionType, DisputeStatus } from './dispute';
+import { Preference } from '../../preference/model';
 
 const { parseDate, parseNum, matchDB, getProductAndStore } = core.utils;
 const bookshelf = core.postgres.db;
@@ -319,17 +320,28 @@ class InvoiceModel extends bookshelf.Model {
           .where(where);
       })
       .fetch({ withRelated: related });
+
     if (!invoice) return false;
     const storeDropshipId = invoice.get('store_dropship_id');
     const getBuyer = invoice.load('buyer');
     let getStore;
+
     if (storeDropshipId) {
       // If we are the reseller then use the store in the argument
       getStore = storeDropshipId !== storeId ? Store.where('id_toko', storeDropshipId).fetch() : Promise.resolve(store);
     }
-    const getBuyerAddress = invoice.related('shipping').related('address').load(['province', 'district', 'subDistrict', 'village']);
+
+    const getBuyerAddress = invoice
+      .related('shipping')
+      .related('address')
+      .load(['province', 'district', 'subDistrict', 'village']);
+
     const seller = invoice.related('store').related('user');
-    const getSellerAddress = seller.related('address').load(['province', 'district', 'subDistrict', 'village']);
+
+    const getSellerAddress = seller
+      .related('address')
+      .load(['province', 'district', 'subDistrict', 'village']);
+
     const items = invoice.related('items').map((item) => {
       const product = item.related('product');
       const image = product.related('image').serialize().file;
@@ -345,14 +357,22 @@ class InvoiceModel extends bookshelf.Model {
       }
       return item;
     });
-    const [buyerAddress, sellerAddress] = await Promise.all([
+
+    const getLimit = invoiceStatus === InvoiceTransactionStatus.PROCEED ? Preference.get('order_response') : false;
+    const [buyerAddress, sellerAddress, limit] = await Promise.all([
       getBuyerAddress,
       getSellerAddress,
+      getLimit,
       getBuyer,
     ]);
+
     const buyer = invoice.related('buyer').serialize({ orderDetail: true });
     const result = {
-      invoice: invoice.serialize({ minimal: true, orderDetail: true }),
+      invoice: {
+        ...invoice.serialize({ minimal: true, orderDetail: true }),
+        day_limit: limit ? parseNum(limit.value) : null,
+        date_limit: limit ? moment(invoice.get('createdate_invoice')).add(limit.value, 'd').unix() : null,
+      },
       items,
       buyer: { ...buyer, address: buyerAddress.serialize({ full: true }) },
       seller: {
@@ -360,6 +380,7 @@ class InvoiceModel extends bookshelf.Model {
         address: sellerAddress.serialize({ full: true }),
       },
     };
+
     if (storeDropshipId) {
       const isReseller = Number(storeDropshipId) === Number(storeId);
       const dropshipStore = await getStore;
@@ -371,6 +392,7 @@ class InvoiceModel extends bookshelf.Model {
     } else {
       result.invoice.type = 'buyer';
     }
+
     if (!invoiceStatus) {
       const shipping = invoice.related('shipping').serialize();
       delete shipping.address;
@@ -382,6 +404,7 @@ class InvoiceModel extends bookshelf.Model {
         dispute: dispute.id ? dispute : null,
       };
     }
+
     return result;
   }
 

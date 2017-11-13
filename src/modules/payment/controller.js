@@ -473,13 +473,17 @@ PaymentController.getProcessingOrders = async (req, res, next) => {
 
 PaymentController.getProcessingOrderDetail = async (req, res, next) => {
   const store = await Store.where('id_users', req.user.id).fetch();
-  const invoice = await Invoice
-    .getOrderDetail(req.params.id, store, InvoiceTransactionStatus.PROCEED);
+  const invoice = await Invoice.getOrderDetail(
+    req.params.id,
+    store,
+    InvoiceTransactionStatus.PROCEED,
+  );
   if (!invoice) throw getInvoiceError('invoice', 'not_found');
   req.resData = {
     message: 'Processing Order Detail Data',
     data: invoice,
   };
+
   return next();
 };
 
@@ -511,15 +515,23 @@ PaymentController.getSaleDetail = async (req, res, next) => {
 
 PaymentController.acceptOrder = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const invoice = await Invoice.where({
+  let invoice = Invoice.where({
     id_invoice: req.params.id,
     status_transaksi: InvoiceTransactionStatus.WAITING,
     id_toko: storeId,
   }).fetch({ withRelated: 'user' });
+  let limit = Preference.get('order_response');
+  [invoice, limit] = await Promise.all([invoice, limit]);
+
   if (!invoice) throw acceptOrderError('order', 'not_found');
-  await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.PROCEED)
-    .catch();
+
+  limit = moment(invoice.get('createdate_invoice')).add(limit.value, 'd');
+  const diff = limit.diff(moment(), 'd');
+  if (diff < 0) throw getInvoiceError('invoice', 'expired');
+
+  await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.PROCEED).catch();
   const buyer = invoice.related('user');
+
   if (buyer.get('reg_token')) {
     Notification.send(
       buyerNotification.ORDER_PROCEED,
@@ -532,20 +544,29 @@ PaymentController.acceptOrder = async (req, res, next) => {
       },
     );
   }
+
   return next();
 };
 
 PaymentController.rejectOrder = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const invoice = await Invoice.where({
+  let invoice = Invoice.where({
     id_invoice: req.params.id,
     status_transaksi: InvoiceTransactionStatus.WAITING,
     id_toko: storeId,
   }).fetch({ withRelated: 'user' });
+  let limit = Preference.get('order_response');
+  [invoice, limit] = await Promise.all([invoice, limit]);
+
   if (!invoice) throw rejectOrderError('order', 'not_found');
-  await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.REJECTED)
-    .catch();
+
+  limit = moment(invoice.get('createdate_invoice')).add(limit.value, 'd');
+  const diff = limit.diff(moment(), 'd');
+  if (diff < 0) throw getInvoiceError('invoice', 'expired');
+
+  await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.REJECTED).catch();
   const buyer = invoice.related('user');
+
   if (buyer.get('reg_token')) {
     Notification.send(
       buyerNotification.ORDER_REJECTED,
@@ -558,24 +579,34 @@ PaymentController.rejectOrder = async (req, res, next) => {
       },
     );
   }
+
   return next();
 };
 
 PaymentController.inputAirwayBill = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const invoice = await Invoice.where({
+  let invoice = await Invoice.where({
     id_invoice: req.params.id,
     id_toko: storeId,
   }).query(qb => qb.whereIn('status_transaksi', [
     InvoiceTransactionStatus.PROCEED,
     InvoiceTransactionStatus.SENDING,
   ])).fetch({ withRelated: 'user' });
+  let limit = Preference.get('order_response');
+  [invoice, limit] = await Promise.all([invoice, limit]);
+
   if (!invoice) throw inputBillError('order', 'not_found');
+
+  limit = moment(invoice.get('createdate_invoice')).add(limit.value, 'd');
+  const diff = limit.diff(moment(), 'd');
+  if (diff < 0) throw getInvoiceError('invoice', 'expired');
+
   await Shipping.where('id_pengiriman_produk', invoice.get('id_pengiriman_produk'))
     .save({ resiresponkirim: req.body.airway_bill }, { require: true, patch: true })
     .catch(() => { throw inputBillError('input', 'error'); });
   await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.SENDING);
   const buyer = invoice.related('user');
+
   if (buyer.get('reg_token')) {
     Notification.send(
       buyerNotification.ORDER_SENT,
@@ -588,5 +619,6 @@ PaymentController.inputAirwayBill = async (req, res, next) => {
       },
     );
   }
+
   return next();
 };
