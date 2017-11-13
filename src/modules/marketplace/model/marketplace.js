@@ -32,6 +32,7 @@ class MarketplaceModel extends bookshelf.Model {
       domain: this.get('domain_marketplace'),
       name: this.get('nama_marketplace'),
       email: this.get('email_marketplaceuser'),
+      email_from: this.get('email_from'),
       phone_number: this.get('no_telepon'),
       saldo_wallet: this.get('saldo_wallet'),
       logo: this.get('logo_marketplace'),

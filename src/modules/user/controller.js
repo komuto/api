@@ -235,7 +235,7 @@ UserController.forgotPassword = async (req, res, next) => {
     {
       to: user.email,
       toName: user.name,
-      from: req.marketplace.email,
+      from: req.marketplace.email_from,
       fromName: req.marketplace.name,
     },
     token,
@@ -258,7 +258,7 @@ UserController.resendVerification = async (req, res, next) => {
     {
       to: req.user.email,
       toName: req.user.name,
-      from: req.marketplace.email,
+      from: req.marketplace.email_from,
       fromName: req.marketplace.name,
     },
     token,

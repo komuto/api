@@ -147,7 +147,7 @@ AddressController.updateStoreAddress = async (req, res, next) => {
     {
       to: config.komutoEmail,
       toName: config.komutoEmailName,
-      from: req.marketplace.email,
+      from: req.marketplace.email_from,
       fromName: req.marketplace.name,
     },
     data,
