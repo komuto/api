@@ -103,6 +103,8 @@ class BucketModel extends bookshelf.Model {
         { 'items.product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
         'items.product.store.user.addresses.district',
         'items.product.expeditionServices.expedition',
+        'items.product.wholesale',
+        'items.product.image',
         'items.shipping.address.province',
         'items.shipping.address.district',
         'items.shipping.address.subDistrict',

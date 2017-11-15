@@ -88,8 +88,8 @@ class ItemModel extends bookshelf.Model {
     let product = item.related('product');
     let shipping = item.related('shipping');
     let store = product.related('store');
-    await product.load({ images: qb => (qb.limit(1)) });
-    const images = product.related('images').serialize();
+    const image = product.related('image');
+    const wholesale = product.related('wholesale').serialize();
     const expeditions = await Product.loadExpeditions(product);
     const districtStore = store.related('user').related('addresses').models[0].related('district');
 
@@ -99,10 +99,11 @@ class ItemModel extends bookshelf.Model {
     }
 
     product = product.serialize({ minimal: true, alterId: store.get('id_toko') });
-    product.image = images.length ? images[0].file : config.defaultImage.product;
+    product.image = image ? image.serialize().file : config.defaultImage.product;
     product.store = store;
     product.location = { district: districtStore };
     product.expeditions = expeditions;
+    product.wholesale = product.is_wholesaler ? wholesale : null;
     const address = shipping.related('address');
 
     const province = address.related('province');
@@ -131,6 +132,8 @@ class ItemModel extends bookshelf.Model {
         { 'product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
         'product.store.user.addresses.district',
         'product.expeditionServices.expedition',
+        'product.wholesale',
+        'product.image',
         'shipping.address.province',
         'shipping.address.district',
         'shipping.address.subDistrict',
