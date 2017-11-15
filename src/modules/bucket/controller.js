@@ -85,6 +85,7 @@ BucketController.getCost = async (body, product) => {
 
 BucketController.saveCart = async (bucket, body, product, item, where, wholesale = []) => {
   let insuranceCost = 0;
+  let isWholesale = false;
 
   if (wholesale.length) {
     const found = _.find(wholesale, (o, i) => {
@@ -94,11 +95,12 @@ BucketController.saveCart = async (bucket, body, product, item, where, wholesale
       return body.qty >= o.min && body.qty <= o.max;
     });
     if (found) {
+      isWholesale = true;
       product.price = found.price;
     }
   }
 
-  if (product.is_discount) {
+  if (!isWholesale && product.is_discount) {
     product.price -= product.price * (product.discount / 100);
   }
 
