@@ -77,12 +77,18 @@ export const msg = {
     title: 'Create resolusi gagal',
     error: 'Gagal membuat resolusi',
     image: 'Image tidak valid',
+    success: 'Berhasil mengirim keluhan',
   },
   updateNotification: {
     success: 'Sukses memperbarui notifikasi',
   },
   message: {
     success: 'Berhasil mengirim pesan',
+    successArchive: 'Berhasil memindahkan ke arsip',
+    successConversation: 'Berhasil memindahkan ke percakapan',
+  },
+  updateExpedition: {
+    success: 'Berhasil memperbarui ekspedisi pengiriman',
   },
 };
 

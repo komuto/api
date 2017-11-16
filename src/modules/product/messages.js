@@ -12,6 +12,8 @@ export const msg = {
     title: 'Daftar produk gagal',
     catalog_not_found: 'Katalog tidak ditemukan',
     unverified_store: 'Toko belum terverifikasi',
+    successHide: 'Berhasil menyembunyikan barang',
+    successMove: 'Berhasil memindahkan ke katalog lain',
   },
   getDiscussion: {
     title: 'Get diskusi gagal',
@@ -27,6 +29,7 @@ export const msg = {
   createDropship: {
     title: 'Create dropship gagal',
     error: 'Gagal menambah dropship',
+    success: 'Berhasil menjadikan Dropshipping',
   },
   createReport: {
     title: 'Create laporan gagal',
@@ -35,6 +38,7 @@ export const msg = {
   bulkDeleteProduct: {
     title: 'Gagal menghapus produk',
     error: 'Tidak bisa menghapus produk',
+    success: 'Berhasil menghapus barang',
   },
   updateProduct: {
     title: 'Gagal mengubah produk',

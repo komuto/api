@@ -375,7 +375,7 @@ ProductController.dropship = async (req, res, next) => {
   });
   const dropship = await Dropship.create(data);
   req.resData = {
-    message: 'Dropship Data',
+    message: msg.createDropship.success,
     data: dropship,
   };
   return next();
@@ -509,6 +509,7 @@ ProductController.listStoreCatalogProducts = async (req, res, next) => {
 ProductController.hides = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   await Product.hides(storeId, req.body.product_ids);
+  req.resData = { message: msg.createProduct.successHide };
   return next();
 };
 
@@ -519,6 +520,7 @@ ProductController.moveCatalog = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   await Catalog.findByIdAndStoreId(req.body.catalog_id, storeId);
   await Product.moveCatalog(storeId, req.body.product_ids, req.body.catalog_id);
+  req.resData = { message: msg.createProduct.successMove };
   return next();
 };
 
@@ -529,6 +531,7 @@ ProductController.bulkDelete = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const errors = await Product.bulkDelete(storeId, req.body.product_ids);
   if (errors.length) throw new BadRequestError(msg.bulkDeleteProduct.title, errors);
+  req.resData = { message: msg.bulkDeleteProduct.success };
   return next();
 };
 

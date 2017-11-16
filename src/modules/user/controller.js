@@ -315,6 +315,7 @@ UserController.updateExpeditions = async (req, res, next) => {
     return StoreExpedition.matchDBColumn(data, true);
   });
   await StoreExpedition.updateBatch(collection);
+  req.resData = { message: msg.updateExpedition.success };
   return next();
 };
 
@@ -422,7 +423,11 @@ UserController.getMessage = async (req, res, next) => {
 UserController.updateMessage = async (req, res, next) => {
   const flag = req.body.type === 'archive' ? MessageFlagStatus.ARCHIVE : MessageFlagStatus.READ;
   const message = await Message.updateFlag(req.params.id, req.user.id, 'user', flag);
-  req.resData = { data: message };
+  const resMsg = req.body.type === 'archive' ? msg.message.successArchive : msg.message.successConversation;
+  req.resData = {
+    message: resMsg,
+    data: message,
+  };
   return next();
 };
 
@@ -550,7 +555,10 @@ UserController.createResolution = async (req, res, next) => {
   });
   const resolution = await ResolutionCenter.create(data);
   if (req.body.images) await ImageGroup.bulkCreate(resolution.get('id_rescenter'), req.body.images);
-  req.resData = { data: resolution.serialize({ minimal: true }) };
+  req.resData = {
+    message: msg.createResolution.success,
+    data: resolution.serialize({ minimal: true }),
+  };
   return next();
 };
 

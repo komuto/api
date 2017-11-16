@@ -7,6 +7,7 @@ export const msg = {
     title: 'Create katalog gagal',
     duplicate: 'Katalog sudah ada',
     error: 'Error saat membuat katalog',
+    success: 'Berhasil menambah katalog baru',
   },
   getCatalog: {
     title: 'Catalog tidak ditemukan',
@@ -17,13 +18,16 @@ export const msg = {
     title: 'Update katalog gagal',
     error: 'Gagal memperbarui katalog',
     duplicate: 'Katalog sudah ada',
+    success: 'Berhasil memperbarui katalog',
   },
   createStore: {
     title: 'Create toko gagal',
     duplicate: 'Toko sudah ada',
+    successVerify: 'Selamat, Toko Anda telah terverifikasi. Kini Anda adalah verified seller',
   },
   updateStore: {
     logo: 'Format logo salah',
+    success: 'Berhasil memperbarui informasi toko',
   },
   getStore: {
     title: 'Get toko gagal',
@@ -54,6 +58,7 @@ export const msg = {
     title: 'Hapus katalog gagal',
     not_found: 'Katalog tidak ditemukan',
     has_product: 'Katalog tidak bisa dihapus karena masih ada barang didalamnya',
+    success: 'Berhasil menghapus katalog',
   },
 };
 

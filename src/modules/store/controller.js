@@ -208,6 +208,7 @@ StoreController.deleteCatalog = async (req, res, next) => {
   if (!catalog) throw deleteCatalogError('catalog', 'not_found');
   if (await Catalog.checkProduct(req.params.id)) throw deleteCatalogError('catalog', 'has_product');
   await catalog.destroy();
+  req.resData = { message: msg.deleteCatalogMsg.success };
   return next();
 };
 
@@ -222,6 +223,7 @@ StoreController.createCatalog = async (req, res, next) => {
     created_at: moment().toDate(),
   };
   req.resData = {
+    message: msg.createCatalog.success,
     data: await Catalog.create(data),
   };
   return next();
@@ -248,7 +250,7 @@ StoreController.updateCatalog = async (req, res, next) => {
   const data = Catalog.matchDBColumn({ name: req.body.name });
   const catalog = await Catalog.update(req.params.id, storeId, data);
   req.resData = {
-    message: 'Catalog Data',
+    message: msg.updateCatalog.success,
     data: catalog,
   };
   return next();
@@ -260,6 +262,7 @@ StoreController.updateCatalog = async (req, res, next) => {
 StoreController.verify = async (req, res, next) => {
   await OTPAddress.verify(req.user.id, req.body.code);
   await Store.updateVerification(req.user.id);
+  req.resData = { message: msg.createStore.successVerify };
   return next();
 };
 
@@ -331,7 +334,10 @@ StoreController.updateStore = async (req, res, next) => {
     logo,
     term_condition,
   }), req.user.id);
-  req.resData = { data: store };
+  req.resData = {
+    message: msg.updateStore.success,
+    data: store,
+  };
   return next();
 };
 
@@ -372,7 +378,11 @@ StoreController.updateMessage = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const flag = req.body.type === 'archive' ? MessageFlagStatus.ARCHIVE : MessageFlagStatus.READ;
   const message = await Message.updateFlag(req.params.id, storeId, 'store', flag);
-  req.resData = { data: message };
+  const resMsg = req.body.type === 'archive' ? userMsg.message.successArchive : userMsg.message.successConversation;
+  req.resData = {
+    message: resMsg,
+    data: message,
+  };
   return next();
 };
 
@@ -390,14 +400,14 @@ StoreController.deleteMessage = async (req, res, next) => {
  */
 StoreController.replyMessage = async (req, res, next) => {
   const store = await Store.getStoreByUserId(req.user.id);
-  const msg = await Message.findById(req.params.id, store.get('id_toko'), 'store');
+  const message = await Message.findById(req.params.id, store.get('id_toko'), 'store');
   const data = DetailMessage.matchDBColumn(_.assign(req.body, {
     message_id: req.params.id,
     user_id: req.user.id,
     created_at: moment().toDate(),
   }));
   const detailMessage = await DetailMessage.create(data);
-  const buyer = await User.getById(msg.user_id);
+  const buyer = await User.getById(message.user_id);
   const notifications = buyer.serialize({ notification: true }).notifications;
   if (buyer.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
     Notification.send(
