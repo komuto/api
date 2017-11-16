@@ -78,6 +78,9 @@ export const msg = {
     error: 'Gagal membuat resolusi',
     image: 'Image tidak valid',
   },
+  updateNotification: {
+    success: 'Sukses memperbarui notifikasi',
+  },
 };
 
 export const userUpdateError = formatError.bind(msg.updateMsg);

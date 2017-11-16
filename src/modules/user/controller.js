@@ -491,7 +491,10 @@ UserController.getNotifications = async (req, res, next) => {
 UserController.saveNotifications = async (req, res, next) => {
   const notifications = req.body.notifications;
   await User.where({ id_users: req.user.id }).save({ notifications }, { patch: true });
-  req.resData = { data: User.getNotifications(notifications, req.marketplace.name) };
+  req.resData = {
+    message: msg.updateNotification.success,
+    data: User.getNotifications(notifications, req.marketplace.name),
+  };
   return next();
 };
 
