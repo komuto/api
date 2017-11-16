@@ -1,8 +1,8 @@
 import constraints from './validation';
-import { errMsg } from './messages';
+import { msg } from './messages';
 import { middleware } from '../core';
 
-const { createMsg, deleteMsg } = errMsg;
+const { createMsg, deleteMsg } = msg;
 const { formatValidation } = middleware;
 
 export function validateCreateBankAccount() {

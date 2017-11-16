@@ -5,6 +5,7 @@ import {
   createAccountError,
   updateAccountError,
   deleteAccountError,
+  msg,
 } from './messages';
 
 export const BankController = {};
@@ -63,7 +64,7 @@ BankController.createBankAccount = async (req, res, next) => {
   await bankAccount.load('bank');
   await req.otp.save({ status: OTPStatus.USED }, { patch: true });
   req.resData = {
-    message: 'Bank Account Data',
+    message: msg.createMsg.success,
     data: bankAccount,
   };
   return next();
@@ -85,7 +86,7 @@ BankController.updateBankAccount = async (req, res, next) => {
   await bankAccount.load('bank');
   await req.otp.save({ status: OTPStatus.USED }, { patch: true });
   req.resData = {
-    message: 'Bank Account Data',
+    message: msg.updateMsg.success,
     data: bankAccount,
   };
   return next();
@@ -97,6 +98,7 @@ BankController.deleteBankAccount = async (req, res, next) => {
     .catch(() => true);
   if (err === true) throw deleteAccountError('account', 'account_not_found');
   await req.otp.save({ status: OTPStatus.USED }, { patch: true });
+  req.resData = { message: msg.deleteMsg.success };
   return next();
 };
 
