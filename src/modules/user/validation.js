@@ -1,6 +1,6 @@
-import { errMsg } from './messages';
+import { msg } from './messages';
 
-const { loginMsg, registrationMsg, updateMsg, OTPMsg } = errMsg;
+const { loginMsg, registrationMsg, updateMsg, OTPMsg } = msg;
 const constraints = {};
 
 /**

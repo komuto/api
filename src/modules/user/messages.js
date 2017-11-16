@@ -3,7 +3,7 @@ import { BadRequestError } from '../../../common/errors';
 
 const { formatSingularErr, formatError } = utils;
 
-export const errMsg = {
+export const msg = {
   loginMsg: {
     title: 'Login gagal',
     wrong_password: 'Email atau password yang kamu masukkan salah, silahkan coba lagi',
@@ -49,6 +49,7 @@ export const errMsg = {
     phone_presence: '^No hp harus diisi',
     phone_not_valid: '^No hp harus angka',
     date_not_valid: 'Tanggal lahir tidak valid',
+    success: 'Berhasil memperbarui biodata Anda',
   },
   getUserMsg: {
     title: 'Get user gagal',
@@ -78,34 +79,34 @@ export const errMsg = {
   },
 };
 
-export const userUpdateError = formatError.bind(errMsg.updateMsg);
+export const userUpdateError = formatError.bind(msg.updateMsg);
 
-export const resetPassError = formatError.bind(errMsg.resetPassMsg);
+export const resetPassError = formatError.bind(msg.resetPassMsg);
 
-export const registrationError = formatError.bind(errMsg.registrationMsg);
+export const registrationError = formatError.bind(msg.registrationMsg);
 
-export const activateUserError = formatError.bind(errMsg.activateMsg);
+export const activateUserError = formatError.bind(msg.activateMsg);
 
-export const getUserError = formatError.bind(errMsg.getUserMsg);
+export const getUserError = formatError.bind(msg.getUserMsg);
 
-export const loginError = formatError.bind(errMsg.loginMsg);
+export const loginError = formatError.bind(msg.loginMsg);
 
-export const getResolutionError = formatError.bind(errMsg.getResolution);
+export const getResolutionError = formatError.bind(msg.getResolution);
 
-export const createResolutionError = formatError.bind(errMsg.createResolution);
+export const createResolutionError = formatError.bind(msg.createResolution);
 
 function formatFbError(code, e) {
   const session = [102, 190, 458, 459, 460, 463, 464, 467];
   const down = [1, 2, 4, 17, 341, 368];
   if (session.includes(code) || code === 'OAuthException') {
     // session expired error
-    return formatSingularErr('access_token', errMsg.fbMsg.session_expired);
+    return formatSingularErr('access_token', msg.fbMsg.session_expired);
   } else if (down.includes(code)) {
     // fb api down error
-    return errMsg.fbMsg.api_down;
+    return msg.fbMsg.api_down;
   } else if (code === 10 || (code >= 200 && code < 300)) {
     // code 10 and 200-299 for not granted permission error
-    return formatSingularErr('permission', errMsg.fbMsg.permission_denied);
+    return formatSingularErr('permission', msg.fbMsg.permission_denied);
   }
   // Code outside above range, use original fb message
   return e.message;
@@ -113,5 +114,5 @@ function formatFbError(code, e) {
 
 export const fbError = (error) => {
   const data = formatFbError(error.code ? error.code : error.type, error);
-  return new BadRequestError(errMsg.loginMsg.title, data);
+  return new BadRequestError(msg.loginMsg.title, data);
 };

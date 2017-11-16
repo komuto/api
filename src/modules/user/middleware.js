@@ -3,13 +3,13 @@ import jwt from 'jsonwebtoken';
 import constraints from './validation';
 import utils from '../../../common/utils';
 import { jwt as jwtOptions } from '../../../config';
-import { getUserError, errMsg } from './messages';
+import { getUserError, msg } from './messages';
 import { middleware } from '../core';
 import { AuthorizationError } from '../../../common/errors';
 import messages from '../core/messages';
 
 export const ROLE_ALL = '*';
-const { loginMsg, registrationMsg, updateMsg, OTPMsg } = errMsg;
+const { loginMsg, registrationMsg, updateMsg, OTPMsg } = msg;
 const { formatValidation } = middleware;
 
 /**

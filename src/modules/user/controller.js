@@ -27,7 +27,7 @@ import {
   activateUserError,
   fbError,
   getResolutionError,
-  errMsg,
+  msg,
 } from './messages';
 import { Discussion } from '../product/model';
 import core from '../core';
@@ -87,7 +87,7 @@ UserController.getUserSocial = async (req, res, next) => {
     let response = await fb.api(provider_uid, { fields: 'id,name,email,gender,picture.type(large)' })
       .catch(e => fbError(e.response.error));
     if (response instanceof BadRequestError) throw response;
-    if (!response.email) throw new BadRequestError(errMsg.fbMsg.email_not_found);
+    if (!response.email) throw new BadRequestError(msg.fbMsg.email_not_found);
     const user = await User.getByEmail(response.email, req.marketplace.id);
     // Case where user already created but provider name and uid do not match
     if (user) {
@@ -150,7 +150,7 @@ UserController.updateUser = async (req, res, next) => {
     if (!dateOfBirth.isValid()) throw userUpdateError('fields', 'date_not_valid');
     dateOfBirth = dateOfBirth.format('YYYY-MM-DD');
   }
-  validateImageUrl(photo, errMsg.updateMsg.not_valid);
+  validateImageUrl(photo, msg.updateMsg.not_valid);
   const check = {
     name,
     cooperative_member_number,
@@ -163,7 +163,7 @@ UserController.updateUser = async (req, res, next) => {
   if (_.isEmpty(data)) throw userUpdateError('fields', 'not_valid');
   const user = await User.update({ id_users: req.user.id }, data);
   if (photo) ImageService.deleteImage(req.user.file_name, `${config.imagePath}/${IMAGE_PATH}`);
-  req.resData = { data: user };
+  req.resData = { message: msg.updateMsg.success, data: user };
   return next();
 };
 
@@ -528,7 +528,7 @@ UserController.getResolution = async (req, res, next) => {
  */
 UserController.createResolution = async (req, res, next) => {
   if (req.body.images) {
-    req.body.images.map(img => validateImageUrl(img.name, errMsg.createResolution.image));
+    req.body.images.map(img => validateImageUrl(img.name, msg.createResolution.image));
   }
   const ticketNumber = await ResolutionCenter.getTicketNumber();
   const data = ResolutionCenter.matchDBColumn({
