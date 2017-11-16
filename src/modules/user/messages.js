@@ -34,9 +34,10 @@ export const msg = {
   },
   resetPassMsg: {
     title: 'Update password gagal',
-    not_match: 'Password lama salah',
-    email_not_found: 'Email tidak terdaftar',
+    not_match: 'Password tidak sama',
+    email_not_found: 'Email Anda tidak terdaftar',
     token_not_valid: 'Token tidak valid',
+    success: 'Sukses mengubah password Anda',
   },
   updateMsg: {
     title: 'Update user gagal',

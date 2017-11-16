@@ -176,6 +176,7 @@ UserController.updatePassword = async (req, res, next) => {
     const password = User.hashPasswordSync(req.body.password);
     await User.update({ id_users: req.user.id }, { password_users: password });
   } else throw resetPassError('password', 'not_match');
+  req.resData = { message: msg.resetPassMsg.success };
   return next();
 };
 
