@@ -2,7 +2,7 @@ import { utils } from '../core';
 
 const { formatError } = utils;
 
-export const errMsg = {
+export const msg = {
   createCatalog: {
     title: 'Create katalog gagal',
     duplicate: 'Katalog sudah ada',
@@ -48,6 +48,7 @@ export const errMsg = {
     repeat_favorite: 'Anda telah memfavoritkan toko ini',
     not_valid: 'Tidak bisa memfavoritkan toko sendiri',
     not_found: 'Toko tidak ditemukan',
+    success: 'Berhasil memfavoritkan toko',
   },
   deleteCatalogMsg: {
     title: 'Hapus katalog gagal',
@@ -56,22 +57,22 @@ export const errMsg = {
   },
 };
 
-export const createCatalogError = formatError.bind(errMsg.createCatalog);
+export const createCatalogError = formatError.bind(msg.createCatalog);
 
-export const getCatalogError = formatError.bind(errMsg.getCatalog);
+export const getCatalogError = formatError.bind(msg.getCatalog);
 
-export const updateCatalogError = formatError.bind(errMsg.updateCatalog);
+export const updateCatalogError = formatError.bind(msg.updateCatalog);
 
-export const createStoreError = formatError.bind(errMsg.createStore);
+export const createStoreError = formatError.bind(msg.createStore);
 
-export const getStoreError = formatError.bind(errMsg.getStore);
+export const getStoreError = formatError.bind(msg.getStore);
 
-export const createCommentError = formatError.bind(errMsg.createComment);
+export const createCommentError = formatError.bind(msg.createComment);
 
-export const createMessageError = formatError.bind(errMsg.createMessage);
+export const createMessageError = formatError.bind(msg.createMessage);
 
-export const getMessageError = formatError.bind(errMsg.getMessage);
+export const getMessageError = formatError.bind(msg.getMessage);
 
-export const makeFavoriteError = formatError.bind(errMsg.makeFavoriteMsg);
+export const makeFavoriteError = formatError.bind(msg.makeFavoriteMsg);
 
-export const deleteCatalogError = formatError.bind(errMsg.deleteCatalogMsg);
+export const deleteCatalogError = formatError.bind(msg.deleteCatalogMsg);

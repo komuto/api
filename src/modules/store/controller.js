@@ -12,7 +12,7 @@ import {
   StoreExpedition,
   StoreStatus,
 } from './model';
-import { makeFavoriteError, deleteCatalogError, createMessageError, errMsg } from './messages';
+import { makeFavoriteError, deleteCatalogError, createMessageError, msg } from './messages';
 import { msg as userMsg } from '../user/messages';
 import { OTPAddress } from './../OTP/model';
 import { Address } from './../address/model';
@@ -78,7 +78,10 @@ StoreController.favorite = async (req, res, next) => {
   } else {
     await FavoriteStore.create(data);
   }
-  req.resData = { data: { is_favorite: isFavorite } };
+  req.resData = {
+    message: msg.makeFavoriteMsg.success,
+    data: { is_favorite: isFavorite },
+  };
   return next();
 };
 
@@ -265,7 +268,7 @@ StoreController.verify = async (req, res, next) => {
  */
 StoreController.createStore = async (req, res, next) => {
   const expeditionServices = req.body.expedition_services;
-  validateImageUrl(req.body.store.logo, errMsg.updateStore.logo);
+  validateImageUrl(req.body.store.logo, msg.updateStore.logo);
   const storeData = _.assign(req.body.store, {
     user_id: req.user.id,
     status: StoreStatus.ACTIVE,
@@ -321,7 +324,7 @@ StoreController.createStore = async (req, res, next) => {
  */
 StoreController.updateStore = async (req, res, next) => {
   const { slogan, description, logo, term_condition } = req.body;
-  validateImageUrl(logo, errMsg.updateStore.logo);
+  validateImageUrl(logo, msg.updateStore.logo);
   const store = await Store.update(Store.matchDBColumn({
     slogan,
     description,
