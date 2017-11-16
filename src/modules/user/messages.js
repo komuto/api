@@ -81,6 +81,9 @@ export const msg = {
   updateNotification: {
     success: 'Sukses memperbarui notifikasi',
   },
+  message: {
+    success: 'Berhasil mengirim pesan',
+  },
 };
 
 export const userUpdateError = formatError.bind(msg.updateMsg);

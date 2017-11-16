@@ -438,14 +438,14 @@ UserController.deleteMessage = async (req, res, next) => {
  * Reply Message
  */
 UserController.replyMessage = async (req, res, next) => {
-  const msg = await Message.findById(req.params.id, req.user.id, 'user');
+  const message = await Message.findById(req.params.id, req.user.id, 'user');
   const data = DetailMessage.matchDBColumn(_.assign(req.body, {
     message_id: req.params.id,
     user_id: req.user.id,
     created_at: moment().toDate(),
   }));
   const detailMessage = await DetailMessage.create(data);
-  const storeOwner = await User.getById(msg.store.user_id);
+  const storeOwner = await User.getById(message.store.user_id);
   const notifications = storeOwner.serialize({ notification: true }).notifications;
   if (storeOwner.get('reg_token') && getNotification(notifications, NotificationType.PRIVATE_MESSAGE)) {
     Notification.send(
@@ -460,7 +460,10 @@ UserController.replyMessage = async (req, res, next) => {
     name: req.user.name,
     photo: req.user.photo,
   };
-  req.resData = { data: { ...detailMessage.serialize(), user, store: null } };
+  req.resData = {
+    message: msg.message.success,
+    data: { ...detailMessage.serialize(), user, store: null },
+  };
   return next();
 };
 

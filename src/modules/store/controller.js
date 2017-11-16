@@ -13,6 +13,7 @@ import {
   StoreStatus,
 } from './model';
 import { makeFavoriteError, deleteCatalogError, createMessageError, errMsg } from './messages';
+import { msg as userMsg } from '../user/messages';
 import { OTPAddress } from './../OTP/model';
 import { Address } from './../address/model';
 import { User, getNotification, NotificationType } from './../user/model';
@@ -179,7 +180,7 @@ StoreController.createMessage = async (req, res, next) => {
     );
   }
   req.resData = {
-    message: 'Message Data',
+    message: userMsg.message.success,
     data: { message, detail_message: detailMessage },
   };
   return next();
@@ -409,6 +410,7 @@ StoreController.replyMessage = async (req, res, next) => {
     photo: req.user.photo,
   };
   req.resData = {
+    message: userMsg.message.success,
     data: {
       ...detailMessage.serialize(),
       user,
