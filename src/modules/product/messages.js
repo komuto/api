@@ -2,7 +2,7 @@ import { utils } from '../core';
 
 const { formatError } = utils;
 
-export const errMsg = {
+export const msg = {
   getProduct: {
     title: 'Get barang gagal',
     not_found: 'Barang tidak ditemukan',
@@ -21,6 +21,7 @@ export const errMsg = {
     title: 'Create diskusi gagal',
     error: 'Gagal menambah diskusi',
     owner: 'Anda tidak bisa menambah diskusi ke produk Anda',
+    success: 'Berhasil mengirim diskusi',
   },
   createDropship: {
     title: 'Create dropship gagal',
@@ -63,26 +64,26 @@ export const errMsg = {
   },
 };
 
-export const getProductError = formatError.bind(errMsg.getProduct);
+export const getProductError = formatError.bind(msg.getProduct);
 
-export const createProductError = formatError.bind(errMsg.createProduct);
+export const createProductError = formatError.bind(msg.createProduct);
 
-export const getDiscussionError = formatError.bind(errMsg.getDiscussion);
+export const getDiscussionError = formatError.bind(msg.getDiscussion);
 
-export const createDiscussionError = formatError.bind(errMsg.createDiscussion);
+export const createDiscussionError = formatError.bind(msg.createDiscussion);
 
-export const createDropshipError = formatError.bind(errMsg.createDropship);
+export const createDropshipError = formatError.bind(msg.createDropship);
 
-export const createReportError = formatError.bind(errMsg.createReport);
+export const createReportError = formatError.bind(msg.createReport);
 
-export const getCatalogProductsError = formatError.bind(errMsg.getCatalogProducts);
+export const getCatalogProductsError = formatError.bind(msg.getCatalogProducts);
 
-export const updateProductError = formatError.bind(errMsg.updateProduct);
+export const updateProductError = formatError.bind(msg.updateProduct);
 
-export const addDropshipProductError = formatError.bind(errMsg.addDropshipProduct);
+export const addDropshipProductError = formatError.bind(msg.addDropshipProduct);
 
-export const getDropshipProductError = formatError.bind(errMsg.getDropshipProduct);
+export const getDropshipProductError = formatError.bind(msg.getDropshipProduct);
 
-export const deleteDropshipProductError = formatError.bind(errMsg.deleteDropshipProduct);
+export const deleteDropshipProductError = formatError.bind(msg.deleteDropshipProduct);
 
-export const getFeeError = formatError.bind(errMsg.getFee);
+export const getFeeError = formatError.bind(msg.getFee);

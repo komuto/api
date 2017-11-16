@@ -2,7 +2,7 @@ import _ from 'lodash';
 import slug from 'slug';
 import core from '../../core';
 import { Address } from '../../address/model';
-import { getProductError, errMsg, updateProductError } from './../messages';
+import { getProductError, msg, updateProductError } from './../messages';
 import { Store, StoreVerificationStatus } from '../../store/model/store';
 import config from './../../../../config';
 import { Dropship, DropshipStatus } from './dropship';
@@ -753,11 +753,11 @@ class ProductModel extends bookshelf.Model {
       if (!product) {
         const dropship = await Dropship.where(where).fetch().catch(() => {});
         await dropship.destroy().catch(() => {
-          errors.push({ product_id: id, error: errMsg.bulkDeleteProduct.error });
+          errors.push({ product_id: id, error: msg.bulkDeleteProduct.error });
         });
       } else {
         await product.destroy().catch(() => {
-          errors.push({ product_id: id, error: errMsg.bulkDeleteProduct.error });
+          errors.push({ product_id: id, error: msg.bulkDeleteProduct.error });
         });
       }
     }

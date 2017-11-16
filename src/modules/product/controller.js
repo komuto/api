@@ -20,7 +20,7 @@ import {
   createProductError,
   getCatalogProductsError,
   addDropshipProductError,
-  errMsg,
+  msg,
   createDiscussionError,
   getDropshipProductError,
   deleteDropshipProductError,
@@ -256,7 +256,7 @@ ProductController.createDiscussion = async (req, res, next) => {
     );
   }
   req.resData = {
-    message: 'Discussion Data',
+    message: msg.createDiscussion.success,
     data: discussion,
   };
   return next();
@@ -528,7 +528,7 @@ ProductController.moveCatalog = async (req, res, next) => {
 ProductController.bulkDelete = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const errors = await Product.bulkDelete(storeId, req.body.product_ids);
-  if (errors.length) throw new BadRequestError(errMsg.bulkDeleteProduct.title, errors);
+  if (errors.length) throw new BadRequestError(msg.bulkDeleteProduct.title, errors);
   return next();
 };
 
