@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Address, Province, District, SubDistrict, Village } from './model';
-import { getAddressError, deleteAddressError } from './messages';
+import { getAddressError, deleteAddressError, msg } from './messages';
 import { OTPAddress } from '../OTP/model';
 import { Store } from '../store/model';
 import config from '../../../config';
@@ -104,7 +104,7 @@ AddressController.createAddress = async (req, res, next) => {
   }
   const address = await Address.create(Address.matchDBColumn(req.body));
   req.resData = {
-    message: 'Address Data',
+    message: msg.createMsg.success,
     data: address,
   };
   return next();
@@ -121,7 +121,7 @@ AddressController.updateAddress = async (req, res, next) => {
   const address = await Address.update({ id_alamatuser: req.params.id },
     Address.matchDBColumn(req.body));
   req.resData = {
-    message: 'Address Data',
+    message: msg.updateMsg.success,
     data: address,
   };
   return next();
@@ -153,7 +153,7 @@ AddressController.updateStoreAddress = async (req, res, next) => {
     data,
   );
   req.resData = {
-    message: 'Address Data',
+    message: msg.updateMsg.success,
     data: address,
   };
   return next();
@@ -167,5 +167,6 @@ AddressController.deleteAddress = async (req, res, next) => {
   }).fetch();
   if (!address) throw deleteAddressError('address', 'address_not_found');
   await address.destroy();
+  req.resData = { message: msg.deleteMsg.success };
   return next();
 };

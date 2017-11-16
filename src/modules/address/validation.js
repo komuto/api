@@ -1,6 +1,6 @@
-import { errMsg } from './messages';
+import { msg } from './messages';
 
-const { createMsg, updateMsg } = errMsg;
+const { createMsg, updateMsg } = msg;
 const constraints = {};
 
 constraints.createAddress = {

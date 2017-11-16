@@ -2,7 +2,7 @@ import { utils } from '../core';
 
 const { formatError } = utils;
 
-export const errMsg = {
+export const msg = {
   getMsg: {
     title: 'Address tidak ditemukan',
     not_found: 'Alamat tidak ditemukan',
@@ -22,6 +22,7 @@ export const errMsg = {
     name_presence: '^Nama penerima harus diisi',
     address_presence: '^Alamat harus diisi',
     alias_address_presence: '^Alamat alias harus diisi',
+    success: 'Sukses menambahkan alamat baru',
   },
   updateMsg: {
     title: 'Update address gagal',
@@ -31,13 +32,15 @@ export const errMsg = {
     village_not_valid: '^Kelurahan harus angka',
     email_not_valid: '^Email tidak valid',
     postal_code_not_valid: '^Kode pos tidak valid',
+    success: 'Sukses mengubah info alamat',
   },
   deleteMsg: {
     title: 'Delete address gagal',
     address_not_found: 'Alamat tidak ditemukan',
+    success: 'Sukses menghapus alamat',
   },
 };
 
-export const getAddressError = formatError.bind(errMsg.getMsg);
+export const getAddressError = formatError.bind(msg.getMsg);
 
-export const deleteAddressError = formatError.bind(errMsg.deleteMsg);
+export const deleteAddressError = formatError.bind(msg.deleteMsg);
