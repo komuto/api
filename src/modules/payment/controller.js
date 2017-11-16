@@ -30,6 +30,7 @@ import {
   inputBillError,
   errMsg,
 } from './messages';
+import { msg as productMsg } from '../product/messages';
 import { getStoreError } from './../store/messages';
 import { Topup } from '../saldo/model';
 import { BadRequestError } from './../../../common/errors';
@@ -306,7 +307,10 @@ PaymentController.getDispute = async (req, res, next) => {
 PaymentController.createDisputeDiscussion = async (req, res, next) => {
   const where = { id_users: req.user.id, id_dispute: req.params.id };
   const message = await Dispute.createDiscussion(where, req.user.id, req.body.content);
-  req.resData = { data: message };
+  req.resData = {
+    message: productMsg.createDiscussion.success,
+    data: message,
+  };
   return next();
 };
 
@@ -362,7 +366,10 @@ PaymentController.createStoreDisputeDiscussion = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const where = { id_toko: storeId, id_dispute: req.params.id };
   const message = await Dispute.createDiscussion(where, req.user.id, req.body.content);
-  req.resData = { data: message };
+  req.resData = {
+    message: productMsg.createDiscussion.success,
+    data: message,
+  };
   return next();
 };
 

@@ -22,6 +22,7 @@ export const msg = {
     error: 'Gagal menambah diskusi',
     owner: 'Anda tidak bisa menambah diskusi ke produk Anda',
     success: 'Berhasil mengirim diskusi',
+    successComment: 'Berhasil menambah komentar diskusi',
   },
   createDropship: {
     title: 'Create dropship gagal',
