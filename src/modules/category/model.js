@@ -26,6 +26,7 @@ class CategoryModel extends bookshelf.Model {
       id: this.get('id_kategoriproduk'),
       parent_id: this.get('parentid_kategoriproduk'),
       icon: core.categoryPath(this.get('iconpath_kategoriproduk')),
+      icon_mobile: core.categoryPath(this.get('icon_mobile')),
       name: this.get('nama_kategoriproduk'),
       slug: slug(this.get('nama_kategoriproduk'), { lower: true, charmap: '' }),
     };
