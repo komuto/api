@@ -8,9 +8,9 @@ import config from '../../../config';
 import { email } from './email';
 import { Notification, buyerNotification, sellerNotification } from './notification';
 
-const imagePath = (path, file, parent = 'assets') => {
+const imagePath = (path, file) => {
   if (!file) return null;
-  return `${config.assetUrl}/${parent}/${path}/${file}`;
+  return `${config.assetUrl}/assets/${path}/${file}`;
 };
 const categoryPath = file => `${config.assetUrl}/assets/images/img-kategori/${file}`;
 const expeditionPath = file => `${config.assetUrl}/assets/img/pengiriman/${file}`;
