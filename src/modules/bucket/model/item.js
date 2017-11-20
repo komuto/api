@@ -45,6 +45,7 @@ class ItemModel extends bookshelf.Model {
       dropship: this.relations.dropship ? this.related('dropship').serialize() : undefined,
       dropshipper_id: parseNum(this.get('id_dropshipper'), null),
       review_id: parseNum(this.get('id_ulasanproduk'), null),
+      store_id: parseNum(this.get('id_toko'), null),
       note: this.get('keteranganopsi_listbucket'),
     };
   }
@@ -163,6 +164,7 @@ class ItemModel extends bookshelf.Model {
       invoice_id: 'id_invoice',
       shipping_id: 'id_pengiriman_produk',
       dropshipper_id: 'id_dropshipper',
+      store_id: 'id_toko',
       qty: 'qty_listbucket',
       weight: 'beratproduk_listbucket',
       note: 'keteranganopsi_listbucket',

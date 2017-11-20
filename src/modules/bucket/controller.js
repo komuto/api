@@ -177,7 +177,12 @@ BucketController.addToCart = async (req, res, next) => {
   if (req.body.qty > product.stock) throw addCartError('cart', 'stock');
   if (ownStoreId && ownStoreId === storeId) throw addCartError('product', 'not_valid');
 
-  const columns = { bucket_id: bucket.id, product_id: product.id, dropshipper_id: null };
+  const columns = {
+    bucket_id: bucket.id,
+    product_id: product.id,
+    dropshipper_id: null,
+    store_id: storeId,
+  };
   if (product.store_id !== storeId) {
     dropship = await Dropship.findByProductIdAndStoreId(productId, storeId);
     if (dropship.get('id_toko') === ownStoreId) throw addCartError('product', 'not_valid');
@@ -225,14 +230,13 @@ BucketController.checkout = async (req, res, next) => {
   if (items.length === 0) throw getBucketError('bucket', 'not_found_items');
 
   const groups = _.groupBy(items.models, (val) => {
-    const { product, shipping, dropship = {} } = val.serialize();
-    const id = dropship.store_id || '';
-    return `${product.store_id}#${shipping.address_id}#${shipping.expedition_service_id}#${id}`;
+    const { store_id: storeId, shipping } = val.serialize();
+    return `${storeId}#${shipping.address_id}#${shipping.expedition_service_id}`;
   });
 
   const itemGroups = _.map(groups, group => ({
     shipping_id: group[0].serialize().shipping.id,
-    store_id: group[0].serialize().product.store_id,
+    store_id: group[0].serialize().store_id,
     items: group,
   }));
 

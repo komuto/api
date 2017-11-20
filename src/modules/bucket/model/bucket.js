@@ -164,7 +164,7 @@ class BucketModel extends bookshelf.Model {
    */
   static async getForCheckout(userId) {
     const bucket = await this.where({ id_users: userId, status_bucket: BucketStatus.ADDED }).fetch({
-      withRelated: ['promo', 'items.product', 'items.shipping', 'items.dropship'],
+      withRelated: ['promo', 'items.product', 'items.shipping'],
     });
     if (!bucket) throw getBucketError('bucket', 'not_found');
     return bucket;
@@ -279,13 +279,13 @@ class BucketModel extends bookshelf.Model {
     if (items.length === 0) throw getBucketError('bucket', 'not_found_items');
 
     const groups = _.groupBy(items.models, (val) => {
-      val = val.serialize();
-      return `${val.product.store_id}#${val.shipping.address_id}#${val.shipping.expedition_service_id}`;
+      const { store_id: storeId, shipping } = val.serialize();
+      return `${storeId}#${shipping.address_id}#${shipping.expedition_service_id}`;
     });
 
     items = _.map(groups, group => ({
       shipping_id: group[0].serialize().shipping.id,
-      store_id: group[0].serialize().product.store_id,
+      store_id: group[0].serialize().store_id,
       items: group,
     }));
 
