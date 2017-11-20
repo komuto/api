@@ -185,8 +185,8 @@ BucketController.addToCart = async (req, res, next) => {
   };
   if (product.store_id !== storeId) {
     dropship = await Dropship.findByProductIdAndStoreId(productId, storeId);
-    if (dropship.get('id_toko') === ownStoreId) throw addCartError('product', 'not_valid');
     if (!dropship) throw getProductError('product', 'not_found');
+    if (dropship.get('id_toko') === ownStoreId) throw addCartError('product', 'not_valid');
     columns.dropshipper_id = dropship.get('id_dropshipper');
   }
 
