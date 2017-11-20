@@ -8,11 +8,11 @@ import config from '../../../config';
 import { email } from './email';
 import { Notification, buyerNotification, sellerNotification } from './notification';
 
-const imagePath = (path, file) => {
+const imagePath = (path, file, parent = null) => {
   if (!file) return null;
-  return `${config.assetUrl}/assets/${path}/${file}`;
+  return `${config.assetUrl}/assets${parent ? `/${parent}` : ''}/${path}/${file}`;
 };
-const categoryPath = file => `${config.assetUrl}/assets/images/img-kategori/${file}`;
+const categoryPath = (file, path) => `${config.assetUrl}/assets/images/img-kategori/${path}/${file}`;
 const expeditionPath = file => `${config.assetUrl}/assets/img/pengiriman/${file}`;
 const cache = apiCache.cache;
 const cacheClear = apiCache.cacheClear;

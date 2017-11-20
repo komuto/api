@@ -39,7 +39,7 @@ class BankModel extends bookshelf.Model {
       code: this.get('kode_masterbank'),
       status: parseNum(this.get('status_masterbank')),
       status_at: parseDate(this.get('tglstatus_masterbank')),
-      logo: core.imagePath(IMAGE_PATH, this.get('logo_masterbank')),
+      logo: core.imagePath(IMAGE_PATH, this.get('logo_masterbank'), 'img'),
     };
   }
 

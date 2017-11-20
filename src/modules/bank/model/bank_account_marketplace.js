@@ -36,7 +36,7 @@ class BankAccountMarketplaceModel extends bookshelf.Model {
       holder_account_number: this.get('nomor_rekening_mp'),
       bank_branch_office_name: this.get('cabang_bankrekeningusermp'),
       is_primary: parseNum(this.get('primary_rekeningmp')) === BankAccountMarketplaceStatus.PRIMARY,
-      logo: core.imagePath(IMAGE_PATH, this.get('logo_bank')),
+      logo: core.imagePath(IMAGE_PATH, this.get('logo_bank'), 'img'),
     };
   }
 }
