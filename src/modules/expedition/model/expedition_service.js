@@ -19,7 +19,7 @@ class ServiceModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = true, fullName = false } = {}) {
+  serialize({ minimal = true, fullName = false } = {}, domain) {
     const service = {
       id: this.get('id_ekspedisiservice'),
       name: this.get('nama_ekspedisiservice'),
@@ -35,7 +35,7 @@ class ServiceModel extends bookshelf.Model {
     if (minimal) {
       return {
         ...service,
-        expedition: this.relations.expedition ? this.related('expedition').serialize({ minimal }) : undefined,
+        expedition: this.relations.expedition ? this.related('expedition').serialize({ minimal }, domain) : undefined,
       };
     }
     return {

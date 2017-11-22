@@ -223,8 +223,9 @@ class StoreModel extends bookshelf.Model {
   /**
    * Get list expedition service
    * @param userId {integer} user id
+   * @param domain {string}
    */
-  static async getUserExpeditions(userId) {
+  static async getUserExpeditions(userId, domain) {
     const expeditions = [];
     const store = await this.where({ id_users: userId }).fetch({
       withRelated: [
@@ -232,10 +233,16 @@ class StoreModel extends bookshelf.Model {
         'expeditionServices.expedition',
       ],
     });
+
+    if (!store) {
+      throw getStoreError('store', 'not_found');
+    }
+
     const expeditionServices = store.related('expeditionServices');
     expeditionServices.each((service) => {
-      const expedition = service.related('expedition').serialize();
+      const expedition = service.related('expedition').serialize({}, domain);
       const found = _.find(expeditions, { id: expedition.id });
+      service = service.serialize({}, domain);
       if (found === undefined) {
         expedition.services = [service];
         return expeditions.push(expedition);
@@ -248,8 +255,9 @@ class StoreModel extends bookshelf.Model {
   /**
    * Get list expedition service manage
    * @param userId {integer} user id
+   * @param domain {string}
    */
-  static async getUserExpeditionsManage(userId) {
+  static async getUserExpeditionsManage(userId, domain) {
     const store = await this.where({ id_users: userId }).fetch({
       withRelated: [
         { expeditionServices: qb => qb.where('status_ekspedisitoko', StoreExpeditionStatus.USED) },
@@ -264,13 +272,13 @@ class StoreModel extends bookshelf.Model {
         ));
         return {
           ...service.serialize(),
-          expedition: expedition.serialize({ minimal: true }),
+          expedition: expedition.serialize({ minimal: true }, domain),
           is_checked: !!found,
           is_active: !!found,
         };
       });
       const totalActive = _.filter(services, { is_active: true }).length;
-      expedition = expedition.serialize();
+      expedition = expedition.serialize({}, domain);
       expedition.is_active = services.length ? totalActive === services.length : false;
       services = _.sortBy(services, 'id');
       return {

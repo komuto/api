@@ -11,7 +11,7 @@ export default { ExpeditionController };
  * Get expeditions
  */
 ExpeditionController.getExpeditions = async (req, res, next) => {
-  const expeditions = await Expedition.getAllServices();
+  const expeditions = await Expedition.getAllServices(req.marketplace.mobile_domain);
   req.resData = {
     message: 'Expeditions Data',
     data: expeditions,
@@ -23,7 +23,7 @@ ExpeditionController.getExpeditions = async (req, res, next) => {
  * Get expedition services
  */
 ExpeditionController.getListExpeditionServices = async (req, res, next) => {
-  const expeditions = await Expedition.getAllServices();
+  const expeditions = await Expedition.getAllServices(req.marketplace.mobile_domain);
   const services = [];
 
   _.forEach(expeditions, (expedition) => {

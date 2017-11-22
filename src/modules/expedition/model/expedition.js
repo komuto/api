@@ -22,11 +22,11 @@ class ExpeditionModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = false } = {}) {
+  serialize({ minimal = false } = {}, domain) {
     const expedition = {
       id: this.get('id_ekspedisi'),
       name: this.get('nama_ekspedisi'),
-      logo: core.expeditionPath(this.get('logo_path')),
+      logo: core.expeditionPath(domain, this.get('logo_path')),
       insurance_fee: parseFloat(this.get('asurasi_fee')),
       is_checked: false,
     };
@@ -62,7 +62,7 @@ class ExpeditionModel extends bookshelf.Model {
     throw getExpeditionError('expedition', 'not_found');
   }
 
-  static async getAllServices() {
+  static async getAllServices(domain) {
     const expeditions = await this.fetchAll({ withRelated: ['services'] });
     return expeditions.map((expedition) => {
       const services = expedition.related('services').map((service) => {
@@ -71,7 +71,7 @@ class ExpeditionModel extends bookshelf.Model {
         return service;
       });
       return {
-        ...expedition.serialize({ minimal: true }),
+        ...expedition.serialize({ minimal: true }, domain),
         services,
       };
     });
