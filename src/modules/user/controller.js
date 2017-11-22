@@ -201,7 +201,7 @@ UserController.createUser = async (req, res, next) => {
  * Get user profile
  */
 UserController.getUserProfile = async (req, res, next) => {
-  const user = await User.getUserProfile(req.user.id);
+  const user = await User.getUserProfile(req.user.id, req.marketplace.mobile_domain);
   req.resData = {
     message: 'User Profile',
     data: user,
@@ -296,7 +296,13 @@ UserController.getWishlist = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const params = { sort: req.query.sort, query: req.query.q };
-  const products = await Wishlist.get(req.user.id, params, page, pageSize);
+  const products = await Wishlist.get(
+    req.user.id,
+    params,
+    page,
+    pageSize,
+    req.marketplace.mobile_domain,
+  );
   req.resData = {
     message: 'Products Wishlist Data',
     meta: { page, limit: pageSize },
@@ -367,7 +373,12 @@ UserController.updatePhone = async (req, res, next) => {
 UserController.getDiscussions = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const discussions = await Discussion.getByQuery({ id_users: req.user.id }, page, pageSize);
+  const discussions = await Discussion.getByQuery(
+    { id_users: req.user.id },
+    page,
+    pageSize,
+    req.marketplace.mobile_domain,
+  );
   req.resData = {
     message: 'Discussion Data',
     meta: { page, limit: pageSize },
@@ -404,7 +415,14 @@ UserController.getMessages = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const isArchived = req.query.is_archived ? req.query.is_archived : false;
-  const messages = await Message.getById(req.user.id, 'user', JSON.parse(isArchived), page, pageSize);
+  const messages = await Message.getById(
+    req.user.id,
+    'user',
+    JSON.parse(isArchived),
+    page,
+    pageSize,
+    req.marketplace.mobile_domain,
+  );
   req.resData = {
     message: 'Message Data',
     meta: { page, limit: pageSize },

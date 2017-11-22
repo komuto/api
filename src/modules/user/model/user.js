@@ -260,7 +260,7 @@ class UserModel extends bookshelf.Model {
     return user ? user.serialize() : user;
   }
 
-  static async getUserProfile(id) {
+  static async getUserProfile(id, domain) {
     let user = this.where('id_users', id).fetch({
       withRelated: [
         'birthPlace',
@@ -271,9 +271,9 @@ class UserModel extends bookshelf.Model {
     let limit = Preference.get('unverified_store');
     [user, limit] = await Promise.all([user, limit]);
     let store = user.related('store');
-    user = user.serialize({ birth: true, phone: true });
+    user = user.serialize({ birth: true, phone: true }, domain);
     const endDate = moment(store.get('tanggal_verifikasi'), 'YYYY-MM-DD').add(limit.value, 'd');
-    store = store.id ? store.serialize({ verified: true }) : null;
+    store = store.id ? store.serialize({ verified: true }, domain) : null;
     const diff = endDate.diff(moment(), 'd');
     if (store) {
       const timeLeft = store.verification_status === StoreVerificationStatus.DEFAULT ? diff : null;

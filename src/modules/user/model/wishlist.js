@@ -58,7 +58,7 @@ class WishlistModel extends bookshelf.Model {
     return true;
   }
 
-  static async get(userId, params, page, pageSize) {
+  static async get(userId, params, page, pageSize, domain) {
     const { query } = params;
     let { sort } = params;
 
@@ -109,18 +109,18 @@ class WishlistModel extends bookshelf.Model {
       }
       const image = product.related('image');
       const countLike = await this.getCountLike(product.id, wishlist.get('id_dropshipper'));
-      product = product.serialize({ minimal: true, wishlist: true });
+      product = product.serialize({ minimal: true, wishlist: true }, domain);
 
       return {
         product: {
           ...product,
           id: `${product.id}.${store.id}`,
-          image: image ? image.serialize().file : config.defaultImage.product,
+          image: image ? image.serialize(domain).file : config.defaultImage.product,
           count_like: parseNum(countLike),
         },
-        store,
+        store: store.serialize({}, domain),
         // still used for mobile
-        images: [image],
+        images: [image.serialize(domain)],
       };
     }));
   }
