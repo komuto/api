@@ -78,6 +78,7 @@ class UserModel extends bookshelf.Model {
    * @param phone {boolean} true = check if the phone is verified
    * @param notification {boolean} true = include notification
    * @param orderDetail {boolean}
+   * @param domain {string}
    */
   serialize({
               pass = false,
@@ -86,12 +87,12 @@ class UserModel extends bookshelf.Model {
               phone = false,
               notification = false,
               orderDetail = false,
-            } = {}) {
+            } = {}, domain) {
     let user = {
       id: this.get('id_users'),
       name: this.get('namalengkap_users'),
       photo: this.get('pathfoto_users')
-        ? core.imagePath(IMAGE_PATH, this.get('pathfoto_users'))
+        ? core.imagePath(domain, IMAGE_PATH, this.get('pathfoto_users'))
         : config.defaultImage.user,
       phone_number: defaultNull(this.get('nohp_users')),
     };

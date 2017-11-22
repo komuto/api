@@ -3,7 +3,7 @@ import config from '../../../../config';
 
 const bookshelf = core.postgres.db;
 
-const getImage = (group, image) => {
+const getImage = (domain, group, image) => {
   let path;
   switch (group) {
     case 'resolusi':
@@ -15,7 +15,7 @@ const getImage = (group, image) => {
     default:
       break;
   }
-  return core.imagePath(path, image);
+  return core.imagePath(domain, path, image);
 };
 
 class ImageGroupModel extends bookshelf.Model {
@@ -34,11 +34,11 @@ class ImageGroupModel extends bookshelf.Model {
     return false;
   }
 
-  serialize() {
+  serialize(domain) {
     return {
       id: this.get('id_image'),
       parent_id: this.get('parent_id'),
-      image: getImage(this.get('group'), this.get('image')),
+      image: getImage(domain, this.get('group'), this.get('image')),
       group: this.get('group'),
     };
   }

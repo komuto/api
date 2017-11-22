@@ -87,7 +87,7 @@ class MessageModel extends bookshelf.Model {
    * @param page
    * @param pageSize
    */
-  static async getById(id, type, isArchived = false, page, pageSize) {
+  static async getById(id, type, isArchived = false, page, pageSize, domain) {
     const where = type === 'store' ? { 'messages.id_toko': id } : { 'messages.id_users': id };
     const column = type === 'store' ? 'flagreceiver_messages' : 'flagsender_messages';
     const messages = await this.where(where)
@@ -114,7 +114,7 @@ class MessageModel extends bookshelf.Model {
         id: message.get('d_id_users'),
         name: message.get('namalengkap_users'),
         photo: message.get('pathfoto_users')
-          ? core.imagePath(IMAGE_PATH, message.get('pathfoto_users'))
+          ? core.imagePath(domain, IMAGE_PATH, message.get('pathfoto_users'))
           : config.defaultImage.user,
       };
       const detail = {

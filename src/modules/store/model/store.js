@@ -38,11 +38,11 @@ class StoreModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ favorite = false, verified = false, message = false } = {}) {
+  serialize({ favorite = false, verified = false, message = false } = {}, domain) {
     const store = {
       id: this.get('id_toko'),
       name: this.get('nama_toko'),
-      logo: core.imagePath(IMAGE_PATH, this.get('logo_toko')),
+      logo: core.imagePath(domain, IMAGE_PATH, this.get('logo_toko')),
     };
     if (message) {
       store.user_id = this.get('id_users');
@@ -62,7 +62,7 @@ class StoreModel extends bookshelf.Model {
       custom_domain: this.get('custom_domain'),
       status: parseInt(this.get('status_toko'), 10),
       remarks_status: this.get('remarks_status_toko'),
-      cover_image: core.imagePath(IMAGE_PATH, this.get('pathcoverimage_toko')),
+      cover_image: core.imagePath(domain, IMAGE_PATH, this.get('pathcoverimage_toko')),
       seller_theme_id: this.get('identifier_themesseller'),
       reputation: this.get('reputasi_toko'),
       store_id_number: this.get('no_ktp_toko'),

@@ -226,7 +226,7 @@ class CatalogModel extends bookshelf.Model {
   /**
    * Get catalog with products
    */
-  static async getCatalogWithProducts(params) {
+  static async getCatalogWithProducts(params, domain) {
     const { storeId, catalogId, page = 1, pageSize = 10, marketplaceId } = params;
     const status = ProductStatus.SHOW;
     const limit = catalogId === undefined ? 3 : pageSize;
@@ -251,7 +251,7 @@ class CatalogModel extends bookshelf.Model {
     return await Promise.all(productsCatalog.map(async (products, index) => {
       const catalogProducts = products.map((product) => {
         const image = product.file_gambarproduk
-          ? core.imagePath(PRODUCT_IMAGE_PATH, product.file_gambarproduk)
+          ? core.imagePath(domain, PRODUCT_IMAGE_PATH, product.file_gambarproduk)
           : config.defaultImage.product;
         const dropshipOrigin = !product.id_dropshipper ? false
           : {

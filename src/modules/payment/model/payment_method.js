@@ -33,12 +33,12 @@ class PaymentMethodModel extends bookshelf.Model {
     return false;
   }
 
-  serialize() {
+  serialize(domain) {
     return {
       id: this.get('id_paymentmethod'),
       name: this.get('nama_paymentmethod'),
       remarks: this.get('remarks_paymentmethod'),
-      logo: core.imagePath(IMAGE_PATH, this.get('logo_paymentmethod')),
+      logo: core.imagePath(domain, IMAGE_PATH, this.get('logo_paymentmethod')),
       type: parseNum(this.get('type_paymentmethod')),
       type_text: this.get('type_text'),
       status: parseNum(this.get('status_paymentmethod')),

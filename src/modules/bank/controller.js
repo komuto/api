@@ -15,7 +15,7 @@ export default { BankController };
  * Get all banks
  */
 BankController.getAll = async (req, res, next) => {
-  const banks = await Bank.getAll();
+  const banks = await Bank.getAll(req.marketplace.mobile_domain);
   req.resData = {
     message: 'Master Bank Data',
     data: banks,
@@ -27,13 +27,14 @@ BankController.getBank = async (req, res, next) => {
   const bank = await Bank.getById(req.params.id);
   req.resData = {
     message: 'Master Bank Data',
-    data: bank,
+    data: bank.serialize({}, req.marketplace.mobile_domain),
   };
   return next();
 };
 
 BankController.getBankAccounts = async (req, res, next) => {
-  const bankAccounts = await BankAccount.getByUserId(req.user.id);
+  let bankAccounts = await BankAccount.getByUserId(req.user.id);
+  bankAccounts = bankAccounts.map(o => o.serialize({}, req.marketplace.mobile_domain));
   req.resData = {
     message: 'Bank Account Data',
     data: bankAccounts,
@@ -42,12 +43,14 @@ BankController.getBankAccounts = async (req, res, next) => {
 };
 
 BankController.getBankAccount = async (req, res, next) => {
-  const bankAccount = await BankAccount.where({ id_rekeninguser: req.params.id,
-    id_users: req.user.id }).fetch({ withRelated: 'bank' });
+  const bankAccount = await BankAccount.where({
+    id_rekeninguser: req.params.id,
+    id_users: req.user.id,
+  }).fetch({ withRelated: 'bank' });
   if (!bankAccount) throw getAccountError('account', 'not_found');
   req.resData = {
     message: 'Bank Account Data',
-    data: bankAccount,
+    data: bankAccount.serialize({}, req.marketplace.mobile_domain),
   };
   return next();
 };
@@ -103,7 +106,8 @@ BankController.deleteBankAccount = async (req, res, next) => {
 };
 
 BankController.getMarketplaceBankAccounts = async (req, res, next) => {
-  const bankAccounts = await BankAccountMarketplace.fetchAll();
+  let bankAccounts = await BankAccountMarketplace.fetchAll();
+  bankAccounts = bankAccounts.map(o => o.serialize(req.marketplace.mobile_domain));
   req.resData = {
     message: 'Marketplace Bank Account Data',
     data: bankAccounts,
@@ -112,7 +116,8 @@ BankController.getMarketplaceBankAccounts = async (req, res, next) => {
 };
 
 BankController.getKomutoBankAccounts = async (req, res, next) => {
-  const bankAccounts = await BankAccount.getKomutoAccounts();
+  let bankAccounts = await BankAccount.getKomutoAccounts();
+  bankAccounts = bankAccounts.map(o => o.serialize({}, req.marketplace.mobile_domain));
   req.resData = {
     message: 'Komuto Bank Account Data',
     data: bankAccounts,

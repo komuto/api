@@ -25,12 +25,12 @@ class BankAccountModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = false } = {}) {
+  serialize({ minimal = false } = {}, domain) {
     const bank = {
       id: this.get('id_rekeninguser'),
       user_id: this.get('id_users'),
       bank_id: !this.relations.bank ? this.get('id_masterbank') : undefined,
-      bank: this.relations.bank ? this.related('bank') : undefined,
+      bank: this.relations.bank ? this.related('bank').serialize({}, domain) : undefined,
       holder_name: this.get('nama_pemilikrekening'),
       holder_account_number: this.get('nomor_rekening'),
     };

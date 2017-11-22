@@ -28,7 +28,7 @@ class BankModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = false } = {}) {
+  serialize({ minimal = false } = {}, domain) {
     const bank = {
       id: this.get('id_masterbank'),
       name: this.get('nama_masterbank'),
@@ -39,17 +39,18 @@ class BankModel extends bookshelf.Model {
       code: this.get('kode_masterbank'),
       status: parseNum(this.get('status_masterbank')),
       status_at: parseDate(this.get('tglstatus_masterbank')),
-      logo: core.imagePath(IMAGE_PATH, this.get('logo_masterbank'), 'img'),
+      logo: core.imagePath(domain, IMAGE_PATH, this.get('logo_masterbank'), 'img'),
     };
   }
 
   /**
    * Get all banks
    */
-  static async getAll() {
-    const banks = await this.where({}).fetchAll();
+  static async getAll(domain) {
+    let banks = await this.where({}).fetchAll();
     if (!banks) throw new BadRequestError('No banks found');
-    return _.sortBy(banks.serialize(), ['id']);
+    banks = banks.map(o => o.serialize({}, domain));
+    return _.sortBy(banks, ['id']);
   }
 
   static async getById(id) {

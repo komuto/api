@@ -26,12 +26,12 @@ class BannerModel extends bookshelf.Model {
     return false;
   }
 
-  serialize() {
+  serialize(domain) {
     return {
       id: this.get('id_mainbanner'),
       marketplace_id: this.get('id_marketplaceuser'),
       position: this.get('posisi_mainbanner'),
-      image: core.imagePath(IMAGE_PATH, this.get('path_mainbanner')),
+      image: core.imagePath(domain, IMAGE_PATH, this.get('path_mainbanner')),
       link: this.get('link_mainbanner'),
       label: this.get('label_mainbanner'),
       value: this.get('value_mainbanner'),

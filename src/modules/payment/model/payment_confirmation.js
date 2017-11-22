@@ -23,7 +23,7 @@ class PaymentConfirmationModel extends bookshelf.Model {
     return false;
   }
 
-  serialize() {
+  serialize(domain) {
     return {
       id: parseNum(this.get('id')),
       user_id: this.get('id_users'),
@@ -34,7 +34,7 @@ class PaymentConfirmationModel extends bookshelf.Model {
       bank: this.get('bank_pengirim'),
       holder_account_number: this.get('rekening_pengirim'),
       status: this.get('status'),
-      attachment: core.imagePath(IMAGE_PATH, this.get('attachment')),
+      attachment: core.imagePath(domain, IMAGE_PATH, this.get('attachment')),
     };
   }
 

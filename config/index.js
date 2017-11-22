@@ -75,7 +75,6 @@ def.url = (dir = '/') => {
 
 // komuto url & email
 def.komutoUrl = 'http://api.komutodev.aptmi.com/komuto-api/';
-def.assetUrl = 'https://komutodev.aptmi.com';
 def.komutoEmail = 'developer@skyshi.com';
 def.komutoEmailName = 'Admin Komuto';
 

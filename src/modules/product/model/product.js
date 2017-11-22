@@ -46,7 +46,7 @@ class ProductModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = false, wishlist = false, alterId = false } = {}) {
+  serialize({ minimal = false, wishlist = false, alterId = false } = {}, domain) {
     const product = {
       id: !alterId ? this.get('id_produk') : `${this.get('id_produk')}.` +
         // if alterId is number then use that instead of id_toko
@@ -61,7 +61,7 @@ class ProductModel extends bookshelf.Model {
       weight: this.get('berat_produk'),
       stock: this.get('stock_produk'),
       image: !this.relations || !this.relations.image ? undefined
-        : core.imagePath(IMAGE_PATH, this.related('image').get('file_gambarproduk')),
+        : core.imagePath(domain, IMAGE_PATH, this.related('image').get('file_gambarproduk')),
     };
     if (wishlist) {
       product.is_liked = true;
@@ -280,7 +280,7 @@ class ProductModel extends bookshelf.Model {
   /**
    * Get products
    */
-  static async get(params) {
+  static async get(params, domain) {
     const {
       userId,
       where,
@@ -321,7 +321,7 @@ class ProductModel extends bookshelf.Model {
 
     return await Promise.all(products.map(async (product, index) => {
       const image = product.file_gambarproduk
-        ? core.imagePath(IMAGE_PATH, product.file_gambarproduk)
+        ? core.imagePath(domain, IMAGE_PATH, product.file_gambarproduk)
         : config.defaultImage.product;
       // Provide this.get() utility for serialize
       Object.setPrototypeOf(product, getter);

@@ -21,13 +21,13 @@ class RefundItemModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = false } = {}) {
+  serialize({ minimal = false } = {}, domain) {
     const item = {
       id: this.get('id_refund_item'),
       product_id: this.get('id_produk'),
       product_name: this.get('nama_produk'),
       product_image: !this.relations.image ? undefined
-        : core.imagePath(IMAGE_PATH, this.related('image').get('file_gambarproduk')),
+        : core.imagePath(domain, IMAGE_PATH, this.related('image').get('file_gambarproduk')),
     };
     if (minimal) return item;
     return {

@@ -28,11 +28,11 @@ class ImageProductModel extends bookshelf.Model {
     }, this);
   }
 
-  serialize() {
+  serialize(domain) {
     return {
       id: this.get('id_gambarproduk'),
       product_id: this.get('id_produk'),
-      file: core.imagePath(IMAGE_PATH, this.get('file_gambarproduk')),
+      file: core.imagePath(domain, IMAGE_PATH, this.get('file_gambarproduk')),
       file_name: this.get('file_gambarproduk'),
       created_at: moment(this.get('created_gambarproduk')).unix(),
       updated_at: moment(this.get('updated_gambarproduk')).unix(),
