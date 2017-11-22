@@ -196,14 +196,14 @@ class BucketModel extends bookshelf.Model {
     return { days, hours, minutes, seconds };
   }
 
-  static loadDetailTransaction(bucket, limit, isDetail) {
+  static loadDetailTransaction(bucket, limit, isDetail, domain) {
     const { data, total_price, time_left } = bucket.related('invoices').reduce((accu, invoice, index) => {
       const items = invoice.related('items').map((item) => {
         let product = item.related('product');
         const image = product.related('images').models;
         product = {
           ...product.serialize({ minimal: true }),
-          image: image.length ? image[0].serialize().file : config.defaultImage.product,
+          image: image.length ? image[0].serialize(domain).file : config.defaultImage.product,
         };
         if (isDetail) {
           return {
@@ -215,7 +215,7 @@ class BucketModel extends bookshelf.Model {
       });
       accu.total_price += parseInt(invoice.get('total_harga'), 10);
       if (isDetail) {
-        const invoiceObj = { ...invoice.serialize({ minimal: true }), items };
+        const invoiceObj = { ...invoice.serialize({ minimal: true }, domain), items };
         invoiceObj.shipping = invoiceObj.shipping ? invoiceObj.shipping : null;
         accu.data.push(invoiceObj);
       } else {
@@ -234,17 +234,17 @@ class BucketModel extends bookshelf.Model {
     return { ...response, products: data };
   }
 
-  static async listTransactions(userId, page, pageSize) {
+  static async listTransactions(userId, page, pageSize, domain) {
     const buckets = await this.where({ id_users: userId })
       .query(qb => qb.whereNotIn('status_bucket', [BucketStatus.ADDED, BucketStatus.DELETED, BucketStatus.CANCEL]))
       .orderBy('tgl_orderbucket', 'desc')
       .fetchPage({ page, pageSize, withRelated: ['invoices.items.product.images'] });
     if (!buckets.length) return [];
     const limit = await Preference.get('payment');
-    return buckets.map(bucket => (this.loadDetailTransaction(bucket, limit.value, false)));
+    return buckets.map(bucket => (this.loadDetailTransaction(bucket, limit.value, false, domain)));
   }
 
-  static async detailTransaction(userId, bucketId) {
+  static async detailTransaction(userId, bucketId, domain) {
     const bucket = await this.where({ id_users: userId, id_bucket: bucketId })
       .query(qb => qb.whereNotIn('status_bucket', [BucketStatus.ADDED, BucketStatus.DELETED]))
       .fetch();
@@ -264,7 +264,7 @@ class BucketModel extends bookshelf.Model {
       await Promise.all([bucket.load(['invoices.items.product.images', 'promo', 'invoices.store'])]);
     }
     const limit = await Preference.get('payment');
-    return this.loadDetailTransaction(bucket, limit.value, true);
+    return this.loadDetailTransaction(bucket, limit.value, true, domain);
   }
 
   /**

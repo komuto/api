@@ -147,7 +147,12 @@ PaymentController.getSaldoSnapToken = async (req, res, next) => {
 PaymentController.listTransactions = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const buckets = await Bucket.listTransactions(req.user.id, page, pageSize);
+  const buckets = await Bucket.listTransactions(
+    req.user.id,
+    page,
+    pageSize,
+    req.marketplace.mobile_domain,
+  );
   req.resData = {
     message: 'Transactions Data',
     meta: { page, limit: pageSize },
@@ -157,7 +162,11 @@ PaymentController.listTransactions = async (req, res, next) => {
 };
 
 PaymentController.detailTransaction = async (req, res, next) => {
-  const bucket = await Bucket.detailTransaction(req.user.id, req.params.id);
+  const bucket = await Bucket.detailTransaction(
+    req.user.id,
+    req.params.id,
+    req.marketplace.mobile_domain,
+  );
   req.resData = {
     message: 'Transaction Data',
     data: bucket,
@@ -166,7 +175,12 @@ PaymentController.detailTransaction = async (req, res, next) => {
 };
 
 PaymentController.detailInvoice = async (req, res, next) => {
-  const invoice = await Invoice.detail(req.user.id, req.params.id, req.params.invoice_id);
+  const invoice = await Invoice.detail(
+    req.user.id,
+    req.params.id,
+    req.params.invoice_id,
+    req.marketplace.mobile_domain,
+  );
   req.resData = {
     message: 'Invoice Data',
     data: invoice,

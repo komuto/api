@@ -44,13 +44,13 @@ class InvoiceModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = false, orderDetail = false, shippingMin = false } = {}) {
+  serialize({ minimal = false, orderDetail = false, shippingMin = false } = {}, domain) {
     const invoice = {
       id: this.get('id_invoice'),
       payment_method_id: this.get('id_paymentmethod'),
       store_id: this.get('id_toko'),
-      store: this.relations.store ? this.related('store').serialize({ favorite: true }) : undefined,
-      shipping: this.relations.shipping ? this.related('shipping').serialize({ minimal: shippingMin }) : undefined,
+      store: this.relations.store ? this.related('store').serialize({ favorite: true }, domain) : undefined,
+      shipping: this.relations.shipping ? this.related('shipping').serialize({ minimal: shippingMin }, domain) : undefined,
       invoice_number: this.get('no_invoice'),
       total_bill: parseNum(this.get('total_tagihan')),
       total_price: parseNum(this.get('total_harga')),
@@ -134,7 +134,7 @@ class InvoiceModel extends bookshelf.Model {
     return invoice;
   }
 
-  static async detail(userId, bucketId, id) {
+  static async detail(userId, bucketId, id, domain) {
     let invoice = await this.where({
       id_invoice: id,
       id_user: userId,
@@ -170,7 +170,7 @@ class InvoiceModel extends bookshelf.Model {
         product: {
           ...product.serialize({ minimal: true }),
           id: `${product.get('id_produk')}.${storeId}`,
-          image: image.length ? image[0].serialize().file : config.defaultImage.product,
+          image: image.length ? image[0].serialize(domain).file : config.defaultImage.product,
         },
       };
     });
@@ -178,7 +178,7 @@ class InvoiceModel extends bookshelf.Model {
     let dispute = invoice.related('dispute').get('id_dispute') ? invoice.related('dispute') : null;
     if (dispute) {
       dispute = {
-        ...dispute.serialize(),
+        ...dispute.serialize(domain),
         dispute_products: dispute.related('disputeProducts').map((val) => {
           const item = _.find(items, (o) => {
             const { productId } = getProductAndStore(o.product.id);
@@ -191,11 +191,11 @@ class InvoiceModel extends bookshelf.Model {
 
     const store = invoice.related('store');
     const { origin } = Store.getOriginAndDistrict(store);
-    invoice = invoice.serialize();
+    invoice = invoice.serialize({}, domain);
     invoice = {
       ...invoice,
       store: {
-        ...store.serialize({ favorite: true }),
+        ...store.serialize({ favorite: true }, domain),
         origin,
       },
     };
