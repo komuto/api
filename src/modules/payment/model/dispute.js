@@ -53,13 +53,13 @@ class DisputeModel extends bookshelf.Model {
     return false;
   }
 
-  serialize() {
+  serialize(domain) {
     const dispute = {
       id: this.get('id_dispute'),
       user_id: this.get('id_users'),
-      user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
+      user: this.relations.user ? this.related('user').serialize({ account: true }, domain) : undefined,
       store_id: this.get('id_toko'),
-      store: this.relations.store ? this.related('store').serialize({ favorite: true }) : undefined,
+      store: this.relations.store ? this.related('store').serialize({ favorite: true }, domain) : undefined,
       invoice_id: this.get('identifierinvoice_dispute'),
       invoice: this.relations.invoice ? this.related('invoice') : undefined,
       solution: parseNum(this.get('solusi_dispute')),
@@ -140,7 +140,7 @@ class DisputeModel extends bookshelf.Model {
     return problems;
   }
 
-  static async getAll(params) {
+  static async getAll(params, domain) {
     const { where, is_resolved: isResolved, page, pageSize, userId } = params;
     const relation = where.id_users ? 'store' : 'user';
     const disputes = await this.where(where)
@@ -158,10 +158,10 @@ class DisputeModel extends bookshelf.Model {
         ],
       });
 
-    return disputes.map(dispute => this.detailDispute(dispute, false, userId));
+    return disputes.map(dispute => this.detailDispute(dispute, domain, false, userId));
   }
 
-  static async getDetail(where, userId) {
+  static async getDetail(where, userId, domain) {
     const relation = where.id_users ? 'store' : 'user';
     const dispute = await this.where(where).fetch({
       withRelated: [
@@ -180,12 +180,12 @@ class DisputeModel extends bookshelf.Model {
     const message = dispute.related('message');
     const discussions = message.related('detailMessages').map((msg) => {
       const msgObj = msg.serialize();
-      const store = message.serialize().store;
+      const store = message.serialize(domain).store;
       msgObj.store = (store.user_id === msgObj.user.id) ? store : null;
       if (!msgObj.status && userId !== msgObj.user.id) {
         msg.save({ status: DetailMessageStatus.READ }, { patch: true });
       }
-      return msg;
+      return msg.serialize(domain);
     });
 
     let limitSend = null;
@@ -195,16 +195,17 @@ class DisputeModel extends bookshelf.Model {
     }
 
     const invoice = dispute.related('invoice');
+    const proofs = dispute.related('imageGroups').map(o => o.serialize(domain));
     return {
-      ...this.detailDispute(dispute),
+      ...this.detailDispute(dispute, domain),
       limit_send_product: limitSend,
-      proofs: dispute.related('imageGroups'),
+      proofs,
       products: invoice.related('items').map(item => item.related('product').serialize({ minimal: true })),
       discussions,
     };
   }
 
-  static detailDispute(dispute, isDetail = true, userId = null) {
+  static detailDispute(dispute, domain, isDetail = true, userId = null) {
     let fine;
     let countUnread;
 
@@ -228,11 +229,11 @@ class DisputeModel extends bookshelf.Model {
       const image = product.related('images').models;
       return {
         ...product.serialize({ minimal: true }),
-        image: image.length ? image[0].serialize().file : config.defaultImage.product,
+        image: image.length ? image[0].serialize(domain).file : config.defaultImage.product,
       };
     });
 
-    const disputeObj = dispute.serialize();
+    const disputeObj = dispute.serialize(domain);
     if (isDetail && disputeObj.status === DisputeStatus.CLOSED && !fine.length) {
       disputeObj.status = DisputeStatus.REVIEWED;
       dispute.save({ status_dispute: DisputeStatus.REVIEWED }, { patch: true });

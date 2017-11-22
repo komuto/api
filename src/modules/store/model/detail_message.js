@@ -25,12 +25,12 @@ class DetailMessageModel extends bookshelf.Model {
     return false;
   }
 
-  serialize() {
+  serialize(domain) {
     return {
       id: this.get('id_detilmessages'),
       message_id: parseNum(this.get('id_messages')),
       user_id: this.get('id_users'),
-      user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
+      user: this.relations.user ? this.related('user').serialize({ account: true }, domain) : undefined,
       content: this.get('content_messages'),
       status: parseNum(this.get('status')),
       created_at: parseDate(this.get('date_detilmessages')),
