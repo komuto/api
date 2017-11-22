@@ -60,9 +60,10 @@ class ReviewModel extends bookshelf.Model {
    * @param data {Object}
    * @param {integer} pageSize limit
    * @param {integer} page
+   * @param {string} domain
    * @param {boolean} withProduct
    */
-  static async getAll(data, { pageSize, page }, withProduct = false) {
+  static async getAll(data, { pageSize, page }, domain, withProduct = false) {
     const withRelated = !withProduct ? 'user' : ['user', 'product.store', 'product.image'];
     const reviews = await this
       .query((qb) => {
@@ -75,16 +76,16 @@ class ReviewModel extends bookshelf.Model {
       .fetchPage({ pageSize, page, withRelated });
 
     return reviews.models.map((review) => {
-      const { id, name, photo } = review.related('user').serialize();
+      const { id, name, photo } = review.related('user').serialize({}, domain);
       if (withProduct) {
         const product = review.related('product');
         const { id: pId, name: pName } = product.serialize();
-        const store = product.related('store').serialize({ favorite: true });
+        const store = product.related('store').serialize({ favorite: true }, domain);
         let image = product.related('image');
-        image = image ? image.serialize().file : config.defaultImage.product;
+        image = image ? image.serialize(domain).file : config.defaultImage.product;
         return {
           ...review.serialize(),
-          product: { id: `${pId}.${store.id}`, name: pName, image: image.file, store },
+          product: { id: `${pId}.${store.id}`, name: pName, image, store },
           user: { id, name, photo },
         };
       }
@@ -186,7 +187,7 @@ class ReviewModel extends bookshelf.Model {
     return review;
   }
 
-  static async getByStoreId(storeId, page, pageSize) {
+  static async getByStoreId(storeId, page, pageSize, domain) {
     const select = [
       'count("id_ulasanproduk") as "count_review"',
       'SUM(kualitasproduk::integer) as "qualities"',
@@ -209,12 +210,12 @@ class ReviewModel extends bookshelf.Model {
     [rating, reviews] = await Promise.all([rating, reviews]);
 
     reviews = reviews.map((review) => {
-      const { name, id: userId, photo } = review.related('user').serialize();
+      const { name, id: userId, photo } = review.related('user').serialize({}, domain);
       let product = review.related('product');
       const image = product.related('image');
       product = product.serialize();
       product.id = `${product.id}.${review.get('id_toko')}`;
-      product.image = image ? image.serialize().file : config.defaultImage.product;
+      product.image = image ? image.serialize(domain).file : config.defaultImage.product;
       return {
         ...review.serialize(),
         user: { id: userId, name, photo },

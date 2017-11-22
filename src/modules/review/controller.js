@@ -15,6 +15,7 @@ ReviewController.getReviews = async (req, res, next) => {
   const reviews = await Review.getAll(
     productId ? { product_id: productId, store_id: storeId } : req.query,
     { page, pageSize },
+    req.marketplace.mobile_domain,
   );
 
   req.resData = {
@@ -31,7 +32,12 @@ ReviewController.getReviews = async (req, res, next) => {
 ReviewController.getUserReviews = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const reviews = await Review.getAll({ user_id: req.user.id }, { page, pageSize }, true);
+  const reviews = await Review.getAll(
+    { user_id: req.user.id },
+    { page, pageSize },
+    req.marketplace.mobile_domain,
+    true,
+  );
 
   req.resData = {
     message: 'Review List Data',
@@ -48,7 +54,12 @@ ReviewController.getStoreReviews = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const reviews = await Review.getAll({ store_id: storeId }, { page, pageSize }, true);
+  const reviews = await Review.getAll(
+    { store_id: storeId },
+    { page, pageSize },
+    req.marketplace.mobile_domain,
+    true,
+  );
 
   req.resData = {
     message: 'Review List Data',
