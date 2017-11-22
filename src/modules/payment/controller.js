@@ -53,9 +53,11 @@ export const PaymentController = {};
 export default { PaymentController };
 
 PaymentController.getMethods = async (req, res, next) => {
+  let methods = await PaymentMethod.getAll();
+  methods = methods.map(o => o.serialize(req.marketplace.mobile_domain));
   req.resData = {
     message: 'Payment Methods Data',
-    data: await PaymentMethod.getAll(),
+    data: methods,
   };
   return next();
 };
