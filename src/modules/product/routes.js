@@ -241,7 +241,7 @@ routes.put('/users/store/products/:id([0-9]{1,10})',
   apiResponse());
 
 /**
- * GET /users/store/products/id/expeditions
+ * GET /users/store/products/id/expeditions/manage
  * Get the user's store expeditions
  */
 routes.get('/users/store/products/:id([0-9]{1,10})/expeditions/manage',

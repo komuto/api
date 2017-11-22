@@ -76,7 +76,7 @@ ProductController.index = async (req, res, next) => {
     storeId,
     isDropship,
   };
-  const products = await Product.get(params);
+  const products = await Product.get(params, req.marketplace.mobile_domain);
 
   req.resData = {
     message: 'Products Data',
@@ -106,7 +106,12 @@ ProductController.search = async (req, res, next) => {
 
 ProductController.getProduct = async (req, res, next) => {
   const { productId, storeId } = getProductAndStore(req.params.id);
-  const { product, idDropship } = await Product.getFullProduct(productId, storeId, req.user.id);
+  const { product, idDropship } = await Product.getFullProduct(
+    productId,
+    storeId,
+    req.user.id,
+    req.marketplace.mobile_domain,
+  );
   if (!product) throw getProductError('product', 'not_found');
   View.store(productId, requestIp.getClientIp(req), idDropship);
   product.share_link = Product.getShareLink(req.marketplace.mobile_domain, product);
@@ -174,7 +179,13 @@ ProductController.getDiscussions = async (req, res, next) => {
   const { productId, storeId } = getProductAndStore(req.params.id);
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
-  const discussions = await Discussion.getByProductId(productId, storeId, page, pageSize);
+  const discussions = await Discussion.getByProductId(
+    productId,
+    storeId,
+    page,
+    pageSize,
+    req.marketplace.mobile_domain,
+  );
   req.resData = {
     message: 'Product Discussion Data',
     meta: { page, limit: pageSize },
@@ -187,6 +198,7 @@ ProductController.getDiscussions = async (req, res, next) => {
  * Get comments
  */
 ProductController.getComments = async (req, res, next) => {
+  const domain = req.marketplace.mobile_domain;
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const [discussion, comment] = await Promise.all([
@@ -196,8 +208,8 @@ ProductController.getComments = async (req, res, next) => {
   if (!discussion) throw getDiscussionError('discussion', 'not_found');
   let product = discussion.related('product');
   let store = discussion.get('id_toko') ? discussion.related('store') : product.related('store');
-  store = store.serialize({ message: true });
-  product = product.serialize({ minimal: true });
+  store = store.serialize({ message: true }, domain);
+  product = product.serialize({ minimal: true }, domain);
   product.id = `${product.id}.${store.id}`;
   req.resData = {
     message: 'Discussion Comments Data',
@@ -205,7 +217,7 @@ ProductController.getComments = async (req, res, next) => {
     data: {
       product,
       store,
-      comments: comment.comments.serialize({ minimal: true }),
+      comments: comment.comments.serialize({ minimal: true }, domain),
     },
   };
   return next();
@@ -549,7 +561,7 @@ ProductController.bulkUpdateDropship = async (req, res, next) => {
  */
 ProductController.getStoreProduct = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const product = await Product.getFullOwnProduct(req.params.id, storeId, req.marketplace.id);
+  const product = await Product.getFullOwnProduct(req.params.id, storeId, req.marketplace);
   if (!product) throw getProductError('product', 'not_found');
   req.resData = {
     message: 'Product Detail Data',
@@ -584,7 +596,11 @@ ProductController.updateProduct = async (req, res, next) => {
  */
 ProductController.getProductExpeditionsManage = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const expeditions = await Product.getProductExpeditionsManage(req.params.id, storeId);
+  const expeditions = await Product.getProductExpeditionsManage(
+    req.params.id,
+    storeId,
+    req.marketplace.mobile_domain,
+  );
   req.resData = {
     message: 'Product Expeditions Manage Data',
     data: expeditions,

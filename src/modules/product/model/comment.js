@@ -20,7 +20,7 @@ class CommentModel extends bookshelf.Model {
     return ['tgl_subdiskusi'];
   }
 
-  serialize({ minimal = false } = {}) {
+  serialize({ minimal = false } = {}, domain) {
     const comment = {
       id: this.get('id_subdiskusi'),
       user_id: !this.relations.user ? this.get('id_subdiskusi') : undefined,
@@ -30,7 +30,7 @@ class CommentModel extends bookshelf.Model {
     if (minimal) {
       return {
         ...comment,
-        user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
+        user: this.relations.user ? this.related('user').serialize({ account: true }, domain) : undefined,
       };
     }
     return {

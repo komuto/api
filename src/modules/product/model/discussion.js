@@ -22,11 +22,11 @@ class DiscussionModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = false } = {}) {
+  serialize({ minimal = false } = {}, domain) {
     const discussion = {
       id: this.get('id_diskusi'),
       user_id: !this.relations.user ? this.get('id_users') : undefined,
-      user: this.relations.user ? this.related('user').serialize({ account: true }) : undefined,
+      user: this.relations.user ? this.related('user').serialize({ account: true }, domain) : undefined,
       question: this.get('pertanyaan_diskusi'),
       created_at: parseDate(this.get('tgl_diskusi')),
     };
@@ -72,7 +72,7 @@ class DiscussionModel extends bookshelf.Model {
   /**
    * Get discussion by product id
    */
-  static async getByProductId(productId, storeId, page, pageSize) {
+  static async getByProductId(productId, storeId, page, pageSize, domain) {
     const discussions = await this
       .where({ id_produk: productId, id_toko: storeId })
       .orderBy('tgl_diskusi', 'DESC')
@@ -81,7 +81,7 @@ class DiscussionModel extends bookshelf.Model {
     return await Promise.all(discussions.map(async (discussion) => {
       const countComment = await Comment.where({ id_diskusi: discussion.id }).count();
       return {
-        ...discussion.serialize({ minimal: true }),
+        ...discussion.serialize({ minimal: true }, domain),
         count_comments: parseNum(countComment),
       };
     }));

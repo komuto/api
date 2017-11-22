@@ -327,6 +327,10 @@ class ProductModel extends bookshelf.Model {
       Object.setPrototypeOf(product, getter);
       const [view, countLike, isLiked] = await getRelations[index];
       const store = Store.prototype.serialize.call(product);
+      store.logo = store.logo.replace('https://undefined', `https://${domain}`);
+      store.cover_image = store.cover_image
+        ? store.cover_image.replace('https://undefined', `https://${domain}`)
+        : null;
       const countSold = product.p_count_sold;
 
       product = this.prototype.serialize.call(product);
@@ -397,9 +401,9 @@ class ProductModel extends bookshelf.Model {
       }, []);
   }
 
-  static loadReviews(getReviews) {
+  static loadReviews(getReviews, domain) {
     return getReviews.map((review) => {
-      const { name, id: userId, photo } = review.related('user').serialize();
+      const { name, id: userId, photo } = review.related('user').serialize({}, domain);
       review = review.serialize();
       return {
         ...review,
@@ -451,8 +455,9 @@ class ProductModel extends bookshelf.Model {
    * @param productId {integer} product id
    * @param storeId {integer} store id
    * @param userId {integer} user id
+   * @param domain {string}
    */
-  static async getFullProduct(productId, storeId, userId) {
+  static async getFullProduct(productId, storeId, userId, domain) {
     let dropship;
     let isDropshipped = false;
     let getViewDropship = false;
@@ -506,7 +511,7 @@ class ProductModel extends bookshelf.Model {
       ? false
       : product.load('wholesale').catch(() => { throw getProductError('product', 'error'); });
 
-    const category = product.related('category').serialize();
+    const category = product.related('category').serialize(domain);
     let address = Address.getStoreAddress(product.related('store').get('id_users'));
 
     let [countLike, isLiked] = this.getLike(product, userId);
@@ -535,20 +540,20 @@ class ProductModel extends bookshelf.Model {
     ]);
 
     const location = { province: address.related('province'), district: address.related('district') };
-    const expeditions = this.loadExpeditions(product);
+    const expeditions = this.loadExpeditions(product, domain);
 
     getStore = getStore !== false && await getStore;
     let store = getStore !== false ? product.related('store') : dropship.related('store');
-    store = store.serialize({ verified: true });
+    store = store.serialize({ verified: true }, domain);
     store.is_favorite = !!isFavorite;
     const otherLikes = otherProds.map(prod => this.getLike(prod, userId));
 
     getWholesaler = getWholesaler !== false && await getWholesaler;
     const wholesaler = getWholesaler === false ? [] : product.related('wholesale').serialize();
-    const reviews = this.loadReviews(getReviews);
+    const reviews = this.loadReviews(getReviews, domain);
     const { count_review: countReview, quality, accuracy } = this.loadRating(rating);
     rating = { quality, accuracy };
-    const images = product.related('images');
+    const images = product.related('images').map(o => o.serialize(domain));
 
     product = {
       ...product.serialize(),
@@ -564,7 +569,7 @@ class ProductModel extends bookshelf.Model {
     otherProds = await Promise.all(otherProds.map(async (otherProduct, index) => {
       const [cl, il] = await Promise.all(otherLikes[index]);
       const otherImage = otherProduct.related('image');
-      const image = otherImage ? otherImage.serialize().file : config.defaultImage.product;
+      const image = otherImage ? otherImage.serialize(domain).file : config.defaultImage.product;
       const id = `${otherProduct.get('id_produk')}.${otherProduct.get('id_toko')}`;
       return {
         ...otherProduct.serialize({ minimal: true }),
@@ -596,9 +601,10 @@ class ProductModel extends bookshelf.Model {
    * Get product with its relation
    * @param productId {integer} product id
    * @param storeId {integer} store id
-   * @param marketplaceId {integer} marketplace id
+   * @param marketplace {object} marketplace
    */
-  static async getFullOwnProduct(productId, storeId, marketplaceId) {
+  static async getFullOwnProduct(productId, storeId, marketplace) {
+    const { id: marketplaceId, mobile_domain: domain } = marketplace;
     let isDropship = false;
     const where = { id_produk: productId, id_toko: storeId };
     const related = {
@@ -629,13 +635,13 @@ class ProductModel extends bookshelf.Model {
     } else wholesaler = [];
 
     let category = product.related('category');
-    const { parents, name } = await category.parents();
+    const { parents, name } = await category.parents(domain);
     category = {
-      ...category.serialize(),
+      ...category.serialize(domain),
       full_name: name,
       parents,
     };
-    const images = product.related('images');
+    const images = product.related('images').map(o => o.serialize(domain));
     const expeditionServices = product.related('expeditionServices').map(service => service.serialize({ fullName: true }));
     let catalog;
     if (isDropship) {
@@ -795,8 +801,9 @@ class ProductModel extends bookshelf.Model {
    * Get list expedition service
    * @param id {integer} product id
    * @param storeId {integer} store id
+   * @param domain {string}
    */
-  static async getProductExpeditionsManage(id, storeId) {
+  static async getProductExpeditionsManage(id, storeId, domain) {
     const product = await this.where({ id_produk: id, id_toko: storeId }).fetch({
       withRelated: [
         { expeditionServices: qb => qb.where('status_detilekspedisiproduk', ProductExpeditionStatus.USED) },
@@ -825,13 +832,13 @@ class ProductModel extends bookshelf.Model {
         ));
         return {
           ...service.serialize(),
-          expedition: expedition.serialize({ minimal: true }),
+          expedition: expedition.serialize({ minimal: true }, domain),
           is_checked: !!found,
           is_active: !!found,
         };
       });
       const totalActive = _.filter(services, { is_active: true }).length;
-      expedition = expedition.serialize();
+      expedition = expedition.serialize({}, domain);
       expedition.is_active = services.length ? totalActive === services.length : false;
       services = _.sortBy(services, 'id');
       return {

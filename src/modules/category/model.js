@@ -53,7 +53,7 @@ class CategoryModel extends bookshelf.Model {
     return this.hasMany('Category', 'parentid_kategoriproduk', 'id_kategoriproduk');
   }
 
-  async parents() {
+  async parents(domain) {
     let category = this;
     const name = category.serialize().name;
     let parents = [];
@@ -63,7 +63,7 @@ class CategoryModel extends bookshelf.Model {
       category = await CategoryModel.where('id_kategoriproduk', parentId).fetch();
 
       if (category) {
-        parents.push(category.serialize());
+        parents.push(category.serialize(domain));
       }
     }
 
