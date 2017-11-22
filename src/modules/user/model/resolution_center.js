@@ -40,7 +40,7 @@ class ResolutionCenterModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = false } = {}, name) {
+  serialize({ minimal = false } = {}, name, domain) {
     const resolution = {
       id: this.get('id_rescenter'),
       user_id: this.get('id_users'),
@@ -62,7 +62,7 @@ class ResolutionCenterModel extends bookshelf.Model {
       created_at: parseDate(msg.create_at),
     }));
 
-    if (this.relations.imageGroups) resolution.images = this.related('imageGroups');
+    if (this.relations.imageGroups) resolution.images = this.related('imageGroups').serialize(domain);
     return resolution;
   }
 
