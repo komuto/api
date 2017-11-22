@@ -96,7 +96,7 @@ class BucketModel extends bookshelf.Model {
   /**
    * Get detail bucket
    */
-  static async getDetail(userId) {
+  static async getDetail(userId, domain) {
     const bucket = await this.where({ id_users: userId, status_bucket: BucketStatus.ADDED }).fetch({
       withRelated: [
         'promo',
@@ -112,7 +112,9 @@ class BucketModel extends bookshelf.Model {
       ],
     });
     if (!bucket) throw getBucketError('bucket', 'not_found');
-    const items = await Promise.all(bucket.related('items').map(async item => await Item.loadDetailItem(item)));
+    const items = await Promise.all(
+      bucket.related('items').map(async item => await Item.loadDetailItem(item, domain)),
+    );
     return { ...bucket.serialize(), items };
   }
 

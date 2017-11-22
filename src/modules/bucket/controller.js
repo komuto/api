@@ -60,7 +60,7 @@ BucketController.cancelPromo = async (req, res, next) => {
 };
 
 BucketController.getBucket = async (req, res, next) => {
-  const bucket = await Bucket.getDetail(req.user.id);
+  const bucket = await Bucket.getDetail(req.user.id, req.marketplace.mobile_domain);
   req.resData = {
     message: 'Bucket Data',
     data: bucket,
@@ -216,7 +216,7 @@ BucketController.getItem = async (req, res, next) => {
   const item = await Item.getDetail({
     id_bucket: bucket.id,
     id_listbucket: req.params.id,
-  });
+  }, req.marketplace.mobile_domain);
   req.resData = {
     message: 'Item data',
     data: item,

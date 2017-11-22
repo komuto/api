@@ -85,13 +85,13 @@ class ItemModel extends bookshelf.Model {
     return this.where(where).fetch({ withRelated: related });
   }
 
-  static async loadDetailItem(item) {
+  static async loadDetailItem(item, domain) {
     let product = item.related('product');
     let shipping = item.related('shipping');
     let store = product.related('store');
     const image = product.related('image');
     const wholesale = product.related('wholesale').serialize();
-    const expeditions = await Product.loadExpeditions(product);
+    const expeditions = await Product.loadExpeditions(product, domain);
     const districtStore = store.related('user').related('addresses').models[0].related('district');
 
     if (item.get('id_dropshipper')) {
@@ -100,8 +100,8 @@ class ItemModel extends bookshelf.Model {
     }
 
     product = product.serialize({ minimal: true, alterId: store.get('id_toko') });
-    product.image = image ? image.serialize().file : config.defaultImage.product;
-    product.store = store;
+    product.image = image ? image.serialize(domain).file : config.defaultImage.product;
+    product.store = store.serialize({}, domain);
     product.location = { district: districtStore };
     product.expeditions = expeditions;
     product.wholesale = product.is_wholesaler ? wholesale : null;
@@ -110,7 +110,7 @@ class ItemModel extends bookshelf.Model {
     const province = address.related('province');
     const district = address.related('district');
     const subDistrict = address.related('subDistrict');
-    shipping = shipping.serialize();
+    shipping = shipping.serialize({}, domain);
     shipping.address = {
       ...address.serialize(),
       province,
@@ -127,7 +127,7 @@ class ItemModel extends bookshelf.Model {
   /**
    * Get item by bucket_id and product_id
    */
-  static async getDetail(where) {
+  static async getDetail(where, domain) {
     const item = await this.where(where).fetch({
       withRelated: [
         { 'product.store.user.addresses': qb => (qb.where('alamat_originjual', 1)) },
@@ -142,7 +142,7 @@ class ItemModel extends bookshelf.Model {
       ],
     });
     if (!item) throw getItemError('item', 'not_found');
-    return await this.loadDetailItem(item);
+    return await this.loadDetailItem(item, domain);
   }
 
   /**

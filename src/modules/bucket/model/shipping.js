@@ -33,14 +33,16 @@ class ShippingModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = false } = {}) {
+  serialize({ minimal = false } = {}, domain) {
     const shipping = {
       id: parseNum(this.get('id_pengiriman_produk')),
       delivery_cost: parseNum(this.get('harga_ongkir')),
       insurance_fee: parseNum(this.get('nilai_asuransi')),
       is_insurance: this.get('is_asuransi'),
       address: this.relations.address ? this.related('address').serialize({ full: minimal }) : undefined,
-      expedition_service: this.relations.expeditionService ? this.related('expeditionService') : undefined,
+      expedition_service: this.relations.expeditionService
+        ? this.related('expeditionService').serialize({}, domain)
+        : undefined,
     };
     if (minimal) return shipping;
     return {

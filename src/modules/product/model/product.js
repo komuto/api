@@ -382,14 +382,14 @@ class ProductModel extends bookshelf.Model {
     }).fetchAll();
   }
 
-  static loadExpeditions(product) {
+  static loadExpeditions(product, domain) {
     // checking whether expedition id is already in the list or not
     const checker = [];
     return product.related('expeditionServices')
       .reduce((res, service) => {
         const expeditionId = service.get('id_ekspedisi');
         if (!checker.includes(expeditionId)) {
-          const expedition = service.related('expedition').serialize({ minimal: true });
+          const expedition = service.related('expedition').serialize({ minimal: true }, domain);
           checker.push(expeditionId);
           res.push(expedition);
         }
