@@ -5,7 +5,7 @@ export const CategoryController = {};
 export default { CategoryController };
 
 CategoryController.getDetailCategories = async (req, res, next) => {
-  const categories = await Category.getDetailCategories(req.params.id);
+  const categories = await Category.getDetailCategories(req.params.id, req.marketplace.mobile_domain);
   req.resData = {
     message: 'Category List Data',
     data: categories,
@@ -14,7 +14,7 @@ CategoryController.getDetailCategories = async (req, res, next) => {
 };
 
 CategoryController.getFullCategories = async (req, res, next) => {
-  const categories = await Category.getFullCategories();
+  const categories = await Category.getFullCategories(req.marketplace.mobile_domain);
   req.resData = {
     message: 'Category List Data',
     data: categories,
@@ -35,7 +35,8 @@ CategoryController.getBrands = async (req, res, next) => {
  * Get detail categories
  */
 CategoryController.getListCategories = async (req, res, next) => {
-  const categories = await Category.get({ parentid_kategoriproduk: 0 });
+  let categories = await Category.get({ parentid_kategoriproduk: 0 });
+  categories = categories.map(category => category.serialize(req.marketplace.mobile_domain));
   req.resData = {
     message: 'Category List Data',
     data: categories,

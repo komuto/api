@@ -21,12 +21,12 @@ class CategoryModel extends bookshelf.Model {
     return false;
   }
 
-  serialize() {
+  serialize(domain) {
     return {
       id: this.get('id_kategoriproduk'),
       parent_id: this.get('parentid_kategoriproduk'),
-      icon: core.categoryPath(this.get('iconpath_kategoriproduk'), 'pwa'),
-      icon_mobile: core.categoryPath(this.get('icon_mobile'), 'mobile'),
+      icon: core.categoryPath(domain, this.get('iconpath_kategoriproduk'), 'pwa'),
+      icon_mobile: core.categoryPath(domain, this.get('icon_mobile'), 'mobile'),
       name: this.get('nama_kategoriproduk'),
       slug: slug(this.get('nama_kategoriproduk'), { lower: true, charmap: '' }),
     };
@@ -86,12 +86,12 @@ class CategoryModel extends bookshelf.Model {
   /**
    * Get categories and subcategories
    */
-  static async getDetailCategories(id) {
+  static async getDetailCategories(id, domain) {
     const category = await this.where({ id_kategoriproduk: id }).fetch({ withRelated: ['subcategories'] });
     if (!category) throw getCategoryError('category', 'not_found');
-    const subCategories = category.related('subcategories');
+    const subCategories = category.related('subcategories').map(sub => sub.serialize(domain));
     return {
-      ...category.serialize(),
+      ...category.serialize(domain),
       sub_categories: subCategories,
     };
   }
@@ -99,13 +99,13 @@ class CategoryModel extends bookshelf.Model {
   /**
    * Get categories and subcategories
    */
-  static async getFullCategories() {
+  static async getFullCategories(domain) {
     const categories = await this.where({ parentid_kategoriproduk: 0 }).fetchAll({ withRelated: ['subcategories'] });
     if (!categories) throw getCategoryError('category', 'not_found');
     return categories.map((category) => {
-      const subCategories = category.related('subcategories');
+      const subCategories = category.related('subcategories').map(sub => sub.serialize(domain));
       return {
-        ...category.serialize(),
+        ...category.serialize(domain),
         sub_categories: subCategories,
       };
     });

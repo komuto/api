@@ -12,7 +12,7 @@ const imagePath = (path, file, parent = null) => {
   if (!file) return null;
   return `${config.assetUrl}/assets${parent ? `/${parent}` : ''}/${path}/${file}`;
 };
-const categoryPath = (file, path) => `${config.assetUrl}/assets/images/img-kategori/${path}/${file}`;
+const categoryPath = (domain, file, path) => `https://${domain}/assets/images/img-kategori/${path}/${file}`;
 const expeditionPath = file => `${config.assetUrl}/assets/img/pengiriman/${file}`;
 const cache = apiCache.cache;
 const cacheClear = apiCache.cacheClear;
