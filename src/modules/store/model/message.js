@@ -86,6 +86,7 @@ class MessageModel extends bookshelf.Model {
    * @param isArchived
    * @param page
    * @param pageSize
+   * @param domain
    */
   static async getById(id, type, isArchived = false, page, pageSize, domain) {
     const where = type === 'store' ? { 'messages.id_toko': id } : { 'messages.id_users': id };
@@ -127,7 +128,7 @@ class MessageModel extends bookshelf.Model {
         created_at: parseDate(message.get('date_detilmessages')),
       };
       return {
-        ...message.serialize(),
+        ...message.serialize(domain),
         detail_message: detail || {},
       };
     });
@@ -167,7 +168,7 @@ class MessageModel extends bookshelf.Model {
       invoiceUrl = `https://${domain}/transaction/${invoice.get('id_invoice')}/${invoice.get('id_bucket')}`;
     }
 
-    message = message.serialize();
+    message = message.serialize(domain);
     const flag = type === 'store' ? message.flag_receiver : message.flag_sender;
     message.type = flag === MessageFlagStatus.ARCHIVE ? 'archive' : 'conversation';
 

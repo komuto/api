@@ -30,7 +30,7 @@ export const StoreController = {};
 export default { StoreController };
 
 StoreController.getStore = async (req, res, next) => {
-  const store = await Store.getFullStore(req.params.id, req.user.id, req.marketplace.id);
+  const store = await Store.getFullStore(req.params.id, req.user.id, req.marketplace);
   req.resData = {
     message: 'Store Detail Data',
     data: store,
@@ -95,7 +95,7 @@ StoreController.listFavorites = async (req, res, next) => {
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const favorites = await FavoriteStore.getListFavoriteStore(
     req.user.id,
-    req.marketplace.id,
+    req.marketplace,
     req.query.q,
     pageSize,
     page,
@@ -354,7 +354,14 @@ StoreController.getMessages = async (req, res, next) => {
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const storeId = await Store.getStoreId(req.user.id);
   const isArchived = req.query.is_archived ? req.query.is_archived : false;
-  const messages = await Message.getById(storeId, 'store', JSON.parse(isArchived), page, pageSize);
+  const messages = await Message.getById(
+    storeId,
+    'store',
+    JSON.parse(isArchived),
+    page,
+    pageSize,
+    req.marketplace.mobile_domain,
+  );
   req.resData = {
     message: 'Message Data',
     meta: { page, limit: pageSize },

@@ -101,7 +101,7 @@ class DiscussionModel extends bookshelf.Model {
   /**
    * Get discussion by user id or store id
    */
-  static async getByQuery(where, page, pageSize) {
+  static async getByQuery(where, page, pageSize, domain) {
     const discussions = await this
       .where(where)
       .orderBy('tgl_diskusi', 'desc')
@@ -112,12 +112,12 @@ class DiscussionModel extends bookshelf.Model {
       let product = discussion.related('product');
       const image = product.related('image');
       product = {
-        ...product.serialize({ minimal: true }),
+        ...product.serialize({ minimal: true }, domain),
         id: `${product.get('id_produk')}.${product.get('id_toko')}`,
-        image: image ? image.serialize().file : config.defaultImage.product,
+        image: image ? image.serialize(domain).file : config.defaultImage.product,
       };
       return {
-        ...discussion.serialize({ minimal: true }),
+        ...discussion.serialize({ minimal: true }, domain),
         product,
       };
     });

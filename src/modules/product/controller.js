@@ -410,7 +410,7 @@ ProductController.deleteDropship = async (req, res, next) => {
 ProductController.storeProducts = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
   const params = { storeId, marketplaceId: req.marketplace.id };
-  const catalogs = await Catalog.getCatalogWithProducts(params);
+  const catalogs = await Catalog.getCatalogWithProducts(params, req.marketplace.mobile_domain);
   req.resData = {
     message: 'Store Products Data',
     data: catalogs,
@@ -435,7 +435,7 @@ ProductController.storeProductsSearch = async (req, res, next) => {
     hidden: req.query.hidden !== undefined,
     masterFee,
   };
-  const products = await Product.storeProductsSearch(params);
+  const products = await Product.storeProductsSearch(params, req.marketplace.mobile_domain);
   req.resData = {
     message: 'Store Products Data',
     meta: { page, limit: pageSize },
@@ -458,7 +458,7 @@ ProductController.storeCatalogProducts = async (req, res, next) => {
     page,
     pageSize,
     marketplaceId: req.marketplace.id,
-  });
+  }, req.marketplace.mobile_domain);
   if (!products.length) throw getCatalogProductsError('catalog_id', 'not_found');
   req.resData = {
     message: 'Store Catalog Products Data',
@@ -480,7 +480,7 @@ ProductController.hiddenStoreProducts = async (req, res, next) => {
     page,
     pageSize,
     hidden: true,
-  });
+  }, req.marketplace.mobile_domain);
   req.resData = {
     message: 'Hidden Store Products Data',
     meta: { page, limit: pageSize },
@@ -506,7 +506,7 @@ ProductController.listStoreCatalogProducts = async (req, res, next) => {
     pageSize,
     isDropship,
     hidden,
-  });
+  }, req.marketplace.mobile_domain);
   req.resData = {
     message: 'Store Catalog Products Data',
     meta: { page, limit: pageSize },

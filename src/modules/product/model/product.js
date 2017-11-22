@@ -858,7 +858,7 @@ class ProductModel extends bookshelf.Model {
   /**
    * Get store products (hidden / multiple check)
    */
-  static async storeProducts(params) {
+  static async storeProducts(params, domain) {
     const { storeId, catalogId = null, page, pageSize, isDropship = null, hidden = null } = params;
     const where = { id_toko: storeId };
     if (hidden !== null) where.status_produk = hidden ? ProductStatus.HIDE : ProductStatus.SHOW;
@@ -872,7 +872,7 @@ class ProductModel extends bookshelf.Model {
     return await Promise.all(products.map(async (product) => {
       await product.load({ images: qb => qb.limit(1) });
       const images = product.related('images').models;
-      const image = images.length ? images[0].serialize().file : config.defaultImage.product;
+      const image = images.length ? images[0].serialize(domain).file : config.defaultImage.product;
       return {
         ...product.serialize({ minimal: true }),
         image,
@@ -884,7 +884,7 @@ class ProductModel extends bookshelf.Model {
   /**
    * Get store products (search)
    */
-  static async storeProductsSearch(params) {
+  static async storeProductsSearch(params, domain) {
     const {
       page,
       pageSize,
@@ -925,7 +925,7 @@ class ProductModel extends bookshelf.Model {
     return await Promise.all(products.map(async (product) => {
       await product.load({ images: qb => qb.limit(1) });
       const images = product.related('images').models;
-      const image = images.length ? images[0].serialize().file : config.defaultImage.product;
+      const image = images.length ? images[0].serialize(domain).file : config.defaultImage.product;
       const dropshipOrigin = !product.get('id_dropshipper') ? undefined
         : {
           store_id: product.get('id_produk'),

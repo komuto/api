@@ -383,7 +383,12 @@ UserController.getStoreDiscussions = async (req, res, next) => {
   const page = req.query.page ? parseInt(req.query.page, 10) : 1;
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const storeId = await Store.getStoreId(req.user.id);
-  const discussions = await Discussion.getByQuery({ id_toko: storeId }, page, pageSize);
+  const discussions = await Discussion.getByQuery(
+    { id_toko: storeId },
+    page,
+    pageSize,
+    req.marketplace.mobile_domain,
+  );
   req.resData = {
     message: 'Discussion Data',
     meta: { page, limit: pageSize },

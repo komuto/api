@@ -46,12 +46,13 @@ class FavoriteStoreModel extends bookshelf.Model {
   /**
    * Get list of favorite store with its products
    * @param id {integer} user id
-   * @param marketplaceId {integer} marketplace id
+   * @param marketplace {object}
    * @param query {string}
    * @param pageSize {integer} limit
    * @param page {integer}
    */
-  static async getListFavoriteStore(id, marketplaceId, query, pageSize, page) {
+  static async getListFavoriteStore(id, marketplace, query, pageSize, page) {
+    const { id: marketplaceId, mobile_domain: domain } = marketplace;
     const favorites = await this.query((qb) => {
       qb.where('toko_favorit.id_users', id);
       qb.where('toko_favorit.referred_marketplace', marketplaceId);
@@ -75,7 +76,7 @@ class FavoriteStoreModel extends bookshelf.Model {
       // Get province
       addresses.push(Address.getStoreAddress(userId));
       return {
-        store: store.serialize({ favorite: true }),
+        store: store.serialize({ favorite: true }, domain),
         products,
       };
     }));
@@ -84,7 +85,7 @@ class FavoriteStoreModel extends bookshelf.Model {
       store.products = await Promise.all(store.products.map(async (product) => {
         const [countLike, isLiked] = await Promise.all(Product.getLike(product, id));
         return {
-          ...product.serialize({ minimal: true, alterId: true }),
+          ...product.serialize({ minimal: true, alterId: true }, domain),
           count_like: parseNum(countLike),
           is_liked: !!isLiked,
         };

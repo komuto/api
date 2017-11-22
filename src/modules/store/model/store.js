@@ -152,9 +152,10 @@ class StoreModel extends bookshelf.Model {
    * Get store with its relation
    * @param id {integer} store id
    * @param userId {integer} user id
-   * @param marketplaceId {integer} marketplace id
+   * @param marketplace {object}
    */
-  static async getFullStore(id, userId, marketplaceId) {
+  static async getFullStore(id, userId, marketplace) {
+    const { id: marketplaceId, mobile_domain: domain } = marketplace;
     const related = [
       'user.addresses.district',
       'user.addresses.province',
@@ -183,7 +184,7 @@ class StoreModel extends bookshelf.Model {
 
         return {
           ...product,
-          image: image ? image.serialize().file : config.defaultImage.product,
+          image: image ? image.serialize(domain).file : config.defaultImage.product,
           count_like: parseNum(countLike),
           is_liked: !!isLiked,
         };
@@ -204,7 +205,7 @@ class StoreModel extends bookshelf.Model {
     const totalSold = parseNum(fromProduct.get('count_sold')) + parseNum(fromDropship.get('count_sold'));
     const { origin, district } = this.getOriginAndDistrict(store);
     const isFavorite = store.related('favoriteStores').length;
-    store = store.serialize({ verified: true });
+    store = store.serialize({ verified: true }, domain);
     store.total_product_sold = totalSold;
     store.origin = origin;
     store.is_favorite = !!isFavorite;
