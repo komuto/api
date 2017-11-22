@@ -240,9 +240,10 @@ class InvoiceModel extends bookshelf.Model {
    * @param invoiceStatus {int}
    * @param page {int}
    * @param pageSize {int}
+   * @param domain {string}
    * @param isJoin {boolean}
    */
-  static async getOrders(id, invoiceStatus, page, pageSize, isJoin) {
+  static async getOrders(id, invoiceStatus, page, pageSize, domain, isJoin) {
     let where = { 'invoice.id_toko': id };
     if (invoiceStatus) where = { ...where, status_transaksi: invoiceStatus };
     const invoices = await this.query((qb) => {
@@ -273,12 +274,12 @@ class InvoiceModel extends bookshelf.Model {
     return invoices.map((invoice) => {
       const products = invoice.related('items').map((item) => {
         const product = item.related('product');
-        const image = product.related('image').serialize().file;
-        return { ...product.serialize({ minimal: true }), image };
+        const image = product.related('image').serialize(domain).file;
+        return { ...product.serialize({ minimal: true }, domain), image };
       });
       const isDropship = !!invoice.related('items').models[0].get('id_dropshipper');
-      const user = invoice.related('buyer').serialize({ orderDetail: true });
-      invoice = invoice.serialize({ minimal: true });
+      const user = invoice.related('buyer').serialize({ orderDetail: true }, domain);
+      invoice = invoice.serialize({ minimal: true }, domain);
       if (!isDropship) invoice.type = 'buyer';
       else if (Number(id) === Number(invoice.store_id)) invoice.type = 'seller';
       else invoice.type = 'reseller';
@@ -289,9 +290,10 @@ class InvoiceModel extends bookshelf.Model {
   /**
    * @param id {int} invoice id
    * @param store {object}
+   * @param domain {string}
    * @param invoiceStatus {object}
    */
-  static async getOrderDetail(id, store, invoiceStatus = null) {
+  static async getOrderDetail(id, store, domain, invoiceStatus = null) {
     const storeId = store.get('id_toko');
     let where = { 'invoice.id_invoice': id };
     const related = [
@@ -344,11 +346,11 @@ class InvoiceModel extends bookshelf.Model {
 
     const items = invoice.related('items').map((item) => {
       const product = item.related('product');
-      const image = product.related('image').serialize().file;
+      const image = product.related('image').serialize(domain).file;
       let review = item.related('review');
       review = review.serialize().id ? review : null;
       item = item.serialize({ minimal: true, note: true });
-      item = { ...item, product: { ...product.serialize({ minimal: true }), image } };
+      item = { ...item, product: { ...product.serialize({ minimal: true }, domain), image } };
       if (!invoiceStatus) {
         item = {
           ...item,
@@ -366,17 +368,17 @@ class InvoiceModel extends bookshelf.Model {
       getBuyer,
     ]);
 
-    const buyer = invoice.related('buyer').serialize({ orderDetail: true });
+    const buyer = invoice.related('buyer').serialize({ orderDetail: true }, domain);
     const result = {
       invoice: {
-        ...invoice.serialize({ minimal: true, orderDetail: true }),
+        ...invoice.serialize({ minimal: true, orderDetail: true }, domain),
         day_limit: limit ? parseNum(limit.value) : null,
         date_limit: limit ? moment(invoice.get('createdate_invoice')).add(limit.value, 'd').unix() : null,
       },
       items,
       buyer: { ...buyer, address: buyerAddress.serialize({ full: true }) },
       seller: {
-        ...seller.serialize({ orderDetail: true }),
+        ...seller.serialize({ orderDetail: true }, domain),
         address: sellerAddress.serialize({ full: true }),
       },
     };
@@ -394,10 +396,10 @@ class InvoiceModel extends bookshelf.Model {
     }
 
     if (!invoiceStatus) {
-      const shipping = invoice.related('shipping').serialize();
+      const shipping = invoice.related('shipping').serialize(domain);
       delete shipping.address;
       delete shipping.expedition_service;
-      const dispute = invoice.related('dispute').serialize();
+      const dispute = invoice.related('dispute').serialize(domain);
       return {
         ...result,
         shipping,

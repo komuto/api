@@ -455,7 +455,8 @@ PaymentController.getNewOrders = async (req, res, next) => {
     InvoiceTransactionStatus.WAITING,
     page,
     pageSize,
-    );
+    req.marketplace.mobile_domain,
+  );
   req.resData = {
     message: 'New Orders Data',
     meta: { page, limit: pageSize },
@@ -466,8 +467,12 @@ PaymentController.getNewOrders = async (req, res, next) => {
 
 PaymentController.getNewOrderDetail = async (req, res, next) => {
   const store = await Store.where('id_users', req.user.id).fetch();
-  const invoice = await Invoice
-    .getOrderDetail(req.params.id, store, InvoiceTransactionStatus.WAITING);
+  const invoice = await Invoice.getOrderDetail(
+    req.params.id,
+    store,
+    req.marketplace.mobile_domain,
+    InvoiceTransactionStatus.WAITING,
+  );
   if (!invoice) throw getInvoiceError('invoice', 'not_found');
   req.resData = {
     message: 'New Order Detail Data',
@@ -485,7 +490,8 @@ PaymentController.getProcessingOrders = async (req, res, next) => {
     InvoiceTransactionStatus.PROCEED,
     page,
     pageSize,
-    );
+    req.marketplace.mobile_domain,
+  );
   req.resData = {
     message: 'Processing Orders Data',
     meta: { page, limit: pageSize },
@@ -499,6 +505,7 @@ PaymentController.getProcessingOrderDetail = async (req, res, next) => {
   const invoice = await Invoice.getOrderDetail(
     req.params.id,
     store,
+    req.marketplace.mobile_domain,
     InvoiceTransactionStatus.PROCEED,
   );
   if (!invoice) throw getInvoiceError('invoice', 'not_found');
@@ -515,7 +522,14 @@ PaymentController.getSales = async (req, res, next) => {
   const pageSize = req.query.limit ? parseInt(req.query.limit, 10) : 10;
   const storeId = await Store.getStoreId(req.user.id);
   const isJoin = req.query.is_dropship ? JSON.parse(req.query.is_dropship) : false;
-  const invoices = await Invoice.getOrders(storeId, null, page, pageSize, isJoin);
+  const invoices = await Invoice.getOrders(
+    storeId,
+    null,
+    page,
+    pageSize,
+    req.marketplace.mobile_domain,
+    isJoin,
+  );
   req.resData = {
     message: 'Sales Data',
     meta: { page, limit: pageSize },
@@ -527,7 +541,7 @@ PaymentController.getSales = async (req, res, next) => {
 PaymentController.getSaleDetail = async (req, res, next) => {
   const store = await Store.where('id_users', req.user.id).fetch();
   if (!store) throw getStoreError('store', 'not_found');
-  const invoice = await Invoice.getOrderDetail(req.params.id, store);
+  const invoice = await Invoice.getOrderDetail(req.params.id, store, req.marketplace.mobile_domain);
   if (!invoice) throw getInvoiceError('invoice', 'not_found');
   req.resData = {
     message: 'Sale Detail Data',
