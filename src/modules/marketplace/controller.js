@@ -17,7 +17,7 @@ MarketplaceController.getBanners = async (req, res, next) => {
   let banners = await Banner.findByMarketplaceId(req.marketplace.id);
 
   banners = banners.map((banner) => {
-    banner = banner.serialize();
+    banner = banner.serialize(req.marketplace.mobile_domain);
     if (banner.link.includes('/detail/')) {
       const sArr = banner.link.split('.');
       const pArr = sArr[sArr.length - 2].split('-');
