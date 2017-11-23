@@ -155,6 +155,8 @@ constraints.createProduct = {
     numericality: {
       onlyInteger: true,
       greaterThanOrEqualTo: 0,
+      lessThan: 1000000000,
+      message: 'not valid',
     },
   },
   weight: {
