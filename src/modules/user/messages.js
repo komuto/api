@@ -20,6 +20,7 @@ export const msg = {
     title: 'Registrasi gagal',
     duplicate_email: 'Email sudah terdaftar',
     name_presence: '^Nama harus diisi',
+    name_length: '^Nama minimal 4 karakter',
     email_presence: '^Email harus diisi',
     email_not_valid: '^Email tidak valid',
     password_presence: '^Password harus diisi',

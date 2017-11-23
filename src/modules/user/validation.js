@@ -34,7 +34,15 @@ constraints.socialLogin = {
 };
 
 constraints.registration = {
-  name: { presence: { message: registrationMsg.name_presence } },
+  name: {
+    presence: {
+      message: registrationMsg.name_presence,
+    },
+    length: {
+      minimum: 4,
+      message: registrationMsg.name_length,
+    },
+  },
   email: {
     presence: { message: registrationMsg.email_presence },
     email: { message: registrationMsg.email_not_valid },
