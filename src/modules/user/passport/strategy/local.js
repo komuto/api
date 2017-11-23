@@ -17,7 +17,7 @@ export default new LocalStrategy({
     if (!check) {
       return done(loginError('password', 'wrong_password', true), false);
     }
-    return done(null, user.serialize({ phone: true }));
+    return done(null, user.serialize({ phone: true }, req.marketplace.mobile_domain));
   } catch (e) {
     return done(loginError('api', 'bad_request', true), false);
   }

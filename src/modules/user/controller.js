@@ -201,16 +201,24 @@ UserController.createUser = async (req, res, next) => {
  * Get user profile
  */
 UserController.getUserProfile = async (req, res, next) => {
-  const user = await User.getUserProfile(req.user.id, req.marketplace.mobile_domain);
+  const data = await User.getUserProfile(req.user.id, req.marketplace.mobile_domain);
   req.resData = {
     message: 'User Profile',
-    data: user,
+    data,
   };
   return next();
 };
 
 UserController.getAccountProfile = async (req, res, next) => {
-  const { id, name, photo, gender, place_of_birth, date_of_birth } = req.user;
+  const user = await User.getById(req.user.id);
+  const {
+    id,
+    name,
+    photo,
+    gender,
+    place_of_birth,
+    date_of_birth,
+  } = user.serialize({}, req.marketplace.mobile_domain);
   const birthPlace = await User.getBirthPlace(place_of_birth);
   req.resData = {
     message: 'Profile Data',
