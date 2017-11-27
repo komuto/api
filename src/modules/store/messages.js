@@ -53,6 +53,7 @@ export const msg = {
     not_valid: 'Tidak bisa memfavoritkan toko sendiri',
     not_found: 'Toko tidak ditemukan',
     success: 'Berhasil memfavoritkan toko',
+    unfavorite: 'Berhasil menghapus toko dari daftar favorit',
   },
   deleteCatalogMsg: {
     title: 'Hapus katalog gagal',

@@ -84,7 +84,7 @@ StoreController.favorite = async (req, res, next) => {
     await FavoriteStore.create(data);
   }
   req.resData = {
-    message: msg.makeFavoriteMsg.success,
+    message: isFavorite ? msg.makeFavoriteMsg.success : msg.makeFavoriteMsg.unfavorite,
     data: { is_favorite: isFavorite },
   };
   return next();
