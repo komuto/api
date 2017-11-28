@@ -72,6 +72,11 @@ constraints.updatePhone = {
   phone_number: {
     presence: { message: updateMsg.phone_presence },
     format: { pattern: /^[0-9]+$/, message: updateMsg.phone_not_valid },
+    length: {
+      minimum: 5,
+      maximum: 12,
+      message: updateMsg.phone_length,
+    },
   },
 };
 
