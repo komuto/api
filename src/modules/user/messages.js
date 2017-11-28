@@ -36,6 +36,7 @@ export const msg = {
     title: 'Update password gagal',
     not_match: 'Password tidak sama',
     email_not_found: 'Email Anda tidak terdaftar',
+    wrong_email: 'Email Anda salah',
     token_not_valid: 'Token tidak valid',
     success: 'Sukses mengubah password Anda',
   },
