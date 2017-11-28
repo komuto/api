@@ -858,7 +858,7 @@ class ProductModel extends bookshelf.Model {
   /**
    * Get store products (hidden / multiple check)
    */
-  static async storeProducts(params, domain) {
+  static async storeProducts(params, marketplace) {
     const { storeId, catalogId = null, page, pageSize, isDropship = null, hidden = null } = params;
     const where = { id_toko: storeId };
     if (hidden !== null) where.status_produk = hidden ? ProductStatus.HIDE : ProductStatus.SHOW;
@@ -867,16 +867,26 @@ class ProductModel extends bookshelf.Model {
     if (catalogId) where.identifier_katalog = catalogId;
     if (isDropship !== null) where.is_dropshiper = isDropship;
 
-    const products = await this.where(where).fetchPage({ page, pageSize });
+    let products = this.where(where).fetchPage({ page, pageSize, withRelated: 'image' });
+    let masterFee = MasterFee.findByMarketplaceId(marketplace.id);
+
+    [products, masterFee] = await Promise.all([products, masterFee]);
 
     return await Promise.all(products.map(async (product) => {
-      await product.load({ images: qb => qb.limit(1) });
-      const images = product.related('images').models;
-      const image = images.length ? images[0].serialize(domain).file : config.defaultImage.product;
+      let image = product.related('image');
+      image = image
+        ? image.serialize(marketplace.mobile_domain).file
+        : config.defaultImage.product;
       return {
         ...product.serialize({ minimal: true }),
         image,
         is_checked: isChecked,
+        commission: MasterFee.calculateCommissionByFees(
+          masterFee,
+          Number(product.get('harga_produk')),
+          true,
+          false,
+        ),
       };
     }));
   }

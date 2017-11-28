@@ -484,7 +484,7 @@ ProductController.hiddenStoreProducts = async (req, res, next) => {
     page,
     pageSize,
     hidden: true,
-  }, req.marketplace.mobile_domain);
+  }, req.marketplace);
   req.resData = {
     message: 'Hidden Store Products Data',
     meta: { page, limit: pageSize },
@@ -510,7 +510,7 @@ ProductController.listStoreCatalogProducts = async (req, res, next) => {
     pageSize,
     isDropship,
     hidden,
-  }, req.marketplace.mobile_domain);
+  }, req.marketplace);
   req.resData = {
     message: 'Store Catalog Products Data',
     meta: { page, limit: pageSize },
