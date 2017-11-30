@@ -25,6 +25,7 @@ routes.get('/stores/:id([0-9]{1,10})/reviews',
   apiResponse());
 
 /**
+ * PUT /stores/id/favorite
  * Favorite or delete store
  */
 routes.put('/stores/:id([0-9]{1,10})/favorite',

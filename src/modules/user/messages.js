@@ -37,6 +37,7 @@ export const msg = {
     title: 'Update password gagal',
     not_match: 'Password tidak sama',
     email_not_found: 'Email Anda tidak terdaftar',
+    wrong_email: 'Email Anda salah',
     token_not_valid: 'Token tidak valid',
     success: 'Sukses mengubah password Anda',
   },
@@ -51,6 +52,7 @@ export const msg = {
     phone_presence: '^No hp harus diisi',
     phone_not_valid: '^No hp harus angka',
     date_not_valid: 'Tanggal lahir tidak valid',
+    phone_length: '^No hp tidak valid',
     success: 'Berhasil memperbarui biodata Anda',
   },
   getUserMsg: {

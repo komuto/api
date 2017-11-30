@@ -1,4 +1,6 @@
+import _ from 'lodash';
 import { Banner } from './model/banner';
+import { MasterFee } from '../product/model';
 
 export const MarketplaceController = {};
 export default { MarketplaceController };
@@ -10,6 +12,15 @@ MarketplaceController.get = async (req, res, next) => {
     message: 'Marketplace Data',
     data: { name, domain, mobile_domain, api_domain, fb_app_id, fb_app_secret },
   };
+  return next();
+};
+
+MarketplaceController.getCommission = async (req, res, next) => {
+  let fees = await MasterFee.findByMarketplaceId(req.marketplace.id);
+  fees = fees.map(fee => fee.serialize());
+  fees = _.orderBy(fees, 'max', 'desc');
+
+  req.resData = { data: { commission: fees[0].fee } };
   return next();
 };
 

@@ -96,7 +96,7 @@ routes.post('/products',
   apiResponse());
 
 /**
- * GET /products/id/wishlist
+ * PUT /products/id/wishlist
  * Add to wishlist
  */
 routes.put('/products/:id([0-9]{1,10}.[0-9]{1,10})/wishlist',

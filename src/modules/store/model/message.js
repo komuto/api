@@ -156,8 +156,8 @@ class MessageModel extends bookshelf.Model {
     if (!message) throw getMessageError('message', 'not_found');
 
     const detailMessages = message.related('detailMessages').map((msg) => {
-      msg = msg.serialize();
-      const store = message.serialize().store;
+      msg = msg.serialize(domain);
+      const store = message.serialize(domain).store;
       msg.store = (store.user_id === msg.user.id) ? store : null;
       return msg;
     });

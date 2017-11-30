@@ -171,12 +171,19 @@ UserController.updateUser = async (req, res, next) => {
  * Update user password
  */
 UserController.updatePassword = async (req, res, next) => {
+  if (req.body.email !== req.user.email) {
+    throw resetPassError('email', 'wrong_email');
+  }
+
   const check = await User.checkPasswordFromApi(req.body.old_password, req.user.password);
+
   if (check) {
     const password = User.hashPasswordSync(req.body.password);
     await User.update({ id_users: req.user.id }, { password_users: password });
   } else throw resetPassError('password', 'not_match');
+
   req.resData = { message: msg.resetPassMsg.success };
+
   return next();
 };
 

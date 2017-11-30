@@ -14,6 +14,13 @@ routes.get('/marketplace',
   apiResponse());
 
 /**
+ * Get marketplace commission data
+ */
+routes.get('/marketplace/commission',
+  wrap(MarketplaceController.getCommission),
+  apiResponse());
+
+/**
  * Get banners
  */
 routes.get('/banners',
