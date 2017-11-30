@@ -327,7 +327,7 @@ class ProductModel extends bookshelf.Model {
       Object.setPrototypeOf(product, getter);
       const [view, countLike, isLiked] = await getRelations[index];
       const store = Store.prototype.serialize.call(product);
-      store.logo = store.logo.replace('https://undefined', `https://${domain}`);
+      store.logo = store.logo ? store.logo.replace('https://undefined', `https://${domain}`) : null;
       store.cover_image = store.cover_image
         ? store.cover_image.replace('https://undefined', `https://${domain}`)
         : null;
