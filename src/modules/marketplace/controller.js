@@ -18,9 +18,8 @@ MarketplaceController.get = async (req, res, next) => {
 MarketplaceController.getCommission = async (req, res, next) => {
   let fees = await MasterFee.findByMarketplaceId(req.marketplace.id);
   fees = fees.map(fee => fee.serialize());
-  fees = _.orderBy(fees, 'max', 'desc');
 
-  req.resData = { data: { commission: fees[0].fee } };
+  req.resData = { data: { commission: _.maxBy(fees, 'fee').fee } };
   return next();
 };
 
