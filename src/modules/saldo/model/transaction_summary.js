@@ -129,13 +129,14 @@ class transSummaryModel extends bookshelf.Model {
 
   /**
    * @param type {string} transaction type
+   * @param domain {string} transaction type
    */
-  async getSellingDetail(type) {
+  async getSellingDetail(type, domain) {
     await this.load('summaryable.items.product.image');
     let invoice = this.related('summaryable');
     const getBuyer = invoice.load('buyer');
     const items = invoice.related('items').map((item) => {
-      const product = item.related('product').serialize({ minimal: true });
+      const product = item.related('product').serialize({ minimal: true }, domain);
       item = item.serialize({ minimal: true, note: true });
       return { item, product };
     });
@@ -145,12 +146,12 @@ class transSummaryModel extends bookshelf.Model {
     const nominal = type === SummTransType.SELLING ? totalBill - amount : amount;
     const percent = (nominal / totalBill) * 100;
     await getBuyer;
-    const buyer = invoice.related('buyer').serialize({ orderDetail: true });
-    invoice = { ...invoice.serialize({ orderDetail: true }), items };
+    const buyer = invoice.related('buyer').serialize({ orderDetail: true }, domain);
+    invoice = { ...invoice.serialize({ orderDetail: true }, domain), items };
     return { transaction, commission: { nominal, percent }, buyer, invoice };
   }
 
-  async getPaymentDetail() {
+  async getPaymentDetail(domain) {
     await this.load([
       'summaryable.promo',
       'summaryable.invoices.shipping.address',
@@ -167,8 +168,8 @@ class transSummaryModel extends bookshelf.Model {
       getRelations.store.push(invoice.load('store'));
       getRelations.expedition.push(shipping.load('expeditionService.expedition'));
       return invoice.related('items').map((item) => {
-        const product = item.related('product').serialize({ minimal: true });
-        item = item.serialize({ minimal: true, note: true });
+        const product = item.related('product').serialize({ minimal: true }, domain);
+        item = item.serialize({ minimal: true, note: true }, domain);
         return { item, product };
       });
     });
@@ -176,7 +177,7 @@ class transSummaryModel extends bookshelf.Model {
       const { address, store, expedition } = getRelations;
       await Promise.all([address[idx], store[idx], expedition[idx]]);
       return {
-        invoice: invoice.serialize({ minimal: true, shippingMin: true }),
+        invoice: invoice.serialize({ minimal: true, shippingMin: true }, domain),
         items: items[idx],
       };
     }));

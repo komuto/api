@@ -117,7 +117,7 @@ SaldoController.historyDetail = async (req, res, next) => {
 SaldoController.sellingTrans = async (req, res, next) => {
   const type = req.body.transType;
   if (type !== SummTransType.SELLING && type !== SummTransType.FEE) return next();
-  const data = await req.body.transaction.getSellingDetail(type)
+  const data = await req.body.transaction.getSellingDetail(type, req.marketplace.mobile_domain)
     .catch(() => { throw transDetailError('transaction', 'transaction_corrupted'); });
   const message = type === SummTransType.SELLING ? 'Selling Transaction Data' : 'Commission Transaction Data';
   req.resData = { message, data };
@@ -126,7 +126,7 @@ SaldoController.sellingTrans = async (req, res, next) => {
 
 SaldoController.paymentTrans = async (req, res, next) => {
   if (req.body.transType !== SummTransType.PAYMENT) return next();
-  const data = await req.body.transaction.getPaymentDetail()
+  const data = await req.body.transaction.getPaymentDetail(req.marketplace.mobile_domain)
     .catch(() => { throw transDetailError('transaction', 'transaction_corrupted'); });
   req.resData = { message: 'Payment Transaction Data', data };
   return next();
