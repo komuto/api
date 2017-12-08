@@ -175,12 +175,13 @@ class BucketModel extends bookshelf.Model {
   /**
    * Find bucket
    */
-  static findOrCreateBucket(userId) {
+  static findOrCreateBucket(userId, marketplaceId) {
     return this.findOrCreate({
       id_users: userId,
       status_bucket: BucketStatus.ADDED,
     }, {
       defaults: this.matchDBColumn({
+        marketplace_id: marketplaceId,
         wallet: 0,
         unique_code: 0,
         order_at: moment().toDate(),
@@ -459,6 +460,7 @@ class BucketModel extends bookshelf.Model {
       status: 'status_bucket',
       status_at: 'tglstatus_bucket',
       platform: 'platform',
+      marketplace_id: 'id_marketplaceuser',
     };
     return matchDB(data, column);
   }

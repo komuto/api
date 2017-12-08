@@ -154,7 +154,8 @@ BucketController.saveCart = async (bucket, body, product, item, where, wholesale
 
 BucketController.addToCart = async (req, res, next) => {
   let dropship;
-  const getBucket = Bucket.findOrCreateBucket(req.user.id);
+  const getBucket = Bucket.findOrCreateBucket(req.user.id, req.marketplace.id);
+  return next();
   const getAddress = Address.where({
     id_users: req.user.id,
     id_alamatuser: req.body.address_id,
