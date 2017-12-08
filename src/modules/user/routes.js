@@ -65,10 +65,10 @@ routes.get('/users/profile',
  */
 routes.post('/users',
   validateRegistration(),
-  wrap(UserController.createUser),
-  UserController.login,
-  addToken,
-  userData,
+  // wrap(UserController.createUser),
+  // UserController.login,
+  // addToken,
+  // userData,
   apiResponse());
 
 /**

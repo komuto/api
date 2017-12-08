@@ -58,7 +58,15 @@ constraints.registration = {
     presence: { message: registrationMsg.gender_presence },
     format: { pattern: /^male|female$/, message: registrationMsg.gender_not_valid },
   },
-  phone_number: { presence: { message: registrationMsg.phone_presence } },
+  phone_number: {
+    presence: { message: registrationMsg.phone_presence },
+    format: { pattern: /^\+?[0-9]+$/, message: updateMsg.phone_not_valid },
+    length: {
+      minimum: 5,
+      maximum: 12,
+      message: updateMsg.phone_length,
+    },
+  },
   reg_token: { presence: false },
 };
 
@@ -79,7 +87,7 @@ constraints.update = {
 constraints.updatePhone = {
   phone_number: {
     presence: { message: updateMsg.phone_presence },
-    format: { pattern: /^[0-9]+$/, message: updateMsg.phone_not_valid },
+    format: { pattern: /^\+?[0-9]+$/, message: updateMsg.phone_not_valid },
     length: {
       minimum: 5,
       maximum: 12,
