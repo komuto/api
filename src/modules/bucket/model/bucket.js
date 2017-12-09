@@ -8,7 +8,7 @@ import './shipping';
 import { Item } from './item';
 import { PromoType } from './promo';
 import config from './../../../../config';
-import { InvoiceStatus, InvoiceTransactionStatus, TransactionLog, PaymentMethod } from '../../payment/model';
+import { InvoiceStatus, InvoiceTransactionStatus, TransactionLog, PaymentMethod, Invoice } from '../../payment/model';
 import { Dropship } from '../../product/model/dropship';
 import { Preference } from '../../preference/model';
 
@@ -326,7 +326,7 @@ class BucketModel extends bookshelf.Model {
 
   static async updateStatus(id, status, related, paymentMethodId) {
     const bucket = await this.where({ id_bucket: id }).fetch({ withRelated: related });
-    if (status.invoice !== BucketStatus.UNPAID) {
+    if (status.invoice !== InvoiceStatus.UNPAID) {
       await Promise.all(bucket.related('invoices').map(async (invoice) => {
         if (status.invoice === InvoiceStatus.PAID) {
           let dropshipper;
@@ -373,8 +373,13 @@ class BucketModel extends bookshelf.Model {
         return await invoice.save({
           status_invoice: status.invoice,
           status_transaksi: status.transaction,
+          id_paymentmethod: paymentMethodId,
         }, { patch: true });
       }));
+    }
+
+    if (status.invoice !== InvoiceStatus.PAID) {
+      Invoice.where('id_bucket', bucket.id).save({ id_paymentmethod: paymentMethodId }, { patch: true });
     }
 
     if (status.bucket === BucketStatus.PAYMENT_RECEIVED && bucket.get('id_promo')) {
