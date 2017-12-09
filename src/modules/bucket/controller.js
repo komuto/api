@@ -4,7 +4,7 @@ import { Bucket, Promo, Item, Shipping, BucketStatus, PromoType } from './model'
 import { Dropship } from '../product/model';
 import { Product } from '../product/model/product';
 import { Expedition } from '../expedition/model';
-import { Invoice, InvoiceStatus, InvoiceTransactionStatus } from '../payment/model';
+import { Invoice, InvoiceStatus, InvoiceTransactionStatus, PaymentMethod } from '../payment/model';
 import { User } from '../user/model';
 import { Address } from '../address/model';
 import { Store } from '../store/model';
@@ -15,7 +15,6 @@ import { getProductAndStore } from '../core/utils';
 import { getProductError } from '../product/messages';
 import { SummTransType, TransSummary } from '../saldo/model/transaction_summary';
 import { TransType } from '../saldo/model/transaction_type';
-import { PaymentMethod } from "../payment/model/payment_method";
 
 export const BucketController = {};
 export default { BucketController };
