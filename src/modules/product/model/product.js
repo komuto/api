@@ -207,7 +207,13 @@ class ProductModel extends bookshelf.Model {
         products.where(column, catalogId);
       }
     }
-    if (query) products.whereRaw('to_tsvector(nama_produk) @@ to_tsquery(?)', query);
+    if (query) {
+      if (isDropship && storeId) {
+        products.whereRaw('LOWER(nama_produk) LIKE ?', `%${query.toLowerCase()}%`);
+      } else {
+        products.whereRaw('to_tsvector(nama_produk) @@ to_tsquery(?)', query);
+      }
+    }
     if (price && price.min !== 0 && price.max !== 0) products.whereBetween('harga_produk', [price.min, price.max]);
     if (address) {
       products.innerJoin('alamat_users as au', 'au.id_users', 'u.id_users');
@@ -230,7 +236,7 @@ class ProductModel extends bookshelf.Model {
   }
 
   static async getProducts(params) {
-    const { page, pageSize, sort } = params;
+    const { page, pageSize, sort, isDropship, storeId } = params;
     const offset = page <= 1 ? 0 : (page - 1) * pageSize;
     const self = this;
 
@@ -249,25 +255,31 @@ class ProductModel extends bookshelf.Model {
       .join('users as u', 't.id_users', 'u.id_users')
       .joinRaw('join (select DISTINCT ON (id_produk) id_produk, file_gambarproduk FROM gambar_produk) as images ON images.id_produk = p.id_produk');
 
-    return self.addWhereClause(fromProduct, params, true)
-      .union(function () {
-        const fromDropship = this
-          .select([
-            'p.*',
-            'tglstatus_dropshipper as date_created',
-            't.*',
-            'file_gambarproduk',
-            'd.id_katalog as identifier_katalog',
-            'd.id_dropshipper',
-          ])
-          .select(knex.raw('COALESCE("d"."count_sold", 0) as "p_count_sold"'))
-          .from('dropshipper as d')
-          .join('produk as p', 'd.id_produk', 'p.id_produk')
-          .join('toko as t', 'd.id_toko', 't.id_toko')
-          .join('users as u', 't.id_users', 'u.id_users')
-          .joinRaw('join (select DISTINCT ON (id_produk) id_produk, file_gambarproduk FROM gambar_produk) as images ON images.id_produk = p.id_produk');
-        self.addWhereClause(fromDropship, params, false);
-      })
+    const results = self.addWhereClause(fromProduct, params, true);
+
+    if (!isDropship && !storeId) {
+      results
+        .union(function () {
+          const fromDropship = this
+            .select([
+              'p.*',
+              'tglstatus_dropshipper as date_created',
+              't.*',
+              'file_gambarproduk',
+              'd.id_katalog as identifier_katalog',
+              'd.id_dropshipper',
+            ])
+            .select(knex.raw('COALESCE("d"."count_sold", 0) as "p_count_sold"'))
+            .from('dropshipper as d')
+            .join('produk as p', 'd.id_produk', 'p.id_produk')
+            .join('toko as t', 'd.id_toko', 't.id_toko')
+            .join('users as u', 't.id_users', 'u.id_users')
+            .joinRaw('join (select DISTINCT ON (id_produk) id_produk, file_gambarproduk FROM gambar_produk) as images ON images.id_produk = p.id_produk');
+          self.addWhereClause(fromDropship, params, false);
+        });
+    }
+
+    return results
       .orderBy(sort.column, sort.by)
       .limit(pageSize)
       .offset(offset)
