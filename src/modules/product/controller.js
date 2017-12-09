@@ -221,7 +221,7 @@ ProductController.getComments = async (req, res, next) => {
     data: {
       product,
       store,
-      comments: comment.comments.serialize({ minimal: true }, domain),
+      comments: comment.comments.map(o => o.serialize({ minimal: true }, domain)),
     },
   };
   return next();
