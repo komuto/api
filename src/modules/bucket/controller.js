@@ -15,6 +15,7 @@ import { getProductAndStore } from '../core/utils';
 import { getProductError } from '../product/messages';
 import { SummTransType, TransSummary } from '../saldo/model/transaction_summary';
 import { TransType } from '../saldo/model/transaction_type';
+import { PaymentMethod } from "../payment/model/payment_method";
 
 export const BucketController = {};
 export default { BucketController };
@@ -361,7 +362,12 @@ BucketController.balancePayment = async (req, res, next) => {
   const now = moment();
   const getBucket = Bucket.getForPayment(req.user.id, req.params.id);
   const getPref = Preference.get('payment');
-  const [bucket, pref] = await Promise.all([getBucket, getPref]);
+  const getPaymentMethodId = PaymentMethod.findByType('saldo-komuto');
+  const [bucket, pref, paymentMethodId] = await Promise.all([
+    getBucket,
+    getPref,
+    getPaymentMethodId,
+  ]);
   if (!bucket) throw paymentError('transaction', 'not_found');
   const expired = moment(bucket.get('tglstatus_bucket')).add(pref.value, 'days');
   if (now > expired) throw paymentError('transaction', 'not_found');
@@ -373,12 +379,14 @@ BucketController.balancePayment = async (req, res, next) => {
     status_bucket: BucketStatus.PAYMENT_RECEIVED,
     tglstatus_bucket: now.toDate(),
     bayar_wallet: bill,
+    id_paymentmethod: paymentMethodId,
   }, { patch: true });
 
   Invoice.where('id_bucket', bucket.get('id_bucket')).save({
     status_invoice: InvoiceStatus.PAID,
     updated_at: now.toDate(),
     status_transaksi: InvoiceTransactionStatus.WAITING,
+    id_paymentmethod: paymentMethodId,
   }, { patch: true });
 
   const remark = await TransType.getRemark(SummTransType.PAYMENT);
