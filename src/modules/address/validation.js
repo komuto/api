@@ -50,7 +50,10 @@ constraints.updateAddress = {
     numericality: { noStrings: true, onlyInteger: true, message: updateMsg.village_not_valid },
   },
   email: {
-    email: { message: updateMsg.email_not_valid },
+    format: {
+      pattern: /^([a-zA-Z0-9_\.])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
+      message: updateMsg.email_not_valid,
+    },
   },
   postal_code: {
     format: { pattern: /\d{5}(-\d{4})?/, message: updateMsg.postal_code_not_valid },

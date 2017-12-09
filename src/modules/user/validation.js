@@ -9,7 +9,10 @@ const constraints = {};
 constraints.login = {
   email: {
     presence: { message: loginMsg.email_presence },
-    email: { message: loginMsg.email_not_valid },
+    format: {
+      pattern: /^([a-zA-Z0-9_\.])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
+      message: loginMsg.email_not_valid,
+    },
   },
   password: {
     presence: { message: loginMsg.password_presence },
@@ -45,7 +48,10 @@ constraints.registration = {
   },
   email: {
     presence: { message: registrationMsg.email_presence },
-    email: { message: registrationMsg.email_not_valid },
+    format: {
+      pattern: /^([a-zA-Z0-9_\.])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
+      message: registrationMsg.email_not_valid,
+    },
   },
   password: {
     presence: { message: registrationMsg.password_presence },
@@ -71,7 +77,12 @@ constraints.registration = {
 };
 
 constraints.update = {
-  email: { email: { message: updateMsg.email_not_valid } },
+  email: {
+    format: {
+      pattern: /^([a-zA-Z0-9_\.])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
+      message: updateMsg.email_not_valid,
+    },
+  },
   approval_cooperative_status: { format: { pattern: /^[0-4]$/, message: updateMsg.app_coop_not_valid } },
   gender: { format: { pattern: /^male|female$/, message: updateMsg.gender_not_valid } },
   status: { format: { pattern: /^[0-3]$/, message: updateMsg.status_not_valid } },
