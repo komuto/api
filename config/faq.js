@@ -3,7 +3,7 @@ module.exports = [
     question: 'Apa itu Dropshipping ?',
     answer: 'Sebuah metode pemasaran dimana penjual yang menjadi dropshipper tidak menyimpan stok barang, ' +
     'dan dimana jika dropshipper mendapatkan order, penjual tersebut langsung meneruskan order dan detail pengiriman ' +
-    'barangnya ke distributor/supplier/produsen/pemilik barang asli. Yang kemudian pesananitu dikirimkan oleh pemilik barang ' +
+    'barangnya ke distributor/supplier/produsen/pemilik barang asli. Yang kemudian pesanan itu dikirimkan oleh pemilik barang ' +
     'asli kepada pemesan barang dengan mengatas namakan pihak dropshipper.\n',
   },
   {
