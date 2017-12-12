@@ -121,6 +121,7 @@ BucketController.saveCart = async (bucket, body, product, item, where, wholesale
   });
 
   let shippingId;
+  let shipping;
   let prevBill = 0;
   let update = true;
   if (item) {
@@ -128,9 +129,9 @@ BucketController.saveCart = async (bucket, body, product, item, where, wholesale
     const prevQty = Number(item.get('qty_listbucket'));
     prevBill = prevQty !== body.qty ? prevQty * product.price : 0;
     update = prevBill !== 0;
-    await Shipping.update(shippingId, shippingObj);
+    shipping = await Shipping.update(shippingId, shippingObj);
   } else {
-    const shipping = await Shipping.create(shippingObj);
+    shipping = await Shipping.create(shippingObj);
     shippingId = shipping.id;
   }
   const bill = product.price * body.qty;
@@ -149,7 +150,7 @@ BucketController.saveCart = async (bucket, body, product, item, where, wholesale
   // total bill used for checking minimum price of promo
   const updateBucket = update ? bucket.updateBill(bill, prevBill) : null;
   const [newItem] = await Promise.all([getNewItem, updateBucket]);
-  return newItem;
+  return { ...newItem.serialize(), shipping };
 };
 
 BucketController.addToCart = async (req, res, next) => {
