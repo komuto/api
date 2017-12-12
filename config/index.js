@@ -19,6 +19,11 @@ def.cachePath = path.join(rootDir, 'cache');
 def.tempPath = path.join(rootDir, 'temp');
 def.logPath = path.join(rootDir, 'logs/log');
 
+// loggly
+def.loggly = {};
+def.loggly.token = '';
+def.loggly.subdomain = '';
+
 // images
 def.imagePath = path.join(rootDir, 'public/image');
 def.imageMaxWidth = 1000;

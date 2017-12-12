@@ -4,6 +4,7 @@ import ch from 'chalk';
 import morgan from 'morgan';
 import winston from 'winston';
 import 'winston-daily-rotate-file';
+import 'winston-loggly-bulk';
 import passport from 'passport';
 import validate from 'validate.js';
 import c from '../../constants';
@@ -102,6 +103,12 @@ export function errResponse() { // eslint-disable-next-line no-unused-vars
 }
 
 export function winstonLogger() {
+  winston.add(winston.transports.Loggly, {
+    token: config.loggly.token,
+    subdomain: config.loggly.subdomain,
+    tags: ['Komuto-API'],
+    json: true,
+  });
   const logger = new (winston.Logger)({
     transports: [
       new winston.transports.DailyRotateFile({
@@ -117,7 +124,8 @@ export function winstonLogger() {
 
   logger.stream = {
     write: (message) => {
-      logger.info(message);
+      // logger.info(message);
+      winston.log('info', message);
     },
   };
 
