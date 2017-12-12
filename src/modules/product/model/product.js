@@ -876,7 +876,7 @@ class ProductModel extends bookshelf.Model {
     if (hidden !== null) where.status_produk = hidden ? ProductStatus.HIDE : ProductStatus.SHOW;
     const isChecked = catalogId ? false : undefined;
 
-    if (catalogId) where.identifier_katalog = catalogId;
+    if (catalogId) where.identifier_katalog = catalogId === '0' ? null : catalogId;
     if (isDropship !== null) where.is_dropshiper = isDropship;
 
     let products = this.where(where).fetchPage({ page, pageSize, withRelated: 'image' });
