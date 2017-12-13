@@ -16,7 +16,7 @@ module.exports = [
     answer: 'Syarat menjadi dropshipper\n' +
     '1. Pengguna Komuto\n' +
     '2. Dropshipper mengerti mengenai produk yang akan didropshipkan sehingga apabila terdapat pertanyaan dari pembeli mengenai produk dapat menjelaskan dengan baik.\n\n' +
-    'Tata cara menjadi penjual dropship' +
+    'Tata cara menjadi penjual dropship\n' +
     '1. Pada saat menambahkan produk barang, pilih menu “Ambil Dari Dropshiper”.\n' +
     '2. Silahkan baca keterangan informasi terkait dropshiper pada halaman yang muncul.\n' +
     '3. Jika sudah cukup membaca informasi anda bisa melanjutkan dengan menekan tombol “Saya Mengerti, Lanjutkan Proses”.\n' +
