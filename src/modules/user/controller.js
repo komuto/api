@@ -593,6 +593,7 @@ UserController.createResolution = async (req, res, next) => {
     status_at: moment().toDate(),
     ends_at: moment().toDate(),
     created_at: moment().toDate(),
+    is_read: 0, // default value
   });
   const resolution = await ResolutionCenter.create(data);
   if (req.body.images) await ImageGroup.bulkCreate(resolution.get('id_rescenter'), req.body.images);
@@ -610,7 +611,11 @@ UserController.replyResolution = async (req, res, next) => {
   const resolution = await ResolutionCenter.getDetail(req.user.id, req.params.id);
   if (!resolution) throw getResolutionError('resolution_center', 'not_found');
   const discussions = resolution.pushMessage(req.user.name, req.body.message);
-  await resolution.save({ isipesan_rescenter: discussions, update_at: moment() }, { patch: true });
+  await resolution.save({
+    isipesan_rescenter: discussions,
+    update_at: moment(),
+    is_read: 0, // default value
+  }, { patch: true });
   req.resData = {
     message: 'Resolution Data',
     data: resolution.serialize({ minimal: false }, req.user.name),

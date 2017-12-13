@@ -139,6 +139,7 @@ class ResolutionCenterModel extends bookshelf.Model {
       status_at: 'tglstatus_ticket_rescenter',
       ends_at: 'enddate_rescenter',
       created_at: 'datecreated_rescenter',
+      is_read: 'is_read',
     };
     return matchDB(data, column);
   }
