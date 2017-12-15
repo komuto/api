@@ -1,6 +1,6 @@
-require('dotenv').config({ path: '../.env' });
 const path = require('path');
 const cfg = require('../common/config');
+require('dotenv').config({ path: `${path.dirname(__dirname)}/.env` });
 
 const def = {};
 
