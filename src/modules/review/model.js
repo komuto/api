@@ -5,8 +5,12 @@ import config from '../../../config';
 import { Invoice } from '../payment/model';
 import { Product } from '../product/model/product';
 import { Dropship } from '../product/model/dropship';
-import { getNotification, NotificationType } from '../user/model/user';
+import { getNotification, NotificationType, User } from '../user/model/user';
 import { ShippingReceiverStatus, ShippingSenderStatus } from '../bucket/model';
+import { MasterFee } from '../product/model/master_fee';
+import { TransType } from '../saldo/model/transaction_type';
+import { SummTransType, TransSummary } from '../saldo/model/transaction_summary';
+import { InvoiceTransactionStatus } from '../payment/model/invoice';
 
 const knex = core.postgres.knex;
 const { Notification, sellerNotification } = core;
@@ -125,23 +129,70 @@ class ReviewModel extends bookshelf.Model {
   static async bulkCreate(params, marketplace) {
     const { user_id: userId, bucket_id: bucketId, invoice_id: invoiceId, reviews } = params;
 
-    const invoice = await Invoice.get(userId, bucketId, invoiceId, ['items', 'shipping']);
+    let invoice = Invoice.get(userId, bucketId, invoiceId, ['items', 'shipping', 'store.user']);
+    let masterFee = MasterFee.findByMarketplaceId(marketplace.id);
+    let remark = TransType.getRemark(SummTransType.SELLING);
+    [invoice, masterFee] = await Promise.all([invoice, masterFee]);
+
     const items = invoice.related('items');
+    let shipping = invoice.related('shipping');
+    shipping = shipping.serialize();
+    let amount = 0;
 
     const reviewData = await Promise.all(reviews.map(async (val) => {
       const { productId, storeId: sId } = getProductAndStore(val.product_id);
-      const product = await Product.findProduct(productId, sId);
+      let product = await Product.findProduct(productId, sId);
       if (!product) throw createReviewError('product', 'store_not_found');
       const item = items.find(o => o.get('id_produk') === product.get('id_produk'));
       if (!item) throw createReviewError('product', 'product_not_found');
 
-      return await this.create(item, product.serialize(), userId, val, marketplace);
+      const itemObj = item.serialize();
+      product = product.serialize();
+
+      const commission = MasterFee.calculateCommissionByFees(masterFee, Number(product.price));
+      amount += ((product.price - commission) * itemObj.qty)
+        + itemObj.additional_cost
+        + shipping.insurance_fee;
+
+      return await this.create(item, product, userId, val, marketplace);
     }));
 
-    await invoice.related('shipping').save({
+    amount += shipping.delivery_cost;
+
+    const seller = invoice.related('store').related('user');
+    const { saldo_wallet: saldo } = seller.serialize();
+    const remainingSaldo = saldo + amount;
+
+    remark = await remark;
+    TransSummary.create(TransSummary.matchDBColumn({
+      amount,
+      first_saldo: saldo,
+      last_saldo: remainingSaldo,
+      user_id: seller.id,
+      type: SummTransType.SELLING,
+      remark,
+      marketplace_id: marketplace.id,
+      summaryable_type: 'invoice',
+      summaryable_id: invoice.id,
+    }));
+
+    User.where({ id_users: seller.id }).save({ saldo_wallet: remainingSaldo }, { patch: true });
+
+    invoice.related('shipping').save({
       statusresponkirim: ShippingSenderStatus.SENT,
       statusresponterima: ShippingReceiverStatus.ACCEPT,
     }, { patch: true });
+
+    Invoice.updateStatus(invoice.id, InvoiceTransactionStatus.RECEIVED);
+
+    if (seller.get('reg_token')) {
+      Notification.send(
+        sellerNotification.ORDER_RECEIVED,
+        seller.get('reg_token'),
+        marketplace,
+        { invoice_id: String(invoice.id), click_action: `order-detail?id=${invoice.id}` },
+      );
+    }
 
     return reviewData;
   }

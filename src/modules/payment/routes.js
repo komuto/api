@@ -68,8 +68,13 @@ routes.get('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})',
  */
 routes.post('/transactions/:id([0-9]{1,10})/invoices/:invoice_id([0-9]{1,10})',
   auth(),
-  validateParam(constraints.bulkReview, true, null, true,
-    params => ({ ...params, product_id: String(params.product_id) })),
+  validateParam(
+    constraints.bulkReview,
+    true,
+    null,
+    true,
+    params => ({ ...params, product_id: String(params.product_id) }),
+  ),
   wrap(PaymentController.bulkReview),
   apiResponse());
 
