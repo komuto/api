@@ -20,7 +20,7 @@ import { Store } from '../store/model';
 import config from '../../../config';
 import core from '../core';
 import { Review } from '../review/model';
-import { ImageGroup } from '../user/model';
+import { ImageGroup, User } from '../user/model';
 import nominal from '../../../config/nominal.json';
 import {
   getNominalError,
@@ -32,7 +32,7 @@ import {
 } from './messages';
 import { msg as productMsg } from '../product/messages';
 import { getStoreError } from './../store/messages';
-import { Topup } from '../saldo/model';
+import { Topup, TransType, SummTransType, TransSummary } from '../saldo/model';
 import { BadRequestError } from './../../../common/errors';
 import messages from '../core/messages';
 import { Preference } from '../preference/model';
@@ -579,6 +579,7 @@ PaymentController.rejectOrder = async (req, res, next) => {
     id_toko: storeId,
   }).fetch({ withRelated: 'user' });
   let limit = Preference.get('order_response');
+  let remark = TransType.getRemark(SummTransType.REFUND);
   [invoice, limit] = await Promise.all([invoice, limit]);
 
   if (!invoice) throw rejectOrderError('order', 'not_found');
@@ -588,7 +589,26 @@ PaymentController.rejectOrder = async (req, res, next) => {
   if (diff < 0) throw getInvoiceError('invoice', 'expired');
 
   await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.REJECTED).catch();
+
   const buyer = invoice.related('user');
+  const amount = invoice.serialize().total_price;
+  const { saldo_wallet: saldo } = buyer.serialize();
+  const remainingSaldo = saldo + amount;
+
+  remark = await remark;
+  TransSummary.create(TransSummary.matchDBColumn({
+    amount,
+    first_saldo: saldo,
+    last_saldo: remainingSaldo,
+    user_id: buyer.id,
+    type: SummTransType.REFUND,
+    remark,
+    marketplace_id: req.marketplace.id,
+    summaryable_type: 'invoice',
+    summaryable_id: invoice.id,
+  }));
+
+  User.where({ id_users: buyer.id }).save({ saldo_wallet: remainingSaldo }, { patch: true });
 
   if (buyer.get('reg_token')) {
     Notification.send(
