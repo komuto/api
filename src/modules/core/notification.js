@@ -73,18 +73,10 @@ class NotificationClass {
       content_available: true,
       priority: 'high',
       show_in_foreground: true,
+      sound: 'default',
+      click_action: data.click_action,
     });
-    return {
-      notification: {
-        title: marketplace.name,
-        body: notification.body,
-        content_available: 'true',
-        priority: 'high',
-        sound: 'default',
-        click_action: data.click_action,
-      },
-      data,
-    };
+    return { data };
   }
 
   static send(notification, token, marketplace, data) {
