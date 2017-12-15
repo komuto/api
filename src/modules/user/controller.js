@@ -571,7 +571,7 @@ UserController.getResolution = async (req, res, next) => {
   if (!resolution) throw getResolutionError('resolution_center', 'not_found');
   req.resData = {
     message: 'Resolution Data',
-    data: resolution.serialize({ minimal: false }, req.user.name, req.marketplace.mobile_domain),
+    data: resolution.serialize({ minimal: false }, req.user, req.marketplace.mobile_domain),
   };
   return next();
 };
@@ -618,7 +618,7 @@ UserController.replyResolution = async (req, res, next) => {
   }, { patch: true });
   req.resData = {
     message: 'Resolution Data',
-    data: resolution.serialize({ minimal: false }, req.user.name),
+    data: resolution.serialize({ minimal: false }, req.user, req.marketplace.mobile_domain),
   };
   return next();
 };

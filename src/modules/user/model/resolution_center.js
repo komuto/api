@@ -1,9 +1,11 @@
 import moment from 'moment';
 import core from '../../core';
+import config from '../../../../config';
 import { createResolutionError } from '../messages';
 
 const { parseDate, parseNum, matchDB } = core.utils;
 const bookshelf = core.postgres.db;
+export const IMAGE_PATH = config.imageFolder.profile;
 
 export const ResolutionCenterStatus = {
   CLOSE: 0,
@@ -40,7 +42,7 @@ class ResolutionCenterModel extends bookshelf.Model {
     return false;
   }
 
-  serialize({ minimal = false } = {}, name, domain) {
+  serialize({ minimal = false } = {}, user, domain) {
     const resolution = {
       id: this.get('id_rescenter'),
       user_id: this.get('id_users'),
@@ -57,8 +59,11 @@ class ResolutionCenterModel extends bookshelf.Model {
     if (minimal) return resolution;
 
     resolution.discussions = JSON.parse(this.get('isipesan_rescenter')).map(msg => ({
-      name: msg.user !== 'Admin' ? name : 'admin',
+      name: msg.user !== 'Admin' ? user.name : 'admin',
       message: msg.pesan,
+      photo: msg.user !== 'Admin'
+        ? core.imagePath(domain, IMAGE_PATH, user.file_name)
+        : config.defaultImage.user,
       created_at: parseDate(msg.create_at),
     }));
 
