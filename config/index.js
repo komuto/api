@@ -1,3 +1,4 @@
+require('dotenv').config({ path: '../.env' });
 const path = require('path');
 const cfg = require('../common/config');
 
@@ -5,7 +6,6 @@ const def = {};
 
 // setup default env
 def.env = process.env.NODE_ENV || 'development';
-process.env.NODE_ENV = def.env;
 
 def.debug = true;
 def.https = false;

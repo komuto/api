@@ -3,7 +3,7 @@
     {
       "name": "komuto.api",
       "script": "/home/skyshi/.nvm/versions/node/v6.11.5/bin/yarn",
-      "args": "start",
+      "args": "build/server.js",
       "ignore_watch": [
         "node_modules",
         "log/error.log",
@@ -23,7 +23,7 @@
       "ref": "origin/master",
       "path": "/home/skyshi/deploy/komuto.api",
       "repo": "git@gitlab.skyshi.io:komuto/api.git",
-      "post-deploy": "/home/skyshi/.nvm/versions/node/v6.11.5/bin/yarn install && pm2 startOrRestart ecosystem.json"
+      "post-deploy": "/home/skyshi/.nvm/versions/node/v6.11.5/bin/yarn install && /home/skyshi/.nvm/versions/node/v6.11.5/bin/yarn build && pm2 startOrRestart ecosystem.json"
     }
   }
 }
