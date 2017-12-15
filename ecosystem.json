@@ -2,7 +2,7 @@
   "apps": [
     {
       "name": "komuto.api",
-      "script": "/home/skyshi/.nvm/versions/node/v6.11.5/bin/yarn",
+      "script": "/home/skyshi/.nvm/versions/node/v6.11.5/bin/node",
       "args": "build/server.js",
       "ignore_watch": [
         "node_modules",
