@@ -167,18 +167,33 @@ SaldoController.withdrawTrans = async (req, res, next) => {
 
 SaldoController.refundTrans = async (req, res, next) => {
   if (req.body.transType !== SummTransType.REFUND) return next();
-  const transaction = await req.body.transaction.load({ 'summaryable.items.image': qb => qb.orderBy('id_gambarproduk') });
-  let refund;
-  let items;
-  try {
-    refund = transaction.related('summaryable');
-    items = refund.related('items').map(item => item.serialize({ minimal: true }));
-  } catch (e) {
-    throw transDetailError('transaction', 'transaction_corrupted');
+
+  let data;
+  if (req.body.transaction.get('summaryable_type') === 'bucket_refund') {
+    const transaction = await req.body.transaction.load({ 'summaryable.items.image': qb => qb.orderBy('id_gambarproduk') });
+    let refund;
+    let items;
+    try {
+      refund = transaction.related('summaryable');
+      items = refund.related('items').map(item => item.serialize({ minimal: true }));
+    } catch (e) {
+      throw transDetailError('transaction', 'transaction_corrupted');
+    }
+    data = {
+      transaction: transaction.serialize(),
+      refund: { ...refund.serialize({ minimal: true }), items },
+    };
+  } else {
+    data = await req.body.transaction.getSellingDetail(
+      SummTransType.SELLING,
+      req.marketplace.mobile_domain,
+    ).catch(() => {
+      throw transDetailError('transaction', 'transaction_corrupted');
+    });
   }
-  const data = { transaction: transaction.serialize(),
-    refund: { ...refund.serialize({ minimal: true }), items } };
+
   req.resData = { message: 'Refund Transaction Data', data };
+
   return next();
 };
 
