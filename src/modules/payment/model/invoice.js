@@ -386,7 +386,7 @@ class InvoiceModel extends bookshelf.Model {
     if (storeDropshipId) {
       const isReseller = Number(storeDropshipId) === Number(storeId);
       const dropshipStore = await getStore;
-      const resellerStore = dropshipStore.serialize({ favorite: true });
+      const resellerStore = dropshipStore.serialize({ favorite: true }, domain);
       // include reseller logo if we are the original seller
       resellerStore.logo = isReseller ? null : resellerStore.logo;
       result.reseller = { store: resellerStore };
