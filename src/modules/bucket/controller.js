@@ -182,7 +182,9 @@ BucketController.addToCart = async (req, res, next) => {
     bucket_id: bucket.id,
     product_id: product.id,
     dropshipper_id: null,
-    store_id: storeId,
+    // Store id on item is original store, although the order is from the dropshipper
+    // This store id will be used when the invoice is created
+    store_id: product.store_id,
   };
   if (product.store_id !== storeId) {
     dropship = await Dropship.findByProductIdAndStoreId(productId, storeId);
