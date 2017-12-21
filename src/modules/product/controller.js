@@ -326,7 +326,7 @@ ProductController.createComment = async (req, res, next) => {
 
   req.resData = {
     message: msg.createDiscussion.successComment,
-    data: comment.serialize({ minimal: true }),
+    data: comment.serialize({ minimal: true }, req.marketplace.mobile_domain),
   };
   return next();
 };
