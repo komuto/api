@@ -960,6 +960,12 @@ class ProductModel extends bookshelf.Model {
       return {
         ...product.serialize({ minimal: true }),
         image,
+        commission: MasterFee.calculateCommissionByFees(
+          masterFee,
+          Number(product.get('harga_produk')),
+          true,
+          false,
+        ),
         dropship_origin: dropshipOrigin,
       };
     }));
