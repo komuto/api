@@ -184,7 +184,7 @@ class UserModel extends bookshelf.Model {
    * Add relation to Marketplace
    */
   marketplace() {
-    return this.belongsTo('Marketplace', 'id_users');
+    return this.belongsTo('Marketplace', 'id_marketplaceuser');
   }
 
   /**

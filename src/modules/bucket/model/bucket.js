@@ -9,8 +9,8 @@ import { Item } from './item';
 import { PromoType } from './promo';
 import config from './../../../../config';
 import { InvoiceStatus, InvoiceTransactionStatus, TransactionLog, PaymentMethod, Invoice } from '../../payment/model';
-import { Dropship } from '../../product/model/dropship';
 import { Preference } from '../../preference/model';
+import { Marketplace } from '../../marketplace/model/marketplace';
 
 const { Notification, sellerNotification } = core;
 const { parseNum, parseDate, matchDB } = core.utils;
@@ -326,6 +326,8 @@ class BucketModel extends bookshelf.Model {
 
   static async updateStatus(id, status, related, paymentMethodId) {
     const bucket = await this.where({ id_bucket: id }).fetch({ withRelated: related });
+    const marketplace = await Marketplace.where('id_marketplaceuser', bucket.get('id_marketplaceuser')).fetch();
+
     if (status.invoice !== InvoiceStatus.UNPAID) {
       await Promise.all(bucket.related('invoices').map(async (invoice) => {
         if (status.invoice === InvoiceStatus.PAID) {
@@ -350,7 +352,6 @@ class BucketModel extends bookshelf.Model {
           }));
 
           const owner = invoice.related('store').related('user');
-          const marketplace = owner.related('marketplace').serialize();
           if (owner.get('reg_token')) {
             Notification.send(
               sellerNotification.TRANSACTION,
@@ -409,7 +410,7 @@ class BucketModel extends bookshelf.Model {
           'invoices.items.product',
           'promo',
           'invoices.items.dropship.store.user',
-          'invoices.store.user.marketplace',
+          'invoices.store.user',
         ];
         break;
       case '201':
