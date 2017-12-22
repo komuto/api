@@ -111,6 +111,7 @@ SaldoController.historyDetail = async (req, res, next) => {
   if (!transaction) throw transDetailError('transaction', 'not_found');
   req.body.transType = transaction.get('kode_summarytransaksi');
   req.body.transaction = transaction;
+  req.body.domain = req.marketplace.mobile_domain;
   return next();
 };
 
@@ -175,7 +176,7 @@ SaldoController.refundTrans = async (req, res, next) => {
     let items;
     try {
       refund = transaction.related('summaryable');
-      items = refund.related('items').map(item => item.serialize({ minimal: true }));
+      items = refund.related('items').map(item => item.serialize({ minimal: true }, req.body.domain));
     } catch (e) {
       throw transDetailError('transaction', 'transaction_corrupted');
     }
