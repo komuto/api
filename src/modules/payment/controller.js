@@ -14,7 +14,15 @@ import {
   DisputeProduct,
   DisputeSolutionType,
 } from './model';
-import { Bucket, BucketStatus, Shipping, Refund, RefundStatus, RefundItem } from './../bucket/model';
+import {
+  Bucket,
+  BucketStatus,
+  Shipping,
+  Refund,
+  RefundStatus,
+  RefundItem,
+  ShippingSenderStatus,
+} from './../bucket/model';
 import { BankAccount } from '../bank/model';
 import { Store } from '../store/model';
 import config from '../../../config';
@@ -577,7 +585,7 @@ PaymentController.rejectOrder = async (req, res, next) => {
     id_invoice: req.params.id,
     status_transaksi: InvoiceTransactionStatus.WAITING,
     id_toko: storeId,
-  }).fetch({ withRelated: 'user' });
+  }).fetch({ withRelated: ['user', 'shipping'] });
   let limit = Preference.get('order_response');
   let remark = TransType.getRemark(SummTransType.REFUND);
   [invoice, limit] = await Promise.all([invoice, limit]);
@@ -589,6 +597,8 @@ PaymentController.rejectOrder = async (req, res, next) => {
   if (diff < 0) throw getInvoiceError('invoice', 'expired');
 
   await Invoice.updateStatus(req.params.id, InvoiceTransactionStatus.REJECTED).catch();
+
+  invoice.related('shipping').save({ statusresponkirim: ShippingSenderStatus.DECLINE }, { patch: true });
 
   const buyer = invoice.related('user');
   const amount = invoice.serialize().total_price;

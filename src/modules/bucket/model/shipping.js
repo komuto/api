@@ -108,6 +108,8 @@ class ShippingModel extends bookshelf.Model {
       note: 'keterangan',
       airway_bill: 'resiresponkirim',
       is_insurance: 'is_asuransi',
+      sender_status: 'statusresponkirim',
+      receiver_status: 'statusresponterima',
     };
     const newData = {};
     Object.keys(data).forEach((prop) => {

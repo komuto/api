@@ -15,7 +15,7 @@ import { getProductAndStore } from '../core/utils';
 import { getProductError } from '../product/messages';
 import { SummTransType, TransSummary } from '../saldo/model/transaction_summary';
 import { TransType } from '../saldo/model/transaction_type';
-import { Notification, sellerNotification } from '../core/notification';
+import { ShippingReceiverStatus, ShippingSenderStatus } from './model/shipping';
 
 export const BucketController = {};
 export default { BucketController };
@@ -119,6 +119,8 @@ BucketController.saveCart = async (bucket, body, product, item, where, wholesale
     insurance_fee: insuranceCost,
     is_insurance: body.is_insurance,
     note: null,
+    sender_status: ShippingSenderStatus.DEFAULT,
+    receiver_status: ShippingReceiverStatus.DEFAULT,
   });
 
   let shippingId;
