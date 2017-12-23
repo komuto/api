@@ -32,4 +32,8 @@ export default {
     msg: 'Access denied',
     code: 401,
   },
+  database_reached: {
+    msg: 'Database can not be reached',
+    code: 500,
+  },
 };

@@ -12,9 +12,25 @@ export function verify() {
       req.marketplace = marketplace.serialize();
       next();
     } catch (e) {
-      const msg = e.code === 'ECONNREFUSED' ? messages.database_down.msg : messages.path_not_found.msg;
+      let msg;
+      let statusCode;
+      switch (e.code) {
+        case 'ECONNREFUSED':
+          msg = messages.database_down.msg;
+          statusCode = messages.database_down.code;
+          break;
+        case 'ENETUNREACH':
+          msg = messages.database_reached.msg;
+          statusCode = messages.database_reached.code;
+          break;
+        default:
+          msg = messages.path_not_found.msg;
+          statusCode = messages.path_not_found.code;
+          break;
+      }
+
       const err = new Error(msg);
-      err.httpStatus = e.code === 'ECONNREFUSED' ? messages.database_down.code : messages.path_not_found.code;
+      err.httpStatus = statusCode;
       next(err);
     }
   };
