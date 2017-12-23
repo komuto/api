@@ -356,7 +356,7 @@ class BucketModel extends bookshelf.Model {
             Notification.send(
               sellerNotification.TRANSACTION,
               owner.get('reg_token'),
-              marketplace,
+              marketplace.serialize(),
               { invoice_id: String(invoice.id), click_action: `order-detail?id=${invoice.id}` },
             );
           }
