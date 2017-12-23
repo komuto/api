@@ -129,15 +129,23 @@ class ReviewModel extends bookshelf.Model {
   static async bulkCreate(params, marketplace) {
     const { user_id: userId, bucket_id: bucketId, invoice_id: invoiceId, reviews } = params;
 
-    let invoice = Invoice.get(userId, bucketId, invoiceId, ['items', 'shipping', 'store.user']);
+    let invoice = Invoice.get(
+      userId,
+      bucketId,
+      invoiceId,
+      ['items.dropship.store.user', 'shipping', 'store.user'],
+    );
     let masterFee = MasterFee.findByMarketplaceId(marketplace.id);
     let remark = TransType.getRemark(SummTransType.SELLING);
+    let remarkFee = TransType.getRemark(SummTransType.FEE);
     [invoice, masterFee] = await Promise.all([invoice, masterFee]);
 
     const items = invoice.related('items');
     let shipping = invoice.related('shipping');
     shipping = shipping.serialize();
     let amount = 0;
+    let dropshipperFee = 0;
+    let dropshipper;
 
     const reviewData = await Promise.all(reviews.map(async (val) => {
       const { productId, storeId: sId } = getProductAndStore(val.product_id);
@@ -149,10 +157,23 @@ class ReviewModel extends bookshelf.Model {
       const itemObj = item.serialize();
       product = product.serialize();
 
-      const commission = MasterFee.calculateCommissionByFees(masterFee, Number(product.price));
-      amount += ((product.price - commission) * itemObj.qty)
+      dropshipper = item.get('id_dropshipper')
+        ? item.related('dropship').related('store').related('user')
+        : null;
+
+      // marketplace fee
+      const fee = MasterFee.calculateCommissionByFees(
+        masterFee,
+        Number(product.price),
+        false,
+        false,
+      );
+      amount += ((product.price - fee) * itemObj.qty)
         + itemObj.additional_cost
         + shipping.insurance_fee;
+
+      // dropshipper fee
+      dropshipperFee += MasterFee.calculateCommissionByFees(masterFee, Number(product.price));
 
       return await this.create(item, product, userId, val, marketplace);
     }));
@@ -177,6 +198,27 @@ class ReviewModel extends bookshelf.Model {
     }));
 
     User.where({ id_users: seller.id }).save({ saldo_wallet: remainingSaldo }, { patch: true });
+
+    if (dropshipper) {
+      const { saldo_wallet: dSaldo } = dropshipper.serialize();
+      const dRemainingSaldo = dSaldo + dropshipperFee;
+
+      remarkFee = await remarkFee;
+      TransSummary.create(TransSummary.matchDBColumn({
+        amount: dropshipperFee,
+        first_saldo: dSaldo,
+        last_saldo: dRemainingSaldo,
+        user_id: dropshipper.id,
+        type: SummTransType.FEE,
+        remark: remarkFee,
+        marketplace_id: marketplace.id,
+        summaryable_type: 'invoice',
+        summaryable_id: invoice.id,
+      }));
+
+      User.where({ id_users: dropshipper.id })
+        .save({ saldo_wallet: dRemainingSaldo }, { patch: true });
+    }
 
     invoice.related('shipping').save({
       statusresponkirim: ShippingSenderStatus.SENT,

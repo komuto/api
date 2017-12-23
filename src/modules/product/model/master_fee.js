@@ -57,8 +57,7 @@ class MasterFeeModel extends bookshelf.Model {
     if (!found) return 0;
 
     found = found.serialize();
-    if (!isDropship) return found.fee;
-    const fee = (found.fee * found.dropshipper_fee) / 100;
+    const fee = !isDropship ? found.fee : (found.fee * found.dropshipper_fee) / 100;
     if (isPercentage) return fee;
     return (fee * price) / 100;
   }
