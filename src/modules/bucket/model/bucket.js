@@ -126,7 +126,7 @@ class BucketModel extends bookshelf.Model {
       id_users: userId,
       id_bucket: bucketId,
       status_bucket: BucketStatus.WAITING_FOR_PAYMENT,
-    }).fetch({ withRelated: 'items.product' });
+    }).fetch({ withRelated: ['items.product', 'promo'] });
     if (!bucket) throw getBucketError('bucket', 'not_found');
     if (platform) bucket.save({ platform }, { patch: true });
     bucket.related('items').each((item) => {
@@ -331,44 +331,7 @@ class BucketModel extends bookshelf.Model {
     if (status.invoice !== InvoiceStatus.UNPAID) {
       await Promise.all(bucket.related('invoices').map(async (invoice) => {
         if (status.invoice === InvoiceStatus.PAID) {
-          let dropshipper;
-          await Promise.all(invoice.related('items').map(async (item, i) => {
-            const product = item.related('product');
-            const { stock, count_sold: sold } = product.serialize();
-            const qty = item.serialize().qty;
-            let updateSold = sold + qty;
-            if (item.get('id_dropshipper')) {
-              updateSold = sold;
-              const dropship = item.related('dropship');
-              await dropship.save({
-                count_sold: dropship.serialize().count_sold + qty,
-              }, { patch: true });
-              if (i === 0) dropshipper = dropship.related('store').related('user');
-            }
-            return await product.save({
-              stock_produk: stock - qty,
-              count_sold: updateSold,
-            }, { patch: true });
-          }));
-
-          const owner = invoice.related('store').related('user');
-          if (owner.get('reg_token')) {
-            Notification.send(
-              sellerNotification.TRANSACTION,
-              owner.get('reg_token'),
-              marketplace.serialize(),
-              { invoice_id: String(invoice.id), click_action: `order-detail?id=${invoice.id}` },
-            );
-          }
-
-          if (dropshipper && dropshipper.get('req_token')) {
-            Notification.send(
-              sellerNotification.TRANSACTION,
-              dropshipper.get('reg_token'),
-              marketplace,
-              { invoice_id: String(invoice.id), click_action: `order-detail?id=${invoice.id}` },
-            );
-          }
+          await this.updateStockAndSendNotification(invoice, marketplace.serialize());
         }
 
         return await invoice.save({
@@ -393,6 +356,52 @@ class BucketModel extends bookshelf.Model {
       status_bucket: status.bucket,
       id_paymentmethod: paymentMethodId,
     }, { patch: true });
+  }
+
+  static async updateStockAndSendNotification(invoice, marketplace) {
+    let dropshipper;
+    await Promise.all(invoice.related('items').map(async (item, i) => {
+      const product = item.related('product');
+      const { stock, count_sold: sold } = product.serialize();
+      const qty = item.serialize().qty;
+      let updateSold = sold + qty;
+
+      if (item.get('id_dropshipper')) {
+        updateSold = sold;
+        const dropship = item.related('dropship');
+        await dropship.save({
+          count_sold: dropship.serialize().count_sold + qty,
+        }, { patch: true });
+        if (i === 0) dropshipper = dropship.related('store').related('user');
+      }
+
+      const updatedStock = stock - qty;
+
+      return await product.save({
+        // preventing stock to be minus
+        stock_produk: updatedStock < 0 ? 0 : updatedStock,
+        count_sold: updateSold,
+      }, { patch: true });
+    }));
+
+    const owner = invoice.related('store').related('user');
+    if (owner.get('reg_token')) {
+      Notification.send(
+        sellerNotification.TRANSACTION,
+        owner.get('reg_token'),
+        marketplace,
+        { invoice_id: String(invoice.id), click_action: `order-detail?id=${invoice.id}` },
+      );
+    }
+
+    if (dropshipper && dropshipper.get('req_token')) {
+      Notification.send(
+        sellerNotification.TRANSACTION,
+        dropshipper.get('reg_token'),
+        marketplace,
+        { invoice_id: String(invoice.id), click_action: `order-detail?id=${invoice.id}` },
+      );
+    }
   }
 
   static async midtransNotification(id, body) {

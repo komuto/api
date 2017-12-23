@@ -15,6 +15,7 @@ import { getProductAndStore } from '../core/utils';
 import { getProductError } from '../product/messages';
 import { SummTransType, TransSummary } from '../saldo/model/transaction_summary';
 import { TransType } from '../saldo/model/transaction_type';
+import { Notification, sellerNotification } from '../core/notification';
 
 export const BucketController = {};
 export default { BucketController };
@@ -383,6 +384,12 @@ BucketController.balancePayment = async (req, res, next) => {
     id_paymentmethod: paymentMethodId,
   }, { patch: true });
 
+  if (bucket.get('id_promo')) {
+    const promo = bucket.related('promo');
+    // eslint-disable-next-line no-plusplus
+    promo.save({ kuota_promo: --promo.serialize().quota }, { patch: true });
+  }
+
   Invoice.where('id_bucket', bucket.get('id_bucket')).save({
     status_invoice: InvoiceStatus.PAID,
     updated_at: now.toDate(),
@@ -403,6 +410,22 @@ BucketController.balancePayment = async (req, res, next) => {
   }));
 
   User.where('id_users', req.user.id).save({ saldo_wallet: saldo }, { patch: true });
+
+  const invoices = await Invoice
+    .where('id_bucket', bucket.get('id_bucket'))
+    .fetchAll({
+      withRelated: [
+        'items.product',
+        'items.dropship.store.user',
+        'store.user',
+      ],
+    });
+
+  await Promise.all(invoices.map(async (invoice) => {
+    await Bucket.updateStockAndSendNotification(invoice, req.marketplace);
+  }));
+
   req.resData = { data: bucket };
+
   return next();
 };
