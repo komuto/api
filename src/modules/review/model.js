@@ -133,7 +133,7 @@ class ReviewModel extends bookshelf.Model {
       userId,
       bucketId,
       invoiceId,
-      ['items.dropship.store.user', 'shipping', 'store.user'],
+      ['items.dropship.store.user', 'store.user'],
     );
     let masterFee = MasterFee.findByMarketplaceId(marketplace.id);
     let remark = TransType.getRemark(SummTransType.SELLING);
@@ -141,9 +141,8 @@ class ReviewModel extends bookshelf.Model {
     [invoice, masterFee] = await Promise.all([invoice, masterFee]);
 
     const items = invoice.related('items');
-    let shipping = invoice.related('shipping');
-    shipping = shipping.serialize();
-    let amount = 0;
+    let amountBefore = 0;
+    let amountAfter = 0;
     let dropshipperFee = 0;
     let dropshipper;
 
@@ -168,9 +167,8 @@ class ReviewModel extends bookshelf.Model {
         false,
         false,
       );
-      amount += ((product.price - fee) * itemObj.qty)
-        + itemObj.additional_cost
-        + shipping.insurance_fee;
+      amountBefore += product.price * itemObj.qty;
+      amountAfter += (product.price - fee) * itemObj.qty;
 
       // dropshipper fee
       dropshipperFee += MasterFee.calculateCommissionByFees(masterFee, Number(product.price));
@@ -178,15 +176,15 @@ class ReviewModel extends bookshelf.Model {
       return await this.create(item, product, userId, val, marketplace);
     }));
 
-    amount += shipping.delivery_cost;
+    amountAfter = (parseFloat(invoice.get('total_tagihan')) - amountBefore) + amountAfter;
 
     const seller = invoice.related('store').related('user');
     const { saldo_wallet: saldo } = seller.serialize();
-    const remainingSaldo = saldo + amount;
+    const remainingSaldo = saldo + amountAfter;
 
     remark = await remark;
     TransSummary.create(TransSummary.matchDBColumn({
-      amount,
+      amount: amountAfter,
       first_saldo: saldo,
       last_saldo: remainingSaldo,
       user_id: seller.id,
