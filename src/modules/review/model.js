@@ -133,7 +133,7 @@ class ReviewModel extends bookshelf.Model {
       userId,
       bucketId,
       invoiceId,
-      ['items.dropship.store.user', 'store.user'],
+      ['items.dropship.store.user', 'shipping', 'store.user'],
     );
     let masterFee = MasterFee.findByMarketplaceId(marketplace.id);
     let remark = TransType.getRemark(SummTransType.SELLING);
