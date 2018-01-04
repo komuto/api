@@ -268,7 +268,7 @@ class InvoiceModel extends bookshelf.Model {
       }
     })
       .orderBy('updated_at', 'desc')
-      .fetchPage({ page, pageSize, withRelated: ['items.product.image', 'buyer'], debug: true });
+      .fetchPage({ page, pageSize, withRelated: ['items.product.image', 'buyer'] });
 
     if (!invoices) return [];
     return invoices.map((invoice) => {
