@@ -25,6 +25,7 @@ import { Review } from '../review/model';
 
 const { Notification, sellerNotification, buyerNotification } = core;
 const { validateImageUrl } = core.middleware;
+const { parseNum } = core.utils;
 
 export const StoreController = {};
 export default { StoreController };
@@ -461,9 +462,9 @@ StoreController.getPage = async (req, res, next) => {
     message: 'Store Page',
     data: {
       sales: {
-        new_order: newOrders,
-        processing_order: processing,
-        sale,
+        new_order: parseNum(newOrders),
+        processing_order: parseNum(processing),
+        sale: parseNum(sale),
       },
       disputes,
     },

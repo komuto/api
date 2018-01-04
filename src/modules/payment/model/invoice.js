@@ -421,16 +421,23 @@ class InvoiceModel extends bookshelf.Model {
     return this.where('id_invoice', id).fetch({ withRelated: ['item.dropship'] });
   }
 
-  static async getCount(storeId, status = null) {
-    const count = await this.where('id_toko', storeId).query((qb) => {
+  static getCount(storeId, status = null) {
+    return this.query((qb) => {
+      qb.distinct();
+      qb.where('invoice.id_toko', storeId);
+
       if (status) {
         qb.where('status_transaksi', status);
+
+        qb.join('listbucket as l', 'l.id_invoice', 'invoice.id_invoice')
+          .leftJoin('dropshipper as d', 'd.id_dropshipper', 'l.id_dropshipper')
+          .orWhere('d.id_toko', storeId)
+          .andWhere('status_transaksi', status);
       } else {
         qb.whereNotIn('status_transaksi', [InvoiceTransactionStatus.WAITING, InvoiceTransactionStatus.PROCEED]);
         qb.whereNotNull('status_transaksi');
       }
     }).count();
-    return parseNum(count);
   }
 
   /**
