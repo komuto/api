@@ -504,7 +504,7 @@ UserController.replyMessage = async (req, res, next) => {
   const user = {
     id: req.user.id,
     name: req.user.name,
-    photo: req.user.photo,
+    photo: req.user.photo.replace('undefined', req.marketplace.mobile_domain),
   };
   req.resData = {
     message: msg.message.success,
