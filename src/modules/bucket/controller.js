@@ -74,14 +74,24 @@ BucketController.getCost = async (body, product) => {
     expedition,
     services,
   } = await Expedition.getServiceByServiceName(body.expedition_id, body.service);
+
   const query = {
     origin_ro_id: body.origin_ro_id,
     destination_ro_id: body.destination_ro_id,
-    weight: product.weight * body.qty,
+    // find cost per 1kg first
+    weight: 1000,
   };
-  const delivery = await Expedition.getCost(expedition, services, query);
-  if (delivery.length === 0) throw new BadRequestError('No expedition found');
-  return delivery[0];
+
+  let delivery = await Expedition.getCost(expedition, services, query);
+
+  if (delivery.length === 0) {
+    throw new BadRequestError('No expedition found');
+  }
+
+  delivery = delivery[0];
+  delivery.cost *= Math.ceil((product.weight * body.qty) / 1000);
+
+  return delivery;
 };
 
 BucketController.saveCart = async (bucket, body, product, item, where, wholesale = []) => {
@@ -177,6 +187,7 @@ BucketController.addToCart = async (req, res, next) => {
   const product = productModel.serialize();
   const wholesale = product.is_wholesaler ? productModel.related('wholesale').serialize() : [];
   const ownStoreId = store ? store.get('id_toko') : null;
+
   if (!address) throw addCartError('address', 'address_not_found');
   if (req.body.qty > product.stock) throw addCartError('cart', 'stock');
   if (ownStoreId && ownStoreId === storeId) throw addCartError('product', 'not_valid');
@@ -189,6 +200,7 @@ BucketController.addToCart = async (req, res, next) => {
     // This store id will be used when the invoice is created
     store_id: product.store_id,
   };
+
   if (product.store_id !== storeId) {
     dropship = await Dropship.findByProductIdAndStoreId(productId, storeId);
     if (!dropship) throw getProductError('product', 'not_found');
