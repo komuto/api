@@ -117,8 +117,11 @@ class DisputeModel extends bookshelf.Model {
   }
 
   getProblems() {
+    let problemDisputes = this.get('problem_dispute');
+    problemDisputes = JSON.parse(`[${problemDisputes.substr(1, problemDisputes.length - 2)}]`);
+
     let problems = '';
-    this.get('problem_dispute').forEach((val, key) => {
+    problemDisputes.forEach((val, key) => {
       if (key !== 0) problems += ', ';
       switch (val.problem) {
         case 1:
