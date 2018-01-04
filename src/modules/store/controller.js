@@ -25,7 +25,6 @@ import { Review } from '../review/model';
 
 const { Notification, sellerNotification, buyerNotification } = core;
 const { validateImageUrl } = core.middleware;
-const { parseNum } = core.utils;
 
 export const StoreController = {};
 export default { StoreController };
@@ -451,7 +450,7 @@ StoreController.replyMessage = async (req, res, next) => {
  */
 StoreController.getPage = async (req, res, next) => {
   const storeId = await Store.getStoreId(req.user.id);
-  const [newOrders, processing, sale, disputes] = await Promise.all([
+  const [newOrder, processing, sale, disputes] = await Promise.all([
     Invoice.getCount(storeId, InvoiceTransactionStatus.WAITING),
     Invoice.getCount(storeId, InvoiceTransactionStatus.PROCEED),
     Invoice.getCount(storeId),
@@ -462,12 +461,13 @@ StoreController.getPage = async (req, res, next) => {
     message: 'Store Page',
     data: {
       sales: {
-        new_order: parseNum(newOrders),
-        processing_order: parseNum(processing),
-        sale: parseNum(sale),
+        new_order: Number(newOrder.get('count')),
+        processing_order: Number(processing.get('count')),
+        sale: Number(sale.get('count')),
       },
       disputes,
     },
   };
+
   return next();
 };

@@ -268,7 +268,7 @@ class InvoiceModel extends bookshelf.Model {
       }
     })
       .orderBy('updated_at', 'desc')
-      .fetchPage({ page, pageSize, withRelated: ['items.product.image', 'buyer'] });
+      .fetchPage({ page, pageSize, withRelated: ['items.product.image', 'buyer'], debug: true });
 
     if (!invoices) return [];
     return invoices.map((invoice) => {
@@ -423,7 +423,6 @@ class InvoiceModel extends bookshelf.Model {
 
   static getCount(storeId, status = null) {
     return this.query((qb) => {
-      qb.distinct();
       qb.where('invoice.id_toko', storeId);
 
       if (status) {
@@ -437,7 +436,8 @@ class InvoiceModel extends bookshelf.Model {
         qb.whereNotIn('status_transaksi', [InvoiceTransactionStatus.WAITING, InvoiceTransactionStatus.PROCEED]);
         qb.whereNotNull('status_transaksi');
       }
-    }).count();
+      qb.countDistinct('invoice.id_invoice');
+    }).fetch();
   }
 
   /**
