@@ -79,19 +79,16 @@ BucketController.getCost = async (body, product) => {
     origin_ro_id: body.origin_ro_id,
     destination_ro_id: body.destination_ro_id,
     // find cost per 1kg first
-    weight: 1000,
+    weight: product.weight * body.qty,
   };
 
-  let delivery = await Expedition.getCost(expedition, services, query);
+  const delivery = await Expedition.getCost(expedition, services, query);
 
   if (delivery.length === 0) {
     throw new BadRequestError('No expedition found');
   }
 
-  delivery = delivery[0];
-  delivery.cost *= Math.ceil((product.weight * body.qty) / 1000);
-
-  return delivery;
+  return delivery[0];
 };
 
 BucketController.saveCart = async (bucket, body, product, item, where, wholesale = []) => {
