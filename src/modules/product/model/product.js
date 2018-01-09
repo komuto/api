@@ -257,7 +257,7 @@ class ProductModel extends bookshelf.Model {
 
     const results = self.addWhereClause(fromProduct, params, true);
 
-    if (!isDropship && !storeId) {
+    if (!isDropship) {
       results
         .union(function () {
           const fromDropship = this
